@@ -7,15 +7,15 @@
 @layer base {
   :root {
     /* Base Colors */
-    --background: 0 0% 98%;
-    --foreground: 25 25% 15%;
+    --background: 25 25% 5%;
+    --foreground: 45 100% 95%;
 
     /* Card & Surfaces */
-    --card: 0 0% 100%;
-    --card-foreground: 25 25% 15%;
+    --card: 25 25% 8%;
+    --card-foreground: 45 100% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 25 25% 15%;
+    --popover: 25 25% 8%;
+    --popover-foreground: 45 100% 95%;
 
     /* Luxury Gold Theme */
     --primary: 45 100% 60%;        /* Rich Gold */
@@ -29,11 +29,11 @@
     --luxury-foreground: 25 25% 15%;
 
     /* Elegant Neutrals */
-    --muted: 25 10% 95%;
-    --muted-foreground: 25 15% 45%;
+    --muted: 25 15% 12%;
+    --muted-foreground: 45 15% 65%;
 
-    --accent: 45 100% 97%;         /* Soft Gold Accent */
-    --accent-foreground: 25 25% 15%;
+    --accent: 25 15% 10%;         /* Dark Accent */
+    --accent-foreground: 45 100% 95%;
 
     /* Semantic Colors */
     --destructive: 0 84% 60%;
@@ -43,15 +43,15 @@
     --success-foreground: 0 0% 98%;
 
     /* Borders & Inputs */
-    --border: 25 15% 90%;
-    --input: 25 15% 92%;
+    --border: 25 15% 20%;
+    --input: 25 15% 15%;
     --ring: 45 100% 60%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(45 100% 60%), hsl(42 87% 55%));
-    --gradient-luxury: linear-gradient(135deg, hsl(45 100% 60%), hsl(38 90% 50%));
-    --gradient-hero: linear-gradient(135deg, hsl(25 25% 15% / 0.8), hsl(45 100% 60% / 0.1));
-    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(45 100% 97%));
+    --gradient-primary: linear-gradient(135deg, hsl(45 100% 65%), hsl(42 87% 60%));
+    --gradient-luxury: linear-gradient(135deg, hsl(45 100% 65%), hsl(38 90% 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(25 25% 5% / 0.9), hsl(45 100% 65% / 0.2));
+    --gradient-card: linear-gradient(135deg, hsl(25 25% 8%), hsl(25 20% 10%));
 
     /* Shadows */
     --shadow-luxury: 0 20px 40px -12px hsl(45 100% 60% / 0.25);
@@ -247,6 +247,66 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* Dining Experience Cards */
+  .dining-experience-card {
+    @apply transition-all duration-500;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .dining-experience-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), 0 0 30px hsl(var(--primary) / 0.2);
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  /* Spa Service Cards */
+  .spa-service-card {
+    @apply transition-all duration-300 rounded-2xl;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .spa-service-card:hover {
+    transform: translateX(4px);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid hsl(var(--primary) / 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 0 20px hsl(var(--primary) / 0.15);
+  }
+
+  /* Glass Badge */
+  .glass-badge {
+    @apply w-8 h-8 rounded-full flex items-center justify-center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  /* Glass Card */
+  .glass-card {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+  }
+
+  /* Luxury Button Small */
+  .btn-luxury-sm {
+    @apply bg-gradient-to-r from-primary to-luxury text-primary-foreground font-medium px-4 py-2 rounded-lg text-xs;
+    box-shadow: 0 4px 15px hsl(var(--primary) / 0.3);
+    transition: var(--transition-luxury);
+  }
+
+  .btn-luxury-sm:hover {
+    box-shadow: 0 6px 20px hsl(var(--primary) / 0.4);
+    transform: translateY(-1px);
   }
 
   /* Smooth Scroll */

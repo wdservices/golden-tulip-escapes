@@ -1,21 +1,20 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { BranchTabs } from "@/components/BranchTabs";
-import { BookingForm } from "@/components/BookingForm";
 import { InfoSections } from "@/components/InfoSections";
 import { Footer } from "@/components/Footer";
 
 const Index = () => {
   const [activeBranch, setActiveBranch] = useState("main");
-  const bookingRef = useRef<HTMLDivElement>(null);
 
   const handleTabChange = (branch: string) => {
     setActiveBranch(branch);
   };
 
   const handleBookNowClick = () => {
-    bookingRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Navigate to booking page or show booking modal
+    console.log("Book now clicked");
   };
 
   return (
@@ -32,13 +31,6 @@ const Index = () => {
           activeTab={activeBranch} 
           onTabChange={handleTabChange}
         />
-        
-        <div ref={bookingRef}>
-          <BookingForm 
-            selectedBranch={activeBranch}
-            showLocationDropdown={activeBranch === "main"}
-          />
-        </div>
         
         <InfoSections />
         

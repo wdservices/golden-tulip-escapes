@@ -137,105 +137,139 @@ export const InfoSections = () => {
       </section>
 
       {/* Dining Section */}
-      <section id="dining" className="py-16 bg-gradient-card">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-serif font-bold mb-4 text-gradient-gold">
-              Dining Experiences
+      <section id="dining" className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/90"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-serif font-bold mb-6 text-gradient-gold">
+              Culinary Artistry
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Savor exceptional cuisine crafted by our world-class chefs
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Embark on an extraordinary gastronomic journey crafted by world-renowned chefs
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div className="space-y-6">
-              {diningOptions.map((option, index) => (
-                <Card key={index} className="card-luxury">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="text-xl font-semibold mb-2 flex items-center">
-                          <Utensils className="h-5 w-5 mr-2 text-primary" />
-                          {option.name}
-                        </h3>
-                        <p className="text-primary font-medium mb-1">{option.type}</p>
-                        <p className="text-muted-foreground mb-2">{option.cuisine}</p>
-                        <p className="text-sm text-muted-foreground">{option.hours}</p>
-                      </div>
-                      <Button variant="ghost" className="text-primary hover:text-primary">
-                        View Menu
-                      </Button>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            {diningOptions.map((option, index) => (
+              <div key={index} className="dining-experience-card group">
+                <div className="relative overflow-hidden rounded-2xl h-64 mb-6">
+                  <img
+                    src={restaurant}
+                    alt={option.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                  <div className="absolute top-4 right-4">
+                    <div className="glass-badge">
+                      <Utensils className="h-4 w-4 text-primary" />
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            <div className="relative">
-              <img
-                src={restaurant}
-                alt="Restaurant"
-                className="w-full h-96 object-cover rounded-2xl shadow-elegant"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-secondary/60 to-transparent rounded-2xl flex items-end p-6">
-                <div className="text-white">
-                  <h3 className="text-2xl font-semibold mb-2">Culinary Excellence</h3>
-                  <p className="text-sm opacity-90">Experience world-class dining in elegant surroundings</p>
+                  </div>
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <h3 className="text-2xl font-serif font-bold text-gradient-gold-light mb-2">
+                      {option.name}
+                    </h3>
+                    <p className="text-primary/90 font-medium text-sm mb-1">{option.type}</p>
+                  </div>
+                </div>
+                <div className="px-2">
+                  <p className="text-muted-foreground mb-3 text-sm">{option.cuisine}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground/70">{option.hours}</span>
+                    <Button size="sm" className="btn-luxury-sm">
+                      Explore Menu
+                    </Button>
+                  </div>
                 </div>
               </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <div className="inline-flex items-center space-x-4 bg-black/30 backdrop-blur-lg border border-primary/20 rounded-full px-8 py-4">
+              <span className="text-gradient-gold font-semibold">Reserve Your Table</span>
+              <Button className="btn-luxury">
+                Book Now
+              </Button>
             </div>
           </div>
         </div>
       </section>
 
       {/* Spa & Wellness Section */}
-      <section id="spa" className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-serif font-bold mb-4 text-gradient-gold">
-              Spa & Wellness
+      <section id="spa" className="py-20 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-muted/20 to-transparent"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-serif font-bold mb-6 text-gradient-gold">
+              Sanctuary of Serenity
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Rejuvenate your body and soul in our tranquil wellness sanctuary
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Discover inner harmony through our transformative wellness experiences
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div className="relative order-2 lg:order-1">
-              <img
-                src={spa}
-                alt="Spa"
-                className="w-full h-96 object-cover rounded-2xl shadow-elegant"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-secondary/60 to-transparent rounded-2xl flex items-end p-6">
-                <div className="text-white">
-                  <h3 className="text-2xl font-semibold mb-2">Wellness Retreat</h3>
-                  <p className="text-sm opacity-90">Find your perfect balance in our serene spa environment</p>
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+              {/* Spa Image Section */}
+              <div className="relative group">
+                <div className="relative overflow-hidden rounded-3xl h-[500px]">
+                  <img
+                    src={spa}
+                    alt="Luxury Spa Experience"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <h3 className="text-3xl font-serif font-bold text-gradient-gold-light mb-3">
+                      Wellness Sanctuary
+                    </h3>
+                    <p className="text-white/90 text-sm leading-relaxed">
+                      Immerse yourself in tranquility where ancient healing traditions meet modern luxury
+                    </p>
+                  </div>
                 </div>
+                <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary/20 rounded-full blur-xl"></div>
+                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-primary/10 rounded-full blur-2xl"></div>
               </div>
-            </div>
-            <div className="space-y-6 order-1 lg:order-2">
-              {spaServices.map((service, index) => (
-                <Card key={index} className="card-luxury">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
+
+              {/* Spa Services Section */}
+              <div className="space-y-4">
+                {spaServices.map((service, index) => (
+                  <div key={index} className="spa-service-card group">
+                    <div className="flex items-center justify-between p-6">
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold mb-1 flex items-center">
-                          <Waves className="h-5 w-5 mr-2 text-primary" />
-                          {service.name}
-                        </h3>
-                        <p className="text-muted-foreground text-sm">{service.duration}</p>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xl font-bold text-primary">{service.price}</div>
-                        <Button variant="ghost" size="sm" className="text-primary hover:text-primary">
-                          Book Now
-                        </Button>
+                        <div className="flex items-center mb-3">
+                          <div className="glass-badge mr-3">
+                            <Waves className="h-4 w-4 text-primary" />
+                          </div>
+                          <h3 className="text-xl font-serif font-semibold text-gradient-gold-light">
+                            {service.name}
+                          </h3>
+                        </div>
+                        <p className="text-muted-foreground text-sm mb-2">{service.duration}</p>
+                        <div className="flex items-center space-x-4">
+                          <div className="text-2xl font-bold text-primary">{service.price}</div>
+                          <Button size="sm" className="btn-luxury-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            Reserve
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  </div>
+                ))}
+                
+                <div className="mt-8 p-6 glass-card text-center">
+                  <h4 className="text-lg font-semibold text-gradient-gold mb-3">
+                    Complete Wellness Journey
+                  </h4>
+                  <p className="text-muted-foreground text-sm mb-4">
+                    Combine multiple treatments for the ultimate relaxation experience
+                  </p>
+                  <Button className="btn-luxury">
+                    Design Your Package
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
