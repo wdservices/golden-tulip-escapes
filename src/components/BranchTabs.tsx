@@ -1,4 +1,7 @@
-import { Button } from "@/components/ui/button";
+import hotelExterior from "@/assets/hotel-exterior.jpg";
+import hotelLobby from "@/assets/hotel-lobby.jpg";
+import luxurySuite from "@/assets/luxury-suite.jpg";
+import restaurant from "@/assets/restaurant.jpg";
 
 interface BranchTabsProps {
   activeTab: string;
@@ -7,45 +10,81 @@ interface BranchTabsProps {
 
 export const BranchTabs = ({ activeTab, onTabChange }: BranchTabsProps) => {
   const branches = [
-    { id: "main", name: "GRA", fullName: "Head Branch", location: "Government Reserved Area" },
-    { id: "waterlines", name: "Waterlines", fullName: "Waterlines Branch", location: "Port Harcourt" },
-    { id: "airforce", name: "Airforce", fullName: "Airforce Base", location: "Port Harcourt" },
-    { id: "oyigbo", name: "Oyigbo", fullName: "Oyigbo Branch", location: "Rivers State" }
+    { 
+      id: "main", 
+      name: "GRA", 
+      fullName: "Head Branch", 
+      location: "Government Reserved Area",
+      image: hotelExterior,
+      description: "Our flagship location"
+    },
+    { 
+      id: "waterlines", 
+      name: "Waterlines", 
+      fullName: "Waterlines Branch", 
+      location: "Port Harcourt",
+      image: hotelLobby,
+      description: "Waterfront luxury experience"
+    },
+    { 
+      id: "airforce", 
+      name: "Airforce", 
+      fullName: "Airforce Base", 
+      location: "Port Harcourt",
+      image: luxurySuite,
+      description: "Premium business hotel"
+    },
+    { 
+      id: "oyigbo", 
+      name: "Oyigbo", 
+      fullName: "Oyigbo Branch", 
+      location: "Rivers State",
+      image: restaurant,
+      description: "Serene getaway destination"
+    }
   ];
 
   return (
-    <section className="py-12 relative">
+    <section className="py-16 relative bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-serif font-bold mb-4 text-gradient-gold">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-serif font-bold mb-4 text-gradient-gold">
             Choose Your Golden Tulip Experience
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-muted-foreground/80 max-w-2xl mx-auto text-lg">
             Four premium locations across Rivers State, each offering unique luxury experiences
           </p>
         </div>
         
-        <div className="flex justify-center">
-          <div className="glass-tabs-container p-2 rounded-2xl">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {branches.map((branch) => (
-                <Button
-                  key={branch.id}
-                  variant="ghost"
-                  onClick={() => onTabChange(branch.id)}
-                  className={`glass-tab ${
-                    activeTab === branch.id 
-                      ? "glass-tab-active" 
-                      : "glass-tab-inactive"
-                  }`}
-                >
-                  <div className="text-center p-2">
-                    <div className="font-semibold text-sm mb-1">{branch.name}</div>
-                    <div className="text-xs opacity-80">{branch.location}</div>
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 gap-6">
+            {branches.map((branch) => (
+              <div
+                key={branch.id}
+                onClick={() => onTabChange(branch.id)}
+                className={`luxury-branch-card group cursor-pointer ${
+                  activeTab === branch.id 
+                    ? "luxury-branch-card-active" 
+                    : "luxury-branch-card-inactive"
+                }`}
+              >
+                <div className="relative overflow-hidden rounded-xl h-48">
+                  <img 
+                    src={branch.image} 
+                    alt={branch.fullName}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <h3 className="text-xl font-serif font-bold text-white mb-1 text-gradient-gold-light">
+                      {branch.name}
+                    </h3>
+                    <p className="text-white/90 text-sm mb-1">{branch.location}</p>
+                    <p className="text-white/70 text-xs">{branch.description}</p>
                   </div>
-                </Button>
-              ))}
-            </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
