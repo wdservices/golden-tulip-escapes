@@ -24,7 +24,7 @@ const Index = () => {
       <main>
         <HeroSection 
           activeBranch={activeBranch} 
-          onBookNowClick={handleBookNowClick}
+          onBookNowClick={() => window.location.href = '/booking'}
         />
         
         <BranchTabs 
