@@ -436,14 +436,51 @@
     box-shadow: 0 6px 25px hsl(var(--primary) / 0.2);
   }
 
-  .booking-input {
-    @apply bg-background/50 border-border/50 focus:border-primary/50 focus:ring-primary/20;
+  /* Booking Page - Modern Dropdown Styles */
+  .booking-select {
+    @apply bg-background/60 border-border/50 focus:border-primary/50 focus:ring-primary/20;
     backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
   }
 
-  .booking-date-input {
-    @apply bg-background/50 border-border/50 hover:border-primary/30 focus:border-primary/50;
-    backdrop-filter: blur(10px);
+  .booking-select:hover {
+    border-color: hsl(var(--primary) / 0.3);
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .booking-dropdown {
+    @apply bg-card/95 border-border/30;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    z-index: 50;
+  }
+
+  .booking-dropdown-item {
+    @apply hover:bg-primary/10 focus:bg-primary/10 transition-colors duration-200;
+    padding: 12px 16px;
+  }
+
+  .booking-dropdown-item:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  /* Modern Add-on Cards */
+  .addon-card {
+    @apply p-4 rounded-xl border border-border/30 transition-all duration-300;
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .addon-card:hover {
+    border-color: hsl(var(--primary) / 0.3);
+    background: rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
+  /* Summary Items */
+  .summary-item {
+    @apply p-4 rounded-xl;
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   /* Smooth Scroll */
