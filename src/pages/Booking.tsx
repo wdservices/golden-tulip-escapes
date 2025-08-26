@@ -165,7 +165,7 @@ const Booking = () => {
                           <div
                             key={branch.id}
                             onClick={() => setBookingData(prev => ({ ...prev, branch: branch.id }))}
-                            className={`branch-selection-card cursor-pointer ${
+                            className={`branch-selection-card cursor-pointer group ${
                               bookingData.branch === branch.id ? 'branch-selected' : ''
                             }`}
                           >
@@ -201,7 +201,7 @@ const Booking = () => {
                           <div
                             key={room.id}
                             onClick={() => setBookingData(prev => ({ ...prev, roomType: room.id }))}
-                            className={`room-selection-card cursor-pointer ${
+                            className={`room-selection-card cursor-pointer group ${
                               bookingData.roomType === room.id ? 'room-selected' : ''
                             }`}
                           >

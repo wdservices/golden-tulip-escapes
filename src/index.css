@@ -403,7 +403,7 @@
   }
 
   .branch-selection-card {
-    @apply p-3 rounded-xl border border-border/30 transition-all duration-300 group;
+    @apply p-3 rounded-xl border border-border/30 transition-all duration-300;
     background: rgba(0, 0, 0, 0.1);
   }
 
@@ -420,7 +420,7 @@
   }
 
   .room-selection-card {
-    @apply p-4 rounded-xl border border-border/30 transition-all duration-300 group;
+    @apply p-4 rounded-xl border border-border/30 transition-all duration-300;
     background: rgba(0, 0, 0, 0.1);
   }
 
