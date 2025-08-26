@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
+import { BranchTabs } from "@/components/BranchTabs";
 import { BookingForm } from "@/components/BookingForm";
 import { InfoSections } from "@/components/InfoSections";
 import { Footer } from "@/components/Footer";
@@ -25,6 +26,11 @@ const Index = () => {
         <HeroSection 
           activeBranch={activeBranch} 
           onBookNowClick={handleBookNowClick}
+        />
+        
+        <BranchTabs 
+          activeTab={activeBranch} 
+          onTabChange={handleTabChange}
         />
         
         <div ref={bookingRef}>

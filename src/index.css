@@ -189,6 +189,51 @@
     background-clip: text;
   }
 
+  /* Glass Navigation */
+  .glass-nav {
+    @apply bg-background/80 backdrop-blur-lg border-b border-border/20;
+  }
+
+  /* Glassmorphic Branch Tabs */
+  .glass-tabs-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .glass-tab {
+    @apply min-h-[80px] rounded-xl transition-all duration-300 border-none;
+    background: transparent;
+  }
+
+  .glass-tab-active {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    @apply text-primary scale-105;
+  }
+
+  .glass-tab-inactive {
+    @apply hover:bg-white/10 hover:scale-102;
+    border: 1px solid transparent;
+  }
+
+  .dark .glass-tabs-container {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .dark .glass-tab-active {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .dark .glass-tab-inactive {
+    @apply hover:bg-black/20;
+  }
+
   /* Smooth Scroll */
   html {
     scroll-behavior: smooth;
