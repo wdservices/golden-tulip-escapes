@@ -40,9 +40,11 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
         <div className="flex justify-between items-center py-6">
           {/* Logo */}
           <Link to="/" className="flex items-center group">
-            <div className="text-3xl font-serif font-bold text-gradient-gold transition-all duration-300 group-hover:scale-105">
-              Golden Tulip
-            </div>
+            <img 
+              src="/golden tulip logo.svg" 
+              alt="Golden Tulip Logo" 
+              className="h-12 transition-all duration-300 group-hover:scale-105"
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -96,6 +98,20 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
         }`}>
           <div className="py-4 border-t border-border/20">
             <nav className="space-y-1">
+              <div className="md:hidden">
+              {/* Mobile menu button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hover:bg-primary/10 transition-colors duration-300"
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                >
+                  <div className="relative">
+                    <Menu className={`h-6 w-6 transition-all duration-300 ${isMenuOpen ? 'rotate-180 opacity-0' : 'rotate-0 opacity-100'}`} />
+                    <X className={`h-6 w-6 absolute inset-0 transition-all duration-300 ${isMenuOpen ? 'rotate-0 opacity-100' : 'rotate-180 opacity-0'}`} />
+                  </div>
+                </Button>
+              </div>
               {navigation.map((item, index) => (
                 item.isRoute ? (
                   <Link
