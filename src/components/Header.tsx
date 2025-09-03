@@ -43,7 +43,7 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
             <img 
               src="/golden tulip logo.svg" 
               alt="Golden Tulip Logo" 
-              className="h-12 transition-all duration-300 group-hover:scale-105"
+              className="h-8 transition-all duration-300 group-hover:scale-105"
             />
           </Link>
 
