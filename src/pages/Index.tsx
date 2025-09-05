@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { BranchTabs } from "@/components/BranchTabs";
@@ -6,20 +7,27 @@ import { InfoSections } from "@/components/InfoSections";
 import { Footer } from "@/components/Footer";
 
 const Index = () => {
-  const [activeBranch, setActiveBranch] = useState("main");
+  // Don't set main as the default active tab
+  const [activeBranch, setActiveBranch] = useState<string | null>(null);
 
   const handleTabChange = (branch: string) => {
-    setActiveBranch(branch);
+    // If clicking on main branch, reset the active tab
+    if (branch === 'main') {
+      setActiveBranch(null);
+    } else {
+      setActiveBranch(branch);
+    }
   };
 
+  const navigate = useNavigate();
+
   const handleBookNowClick = () => {
-    // Navigate to booking page or show booking modal
-    console.log("Book now clicked");
+    navigate('/auth', { state: { from: '/booking' } });
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <Header activeTab={activeBranch} onTabChange={handleTabChange} />
+      <Header activeTab={activeBranch || ''} onTabChange={handleTabChange} />
       
       <main>
         <HeroSection 

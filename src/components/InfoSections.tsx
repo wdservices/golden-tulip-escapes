@@ -1,11 +1,86 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Bed, Utensils, Waves, Calendar, Wifi, Car, Dumbbell, Shield } from "lucide-react";
 import luxurySuite from "@/assets/luxury-suite.jpg";
 import restaurant from "@/assets/restaurant.jpg";
 import spa from "@/assets/spa.jpg";
+import { EventDetailsDialog } from "@/components/events/EventDetailsDialog";
+
+// Event data
+const eventTypes = [
+  {
+    id: "corporate",
+    title: "Corporate Events",
+    description: "Host your next corporate event in our state-of-the-art facilities, equipped with the latest technology and professional support.",
+    features: [
+      "Professional meeting rooms",
+      "Conference facilities",
+      "Catering services",
+      "Audio/Visual equipment"
+    ],
+    capacity: "10 - 500 guests",
+    includes: [
+      "Dedicated event coordinator",
+      "High-speed Wi-Fi",
+      "Projector & screen",
+      "Microphone & sound system",
+      "Whiteboard & flip charts"
+    ],
+    priceRange: "From ₦150,000 per day"
+  },
+  {
+    id: "weddings",
+    title: "Weddings",
+    description: "Create magical moments in our beautiful venues, with expert wedding planners to bring your dream wedding to life.",
+    features: [
+      "Elegant ballrooms",
+      "Outdoor ceremony spaces",
+      "Bridal suite",
+      "Custom catering menus"
+    ],
+    capacity: "50 - 300 guests",
+    includes: [
+      "Wedding planning services",
+      "Decor and setup",
+      "Cake and catering",
+      "Accommodation packages",
+      "Day-of coordination"
+    ],
+    priceRange: "Custom packages available"
+  },
+  {
+    id: "special-occasions",
+    title: "Special Occasions",
+    description: "Celebrate life's special moments with us, from birthdays to anniversaries and everything in between.",
+    features: [
+      "Private dining rooms",
+      "Custom decoration",
+      "Themed events",
+      "Entertainment options"
+    ],
+    capacity: "10 - 200 guests",
+    includes: [
+      "Custom menu planning",
+      "Room setup and cleanup",
+      "Audiovisual equipment",
+      "Dedicated service staff",
+      "Cake and dessert options"
+    ],
+    priceRange: "From ₦100,000"
+  }
+];
 
 export const InfoSections = () => {
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+  
+  const handleLearnMore = (eventId: string) => {
+    setSelectedEvent(eventId);
+  };
+  
+  const handleCloseDialog = () => {
+    setSelectedEvent(null);
+  };
   const roomTypes = [
     {
       name: "Standard Room",
@@ -288,31 +363,31 @@ export const InfoSections = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="card-luxury text-center">
-              <CardContent className="p-8">
-                <Calendar className="h-12 w-12 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-3">Corporate Events</h3>
-                <p className="text-muted-foreground mb-4">Professional meeting rooms and conference facilities</p>
-                <Button className="btn-outline-luxury">Learn More</Button>
-              </CardContent>
-            </Card>
-            <Card className="card-luxury text-center">
-              <CardContent className="p-8">
-                <Calendar className="h-12 w-12 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-3">Weddings</h3>
-                <p className="text-muted-foreground mb-4">Create magical moments in our beautiful venues</p>
-                <Button className="btn-outline-luxury">Learn More</Button>
-              </CardContent>
-            </Card>
-            <Card className="card-luxury text-center">
-              <CardContent className="p-8">
-                <Calendar className="h-12 w-12 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-3">Special Occasions</h3>
-                <p className="text-muted-foreground mb-4">Celebrate life's special moments with us</p>
-                <Button className="btn-outline-luxury">Learn More</Button>
-              </CardContent>
-            </Card>
+            {eventTypes.map((event) => (
+              <Card key={event.id} className="card-luxury text-center h-full flex flex-col">
+                <CardContent className="p-8 flex-1 flex flex-col">
+                  <div className="flex-1">
+                    <Calendar className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold mb-3">{event.title}</h3>
+                    <p className="text-muted-foreground mb-4">{event.features[0]}</p>
+                  </div>
+                  <Button 
+                    className="btn-outline-luxury mt-4"
+                    onClick={() => handleLearnMore(event.id)}
+                  >
+                    Learn More
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
+          
+          {/* Event Details Dialog */}
+          <EventDetailsDialog 
+            isOpen={!!selectedEvent}
+            onClose={handleCloseDialog}
+            event={eventTypes.find(e => e.id === selectedEvent) || null}
+          />
         </div>
       </section>
 

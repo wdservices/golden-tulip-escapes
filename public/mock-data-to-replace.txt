@@ -1,0 +1,212 @@
+# GOLDEN TULIP HOTEL - MOCK DATA
+
+PLEASE UPDATE THIS FILE WITH THE ACTUAL DATA FOR YOUR HOTEL. THIS DATA WILL BE USED THROUGHOUT THE APPLICATION.
+
+## 1. BRANCH INFORMATION
+- GRA (Head Branch)
+  - Address: Plot 123, Government Reserved Area, Port Harcourt, Rivers State
+  - Phone: +234 803 123 4567
+  - Email: gra@goldentulip.com
+  - Description: Experience unparalleled luxury at our flagship location...
+
+- Waterlines Branch
+  - Address: 123 Waterlines Road, Port Harcourt, Rivers State
+  - Phone: +234 802 234 5678
+  - Email: waterlines@goldentulip.com
+  - Description: Waterfront elegance meets modern luxury...
+
+- Airforce Base Branch
+  - Address: Airforce Base Road, Port Harcourt, Rivers State
+  - Phone: +234 805 345 6789
+  - Email: airforce@goldentulip.com
+  - Description: Conveniently located near the airforce base...
+
+- Oyigbo Branch
+  - Address: 1 Golden Tulip Road, Oyigbo, Rivers State
+  - Phone: +234 807 456 7890
+  - Email: oyigbo@goldentulip.com
+  - Description: A peaceful sanctuary offering luxury accommodations...
+
+## 2. ROOM TYPES & PRICING
+- Standard Room
+  - Price: ₦45,000/night
+  - Description: Comfortable and well-appointed rooms with modern amenities.
+  - Capacity: 2 adults
+  - Size: 30 sqm
+  - Features: 
+    - Queen-size bed
+    - City view
+    - Free Wi-Fi
+    - Air conditioning
+    - Flat-screen TV
+    - Work desk
+    - Coffee/tea maker
+
+- Deluxe Room
+  - Price: ₦65,000/night
+  - Description: Spacious rooms with premium furnishings and city views.
+  - Capacity: 2 adults
+  - Size: 40 sqm
+  - Features:
+    - King-size bed
+    - Premium view
+    - Mini bar
+    - Work desk
+    - Free Wi-Fi
+    - Air conditioning
+
+- Executive Suite
+  - Price: ₦95,000/night
+  - Description: Luxurious suites with separate living area.
+  - Capacity: 3 adults
+  - Size: 60 sqm
+  - Features:
+    - Separate living area
+    - Premium amenities
+    - Concierge service
+    - Executive lounge access
+    - Complimentary breakfast
+
+- Presidential Suite
+  - Price: ₦150,000/night
+  - Description: Ultimate luxury with premium furnishings.
+  - Capacity: 4 adults
+  - Size: 100 sqm
+  - Features:
+    - Luxury living space
+    - Personal butler
+    - Premium dining
+    - Private balcony
+    - Jacuzzi
+  - Size: 100 sqm
+
+## 3. DINING OPTIONS
+
+### The Golden Terrace (Fine Dining Restaurant)
+- Cuisine: International & Nigerian Cuisine
+- Hours: 6:00 AM - 11:00 PM
+- Features: 
+  - Breakfast buffet
+  - À la carte lunch and dinner
+  - Themed dinner nights
+  - Private dining available
+
+### The Tulip Lounge (Bar & Lounge)
+- Cuisine: Cocktails & Light Bites
+- Hours: 5:00 PM - 2:00 AM
+- Features:
+  - Signature cocktails
+  - Premium spirits
+  - Live music (Friday & Saturday)
+  - Outdoor seating
+
+### Room Service
+- Available: 24/7
+- Features:
+  - Full menu available
+  - Quick delivery
+  - Special dietary options
+  - Late-night menu: International
+
+## 4. SPA SERVICES
+- Relaxation Massage (60 mins)
+  - Price: ₦25,000
+  - Description: A soothing full-body massage...
+
+- Deep Tissue Massage (90 mins)
+  - Price: ₦35,000
+  - Description: Therapeutic massage for deep muscle relief...
+
+## 5. AMENITIES & FACILITIES
+- Free High-Speed Wi-Fi (Throughout the property)
+- Swimming Pool (Outdoor pool with poolside service)
+- Fitness Center (24/7 access with modern equipment)
+- Spa & Wellness Center (Massage, facials, and body treatments)
+- Restaurant & Bar (International and local cuisine)
+- Conference Rooms (Fully equipped for business meetings)
+- Business Center (Printing, copying, and secretarial services)
+- 24/7 Front Desk (Multilingual staff)
+- Airport Shuttle (Available on request)
+- Valet Parking (Complimentary parking service)
+- Room Service (24-hour service)
+- Laundry & Dry Cleaning (Same-day service available)
+- 24/7 Security (Professional security services)
+- Concierge Service (Tour arrangements and local recommendations)
+
+## 6. EVENTS & CONFERENCES
+
+### Corporate Events
+- Capacity: 10 - 500 guests
+- Price Range: From ₦150,000 per day
+- Features:
+  - Professional meeting rooms
+  - Conference facilities
+  - Catering services
+  - Audio/Visual equipment
+  - Dedicated event coordinator
+  - High-speed Wi-Fi
+  - Projector & screen
+  - Microphone & sound system
+  - Whiteboard & flip charts
+
+### Weddings
+- Capacity: 50 - 300 guests
+- Price Range: Custom packages available
+- Features:
+  - Elegant ballrooms
+  - Outdoor ceremony spaces
+  - Bridal suite
+  - Custom catering menus
+  - Wedding planning services
+  - Decor and setup
+  - Cake and catering
+  - Accommodation packages
+  - Day-of coordination
+
+### Special Occasions
+- Capacity: 10 - 200 guests
+- Price Range: From ₦100,000
+- Features:
+  - Private dining rooms
+  - Custom decoration
+  - Themed events
+  - Entertainment options
+  - Custom menu planning
+  - Room setup and cleanup
+  - Audiovisual equipment
+  - Dedicated service staff
+  - Cake and dessert options
+
+## 7. CONTACT INFORMATION
+- General Inquiries: info@goldentulip.com
+- Reservations: reservations@goldentulip.com
+- Events & Conferences: events@goldentulip.com
+- Phone: +234 1 234 5678
+- WhatsApp: +234 812 345 6789
+- Address: 1 Golden Tulip Road, GRA, Port Harcourt, Rivers State, Nigeria
+- Social Media:
+  - Facebook: @GoldenTulipPH
+  - Instagram: @goldentulip_ph
+  - Twitter: @GoldenTulipPH
+
+## 8. OPERATING HOURS
+- Check-in: 2:00 PM
+- Check-out: 12:00 PM
+- Front Desk: 24/7
+- Restaurant: 6:30 AM - 10:30 PM
+- Bar: 10:00 AM - 12:00 AM
+
+## 9. PAYMENT METHODS
+- Cash (NGN, USD)
+- Credit/Debit Cards (Visa, Mastercard, Verve)
+- Bank Transfer
+- Hotel Vouchers
+
+## 10. POLICIES
+- Cancellation: 48 hours prior to arrival
+- Children: Under 12 stay free with parents
+- Pets: Not allowed
+- Smoking: Designated areas only
+- ID: Valid photo ID required at check-in
+
+11 Terms of service

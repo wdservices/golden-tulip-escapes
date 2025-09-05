@@ -1,3 +1,4 @@
+import { Link, useNavigate } from "react-router-dom";
 import hotelExterior from "@/assets/hotel-exterior.jpg";
 import hotelLobby from "@/assets/hotel-lobby.jpg";
 import luxurySuite from "@/assets/luxury-suite.jpg";
@@ -9,6 +10,14 @@ interface BranchTabsProps {
 }
 
 export const BranchTabs = ({ activeTab, onTabChange }: BranchTabsProps) => {
+  const navigate = useNavigate();
+  
+  const handleBranchClick = (branchId: string) => {
+    onTabChange(branchId);
+    if (branchId === 'main') {
+      navigate('/');
+    }
+  };
   const branches = [
     { 
       id: "main", 
@@ -59,32 +68,66 @@ export const BranchTabs = ({ activeTab, onTabChange }: BranchTabsProps) => {
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-2 gap-6">
             {branches.map((branch) => (
-              <div
+              <div 
                 key={branch.id}
-                onClick={() => onTabChange(branch.id)}
-                className={`luxury-branch-card group cursor-pointer ${
-                  activeTab === branch.id 
-                    ? "luxury-branch-card-active" 
-                    : "luxury-branch-card-inactive"
-                }`}
+                className="group block"
+                onClick={() => handleBranchClick(branch.id)}
               >
-                <div className="relative overflow-hidden rounded-xl h-48">
-                  <img 
-                    src={branch.image} 
-                    alt={branch.fullName}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0">
-                    <div className="backdrop-blur-sm bg-black/30 p-4 rounded-b-xl">
-                      <h3 className="text-xl font-serif font-bold text-white mb-1 text-gradient-gold-light">
-                        {branch.name}
-                      </h3>
-                      <p className="text-white/90 text-sm mb-1">{branch.location}</p>
-                      <p className="text-white/80 text-xs">{branch.description}</p>
+                {branch.id !== 'main' ? (
+                  <Link 
+                    to={`/branches/${branch.id}`}
+                    className="block"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                <div 
+                  className={`luxury-branch-card group ${
+                    activeTab === branch.id 
+                      ? "luxury-branch-card-active" 
+                      : "luxury-branch-card-inactive"
+                  }`}
+                >
+                  <div className="relative overflow-hidden rounded-xl h-48">
+                    <img 
+                      src={branch.image} 
+                      alt={branch.fullName}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0">
+                      <div className="backdrop-blur-sm bg-black/30 p-4 rounded-b-xl">
+                        <h3 className="text-xl font-serif font-bold text-white mb-1 text-gradient-gold-light">
+                          {branch.name}
+                        </h3>
+                        <p className="text-white/90 text-sm mb-1">{branch.location}</p>
+                        <p className="text-white/80 text-xs">{branch.description}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                  </div>
+                  </Link>
+                ) : (
+                  <div className="cursor-pointer">
+                    <div className="luxury-branch-card group">
+                      <div className="relative overflow-hidden rounded-xl h-48">
+                        <img 
+                          src={branch.image} 
+                          alt={branch.fullName}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0">
+                          <div className="backdrop-blur-sm bg-black/30 p-4 rounded-b-xl">
+                            <h3 className="text-xl font-serif font-bold text-white mb-1 text-gradient-gold-light">
+                              {branch.name}
+                            </h3>
+                            <p className="text-white/90 text-sm mb-1">{branch.location}</p>
+                            <p className="text-white/80 text-xs">{branch.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Calendar } from "lucide-react";
+import { Menu, X, Calendar, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { UserButton } from "@/components/auth/UserButton";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HeaderProps {
   activeTab: string;
@@ -69,27 +71,32 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
               )
             ))}
             
-            {/* Book Now Button */}
-            <Link to="/booking" className="ml-4">
-              <Button className="btn-luxury-nav group">
-                <Calendar className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:rotate-12" />
-                Book Now
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2 ml-4">
+              <Link to="/booking">
+                <Button className="btn-luxury-nav group">
+                  <Calendar className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:rotate-12" />
+                  Book Now
+                </Button>
+              </Link>
+              <UserButton />
+            </div>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="md:hidden hover:bg-primary/10 transition-colors duration-300"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
+          {/* Mobile Menu Button and User Button */}
+          <div className="flex items-center gap-2 md:hidden">
+            <UserButton />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hover:bg-primary/10 transition-colors duration-300"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
             <div className="relative">
               <Menu className={`h-6 w-6 transition-all duration-300 ${isMenuOpen ? 'rotate-180 opacity-0' : 'rotate-0 opacity-100'}`} />
               <X className={`h-6 w-6 absolute inset-0 transition-all duration-300 ${isMenuOpen ? 'rotate-0 opacity-100' : 'rotate-180 opacity-0'}`} />
             </div>
           </Button>
+          </div>
         </div>
 
         {/* Mobile Menu */}

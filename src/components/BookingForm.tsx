@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Calendar, MapPin, Users, CreditCard } from "lucide-react";
+import { Calendar, MapPin, Users, CreditCard, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface BookingFormProps {
   selectedBranch?: string;
@@ -14,6 +15,7 @@ interface BookingFormProps {
 
 export const BookingForm = ({ selectedBranch, showLocationDropdown = true }: BookingFormProps) => {
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     checkIn: "",
@@ -27,6 +29,19 @@ export const BookingForm = ({ selectedBranch, showLocationDropdown = true }: Boo
     phone: "",
     roomType: ""
   });
+
+  // Pre-fill user data if authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setFormData(prev => ({
+        ...prev,
+        firstName: user.name?.split(' ')[0] || '',
+        lastName: user.name?.split(' ').slice(1).join(' ') || '',
+        email: user.email || '',
+        phone: user.phone || ''
+      }));
+    }
+  }, [isAuthenticated, user]);
 
   const branches = [
     { id: "main", name: "GRA (Head Branch)", location: "Government Reserved Area" },
@@ -207,42 +222,32 @@ export const BookingForm = ({ selectedBranch, showLocationDropdown = true }: Boo
                           </div>
                         </SelectItem>
                       ))}
-                    </SelectContent>
-                  </Select>
-                </div>
 
                 {/* Guest Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input
-                      id="firstName"
-                      value={formData.firstName}
-                      onChange={(e) => handleInputChange("firstName", e.target.value)}
-                      required
-                    />
+                <div className="space-y-4">
+                  <div className="flex items-center">
+                    <User className="h-5 w-5 mr-2 text-primary" />
+                    <h3 className="text-lg font-semibold">
+                      {isAuthenticated ? "Your Information" : "Guest Information"}
+                    </h3>
+                    {isAuthenticated && (
+                      <span className="ml-2 text-sm bg-amber-100 text-amber-800 px-2 py-1 rounded-full">
+                        From Profile
+                      </span>
+                    )}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      value={formData.lastName}
-                      onChange={(e) => handleInputChange("lastName", e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        value={formData.firstName}
+                        onChange={(e) => handleInputChange("firstName", e.target.value)}
+                        readOnly={isAuthenticated}
+                        className={isAuthenticated ? "bg-gray-50" : ""}
+                        required
+                      />
                     <Input
                       id="phone"
                       type="tel"
