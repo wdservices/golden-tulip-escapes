@@ -1,12 +1,28 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { User } from '@/types/auth';
+import { UserProfile } from '@/types/auth';
+import { auth, googleProvider, db } from '@/lib/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { createSession, endUserSessions } from '@/utils/session';
+import { 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  updateProfile as firebaseUpdateProfile,
+  User as FirebaseAuthUser,
+  UserInfo
+} from 'firebase/auth';
+import { isAdmin } from '@/utils/auth';
 
 interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, phone: string, password: string) => Promise<void>;
-  logout: () => void;
+  currentUser: UserProfile | null;
+  firebaseUser: FirebaseAuthUser | null;
+  login: (email: string, password: string) => Promise<string>; // Returns the redirect path
+  register: (name: string, email: string, phone: string, password: string, isAdmin?: boolean) => Promise<UserProfile>;
+  logout: () => Promise<boolean>; // Returns success status
+  signInWithGoogle: () => Promise<void>;
+  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   setupNavigation: (navigate: (to: string) => void) => void;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -16,130 +32,294 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseAuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // This will be set by the AuthProvider component
   const [navigateFn, setNavigateFn] = useState<((to: string) => void) | null>(null);
 
-  // Check for existing session on initial load
+  // Map Firebase user to our UserProfile type
+  const mapFirebaseUser = (user: FirebaseAuthUser | null): UserProfile | null => {
+    if (!user) return null;
+    
+    // In development, check for mock user first
+    if (process.env.NODE_ENV === 'development' && window.mockUser) {
+      return window.mockUser as UserProfile;
+    }
+    
+    // Check if user is admin based on email (only allow specific admin emails)
+    const adminEmails = ['admin@example.com'];
+    const isAdminUser = adminEmails.includes(user.email?.toLowerCase() || '');
+    
+    // Get creation and last sign-in times
+    const creationTime = (user.metadata as any)?.creationTime;
+    const lastSignInTime = (user.metadata as any)?.lastSignInTime || new Date().toISOString();
+    
+    return {
+      id: user.uid,
+      name: user.displayName || 'Guest',
+      email: user.email || '',
+      phone: user.phoneNumber || '',
+      photoURL: user.photoURL || undefined,
+      joinDate: creationTime || new Date().toISOString(),
+      lastLogin: lastSignInTime,
+      role: isAdminUser ? 'admin' : 'user',
+      preferences: {}
+    };
+  };
+
+  // Handle auth state changes
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const storedToken = localStorage.getItem('authToken');
-        if (storedToken) {
-          // TODO: Validate token with backend
-          // For now, we'll just set the token
-          setToken(storedToken);
-          // Fetch user data if needed
-        }
-      } catch (err) {
-        console.error('Failed to initialize auth:', err);
-        localStorage.removeItem('authToken');
-      } finally {
+    let unsubscribe: () => void;
+
+    // Check for mock user in window object for development
+    const checkForMockUser = () => {
+      if (process.env.NODE_ENV === 'development' && window.mockUser) {
+        console.log('Using mock user:', window.mockUser);
+        setCurrentUser(window.mockUser as UserProfile);
         setIsLoading(false);
+        return true;
       }
+      return false;
     };
 
-    initializeAuth();
-  }, []);
+    // Only check Firebase auth if we're not in a mock user session
+    if (!checkForMockUser()) {
+      unsubscribe = onAuthStateChanged(auth, (user) => {
+        setFirebaseUser(user);
+        setCurrentUser(mapFirebaseUser(user));
+        setIsLoading(false);
+        
+        // If user is logged in and we have a navigation function, redirect to dashboard
+        if (user && navigateFn) {
+          navigateFn('/dashboard');
+        }
+      });
+    }
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [navigateFn]);
 
   // Set up navigation function
   const setupNavigation = useCallback((navigate: (to: string) => void) => {
     setNavigateFn(() => navigate);
   }, []);
 
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    setError(null);
-    
+  const login = async (email: string, password: string): Promise<string> => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await authApi.login(email, password);
-      // const { user, token } = response.data;
+      setError(null);
+      setIsLoading(true);
       
-      // Mock response for now
-      const mockUser = {
-        id: '1',
-        name: 'Test User',
-        email,
-        phone: '+1234567890'
+      // Sign in with email and password
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      // Check for admin email
+      const isAdmin = email.toLowerCase() === 'hello.goldentulip@gmail.com';
+      
+      // Update local user state
+      const userProfile: UserProfile = {
+        id: user.uid,
+        email: user.email || '',
+        name: user.displayName || '',
+        displayName: user.displayName || '',
+        photoURL: user.photoURL || '',
+        role: isAdmin ? 'admin' : 'user',
+        lastLogin: new Date().toISOString()
       };
-      const mockToken = 'mock-jwt-token';
       
-      setUser(mockUser);
-      setToken(mockToken);
-      localStorage.setItem('authToken', mockToken);
+      setCurrentUser(userProfile);
       
-      // Use the navigation function if available
-      if (navigateFn) {
-        navigateFn('/booking');
-      }
-    } catch (err) {
-      setError('Invalid email or password');
-      throw err;
+      // Update Firestore in the background (don't await it)
+      const userRef = doc(db, 'users', user.uid);
+      const userData = {
+        ...userProfile,
+        lastLogin: serverTimestamp()
+      };
+      
+      setDoc(userRef, userData, { merge: true }).catch(firestoreError => {
+        console.warn('Firestore update warning:', firestoreError);
+      });
+      
+      // Create a new session (don't await to prevent blocking login)
+      createSession(user.uid).catch(error => {
+        console.warn('Session creation warning:', error);
+      });
+      
+      // Return the appropriate redirect path based on user role
+      return isAdmin ? '/admin' : '/dashboard';
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setError(error.message || 'Failed to log in');
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (name: string, email: string, phone: string, password: string) => {
-    setIsLoading(true);
-    setError(null);
-    
+  const register = async (name: string, email: string, phone: string, password: string, isAdmin: boolean = false) => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await authApi.register({ name, email, phone, password });
+      setError(null);
+      setIsLoading(true);
       
-      // Mock response for now
-      const mockUser = {
-        id: '1',
+      // Create user with email and password
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Update profile with display name
+      await firebaseUpdateProfile(userCredential.user, { displayName: name });
+      
+      // Check if this is the test admin user
+      const isTestAdmin = email === 'admin@example.com' && process.env.NODE_ENV === 'development';
+      
+      // Create user object
+      const user: UserProfile = {
+        id: userCredential.user.uid,
         name,
         email,
-        phone
+        phone,
+        photoURL: userCredential.user.photoURL || undefined,
+        joinDate: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+        role: isAdmin || isTestAdmin ? 'admin' : 'user',
+        preferences: {}
       };
-      const mockToken = 'mock-jwt-token';
       
-      setUser(mockUser);
-      setToken(mockToken);
-      localStorage.setItem('authToken', mockToken);
+      // For test admin in development, set the mock user
+      if (isTestAdmin) {
+        // @ts-ignore - Setting mock user for development
+        window.mockUser = user;
+      }
+      
+      setCurrentUser(user);
       
       if (navigateFn) {
-        navigateFn('/booking');
+        navigateFn('/dashboard');
       }
-    } catch (err) {
-      setError('Registration failed. Please try again.');
+      
+      return user;
+    } catch (err: any) {
+      let errorMessage = 'Failed to register. Please try again.';
+      
+      if (err.code === 'auth/email-already-in-use') {
+        errorMessage = 'This email is already registered. Please use a different email or login.';
+      } else if (err.code === 'auth/weak-password') {
+        errorMessage = 'Password should be at least 6 characters long.';
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address.';
+      }
+      
+      setError(errorMessage);
+      console.error('Registration error:', err);
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      setIsLoading(true);
+      
+      // End all active sessions
+      if (firebaseUser) {
+        await endUserSessions(firebaseUser.uid);
+      }
+      
+      // Sign out from Firebase
+      await firebaseSignOut(auth);
+      
+      // Clear the current user
+      setCurrentUser(null);
+      setFirebaseUser(null);
+      
+      // Navigate to landing page instead of login
+      if (navigateFn) {
+        navigateFn('/');
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Logout error:', error);
+      setError('Failed to log out');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      setError(null);
+      setIsLoading(true);
+      await signInWithPopup(auth, googleProvider);
+      // Navigation is handled by the auth state change listener
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign in with Google');
+      console.error('Google sign in error:', err);
       throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = useCallback(() => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('authToken');
-    if (navigateFn) {
-      navigateFn('/');
+  const updateProfile = async (updates: Partial<UserProfile>) => {
+    if (!firebaseUser) return;
+    
+    try {
+      setError(null);
+      setIsLoading(true);
+      
+      // Update Firebase profile if display name or photo URL changed
+      const firebaseUpdates: { displayName?: string; photoURL?: string } = {};
+      
+      if (updates.name !== undefined) {
+        firebaseUpdates.displayName = updates.name;
+      }
+      
+      if (updates.photoURL !== undefined) {
+        firebaseUpdates.photoURL = updates.photoURL;
+      }
+      
+      if (Object.keys(firebaseUpdates).length > 0) {
+        await firebaseUpdateProfile(firebaseUser, firebaseUpdates);
+      }
+      
+      // Update local user state
+      setCurrentUser(prev => ({
+        ...prev!,
+        ...updates
+      } as UserProfile));
+      
+      // Here you might want to update additional user data in Firestore
+      // Example: await updateUserInFirestore(auth.currentUser.uid, updates);
+      
+    } catch (err: any) {
+      setError('Failed to update profile. Please try again.');
+      console.error('Update profile error:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
     }
-  }, [navigateFn]);
+  };
+
+  const value: AuthContextType = {
+    currentUser,
+    firebaseUser,
+    login: useCallback(login, [navigateFn]),
+    register: useCallback(register, [navigateFn]),
+    logout: useCallback(logout, [navigateFn]),
+    signInWithGoogle: useCallback(signInWithGoogle, [navigateFn]),
+    updateProfile: useCallback(updateProfile, [firebaseUser]),
+    setupNavigation: useCallback((navigate) => setNavigateFn(() => navigate), []),
+    isAuthenticated: !!currentUser,
+    isLoading,
+    error
+  };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        isAuthenticated: !!user && !!token,
-        isLoading,
-        error,
-        login,
-        register,
-        logout,
-        setupNavigation,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

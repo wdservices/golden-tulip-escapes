@@ -1,8 +1,15 @@
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Phone, Mail, Facebook, Instagram, Twitter, MessageCircle } from "lucide-react";
+import { MapPin, Phone, Mail, Facebook, Instagram, Twitter, MessageCircle, Lock } from "lucide-react";
+import { FeedbackForm } from "@/components/feedback/FeedbackForm";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
+import { isAdmin } from '@/utils/auth';
 
 export const Footer = () => {
+  const { currentUser } = useAuth();
   const branches = [
     {
       name: "GRA (Head Branch)",
@@ -94,10 +101,56 @@ export const Footer = () => {
             </ul>
           </div>
 
+          {/* Admin Dashboard Button - Only visible to admins */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-primary">Admin</h3>
+            {isAdmin(currentUser) ? (
+              <Link to="/admin" className="block w-full">
+                <Button variant="default" className="w-full mb-4 bg-amber-600 text-white hover:bg-amber-700">
+                  <Lock className="mr-2 h-4 w-4" />
+                  Admin Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <div className="text-sm text-muted-foreground mb-4">
+                Admin access required
+              </div>
+            )}
+            {/* Debug info - remove in production */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="text-xs text-muted-foreground mt-2">
+                <div>Logged in: {currentUser ? 'Yes' : 'No'}</div>
+                <div>Role: {currentUser?.role || 'none'}</div>
+                <div>Email: {currentUser?.email || 'none'}</div>
+              </div>
+            )}
+          </div>
+
           {/* Contact Info */}
           <div>
             <h3 className="text-lg font-semibold mb-4 text-primary">Contact Us</h3>
             <div className="space-y-3">
+              <div className="mb-4">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full">
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Send Feedback
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl font-bold text-amber-700 mb-2">
+                        We'd Love Your Feedback
+                      </DialogTitle>
+                      <p className="text-sm text-muted-foreground mb-6">
+                        Your suggestions help us improve our services. Share your thoughts with us!
+                      </p>
+                    </DialogHeader>
+                    <FeedbackForm />
+                  </DialogContent>
+                </Dialog>
+              </div>
               <div className="flex items-start space-x-3">
                 <Phone className="h-5 w-5 text-primary mt-0.5" />
                 <div>

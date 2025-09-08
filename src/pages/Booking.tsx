@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,12 +9,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon, MapPin, Users, Bed, Utensils, Waves, Car, CreditCard, Phone, Mail, User } from "lucide-react";
+import { CalendarIcon, MapPin, Users, Bed, Utensils, Waves, Car, CreditCard, Phone, Mail, User, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import luxurySuite from "@/assets/luxury-suite.jpg";
 import hotelExterior from "@/assets/hotel-exterior.jpg";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
+import { collection, addDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useNavigate } from "react-router-dom";
 
 interface BookingFormData {
   branch: string;
@@ -29,9 +34,25 @@ interface BookingFormData {
   phone: string;
   specialRequests: string;
   addOns: string[];
+  bookForClient: boolean;
+  clientEmail?: string;
+  clientName?: string;
 }
 
 const Booking = () => {
+  const { currentUser } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check if user is admin on component mount
+  useEffect(() => {
+    if (currentUser) {
+      setIsAdmin(currentUser.role === 'admin');
+    }
+  }, [currentUser]);
+
   const [bookingData, setBookingData] = useState<BookingFormData>({
     branch: "",
     checkInDate: undefined,
@@ -44,7 +65,10 @@ const Booking = () => {
     email: "",
     phone: "",
     specialRequests: "",
-    addOns: []
+    addOns: [],
+    bookForClient: false,
+    clientEmail: "",
+    clientName: ""
   });
 
   const branches = [
@@ -100,11 +124,11 @@ const Booking = () => {
       const addOn = addOns.find(a => a.id === addOnId);
       return total + (addOn ? addOn.price : 0);
     }, 0);
-    
-    const nights = bookingData.checkInDate && bookingData.checkOutDate 
+
+    const nights = bookingData.checkInDate && bookingData.checkOutDate
       ? Math.ceil((bookingData.checkOutDate.getTime() - bookingData.checkInDate.getTime()) / (1000 * 60 * 60 * 24))
       : 1;
-    
+
     return (roomPrice * nights) + addOnPrice;
   };
 
@@ -122,10 +146,127 @@ const Booking = () => {
     }
   };
 
+  const handleSubmitBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Basic validation
+    if (!bookingData.branch || !bookingData.roomType || !bookingData.checkInDate || !bookingData.checkOutDate) {
+      toast({
+        title: "Missing required fields",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (bookingData.bookForClient && !bookingData.clientEmail) {
+      toast({
+        title: "Client email required",
+        description: "Please enter the client's email address",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // If booking for a client, find their user ID
+      let userId = currentUser?.uid;
+      let guestEmail = bookingData.email;
+      let guestName = `${bookingData.firstName} ${bookingData.lastName}`;
+
+      if (bookingData.bookForClient && bookingData.clientEmail) {
+        // Search for the client by email
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('email', '==', bookingData.clientEmail.toLowerCase().trim()));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          // Client exists, use their ID
+          userId = querySnapshot.docs[0].id;
+          guestEmail = querySnapshot.docs[0].data().email;
+          guestName = querySnapshot.docs[0].data().name || bookingData.clientName || 'Guest';
+        } else if (bookingData.clientEmail) {
+          // Client doesn't exist, create a guest booking
+          guestEmail = bookingData.clientEmail;
+          guestName = bookingData.clientName || 'Guest';
+          userId = 'guest'; // Or generate a guest ID
+        }
+      }
+
+      const bookingRef = collection(db, 'bookings');
+      const newBooking = {
+        userId: userId || 'guest',
+        branchId: bookingData.branch,
+        branchName: branches.find(b => b.id === bookingData.branch)?.name || '',
+        roomType: bookingData.roomType,
+        roomNumber: '', // Will be assigned at check-in
+        checkInDate: bookingData.checkInDate.toISOString(),
+        checkOutDate: bookingData.checkOutDate.toISOString(),
+        status: 'confirmed' as const,
+        paymentStatus: 'pending' as const,
+        totalAmount: calculateTotal(),
+        bookingDate: new Date().toISOString(),
+        guests: bookingData.adults + bookingData.children,
+        adults: bookingData.adults,
+        children: bookingData.children,
+        specialRequests: bookingData.specialRequests,
+        guestName,
+        guestEmail,
+        guestPhone: bookingData.phone,
+        createdBy: currentUser?.uid || 'system',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        addOns: bookingData.addOns,
+        roomCharge: roomTypes.find(r => r.id === bookingData.roomType)?.price || 0,
+        serviceCharge: bookingData.addOns.reduce((total, addOnId) => {
+          const addOn = addOns.find(a => a.id === addOnId);
+          return total + (addOn ? addOn.price : 0);
+        }, 0),
+        tax: 0, // Calculate tax based on your business logic
+        discount: 0, // Apply any discounts
+        source: 'website',
+        marketSegment: 'leisure',
+        rateCode: 'BAR' // Best Available Rate
+      };
+
+      await addDoc(bookingRef, newBooking);
+
+      toast({
+        title: "Booking Confirmed!",
+        description: `Your booking has been successfully created${bookingData.bookForClient ? ' for the client' : ''}.`,
+      });
+
+      // Redirect to bookings page or show success message
+      navigate('/bookings');
+
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      toast({
+        title: "Error",
+        description: "There was an error processing your booking. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleBookForClientChange = (checked: boolean) => {
+    setBookingData(prev => ({
+      ...prev,
+      bookForClient: checked,
+      // Clear client fields when toggling off
+      clientEmail: checked ? prev.clientEmail : "",
+      clientName: checked ? prev.clientName : ""
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header activeTab="" onTabChange={() => {}} />
-      
+
       <main className="pt-20">
         {/* Hero Section */}
         <section className="py-16 bg-gradient-to-r from-black via-black/90 to-black relative overflow-hidden">
@@ -147,10 +288,10 @@ const Booking = () => {
           <div className="container mx-auto px-4">
             <div className="max-w-7xl mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                
+
                 {/* Main Booking Form */}
-                <div className="lg:col-span-3 space-y-6">
-                  
+                <form onSubmit={handleSubmitBooking} className="lg:col-span-3 space-y-6">
+
                   {/* Booking Details */}
                   <Card className="luxury-booking-card">
                     <CardHeader>
@@ -282,7 +423,7 @@ const Booking = () => {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="booking-dropdown">
-                              {[1,2,3,4,5,6].map(num => (
+                              {[1, 2, 3, 4, 5, 6].map(num => (
                                 <SelectItem key={num} value={num.toString()} className="booking-dropdown-item">
                                   {num} Adult{num > 1 ? 's' : ''}
                                 </SelectItem>
@@ -297,7 +438,7 @@ const Booking = () => {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="booking-dropdown">
-                              {[0,1,2,3,4].map(num => (
+                              {[0, 1, 2, 3, 4].map(num => (
                                 <SelectItem key={num} value={num.toString()} className="booking-dropdown-item">
                                   {num} {num === 1 ? 'Child' : 'Children'}
                                 </SelectItem>
@@ -407,7 +548,7 @@ const Booking = () => {
                       </div>
                     </CardContent>
                   </Card>
-                </div>
+                </form>
 
                 {/* Booking Summary Sidebar */}
                 <div className="lg:col-span-2">
@@ -426,7 +567,7 @@ const Booking = () => {
                             <p className="font-medium">{branches.find(b => b.id === bookingData.branch)?.name}</p>
                           </div>
                         )}
-                        
+
                         {bookingData.roomType && (
                           <div className="summary-item">
                             <div className="flex items-center mb-2">
@@ -477,9 +618,62 @@ const Booking = () => {
                           </div>
                         </div>
 
-                        <Button className="btn-luxury w-full h-12 mt-6">
-                          <CreditCard className="h-4 w-4 mr-2" />
-                          Proceed to Payment
+                        {isAdmin && (
+                          <div className="space-y-4 mt-4 border-t pt-4">
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                id="bookForClient"
+                                checked={bookingData.bookForClient}
+                                onCheckedChange={(checked: boolean) => handleBookForClientChange(checked)}
+                              />
+                              <Label htmlFor="bookForClient" className="text-sm font-medium">
+                                Book for a client
+                              </Label>
+                            </div>
+
+                            {bookingData.bookForClient && (
+                              <div className="space-y-4 pl-6">
+                                <div className="space-y-2">
+                                  <Label htmlFor="clientName" className="text-sm">Client Name</Label>
+                                  <Input
+                                    id="clientName"
+                                    placeholder="Client's full name"
+                                    value={bookingData.clientName}
+                                    onChange={(e) => setBookingData(prev => ({ ...prev, clientName: e.target.value }))}
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="clientEmail" className="text-sm">Client Email <span className="text-red-500">*</span></Label>
+                                  <Input
+                                    id="clientEmail"
+                                    type="email"
+                                    placeholder="client@example.com"
+                                    value={bookingData.clientEmail}
+                                    onChange={(e) => setBookingData(prev => ({ ...prev, clientEmail: e.target.value }))}
+                                    required={bookingData.bookForClient}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        <Button
+                          type="submit"
+                          className="btn-luxury w-full h-12 mt-6"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                              Processing...
+                            </>
+                          ) : (
+                            <>
+                              <CreditCard className="h-4 w-4 mr-2" />
+                              {bookingData.bookForClient ? 'Book for Client' : 'Proceed to Payment'}
+                            </>
+                          )}
                         </Button>
                       </CardContent>
                     </Card>

@@ -1,0 +1,285 @@
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { User } from '@/types/auth';
+import { auth, googleProvider } from '@/lib/firebase';
+import { 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  updateProfile as firebaseUpdateProfile,
+  User as FirebaseAuthUser
+} from 'firebase/auth';
+import { isAdmin } from '@/utils/auth';
+
+interface AuthContextType {
+  currentUser: User | null;
+  firebaseUser: FirebaseAuthUser | null;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, phone: string, password: string) => Promise<User>;
+  logout: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  updateProfile: (updates: Partial<User>) => Promise<void>;
+  setupNavigation: (navigate: (to: string) => void) => void;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseAuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [navigateFn, setNavigateFn] = useState<((to: string) => void) | null>(null);
+
+  // Development function to create a test admin user
+  const createTestAdmin = (): User => ({
+    id: 'test-admin-123',
+    name: 'Test Admin',
+    email: 'admin@example.com',
+    phone: '+1234567890',
+    photoURL: undefined,
+    joinDate: new Date().toISOString(),
+    lastLogin: new Date().toISOString(),
+    role: 'admin',
+    preferences: {}
+  });
+
+  // Map Firebase user to our User type
+  const mapFirebaseUser = (user: any): User | null => {
+    if (!user) return null;
+    
+    // In development, create a test admin if the email matches
+    if (process.env.NODE_ENV === 'development' && user.email === 'admin@example.com') {
+      return createTestAdmin();
+    }
+    
+    // Define admin emails (replace with actual admin emails in production)
+    const adminEmails = ['admin@example.com', 'your-email@example.com'];
+    const isAdminUser = adminEmails.includes(user.email?.toLowerCase());
+    
+    return {
+      id: user.uid,
+      name: user.displayName || 'Guest',
+      email: user.email || '',
+      phone: user.phoneNumber || '',
+      photoURL: user.photoURL || undefined,
+      joinDate: user.metadata?.creationTime || new Date().toISOString(),
+      lastLogin: user.metadata?.lastSignInTime || new Date().toISOString(),
+      role: isAdminUser ? 'admin' : 'user',
+      preferences: {}
+    };
+  };
+
+  // Handle auth state changes
+  useEffect(() => {
+    let unsubscribe: () => void;
+
+    // Check for mock user in window object for development
+    const checkForMockUser = () => {
+      if (process.env.NODE_ENV === 'development' && window.mockUser) {
+        console.log('Using mock user:', window.mockUser);
+        setCurrentUser(window.mockUser);
+        setIsLoading(false);
+        return true;
+      }
+      return false;
+    };
+
+    // Only check Firebase auth if we're not in a mock user session
+    if (!checkForMockUser()) {
+      unsubscribe = onAuthStateChanged(auth, (user) => {
+        setFirebaseUser(user);
+        setCurrentUser(mapFirebaseUser(user));
+        setIsLoading(false);
+        
+        // If user is logged in and we have a navigation function, redirect to dashboard
+        if (user && navigateFn) {
+          navigateFn('/dashboard');
+        }
+      });
+    }
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [navigateFn]);
+
+  // Set up navigation function
+  const setupNavigation = useCallback((navigate: (to: string) => void) => {
+    setNavigateFn(() => navigate);
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    try {
+      setError(null);
+      setIsLoading(true);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = mapFirebaseUser(userCredential.user);
+      setCurrentUser(user);
+      
+      if (navigateFn) {
+        navigateFn('/dashboard');
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setError(error.message || 'Failed to log in');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const register = async (name: string, email: string, phone: string, password: string) => {
+    try {
+      setError(null);
+      setIsLoading(true);
+      
+      // Create user with email and password
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Update profile with display name
+      await firebaseUpdateProfile(userCredential.user, { displayName: name });
+      
+      // Create user object
+      const user: User = {
+        id: userCredential.user.uid,
+        name,
+        email,
+        phone,
+        photoURL: userCredential.user.photoURL || undefined,
+        joinDate: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+        role: 'user',
+        preferences: {}
+      };
+      
+      setCurrentUser(user);
+      
+      if (navigateFn) {
+        navigateFn('/dashboard');
+      }
+      
+      return user;
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      setError(error.message || 'Failed to register');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      setError(null);
+      setIsLoading(true);
+      await firebaseSignOut(auth);
+      setCurrentUser(null);
+      setFirebaseUser(null);
+      
+      // Clear mock user in development
+      if (process.env.NODE_ENV === 'development') {
+        delete window.mockUser;
+      }
+      
+      if (navigateFn) {
+        navigateFn('/');
+      }
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      setError(error.message || 'Failed to log out');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      setError(null);
+      setIsLoading(true);
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = mapFirebaseUser(result.user);
+      setCurrentUser(user);
+      
+      if (navigateFn) {
+        navigateFn('/dashboard');
+      }
+    } catch (error: any) {
+      console.error('Google sign-in error:', error);
+      setError(error.message || 'Failed to sign in with Google');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateProfile = async (updates: Partial<User>) => {
+    if (!firebaseUser) return;
+    
+    try {
+      setError(null);
+      setIsLoading(true);
+      
+      // Update Firebase profile if display name or photo URL changed
+      const firebaseUpdates: { displayName?: string; photoURL?: string } = {};
+      
+      if (updates.name !== undefined) {
+        firebaseUpdates.displayName = updates.name;
+      }
+      
+      if (updates.photoURL !== undefined) {
+        firebaseUpdates.photoURL = updates.photoURL;
+      }
+      
+      if (Object.keys(firebaseUpdates).length > 0) {
+        await firebaseUpdateProfile(firebaseUser, firebaseUpdates);
+      }
+      
+      // Update local user state
+      setCurrentUser(prev => ({
+        ...prev!,
+        ...updates
+      }));
+      
+    } catch (error: any) {
+      console.error('Profile update error:', error);
+      setError(error.message || 'Failed to update profile');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const value = {
+    currentUser,
+    firebaseUser,
+    login,
+    register,
+    logout,
+    signInWithGoogle,
+    updateProfile,
+    setupNavigation,
+    isAuthenticated: !!currentUser,
+    isLoading,
+    error
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

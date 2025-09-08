@@ -1,49 +1,193 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, CheckCircle, Clock, Home, MapPin, Moon, Star, Sun } from "lucide-react";
-import { BookingCard } from "@/components/dashboard/BookingCard";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Calendar, CheckCircle, Clock, Home, MapPin, Star, LogOut, MessageSquare } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
-import { getUserProfile, mockBookings } from "@/services/mockData";
 import { format } from "date-fns";
+import type { Booking } from "@/types/booking";
+import type { User } from "@/types/auth";
+import { collection, query, where, getDocs, orderBy, Timestamp } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
+import { FeedbackForm } from "@/components/feedback/FeedbackForm";
+
+// Define the dashboard stats interface
+interface DashboardStats {
+  totalBookings: number;
+  totalNights: number;
+  favoriteBranch?: string;
+  loyaltyPoints: number;
+  upcomingTrips?: number;
+  pastTrips?: number;
+  lastStay?: {
+    branch: string;
+    date: string;
+    roomType: string;
+  };
+}
+
+// DashboardStats interface is used for the booking statistics
+
+// Simple loading component
+const LoadingSpinner = () => (
+  <div className="flex justify-center items-center h-64">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
+  </div>
+);
 
 export const UserDashboard = () => {
-  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { currentUser, isAuthenticated, isLoading: isAuthLoading, logout } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(true);
-  const [profileData, setProfileData] = useState<any>(null);
-  const [bookingStats, setBookingStats] = useState<any>(null);
+  const [profileData, setProfileData] = useState<User | null>(null);
+  const [bookingStats, setBookingStats] = useState<DashboardStats | null>(null);
+  const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
+  const [pastBookings, setPastBookings] = useState<Booking[]>([]);
+  const [favoriteBranch, setFavoriteBranch] = useState<string>("");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [showWelcome, setShowWelcome] = useState(false);
 
+  // Helper function to load user data
+  const loadUserData = useCallback(async () => {
+    if (!currentUser) return;
+
+    setIsLoading(true);
+    try {
+      // Use the current user data from Firebase
+      setProfileData(currentUser);
+
+      // Fetch user's bookings from Firestore
+      const bookingsRef = collection(db, 'bookings');
+      const q = query(
+        bookingsRef, 
+        where('userId', '==', currentUser.id),
+        orderBy('checkInDate', 'desc')
+      );
+
+      const querySnapshot = await getDocs(q);
+      const bookings: Booking[] = [];
+      const branchCount: Record<string, number> = {};
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data() as Booking;
+        bookings.push({
+          ...data,
+          id: doc.id,
+          checkInDate: (data.checkInDate as unknown as Timestamp).toDate().toISOString(),
+          checkOutDate: (data.checkOutDate as unknown as Timestamp).toDate().toISOString(),
+          bookingDate: (data.bookingDate as unknown as Timestamp).toDate().toISOString(),
+        });
+
+        // Count branch usage
+        if (data.branchName) {
+          branchCount[data.branchName] = (branchCount[data.branchName] || 0) + 1;
+        }
+      });
+
+      // Calculate favorite branch
+      let favorite = "";
+      let maxCount = 0;
+      Object.entries(branchCount).forEach(([branch, count]) => {
+        if (count > maxCount) {
+          maxCount = count;
+          favorite = branch;
+        }
+      });
+      setFavoriteBranch(favorite);
+
+      const now = new Date();
+      const upcoming = bookings
+        .filter(b => new Date(b.checkOutDate) >= now)
+        .sort((a, b) => new Date(a.checkInDate).getTime() - new Date(b.checkInDate).getTime());
+
+      const past = bookings
+        .filter(b => new Date(b.checkOutDate) < now);
+
+      // Calculate total nights stayed
+      const totalNights = past.reduce((total, booking) => {
+        const checkIn = new Date(booking.checkInDate);
+        const checkOut = new Date(booking.checkOutDate);
+        const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
+        return total + Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      }, 0);
+
+      // Calculate loyalty points (1 point per night stayed)
+      const loyaltyPoints = 100 + totalNights; // Starting with 100 points
+
+      // Initialize stats
+      const userStats: DashboardStats = {
+        totalBookings: bookings.length,
+        totalNights,
+        loyaltyPoints,
+        upcomingTrips: upcoming.length,
+        pastTrips: past.length,
+        favoriteBranch: favorite,
+      };
+
+      if (past.length > 0) {
+        userStats.lastStay = {
+          branch: past[0].branchName,
+          date: past[0].checkOutDate,
+          roomType: past[0].roomType
+        };
+      }
+
+      setBookingStats(userStats);
+      setUpcomingBookings(upcoming);
+      setPastBookings(past);
+
+    } catch (error) {
+      console.error("Failed to load dashboard data:", error);
+      toast.error("Failed to load dashboard data. Please refresh the page.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentUser]);
+
+  // Helper function to get favorite branch
+  const getFavoriteBranch = useCallback((): string => {
+    if (favoriteBranch) return favoriteBranch;
+    return bookingStats?.favoriteBranch || "—";
+  }, [favoriteBranch, bookingStats]);
+
+  // Helper function to get last stay info
+  const getLastStayInfo = useCallback((): string => {
+    if (pastBookings.length > 0) {
+      return `Last stay: ${format(new Date(pastBookings[0].checkOutDate), 'MMM yyyy')}`;
+    }
+    if (bookingStats?.lastStay) {
+      return `Last stay: ${format(new Date(bookingStats.lastStay.date), 'MMM yyyy')}`;
+    }
+    return "No past stays";
+  }, [pastBookings, bookingStats]);
+
+  // Load user data on component mount and when auth state changes
   useEffect(() => {
+    // Check for welcome flag in URL
+    if (searchParams.get('welcome') === 'true') {
+      setShowWelcome(true);
+      toast.success('Registration successful! Welcome to Golden Tulip Escapes!', {
+        duration: 5000,
+      });
+      // Clean up the URL
+      navigate('/dashboard', { replace: true });
+    }
+
     if (!isAuthLoading && !isAuthenticated) {
       navigate("/auth", { state: { from: "/dashboard" } });
       return;
     }
 
-    if (user) {
-      // Simulate API call
-      const loadData = async () => {
-        setIsLoading(true);
-        try {
-          // In a real app, this would be an API call
-          const { profile, stats } = getUserProfile(user.id);
-          setProfileData(profile);
-          setBookingStats(stats);
-        } catch (error) {
-          console.error("Failed to load user data:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      loadData();
+    if (currentUser) {
+      loadUserData();
     }
-  }, [user, isAuthenticated, isAuthLoading, navigate]);
+  }, [currentUser, isAuthenticated, isAuthLoading, navigate, searchParams, loadUserData]);
 
   const handleViewBookingDetails = (bookingId: string) => {
     // Navigate to booking details page
@@ -54,56 +198,110 @@ export const UserDashboard = () => {
     // Handle booking cancellation
     console.log("Cancel booking:", bookingId);
     // In a real app, this would trigger an API call
+    toast.info("Cancellation request sent");
   };
 
-  const upcomingBookings = mockBookings
-    .filter((b) => new Date(b.checkInDate) > new Date() && b.status === "confirmed")
-    .sort((a, b) => new Date(a.checkInDate).getTime() - new Date(b.checkInDate).getTime());
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/auth');
+      toast.success('Successfully logged out');
+    } catch (error) {
+      console.error('Failed to log out', error);
+      toast.error('Failed to log out. Please try again.');
+    }
+  };
 
-  const pastBookings = mockBookings
-    .filter((b) => new Date(b.checkInDate) <= new Date() || b.status !== "confirmed")
-    .sort((a, b) => new Date(b.checkInDate).getTime() - new Date(a.checkInDate).getTime());
+  // Get time-based greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
+
+  // Welcome Message Component
+  const WelcomeMessage = () => (
+    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+      <div className="flex">
+        <div className="flex-shrink-0">
+          <CheckCircle className="h-5 w-5 text-green-400" />
+        </div>
+        <div className="ml-3">
+          <h3 className="text-sm font-medium text-green-800">{getGreeting()}, {profileData?.name || 'there'}! Welcome to Golden Tulip Escapes!</h3>
+          <div className="mt-2 text-sm text-green-700">
+            <p>Your account has been created successfully. Start exploring our exclusive offers!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   if (isAuthLoading || isLoading) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="animate-pulse space-y-8">
-          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-32 bg-gray-100 rounded-lg"></div>
-            ))}
-          </div>
-          <div className="h-64 bg-gray-100 rounded-lg"></div>
+      <div className="container mx-auto px-4 py-8">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  // Handle case when user data couldn't be loaded
+  if (!profileData || !bookingStats) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold mb-2">Unable to load dashboard</h2>
+          <p className="text-muted-foreground mb-4">We couldn't load your dashboard data.</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto px-4 py-8">
+      {showWelcome && (
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <CheckCircle className="h-5 w-5 text-green-400" />
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-green-800">Welcome to Golden Tulip Escapes!</h3>
+              <p className="mt-1 text-sm text-green-700">Your account has been created successfully.</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <div className="flex items-center space-x-4">
           <Avatar className="h-16 w-16">
-            <AvatarImage src="" alt={profileData?.name} />
+            <AvatarImage src="" alt={profileData.name} />
             <AvatarFallback className="bg-gradient-to-br from-amber-500 to-amber-700 text-white text-2xl">
-              {profileData?.name
+              {profileData.name
                 .split(" ")
-                .map((n: string) => n[0])
+                .map(n => n[0])
                 .join("")}
             </AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-2xl font-bold">Welcome back, {profileData?.name.split(" ")[0]}</h1>
-            <p className="text-muted-foreground">
-              Member since {profileData?.joinDate ? format(new Date(profileData.joinDate), 'MMMM yyyy') : ''}
-            </p>
+            <h1 className="text-2xl font-bold">{getGreeting()}, {profileData.name}</h1>
+            <p className="text-muted-foreground">Here's what's happening with your bookings</p>
           </div>
         </div>
-        <Button className="mt-4 md:mt-0" onClick={() => navigate("/booking")}>
-          Book a Stay
-        </Button>
+        <div className="flex items-center space-x-4">
+          {showWelcome && <WelcomeMessage />}
+          <Button 
+            variant="outline" 
+            onClick={handleLogout}
+            className="flex items-center gap-2"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -112,43 +310,66 @@ export const UserDashboard = () => {
           title="Total Stays"
           value={bookingStats?.totalBookings || 0}
           icon={<Home className="h-4 w-4" />}
-          description={`${bookingStats?.totalNights || 0} nights in total`}
+          description={`${bookingStats?.totalNights || 0} total nights`}
+        />
+        <StatCard
+          title="Upcoming Trips"
+          value={upcomingBookings.length}
+          icon={<Calendar className="h-4 w-4" />}
+          description={`${upcomingBookings.length} booked`}
+        />
+        <StatCard
+          title="Loyalty Points"
+          value={bookingStats?.loyaltyPoints || 0}
+          icon={<Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
+          description="Earn more with each stay"
         />
         <StatCard
           title="Favorite Branch"
-          value={bookingStats?.favoriteBranch || "-"}
-          icon={<MapPin className="h-4 w-4" />}
-          description="Your most visited location"
+          value={bookingStats?.favoriteBranch || "—"}
+          icon={<MapPin className="h-4 w-4 text-rose-500" />}
+          description={getLastStayInfo()}
         />
-        <StatCard
-          title="Last Stay"
-          value={bookingStats?.lastStay ? format(new Date(bookingStats.lastStay), 'MMM yyyy') : "-"}
-          icon={<Moon className="h-4 w-4" />}
-          description={bookingStats?.lastStay ? "Your most recent visit" : "No stays yet"}
-        />
-        <StatCard
-          title="Loyalty Status"
-          value="Gold Member"
-          icon={<Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
-          description="Earn points with every stay"
-        />
+
+        {/* Upcoming Bookings List */}
+        <div className="space-y-4">
+          {upcomingBookings.map((booking) => (
+            <div key={booking.id} className="border rounded-lg p-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="font-medium">{booking.branchName}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {format(new Date(booking.checkInDate), 'MMM d, yyyy')} - {format(new Date(booking.checkOutDate), 'MMM d, yyyy')}
+                  </p>
+                </div>
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleViewBookingDetails(booking.id)}
+                  >
+                    View Details
+                  </Button>
+                  <Button 
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleCancelBooking(booking.id)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
-          <TabsTrigger value="overview" onClick={() => setActiveTab("overview")}>
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="upcoming" onClick={() => setActiveTab("upcoming")}>
-            Upcoming Stays
-          </TabsTrigger>
-          <TabsTrigger value="past" onClick={() => setActiveTab("past")}>
-            Past Stays
-          </TabsTrigger>
-          <TabsTrigger value="profile" onClick={() => setActiveTab("profile")}>
-            Profile
-          </TabsTrigger>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="bookings">My Bookings</TabsTrigger>
+          <TabsTrigger value="feedback">Feedback</TabsTrigger>
+          <TabsTrigger value="profile">Profile</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -162,7 +383,7 @@ export const UserDashboard = () => {
               </CardHeader>
               <CardContent>
                 {upcomingBookings.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <p className="text-lg font-medium">{upcomingBookings[0].branchName}</p>
                     <p className="text-sm text-muted-foreground">
                       {format(new Date(upcomingBookings[0].checkInDate), 'MMM d, yyyy')} -{' '}
@@ -171,7 +392,12 @@ export const UserDashboard = () => {
                     <p className="text-sm">
                       {upcomingBookings[0].roomType} • {upcomingBookings[0].guests} {upcomingBookings[0].guests === 1 ? 'guest' : 'guests'}
                     </p>
-                    <Button variant="outline" size="sm" className="mt-2" onClick={() => handleViewBookingDetails(upcomingBookings[0].id)}>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2" 
+                      onClick={() => handleViewBookingDetails(upcomingBookings[0].id)}
+                    >
                       View Details
                     </Button>
                   </div>
@@ -179,7 +405,10 @@ export const UserDashboard = () => {
                   <div className="text-center py-6">
                     <Clock className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
                     <p className="text-muted-foreground">No upcoming stays</p>
-                    <Button className="mt-4" onClick={() => navigate('/booking')}>
+                    <Button 
+                      className="mt-4" 
+                      onClick={() => navigate('/book')}
+                    >
                       Book a Stay
                     </Button>
                   </div>
@@ -191,9 +420,44 @@ export const UserDashboard = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center">
                   <Star className="h-5 w-5 mr-2 text-amber-400 fill-amber-400" />
-                  Loyalty Points
+                  Loyalty Status
                 </CardTitle>
               </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Member Since</p>
+                      <p className="text-sm text-muted-foreground">
+                        {profileData?.joinDate ? format(new Date(profileData.joinDate), 'MMM d, yyyy') : '—'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">Tier</p>
+                      <p className="text-sm text-amber-600 font-medium">
+                        {bookingStats?.loyaltyPoints && bookingStats.loyaltyPoints >= 1000 ? 'Gold' : 'Silver'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Silver Tier</span>
+                      <span>Gold Tier</span>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-amber-400 to-amber-600"
+                        style={{
+                          width: `${Math.min(100, ((bookingStats?.loyaltyPoints || 0) / 1000) * 100)}%`
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center">
+                      {bookingStats?.loyaltyPoints || 0} / 1000 points to Gold
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
               <CardContent>
                 <div className="space-y-4">
                   <div>
@@ -238,12 +502,32 @@ export const UserDashboard = () => {
           {upcomingBookings.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2">
               {upcomingBookings.map((booking) => (
-                <BookingCard
-                  key={booking.id}
-                  booking={booking}
-                  onViewDetails={handleViewBookingDetails}
-                  onCancel={handleCancelBooking}
-                />
+                <div key={booking.id} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-medium">{booking.branchName}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(booking.checkInDate), 'MMM d, yyyy')} - {format(new Date(booking.checkOutDate), 'MMM d, yyyy')}
+                      </p>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleViewBookingDetails(booking.id)}
+                      >
+                        View Details
+                      </Button>
+                      <Button 
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleCancelBooking(booking.id)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
@@ -251,7 +535,17 @@ export const UserDashboard = () => {
               <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium">No upcoming stays</h3>
               <p className="text-muted-foreground mb-6">Your next adventure awaits!</p>
-              <Button onClick={() => navigate('/booking')}>Book a Stay</Button>
+              <Button 
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    navigate("/auth", { state: { from: "/book" } });
+                  } else {
+                    navigate("/book");
+                  }
+                }}
+              >
+                Book a Stay
+              </Button>
             </div>
           )}
         </TabsContent>
@@ -260,93 +554,114 @@ export const UserDashboard = () => {
           {pastBookings.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2">
               {pastBookings.map((booking) => (
-                <BookingCard
-                  key={booking.id}
-                  booking={booking}
-                  onViewDetails={handleViewBookingDetails}
-                />
+                <div key={booking.id} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-medium">{booking.branchName}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(booking.checkInDate), 'MMM d, yyyy')} - {format(new Date(booking.checkOutDate), 'MMM d, yyyy')}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {booking.roomType} • {booking.status}
+                      </p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewBookingDetails(booking.id)}
+                    >
+                      View Details
+                    </Button>
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-12">
               <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium">No past stays yet</h3>
-              <p className="text-muted-foreground mb-6">Your travel history will appear here</p>
-              <Button onClick={() => navigate('/booking')}>Book Your First Stay</Button>
+              <p className="text-muted-foreground">Your upcoming adventures will appear here</p>
+              <Button 
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    navigate("/auth", { state: { from: "/booking" } });
+                  } else {
+                    navigate("/booking");
+                  }
+                }}
+              >
+                Book Your First Stay
+              </Button>
             </div>
           )}
         </TabsContent>
 
-        <TabsContent value="profile" className="space-y-6">
+        <TabsContent value="feedback" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <MessageSquare className="h-5 w-5 text-amber-600" />
+                <CardTitle>Feedback & Support</CardTitle>
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                We'd love to hear your feedback or help with any issues you're experiencing.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <FeedbackForm 
+                userId={currentUser?.id || ''}
+                userEmail={currentUser?.email || ''}
+                onSuccess={() => {
+                  // Optional: Handle success (e.g., show a thank you message)
+                }}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="profile" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Profile Information</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Full Name</p>
-                    <p className="text-base">{profileData?.name}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Email</p>
-                    <p className="text-base">{profileData?.email}</p>
-                  </div>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Full Name</p>
+                  <p className="font-medium">{profileData.name}</p>
                 </div>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Phone</p>
-                    <p className="text-base">{profileData?.phone || 'Not provided'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Member Since</p>
-                    <p className="text-base">
-                      {profileData?.joinDate ? format(new Date(profileData.joinDate), 'MMMM d, yyyy') : 'N/A'}
-                    </p>
-                  </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="font-medium">{profileData.email}</p>
                 </div>
-                {profileData?.preferences && (
-                  <div className="pt-4 border-t">
-                    <h4 className="text-sm font-medium text-muted-foreground mb-2">Preferences</h4>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div>
-                            <p className="text-sm font-medium">Room Type</p>
-                            <p className="text-sm text-muted-foreground">
-                              {profileData.preferences.roomType || 'No preference'}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Floor Preference</p>
-                            <p className="text-sm text-muted-foreground">
-                              {profileData.preferences.floorPreference || 'No preference'}
-                            </p>
-                          </div>
-                          {profileData.preferences.specialNeeds?.length > 0 && (
-                            <div className="md:col-span-2">
-                              <p className="text-sm font-medium">Special Requests</p>
-                              <div className="flex flex-wrap gap-2 mt-1">
-                                {profileData.preferences.specialNeeds.map((need: string, index: number) => (
-                                  <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                                    {need}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex justify-end pt-4 border-t">
-                    <Button variant="outline" onClick={() => setActiveTab('profile')}>
-                      Edit Profile
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-      );
-    };
+                <div>
+                  <p className="text-sm text-muted-foreground">Member Since</p>
+                  <p className="font-medium">
+                    {format(new Date(profileData.joinDate), 'MMM d, yyyy')}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Last Login</p>
+                  <p className="font-medium">
+                    {format(new Date(profileData.lastLogin), 'MMM d, yyyy h:mm a')}
+                  </p>
+                </div>
+              </div>
+              <div className="pt-4">
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    // Handle edit profile
+                    toast.info('Edit profile functionality coming soon');
+                  }}
+                >
+                  Edit Profile
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};

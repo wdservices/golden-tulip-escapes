@@ -14,21 +14,23 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const UserButton = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { currentUser, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate("/");
   };
 
-  if (!isAuthenticated || !user) {
+  if (!isAuthenticated || !currentUser) {
     return (
-      <Link to="/auth" className="ml-4">
-        <Button variant="outline" className="border-primary/20 hover:bg-primary/5">
-          Sign In
-        </Button>
-      </Link>
+      <Button 
+        variant="outline" 
+        className="border-primary/20 hover:bg-primary/5 ml-4"
+        onClick={() => navigate('/auth')}
+      >
+        Sign In
+      </Button>
     );
   }
 
@@ -46,9 +48,9 @@ export const UserButton = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="" alt={user.name} />
+            <AvatarImage src={currentUser.photoURL || ''} alt={currentUser.name || 'User'} />
             <AvatarFallback className="bg-gradient-to-br from-amber-500 to-amber-700 text-white">
-              {getInitials(user.name)}
+              {getInitials(currentUser.name || 'User')}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -56,9 +58,9 @@ export const UserButton = () => {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.name}</p>
+            <p className="text-sm font-medium leading-none">{currentUser.name || 'User'}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
+              {currentUser.email}
             </p>
           </div>
         </DropdownMenuLabel>

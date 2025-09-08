@@ -1,13 +1,16 @@
 import { Bed, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Branch } from "@/types/branch";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface BranchRoomsProps {
   branch: Branch;
 }
 
 export const BranchRooms = ({ branch }: BranchRoomsProps) => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   if (!branch.roomTypes || branch.roomTypes.length === 0) return null;
 
   return (
@@ -46,7 +49,18 @@ export const BranchRooms = ({ branch }: BranchRoomsProps) => {
                   <span>{room.priceRange}/night</span>
                 </div>
                 
-                <Button asChild className="w-full" variant="outline">
+                <Button 
+                  className="w-full" 
+                  variant="outline"
+                  onClick={(e) => {
+                    if (!isAuthenticated) {
+                      e.preventDefault();
+                      navigate("/auth", { state: { from: "/booking" } });
+                    } else {
+                      navigate("/booking");
+                    }
+                  }}
+                >
                   <Link to="/booking">
                     Book Now
                   </Link>

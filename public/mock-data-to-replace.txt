@@ -1,84 +1,315 @@
-# GOLDEN TULIP HOTEL - MOCK DATA
+# GOLDEN TULIP HOTELS - OFFICIAL CONTENT
 
-PLEASE UPDATE THIS FILE WITH THE ACTUAL DATA FOR YOUR HOTEL. THIS DATA WILL BE USED THROUGHOUT THE APPLICATION.
+This file contains all the content used throughout the Golden Tulip Hotels website. Please ensure all information is kept up-to-date and accurate.
 
+## About Us
+Golden Tulip Hotels in Rivers State offers unparalleled luxury across four premium locations. Our commitment to exceptional service, world-class amenities, and exquisite hospitality makes us the preferred choice for both business and leisure travelers.
 ## 1. BRANCH INFORMATION
-- GRA (Head Branch)
-  - Address: Plot 123, Government Reserved Area, Port Harcourt, Rivers State
-  - Phone: +234 803 123 4567
-  - Email: gra@goldentulip.com
-  - Description: Experience unparalleled luxury at our flagship location...
 
-- Waterlines Branch
-  - Address: 123 Waterlines Road, Port Harcourt, Rivers State
-  - Phone: +234 802 234 5678
-  - Email: waterlines@goldentulip.com
-  - Description: Waterfront elegance meets modern luxury...
+### GRA (Flagship Branch)
+- **Address:** 1 Golden Tulip Road, GRA Phase 2, Port Harcourt, Rivers State
+- **Phone:** +234 803 123 4567
+- **Email:** gra@goldentulip.com
+- **Description:** Our flagship property in the heart of Government Reserved Area, offering premium luxury with easy access to business districts and cultural attractions. Features include a full-service spa, multiple dining options, and state-of-the-art conference facilities.
 
-- Airforce Base Branch
-  - Address: Airforce Base Road, Port Harcourt, Rivers State
-  - Phone: +234 805 345 6789
-  - Email: airforce@goldentulip.com
-  - Description: Conveniently located near the airforce base...
+### Waterlines Branch
+- **Address:** 123 Waterlines Road, Port Harcourt, Rivers State
+- **Phone:** +234 802 234 5678
+- **Email:** waterlines@goldentulip.com
+- **Description:** Experience waterfront luxury with stunning views of the Bonny River. Perfect for both business travelers and vacationers seeking a serene environment with easy access to the city center.
 
-- Oyigbo Branch
-  - Address: 1 Golden Tulip Road, Oyigbo, Rivers State
-  - Phone: +234 807 456 7890
-  - Email: oyigbo@goldentulip.com
-  - Description: A peaceful sanctuary offering luxury accommodations...
+### Airforce Base Branch
+- **Address:** 22 Airforce Base Road, Port Harcourt, Rivers State
+- **Phone:** +234 805 345 6789
+- **Email:** airforce@goldentulip.com
+- **Description:** Strategically located near the airport and major business districts, offering convenience without compromising on luxury. Features include soundproof rooms, a business center, and express check-in/out services.
+
+### Oyigbo Branch
+- **Address:** 1 Golden Tulip Road, Oyigbo, Rivers State
+- **Phone:** +234 807 456 7890
+- **Email:** oyigbo@goldentulip.com
+- **Description:** A peaceful retreat offering a perfect blend of modern comfort and traditional hospitality. Ideal for both short stays and extended visits, with special packages for corporate clients.
 
 ## 2. ROOM TYPES & PRICING
-- Standard Room
-  - Price: ₦45,000/night
-  - Description: Comfortable and well-appointed rooms with modern amenities.
-  - Capacity: 2 adults
-  - Size: 30 sqm
-  - Features: 
-    - Queen-size bed
-    - City view
-    - Free Wi-Fi
-    - Air conditioning
-    - Flat-screen TV
-    - Work desk
-    - Coffee/tea maker
 
-- Deluxe Room
-  - Price: ₦65,000/night
-  - Description: Spacious rooms with premium furnishings and city views.
-  - Capacity: 2 adults
-  - Size: 40 sqm
-  - Features:
-    - King-size bed
-    - Premium view
-    - Mini bar
-    - Work desk
-    - Free Wi-Fi
-    - Air conditioning
+### Standard Room
+- **Price:** ₦45,000/night (exclusive of taxes)
+- **Description:** Our Standard Rooms are designed with modern elegance, offering a perfect balance of comfort and functionality. Ideal for both business travelers and vacationers seeking quality accommodation with premium amenities.
+- **Capacity:** 2 adults + 1 child (below 12 years)
+- **Size:** 30 sqm (323 sq ft)
+- **Bed Configuration:** 1 Queen Bed or 2 Single Beds (upon request)
+- **View Options:** City View or Garden View
+- **Features & Amenities:**
+  - **Sleep & Comfort:**
+    - Queen-size bed with premium plush mattress
+    - 300-thread-count Egyptian cotton linens
+    - Choice of pillow menu (firm, soft, or hypoallergenic)
+    - Blackout curtains for optimal rest
+  
+  - **Technology & Connectivity:**
+    - Complimentary high-speed Wi-Fi (up to 100 Mbps)
+    - 42" Smart LED TV with satellite channels
+    - Bluetooth speaker system
+    - USB charging ports by bedside
+    - International power outlets
+  
+  - **Work & Productivity:**
+    - Spacious work desk with ergonomic chair
+    - Adjustable reading lamp
+    - In-room safe (laptop size)
+    - Complimentary daily newspaper
+  
+  - **Bathroom & Personal Care:**
+    - Modern en-suite bathroom with rain shower
+    - Premium bath amenities by Molton Brown®
+    - Hairdryer
+    - Bathrobes and slippers
+    - Magnifying makeup/shaving mirror
+  
+  - **Refreshments:**
+    - Coffee/tea making facilities
+    - Minibar (on request, additional charges apply)
+    - Complimentary bottled water (replenished daily)
+  
+  - **Services & Housekeeping:**
+    - Twice-daily housekeeping
+    - 24-hour in-room dining
+    - Turndown service (evening)
+    - Laundry/dry cleaning service (additional charge)
+    - Wake-up call service
+  
+  - **Accessibility:**
+    - Available in accessible configuration (upon request)
+    - Roll-in shower option
+    - Visual fire alarms (on request)
+    - TTY devices available
+  
+  - **Additional Benefits:**
+    - Complimentary access to fitness center
+    - Access to swimming pool
+    - Complimentary parking (1 vehicle)
+    - 24-hour security
 
-- Executive Suite
-  - Price: ₦95,000/night
-  - Description: Luxurious suites with separate living area.
-  - Capacity: 3 adults
-  - Size: 60 sqm
-  - Features:
-    - Separate living area
-    - Premium amenities
-    - Concierge service
-    - Executive lounge access
+### Deluxe Room
+- **Price:** ₦65,000/night (exclusive of taxes)
+- **Description:** Our Deluxe Rooms offer a spacious retreat with sophisticated design and premium amenities. Perfect for guests seeking enhanced comfort and style during their stay.
+- **Capacity:** 2 adults + 2 children (below 12 years)
+- **Size:** 40 sqm (430 sq ft)
+- **Bed Configuration:** 1 King Bed or 2 Queen Beds (upon request)
+- **View Options:** City View, River View, or Pool View
+
+- **Features & Amenities:**
+  - **Sleep & Comfort:**
+    - King-size bed with premium pillow-top mattress
+    - 400-thread-count Egyptian cotton linens
+    - Premium pillow menu with 5 options
+    - Blackout curtains with light filtering option
+    - Seating area with armchair and ottoman
+  
+  - **Technology & Connectivity:**
+    - Ultra high-speed Wi-Fi (up to 200 Mbps)
+    - 50" Smart LED TV with streaming capabilities
+    - Bluetooth soundbar with premium audio
+    - Wireless charging pad
+    - Multiple USB/Type-C charging stations
+  
+  - **Work & Productivity:**
+    - Executive work desk with ergonomic chair
+    - Adjustable task lighting
+    - In-room safe (fits 15" laptop)
+    - Complimentary business center access
+    - Printer/scanner service (on request)
+  
+  - **Bathroom & Personal Care:**
+    - Spacious marble bathroom with walk-in rain shower
+    - Premium bath amenities by BVLGARI®
+    - Plush bathrobes and slippers
+    - Hairdryer with diffuser
+    - Makeup mirror with adjustable lighting
+    - Scale
+  
+  - **Refreshments:**
+    - Nespresso coffee machine with capsules
+    - Premium tea selection
+    - Well-stocked minibar
+    - Complimentary bottled water (replenished twice daily)
+    - Fresh fruit platter upon arrival
+  
+  - **Services & Housekeeping:**
+    - Twice-daily housekeeping with evening turndown
+    - 24-hour in-room dining
+    - Personal concierge service
+    - Same-day laundry service (additional charge)
+    - Wake-up call with morning beverage
+  
+  - **Exclusive Benefits:**
+    - Priority check-in/check-out
+    - Late check-out until 2 PM (subject to availability)
+    - Complimentary shoe shine service
+    - Access to executive lounge (at selected locations)
+    - 10% discount at spa and restaurants
+  
+  - **Accessibility:**
+    - Available in accessible configuration
+    - Roll-in shower with seat
+    - Visual alert system for doorbell/phone
+    - TTY devices available
+
+### Executive Suite
+- **Price:** ₦95,000/night (exclusive of taxes)
+- **Description:** Our Executive Suites offer the perfect blend of luxury and functionality, featuring a separate living area and exclusive privileges for the discerning business or leisure traveler.
+- **Capacity:** 3 adults or 2 adults + 2 children (below 12 years)
+- **Size:** 60 sqm (645 sq ft)
+- **Layout:** Separate bedroom and living area with a dividing door
+- **Bed Configuration:** 1 King Bed in bedroom + Sofa bed in living area
+- **View Options:** Panoramic City View or River View
+
+- **Features & Amenities:**
+  - **Bedroom:**
+    - King-size bed with premium pillow-top mattress
+    - 500-thread-count Italian linens
+    - Luxury pillow menu with 7 options
+    - Blackout curtains with automated controls
+    - Walk-in closet with ample storage
+  
+  - **Living Area:**
+    - Spacious sitting area with sofa bed
+    - Dining table for four
+    - Workstation with executive chair
+    - 55" Smart TV in both bedroom and living area
+    - Premium sound system with Bluetooth
+  
+  - **Technology & Connectivity:**
+    - Ultra high-speed Wi-Fi (up to 500 Mbps)
+    - Dual-line cordless phone with voicemail
+    - Wireless charging stations
+    - Universal power outlets with international adapters
+    - Smart room controls (lighting, temperature, curtains)
+  
+  - **Bathroom & Personal Care:**
+    - Marble bathroom with separate rain shower and deep soaking tub
+    - Premium bath amenities by Hermès®
+    - Plush bathrobes and slippers (his & hers)
+    - Double vanity with magnifying mirror
+    - Heated floors and towel rack
+    - Scale and bath salts
+  
+  - **Refreshments:**
+    - Nespresso machine with daily capsule replenishment
+    - Premium TWG tea selection
+    - Welcome fruit basket and chocolate truffles
+    - Complimentary minibar (soft drinks and snacks)
+    - Bottled water (replenished twice daily)
+  
+  - **Exclusive Services:**
+    - Dedicated butler service (8:00 AM - 10:00 PM)
+    - Personal concierge
+    - 24-hour in-suite dining
+    - Evening turndown service with sweet treats
+    - Complimentary pressing service (2 items per stay)
+  
+  - **Executive Lounge Access:**
     - Complimentary breakfast
+    - All-day refreshments
+    - Evening cocktails and canapés (6:00 PM - 8:00 PM)
+    - Private check-in/check-out
+    - Meeting room access (2 hours per day)
+  
+  - **Additional Privileges:**
+    - Guaranteed 4:00 PM late check-out
+    - Priority restaurant reservations
+    - Welcome drink upon arrival
+    - 15% discount on spa treatments
+    - Complimentary airport transfer (one-way, per stay)
+  
+  - **Accessibility:**
+    - Available in accessible configuration
+    - Roll-in shower with seat and grab bars
+    - Visual alert system for doorbell/phone
+    - TTY devices available upon request
 
-- Presidential Suite
-  - Price: ₦150,000/night
-  - Description: Ultimate luxury with premium furnishings.
-  - Capacity: 4 adults
-  - Size: 100 sqm
-  - Features:
-    - Luxury living space
-    - Personal butler
-    - Premium dining
-    - Private balcony
-    - Jacuzzi
-  - Size: 100 sqm
+### Presidential Suite
+- **Price:** ₦250,000/night (exclusive of taxes)
+- **Description:** The epitome of luxury living, our Presidential Suite offers an unparalleled experience with its expansive layout, bespoke services, and attention to every detail. This is the ultimate choice for those who demand nothing but the finest.
+- **Capacity:** 4 adults or 2 adults + 3 children (below 12 years)
+- **Size:** 120 sqm (1,292 sq ft)
+- **Layout:** Grand foyer, separate living room, dining area, bedroom, and study
+- **Bed Configuration:** 1 King Bed in master bedroom + 1 Queen Sofa Bed in living area
+- **View Options:** Panoramic City Skyline or River View (highest floors)
+
+- **Features & Amenities:**
+  - **Master Bedroom:**
+    - King-size four-poster bed with premium mattress
+    - 600-thread-count Italian Frette linens
+    - Custom pillow menu with 10 options
+    - Automated blackout and sheer curtains
+    - Walk-in wardrobe with personal safe
+    - 65" 4K Smart TV with premium channels
+  
+  - **Living & Entertainment:**
+    - Spacious living room with separate seating areas
+    - Formal dining area for 6 guests
+    - Fully equipped kitchenette with bar counter
+    - 75" 4K Smart TV with surround sound system
+    - Premium sound system with multi-room audio
+    - Baby grand piano (in select suites)
+  
+  - **Study & Workspace:**
+    - Private study with executive desk
+    - Video conferencing facilities
+    - Printer/scanner/copier
+    - Complimentary office supplies
+    - Soundproof walls for privacy
+  
+  - **Bathroom & Wellness:**
+    - Luxurious marble bathroom with floor heating
+    - Oversized rain shower for two
+    - Deep soaking Jacuzzi tub with TV
+    - Premium bath amenities by Acqua di Parma®
+    - His and hers vanities with makeup table
+    - Separate water closet with bidet
+    - Steam shower with aromatherapy options
+  
+  - **Outdoor Space:**
+    - Private balcony with seating area
+    - Stunning city or river views
+    - Optional private jacuzzi (in select suites)
+    - Alfresco dining setup available
+  
+  - **Technology & Automation:**
+    - Ultra high-speed Wi-Fi (up to 1 Gbps)
+    - Smart room controls (lighting, temperature, entertainment)
+    - Wireless charging stations throughout
+    - iPad for room controls and services
+    - Universal power outlets and adapters
+  
+  - **Exclusive Services:**
+    - 24/7 dedicated butler service
+    - Personal concierge
+    - Private check-in/check-out in suite
+    - Packing/unpacking service
+    - In-suite spa treatments (additional charge)
+  
+  - **Gourmet Experience:**
+    - Private chef available (on request)
+    - Complimentary minibar (restocked daily)
+    - Premium wine selection
+    - Daily fresh fruit and floral arrangements
+    - Afternoon tea service in suite
+  
+  - **Privileges & Benefits:**
+    - Guaranteed 6:00 PM late check-out
+    - Complimentary airport transfers (roundtrip)
+    - 20% discount on spa services
+    - Priority reservations at all hotel outlets
+    - Welcome champagne and caviar
+    - Personalized stationery
+  
+  - **Accessibility:**
+    - Available in accessible configuration
+    - Roll-in shower with seat and grab bars
+    - Visual and vibrating alarm clock
+    - TTY devices available upon request
 
 ## 3. DINING OPTIONS
 

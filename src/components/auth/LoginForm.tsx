@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useForm, useFormState } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2 } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, Loader2, Lock, Mail, User, Phone } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Define separate schemas for login and register
 const loginSchema = z.object({
@@ -71,18 +73,18 @@ const registerFields: FormField<RegisterFormData> = [
   },
 ];
 
-
 export const LoginForm = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const { login, register: registerUser, isLoading, error } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { login, register: registerUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/booking";
+  const from = location.state?.from?.pathname || "/";
 
-  // Use the appropriate schema based on login/register mode
   const schema = isLogin ? loginSchema : registerSchema;
   const fields = isLogin ? loginFields : registerFields;
-  
+
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -92,104 +94,156 @@ export const LoginForm = () => {
     },
   });
 
-  const { 
-    register, 
-    handleSubmit, 
+  const {
+    register,
+    handleSubmit,
     formState: { errors },
     reset,
     trigger,
     getValues,
-  } = form;
+  } = form as any; // Temporary type assertion to fix TypeScript errors
 
   const onSubmit = async (data: FormData) => {
     try {
+      setIsLoading(true);
+      setError(null);
+
       if (isLogin) {
-        const { email, password } = data as LoginFormData;
-        await login(email, password);
+        // Handle login and get the redirect path
+        const redirectPath = await login(data.email, data.password);
+        // Always use the redirect path from login for admin, otherwise use the 'from' location or dashboard
+        const targetPath = redirectPath || from || '/dashboard';
+        navigate(targetPath, { replace: true });
       } else {
-        const { name, email, phone, password } = data as RegisterFormData;
-        await registerUser(name, email, phone, password);
+        // Handle registration
+        const registerData = data as RegisterFormData;
+        await registerUser(
+          registerData.name,
+          registerData.email,
+          registerData.phone,
+          registerData.password
+        );
+        // After registration, redirect to the dashboard
+        navigate('/dashboard', { replace: true });
       }
-      // Navigation will be handled by the AuthContext after successful login/register
-    } catch (err) {
+    } catch (err: any) {
       console.error("Authentication error:", err);
+      setError(err.message || "An error occurred during authentication");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const toggleAuthMode = () => {
-    const wasLogin = isLogin;
-    const currentEmail = getValues("email");
-    
-    // Reset form with new default values based on the new mode
-    reset({
-      email: currentEmail,
-      password: "",
-      ...(wasLogin ? { name: "", phone: "" } : {}),
-    });
-    
-    // Toggle mode after reset
-    setIsLogin(!wasLogin);
-    
-    // Re-validate the form after mode change
-    setTimeout(() => trigger());
+    setIsLogin(!isLogin);
+    reset();
+    setError(null);
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-6 rounded-lg bg-card shadow-lg">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-serif font-bold text-gradient-gold mb-2">
-          {isLogin ? "Welcome Back" : "Create Account"}
-        </h2>
+    <div className="w-full max-w-md mx-auto p-6 space-y-6 bg-card rounded-lg shadow-lg">
+      <div className="space-y-2 text-center">
+        <h1 className="text-3xl font-bold">
+          {isLogin ? "Login" : "Create Account"}
+        </h1>
         <p className="text-muted-foreground">
-          {isLogin 
-            ? "Sign in to continue to your account" 
-            : "Create an account to book your stay"}
+          {isLogin ? "Enter your credentials to sign in" : "Create a new account"}
         </p>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-md">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {fields.map((field) => {
-          const fieldName = field.name as keyof FormData;
-          return (
-            <div key={field.name} className="space-y-2">
-              <Label htmlFor={field.name}>
-                {field.label}
-              </Label>
-              <Input
-                id={field.name}
-                type={field.type}
-                placeholder={field.placeholder}
-                autoComplete={field.autoComplete}
-                disabled={isLoading}
-                {...register(fieldName as any)}
-              />
-              {errors[fieldName] && (
-                <p className="text-sm text-red-500">
-                  {errors[fieldName]?.message as string}
-                </p>
-              )}
+        {!isLogin && (
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="name">Full Name</Label>
             </div>
-          );
-        })}
-
-        {isLogin && (
-          <div className="flex items-center justify-end">
-            <button
-              type="button"
-              className="text-sm text-primary hover:underline"
-              onClick={() => navigate("/forgot-password")}
+            <Input
+              id="name"
+              placeholder="John Doe"
+              {...register("name")}
               disabled={isLoading}
-            >
-              Forgot password?
-            </button>
+            />
+            {errors.name && (
+              <p className="text-sm text-red-500">{errors.name.message}</p>
+            )}
           </div>
         )}
+
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <Mail className="h-4 w-4 text-muted-foreground" />
+            <Label htmlFor="email">Email</Label>
+          </div>
+          <Input
+            id="email"
+            type="email"
+            placeholder="your@email.com"
+            {...register("email")}
+            disabled={isLoading}
+          />
+          {errors.email && (
+            <p className="text-sm text-red-500">{errors.email.message}</p>
+          )}
+        </div>
+
+        {!isLogin && (
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Phone className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="phone">Phone Number</Label>
+            </div>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="+1 (555) 123-4567"
+              {...register("phone")}
+              disabled={isLoading}
+            />
+            {errors.phone && (
+              <p className="text-sm text-red-500">{errors.phone.message}</p>
+            )}
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Lock className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="password">Password</Label>
+            </div>
+            {isLogin && (
+              <a
+                href="#"
+                className="text-sm text-primary hover:underline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  // Handle forgot password
+                }}
+              >
+                Forgot password?
+              </a>
+            )}
+          </div>
+          <Input
+            id="password"
+            type="password"
+            placeholder="••••••••"
+            {...register("password")}
+            disabled={isLoading}
+          />
+          {errors.password && (
+            <p className="text-sm text-red-500">{errors.password.message}</p>
+          )}
+        </div>
 
         <Button
           type="submit"

@@ -86,25 +86,29 @@ export const InfoSections = () => {
       name: "Standard Room",
       price: "₦45,000",
       features: ["Queen-size bed", "City view", "Free Wi-Fi", "Air conditioning"],
-      image: luxurySuite
+      image: luxurySuite,
+      id: "standard"
     },
     {
       name: "Deluxe Room",
       price: "₦65,000",
       features: ["King-size bed", "Premium view", "Mini bar", "Work desk"],
-      image: luxurySuite
+      image: luxurySuite,
+      id: "deluxe"
     },
     {
       name: "Executive Suite",
       price: "₦95,000",
       features: ["Separate living area", "Premium amenities", "Concierge service", "Executive lounge access"],
-      image: luxurySuite
+      image: luxurySuite,
+      id: "executive"
     },
     {
       name: "Presidential Suite",
       price: "₦150,000",
       features: ["Luxury living space", "Personal butler", "Premium dining", "Private balcony"],
-      image: luxurySuite
+      image: luxurySuite,
+      id: "presidential"
     }
   ];
 
@@ -177,34 +181,34 @@ export const InfoSections = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {roomTypes.map((room, index) => (
-              <Card key={index} className="card-luxury group hover:shadow-glow transition-all duration-500">
-                <div className="relative overflow-hidden rounded-t-2xl">
+              <Card key={index} className="card-luxury group hover:shadow-glow transition-all duration-500 h-full flex flex-col">
+                <div className="relative overflow-hidden rounded-t-2xl flex-grow">
                   <img
                     src={room.image}
                     alt={room.name}
                     className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full font-semibold">
-                    {room.price}/night
-                  </div>
                 </div>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-3 flex items-center">
-                    <Bed className="h-5 w-5 mr-2 text-primary" />
+                <div className="p-6 flex flex-col flex-grow">
+                  <div className="text-2xl font-bold text-primary mb-2">{room.price}<span className="text-sm font-normal text-muted-foreground">/night</span></div>
+                  <h3 className="text-xl font-semibold mb-3">
                     {room.name}
                   </h3>
-                  <ul className="space-y-2 mb-4">
+                  <ul className="space-y-2 mb-6 flex-grow">
                     {room.features.map((feature, idx) => (
-                      <li key={idx} className="text-sm text-muted-foreground flex items-center">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary mr-2"></div>
-                        {feature}
+                      <li key={idx} className="text-sm text-muted-foreground flex items-start">
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary mt-2 mr-2 flex-shrink-0"></span>
+                        <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
-                  <Button className="btn-outline-luxury w-full">
+                  <Button 
+                    className="w-full mt-auto bg-primary hover:bg-primary/90"
+                    onClick={() => window.location.href = `/rooms#${room.id}`}
+                  >
                     View Details
                   </Button>
-                </CardContent>
+                </div>
               </Card>
             ))}
           </div>
@@ -332,18 +336,6 @@ export const InfoSections = () => {
                     </div>
                   </div>
                 ))}
-                
-                <div className="mt-8 p-6 glass-card text-center">
-                  <h4 className="text-lg font-semibold text-gradient-gold mb-3">
-                    Complete Wellness Journey
-                  </h4>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    Combine multiple treatments for the ultimate relaxation experience
-                  </p>
-                  <Button className="btn-luxury">
-                    Design Your Package
-                  </Button>
-                </div>
               </div>
             </div>
           </div>

@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read access to all users for public data
+    match /{document=**} {
+      allow read: if true;
+    }
+    
+    // Feedback collection rules
+    match /feedback/{feedbackId} {
+      // Allow anyone to submit feedback
+      allow create: if request.resource.data is object &&
+                    request.resource.data.keys().hasAll(['type', 'message']) &&
+                    (request.resource.data.type == 'suggestion' || 
+                     request.resource.data.type == 'complaint') &&
+                    request.resource.data.message is string &&
+                    request.resource.data.message.size() > 0 &&
+                    request.resource.data.message.size() <= 2000;
+    }
+    
+    // Sessions collection rules
+    match /sessions/{sessionId} {
+      // Allow users to create their own sessions
+      allow create: if request.auth != null && 
+                    request.auth.uid == request.resource.data.userId &&
+                    request.resource.data.status == 'active';
+      
+      // Allow users to update only their own sessions
+      allow update: if request.auth != null && 
+                    request.auth.uid == resource.data.userId &&
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'logoutTime']);
+      
+      // Allow users to read their own sessions
+      allow read: if request.auth != null && 
+                  (request.auth.uid == resource.data.userId || 
+                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+    
+    // Users collection rules
+    match /users/{userId} {
+      // Allow users to read their own profile
+      allow read: if request.auth != null && 
+                  (request.auth.uid == userId || 
+                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+      
+      // Allow users to update their own profile
+      allow update: if request.auth != null && 
+                    request.auth.uid == userId &&
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'phone', 'preferences', 'lastLogin', 'role', 'email', 'displayName', 'photoURL']);
+    }
+  }
+}

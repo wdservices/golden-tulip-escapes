@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { BranchTabs } from "@/components/BranchTabs";
@@ -20,9 +21,14 @@ const Index = () => {
   };
 
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const handleBookNowClick = () => {
-    navigate('/auth', { state: { from: '/booking' } });
+    if (isAuthenticated) {
+      navigate('/booking');
+    } else {
+      navigate('/auth', { state: { from: '/booking' } });
+    }
   };
 
   return (
@@ -32,7 +38,7 @@ const Index = () => {
       <main>
         <HeroSection 
           activeBranch={activeBranch} 
-          onBookNowClick={() => window.location.href = '/booking'}
+          onBookNowClick={handleBookNowClick}
         />
         
         <BranchTabs 

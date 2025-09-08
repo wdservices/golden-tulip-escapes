@@ -1,263 +1,333 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Calendar, MapPin, Users, CreditCard, User } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { Calendar, MapPin, Users, Loader2, Bed } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { format } from "date-fns";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 interface BookingFormProps {
   selectedBranch?: string;
   showLocationDropdown?: boolean;
+  onBookingSuccess?: () => void;
 }
 
-export const BookingForm = ({ selectedBranch, showLocationDropdown = true }: BookingFormProps) => {
+interface RoomType {
+  id: string;
+  name: string;
+  price: string;
+  description: string;
+}
+
+interface Branch {
+  id: string;
+  name: string;
+  location: string;
+}
+
+const roomTypes: RoomType[] = [
+  { 
+    id: "standard", 
+    name: "Standard Room", 
+    price: "₦45,000",
+    description: "Comfortable room with essential amenities"
+  },
+  { 
+    id: "deluxe", 
+    name: "Deluxe Room", 
+    price: "₦65,000",
+    description: "Spacious room with premium amenities and city view"
+  },
+  { 
+    id: "executive", 
+    name: "Executive Suite", 
+    price: "₦95,000",
+    description: "Luxurious suite with separate living area and premium services"
+  },
+  { 
+    id: "presidential", 
+    name: "Presidential Suite", 
+    price: "₦150,000",
+    description: "The ultimate in luxury with premium services and amenities"
+  },
+];
+
+const branches: Branch[] = [
+  { id: "gra", name: "GRA (Head Branch)", location: "Government Reserved Area" },
+  { id: "waterlines", name: "Waterlines", location: "Port Harcourt" },
+  { id: "airforce", name: "Airforce Base", location: "Port Harcourt" },
+  { id: "oyigbo", name: "Oyigbo", location: "Rivers State" }
+];
+
+export const BookingForm = ({ selectedBranch, showLocationDropdown = true, onBookingSuccess }: BookingFormProps) => {
   const { toast } = useToast();
-  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    checkIn: "",
-    checkOut: "",
-    guests: "2",
-    rooms: "1",
-    location: selectedBranch || "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    roomType: ""
+  const [date, setDate] = useState<{ from: Date | undefined; to: Date | undefined }>({
+    from: undefined,
+    to: undefined,
   });
 
-  // Pre-fill user data if authenticated
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      setFormData(prev => ({
-        ...prev,
-        firstName: user.name?.split(' ')[0] || '',
-        lastName: user.name?.split(' ').slice(1).join(' ') || '',
-        email: user.email || '',
-        phone: user.phone || ''
-      }));
-    }
-  }, [isAuthenticated, user]);
+  const [formData, setFormData] = useState({
+    location: selectedBranch || "",
+    roomType: "",
+    guests: 2,
+    firstName: currentUser?.name?.split(' ')[0] || "",
+    lastName: currentUser?.name?.split(' ').slice(1).join(' ') || "",
+    email: currentUser?.email || "",
+    phone: currentUser?.phone || "",
+    specialRequests: ""
+  });
+    phone: "",
+    specialRequests: ""
+  });
 
-  const branches = [
-    { id: "main", name: "GRA (Head Branch)", location: "Government Reserved Area" },
+  const roomTypes: RoomType[] = [
+    { id: "standard", name: "Standard Room", price: "₦45,000" },
+    { id: "deluxe", name: "Deluxe Room", price: "₦65,000" },
+    { id: "executive", name: "Executive Suite", price: "₦95,000" },
+    { id: "presidential", name: "Presidential Suite", price: "₦150,000" },
+    { id: "family", name: "Family Room", price: "₦85,000" }
+  ];
+
+  const branches: Branch[] = [
+    { id: "gra", name: "GRA (Head Branch)", location: "Government Reserved Area" },
     { id: "waterlines", name: "Waterlines", location: "Port Harcourt" },
     { id: "airforce", name: "Airforce Base", location: "Port Harcourt" },
     { id: "oyigbo", name: "Oyigbo", location: "Rivers State" }
   ];
 
-  const roomTypes = [
-    { id: "standard", name: "Standard Room", price: "₦45,000" },
-    { id: "deluxe", name: "Deluxe Room", price: "₦65,000" },
-    { id: "executive", name: "Executive Suite", price: "₦95,000" },
-    { id: "presidential", name: "Presidential Suite", price: "₦150,000" }
-  ];
+  // Pre-fill user data if authenticated
+  useEffect(() => {
+    if (isAuthenticated && currentUser) {
+      const nameParts = currentUser.name?.split(' ') || [];
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ');
+      
+      setFormData(prev => ({
+        ...prev,
+        firstName,
+        lastName,
+        email: currentUser.email || '',
+        phone: currentUser.phone || ''
+      }));
+    }
+  }, [isAuthenticated, currentUser]);
 
-  const handleInputChange = (field: string, value: string) => {
+  // Update check-in/check-out when date range changes
+  useEffect(() => {
+    if (date.from && date.to && date.to <= date.from) {
+      const nextDay = new Date(date.from);
+      nextDay.setDate(nextDay.getDate() + 1);
+      setDate(prev => ({ ...prev, to: nextDay }));
+    }
+  }, [date.from, date.to]);
+
+  const calculateTotal = (): number => {
+    if (!date.from || !date.to || !formData.roomType) return 0;
+    
+    const selectedRoom = roomTypes.find(room => room.id === formData.roomType);
+    if (!selectedRoom) return 0;
+    
+    const nights = Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24));
+    const roomPrice = parseInt(selectedRoom.price.replace(/[^0-9]/g, ''));
+    return nights * roomPrice * formData.guests;
+  };
+
+  const handleInputChange = (field: keyof typeof formData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!date.from || !date.to) {
+      toast({
+        title: "Please select check-in and check-out dates",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.roomType) {
+      toast({
+        title: "Please select a room type",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
-    // Simulate booking process
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // In a real app, this would be an API call to your backend
+      const bookingData = {
+        ...formData,
+        checkInDate: date.from,
+        checkOutDate: date.to,
+        userId: currentUser?.id,
+        status: 'confirmed',
+        createdAt: new Date().toISOString(),
+        totalPrice: calculateTotal()
+      };
 
-    toast({
-      title: "Booking Request Submitted!",
-      description: "We'll contact you shortly to confirm your reservation.",
-    });
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast({
+        title: "Booking Successful!",
+        description: "Your reservation has been confirmed. We've sent a confirmation to your email.",
+      });
+      
+      // Call the success callback if provided
+      onBookingSuccess?.();
+      
+      // Redirect to dashboard or bookings page
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Booking failed:', error);
+      toast({
+        title: "Booking Failed",
+        description: "There was an error processing your booking. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+    }
 
-    setIsLoading(false);
+    if (!formData.roomType) {
+      toast({
+        title: "Please select a room type",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // In a real app, this would be an API call to your backend
+      const bookingData = {
+        ...formData,
+        checkInDate: date.from,
+        checkOutDate: date.to,
+        userId: currentUser?.uid,
+        status: 'confirmed',
+        createdAt: new Date().toISOString(),
+        totalPrice: calculateTotal()
+      };
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast({
+        title: "Booking Successful!",
+        description: "Your reservation has been confirmed. We've sent a confirmation to your email.",
+      });
+      
+      // Call the success callback if provided
+      onBookingSuccess?.();
+      
+      // Redirect to dashboard or bookings page
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Booking failed:', error);
+      toast({
+        title: "Booking Failed",
+        description: "There was an error processing your booking. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+    }
+
+    if (!formData.roomType) {
+      toast({
+        title: "Please select a room type",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      // In a real app, this would be an API call to your backend
+      const bookingData = {
+        ...formData,
+        checkInDate: date.from,
+        checkOutDate: date.to,
+        userId: user?.id,
+        status: 'confirmed',
+        createdAt: new Date().toISOString()
+      };
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast({
+        title: "Booking Successful!",
+        description: "Your reservation has been confirmed. We've sent a confirmation to your email.",
+      });
+      
+      // Call the success callback if provided
+      onBookingSuccess?.();
+      
+      // Redirect to dashboard or bookings page
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Booking failed:', error);
+      toast({
+        title: "Booking Failed",
+        description: "There was an error processing your booking. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const calculateTotal = () => {
     const selectedRoom = roomTypes.find(room => room.id === formData.roomType);
-    if (!selectedRoom || !formData.checkIn || !formData.checkOut) return 0;
+    if (!selectedRoom || !date.from || !date.to) return 0;
 
-    const checkIn = new Date(formData.checkIn);
-    const checkOut = new Date(formData.checkOut);
-    const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+    const nights = Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24));
     const roomPrice = parseInt(selectedRoom.price.replace(/[₦,]/g, ""));
-    
-    return nights * roomPrice * parseInt(formData.rooms);
+    return nights * roomPrice * formData.guests;
   };
 
   return (
-    <section id="booking" className="py-16 bg-gradient-card">
-      <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-serif font-bold mb-4 text-gradient-gold">
-              Reserve Your Stay
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Experience luxury hospitality at Golden Tulip Hotels. Book your perfect getaway today.
-            </p>
-          </div>
-
-          <Card className="card-luxury">
-            <CardHeader>
-              <CardTitle className="flex items-center text-2xl">
-                <Calendar className="h-6 w-6 mr-3 text-primary" />
-                Booking Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Location Selection */}
-                {showLocationDropdown && (
-                  <div className="space-y-2">
-                    <Label htmlFor="location" className="flex items-center font-semibold">
-                      <MapPin className="h-4 w-4 mr-2 text-primary" />
-                      Which location would you like to book?
-                    </Label>
-                    <Select
-                      value={formData.location}
-                      onValueChange={(value) => handleInputChange("location", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a Golden Tulip branch" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {branches.map((branch) => (
-                          <SelectItem key={branch.id} value={branch.id}>
-                            <div>
-                              <div className="font-medium">{branch.name}</div>
-                              <div className="text-sm text-muted-foreground">{branch.location}</div>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {/* Dates and Guests */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="checkIn">Check-in Date</Label>
-                    <Input
-                      id="checkIn"
-                      type="date"
-                      value={formData.checkIn}
-                      onChange={(e) => handleInputChange("checkIn", e.target.value)}
-                      min={new Date().toISOString().split('T')[0]}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="checkOut">Check-out Date</Label>
-                    <Input
-                      id="checkOut"
-                      type="date"
-                      value={formData.checkOut}
-                      onChange={(e) => handleInputChange("checkOut", e.target.value)}
-                      min={formData.checkIn}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="guests" className="flex items-center">
-                      <Users className="h-4 w-4 mr-1 text-primary" />
-                      Guests
-                    </Label>
-                    <Select
-                      value={formData.guests}
-                      onValueChange={(value) => handleInputChange("guests", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[1, 2, 3, 4, 5, 6].map((num) => (
-                          <SelectItem key={num} value={num.toString()}>
-                            {num} {num === 1 ? "Guest" : "Guests"}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="rooms">Rooms</Label>
-                    <Select
-                      value={formData.rooms}
-                      onValueChange={(value) => handleInputChange("rooms", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[1, 2, 3, 4, 5].map((num) => (
-                          <SelectItem key={num} value={num.toString()}>
-                            {num} {num === 1 ? "Room" : "Rooms"}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Room Type Selection */}
-                <div className="space-y-2">
-                  <Label htmlFor="roomType">Room Category</Label>
-                  <Select
-                    value={formData.roomType}
-                    onValueChange={(value) => handleInputChange("roomType", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select room type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {roomTypes.map((room) => (
-                        <SelectItem key={room.id} value={room.id}>
-                          <div className="flex justify-between w-full">
-                            <span>{room.name}</span>
-                            <span className="text-primary font-semibold ml-4">{room.price}/night</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-
-                {/* Guest Information */}
-                <div className="space-y-4">
-                  <div className="flex items-center">
-                    <User className="h-5 w-5 mr-2 text-primary" />
-                    <h3 className="text-lg font-semibold">
-                      {isAuthenticated ? "Your Information" : "Guest Information"}
-                    </h3>
-                    {isAuthenticated && (
-                      <span className="ml-2 text-sm bg-amber-100 text-amber-800 px-2 py-1 rounded-full">
-                        From Profile
-                      </span>
-                    )}
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input
-                        id="firstName"
-                        value={formData.firstName}
-                        onChange={(e) => handleInputChange("firstName", e.target.value)}
-                        readOnly={isAuthenticated}
-                        className={isAuthenticated ? "bg-gray-50" : ""}
-                        required
-                      />
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => handleInputChange("phone", e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
+    <Card className="w-full max-w-4xl mx-auto">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold text-amber-800 flex items-center">
+          <Calendar className="h-6 w-6 mr-2" />
+          Book Your Stay
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {showLocationDropdown && (
+              <div className="space-y-2">
+                <Label htmlFor="location" className="flex items-center">
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Location
+                </Label>
+                <Select 
+                  value={formData.location}
+                  onValueChange={(value) => setFormData({...formData, location: value})}
+                  required
                 {/* Price Summary */}
                 {formData.roomType && formData.checkIn && formData.checkOut && (
                   <div className="bg-accent p-6 rounded-lg border-2 border-primary/20">
