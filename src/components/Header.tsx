@@ -17,19 +17,13 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
 
-  const navigation = [
+  const navigation: Array<{
+    name: string;
+    href: string;
+    isRoute: boolean;
+  }> = [
     { name: "Home", href: "/", isRoute: true },
-    { 
-      name: "Rooms & Suites", 
-      href: "/rooms", 
-      isRoute: true,
-      subItems: [
-        { name: "Standard Room", href: "/rooms/standard" },
-        { name: "Deluxe Room", href: "/rooms/deluxe" },
-        { name: "Executive Suite", href: "/rooms/executive" },
-        { name: "Presidential Suite", href: "/rooms/presidential" }
-      ]
-    },
+    { name: "Rooms", href: "#rooms", isRoute: false },
     { name: "Dining", href: "#dining", isRoute: false },
     { name: "Events", href: "#events", isRoute: false },
     { name: "About", href: "#about", isRoute: false },
@@ -77,32 +71,12 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
             {navigation.map((item) => (
               <div key={item.name} className="relative group">
                 {item.isRoute ? (
-                  <>
-                    <Link
-                      to={item.href}
-                      className="nav-link-animated px-4 py-2 rounded-lg flex items-center gap-1"
-                    >
-                      {item.name}
-                      {item.subItems && (
-                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      )}
-                    </Link>
-                    {item.subItems && (
-                      <div className="absolute left-0 mt-1 w-56 bg-white rounded-lg shadow-lg py-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-1 group-hover:translate-y-0">
-                        {item.subItems.map((subItem) => (
-                          <Link
-                            key={subItem.name}
-                            to={subItem.href}
-                            className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                          >
-                            {subItem.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </>
+                  <Link
+                    to={item.href}
+                    className="nav-link-animated px-4 py-2 rounded-lg flex items-center gap-1"
+                  >
+                    {item.name}
+                  </Link>
                 ) : (
                   <button
                     onClick={() => scrollToSection(item.href)}

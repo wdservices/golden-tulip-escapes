@@ -1,10 +1,52 @@
 export type RoomStatus = 'available' | 'occupied' | 'maintenance' | 'cleaning' | 'reserved';
-export type RoomType = 'standard' | 'deluxe' | 'suite' | 'family' | 'executive';
 
 export interface RoomAmenity {
   id: string;
   name: string;
   icon: string;
+}
+
+export interface RoomType {
+  id: string;
+  name: string;
+  description: string;
+  longDescription?: string;
+  price: number;
+  size: number;
+  capacity: number;
+  bedType: string;
+  amenities: string[];
+  images: string[];
+  vrTourUrl?: string;
+  // Additional properties
+  maxOccupancy?: number;
+  bedCount?: number;
+  roomNumber?: string;
+  floor?: number;
+  status?: RoomStatus;
+  lastCleaned?: string | null;
+  nextMaintenance?: string | null;
+  currentBookingId?: string | null;
+  notes?: string;
+  isSmoking?: boolean;
+  isAccessible?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Room extends RoomType {
+  id: string;
+  roomNumber: string;
+  floor: number;
+  status: RoomStatus;
+  lastCleaned?: string | null;
+  nextMaintenance?: string | null;
+  currentBookingId?: string | null;
+  notes?: string;
+  isSmoking: boolean;
+  isAccessible: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface RoomTypeConfig {
@@ -16,32 +58,6 @@ export interface RoomTypeConfig {
   amenities: RoomAmenity[];
   imageUrl: string;
   size: string; // e.g., '30 sqm'
-  bedType: 'single' | 'double' | 'queen' | 'king' | 'twin' | 'bunk';
-  bedCount: number;
-}
-
-export interface Room {
-  id: string;
-  roomNumber: string;
-  floor: number;
-  type: RoomType;
-  status: RoomStatus;
-  lastCleaned?: string | null;
-  nextMaintenance?: string | null;
-  currentBookingId?: string | null;
-  notes?: string;
-  isSmoking: boolean;
-  isAccessible: boolean;
-  createdAt: string;
-  updatedAt: string;
-  // Additional properties for room display
-  name: string;
-  description: string;
-  size: number;
-  price: number;
-  images: string[];
-  amenities: string[];
-  maxOccupancy: number;
   bedType: 'single' | 'double' | 'queen' | 'king' | 'twin' | 'bunk';
   bedCount: number;
 }

@@ -1,5 +1,4 @@
 import { Booking, BookingStatus } from './booking';
-import { RoomStatus } from './room';
 
 export interface DateRange {
   start: Date;
@@ -8,42 +7,18 @@ export interface DateRange {
 
 export interface ReportFilter {
   dateRange: DateRange;
-  roomTypes?: string[];
   bookingStatuses?: BookingStatus[];
-  roomStatuses?: RoomStatus[];
   branchId?: string;
-}
-
-export interface OccupancyReport {
-  date: string;
-  totalRooms: number;
-  occupied: number;
-  available: number;
-  occupancyRate: number;
-  revenue: number;
-  adr: number; // Average Daily Rate
-  revPar: number; // Revenue Per Available Room
 }
 
 export interface RevenueReport {
   date: string;
   totalRevenue: number;
-  roomRevenue: number;
   serviceRevenue: number;
   tax: number;
   discount: number;
   bookingCount: number;
   averageStay: number;
-}
-
-export interface RoomTypePerformance {
-  roomType: string;
-  totalRooms: number;
-  occupied: number;
-  revenue: number;
-  occupancyRate: number;
-  adr: number;
-  revPar: number;
 }
 
 export interface GuestReport {
@@ -69,9 +44,7 @@ export interface CancellationReport {
 }
 
 export interface ReportData {
-  occupancyData: OccupancyReport[];
   revenueData: RevenueReport[];
-  roomTypeData: RoomTypePerformance[];
   guestData: GuestReport[];
   cancellationData: CancellationReport[];
   generatedAt: Date;

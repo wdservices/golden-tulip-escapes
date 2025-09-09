@@ -1,513 +1,279 @@
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { doc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { useToast } from '@/components/ui/use-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Save } from 'lucide-react';
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Trash2, Calendar, Tag, Clock } from "lucide-react";
 
-// Define the pricing schema
-const pricingSchema = z.object({
-  // Room Prices
-  standardPrice: z.number().min(0, 'Price must be positive'),
-  deluxePrice: z.number().min(0, 'Price must be positive'),
-  suitePrice: z.number().min(0, 'Price must be positive'),
-  familyPrice: z.number().min(0, 'Price must be positive'),
-  executivePrice: z.number().min(0, 'Price must be positive'),
-  
-  // Service Prices
-  spaBasic: z.number().min(0, 'Price must be positive'),
-  spaPremium: z.number().min(0, 'Price must be positive'),
-  spaDeluxe: z.number().min(0, 'Price must be positive'),
-  
-  // Additional Services
-  breakfastPrice: z.number().min(0, 'Price must be positive'),
-  lateCheckoutPrice: z.number().min(0, 'Price must be positive'),
-  extraBedPrice: z.number().min(0, 'Price must be positive'),
-  
-  // Taxes and Fees
-  taxRate: z.number().min(0, 'Tax rate must be positive').max(100, 'Tax rate cannot exceed 100%'),
-  serviceCharge: z.number().min(0, 'Service charge must be positive').max(100, 'Service charge cannot exceed 100%'),
-  
-  // Discounts
-  weeklyDiscount: z.number().min(0, 'Discount must be positive').max(100, 'Discount cannot exceed 100%'),
-  monthlyDiscount: z.number().min(0, 'Discount must be positive').max(100, 'Discount cannot exceed 100%'),
-});
+// Mock data - replace with actual API calls
+const roomTypes = [
+  { id: "deluxe", name: "Deluxe Room" },
+  { id: "executive", name: "Executive Suite" },
+  { id: "presidential", name: "Presidential Suite" },
+];
 
-type PricingFormValues = z.infer<typeof pricingSchema>;
+const pricingPeriods = [
+  { id: "peak", name: "Peak Season" },
+  { id: "offpeak", name: "Off-Peak" },
+  { id: "holiday", name: "Holiday" },
+];
 
-export default function PricingManagement() {
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<PricingFormValues>({
-    resolver: zodResolver(pricingSchema),
-    defaultValues: {
-      // Room Prices
-      standardPrice: 0,
-      deluxePrice: 0,
-      suitePrice: 0,
-      familyPrice: 0,
-      executivePrice: 0,
-      
-      // Service Prices
-      spaBasic: 0,
-      spaPremium: 0,
-      spaDeluxe: 0,
-      
-      // Additional Services
-      breakfastPrice: 0,
-      lateCheckoutPrice: 0,
-      extraBedPrice: 0,
-      
-      // Taxes and Fees
-      taxRate: 0,
-      serviceCharge: 0,
-      
-      // Discounts
-      weeklyDiscount: 0,
-      monthlyDiscount: 0,
+type PricingRule = {
+  id: string;
+  roomType: string;
+  period: string;
+  price: number;
+  minNights: number;
+  isActive: boolean;
+};
+
+export const PricingManagement = () => {
+  const [pricingRules, setPricingRules] = useState<PricingRule[]>([
+    {
+      id: "1",
+      roomType: "deluxe",
+      period: "peak",
+      price: 50000,
+      minNights: 2,
+      isActive: true,
     },
+  ]);
+
+  const [newRule, setNewRule] = useState<Omit<PricingRule, 'id'>>({ 
+    roomType: "", 
+    period: "", 
+    price: 0, 
+    minNights: 1,
+    isActive: true 
   });
 
-  // Load pricing data from Firestore
-  useEffect(() => {
-    const loadPricing = async () => {
-      try {
-        setIsLoading(true);
-        const pricingDoc = await getDoc(doc(db, 'settings', 'pricing'));
-        
-        if (pricingDoc.exists()) {
-          reset(pricingDoc.data() as PricingFormValues);
-        } else {
-          // Initialize with default values if no pricing document exists
-          await updateDoc(doc(db, 'settings', 'pricing'), {
-            // Room Prices
-            standardPrice: 100,
-            deluxePrice: 150,
-            suitePrice: 250,
-            familyPrice: 180,
-            executivePrice: 350,
-            
-            // Service Prices
-            spaBasic: 50,
-            spaPremium: 80,
-            spaDeluxe: 120,
-            
-            // Additional Services
-            breakfastPrice: 15,
-            lateCheckoutPrice: 30,
-            extraBedPrice: 25,
-            
-            // Taxes and Fees
-            taxRate: 10,
-            serviceCharge: 5,
-            
-            // Discounts
-            weeklyDiscount: 10,
-            monthlyDiscount: 20,
-          });
-          
-          // Reload the data
-          loadPricing();
-        }
-      } catch (error) {
-        console.error('Error loading pricing:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load pricing data. Please try again.',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadPricing();
-  }, [reset, toast]);
-
-  const onSubmit = async (data: PricingFormValues) => {
-    try {
-      setIsSaving(true);
-      
-      await updateDoc(doc(db, 'settings', 'pricing'), {
-        ...data,
-        updatedAt: new Date().toISOString(),
-      });
-      
-      toast({
-        title: 'Success',
-        description: 'Pricing has been updated successfully.',
-      });
-    } catch (error) {
-      console.error('Error updating pricing:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update pricing. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSaving(false);
-    }
+  const addPricingRule = () => {
+    if (!newRule.roomType || !newRule.period) return;
+    
+    setPricingRules([
+      ...pricingRules,
+      {
+        ...newRule,
+        id: Date.now().toString(),
+      },
+    ]);
+    
+    // Reset form
+    setNewRule({ 
+      roomType: "", 
+      period: "", 
+      price: 0, 
+      minNights: 1,
+      isActive: true 
+    });
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
+  const removePricingRule = (id: string) => {
+    setPricingRules(pricingRules.filter(rule => rule.id !== id));
+  };
+
+  const toggleRuleStatus = (id: string) => {
+    setPricingRules(pricingRules.map(rule => 
+      rule.id === id ? { ...rule, isActive: !rule.isActive } : rule
+    ));
+  };
+
+  const updatePricingRule = (id: string, field: keyof PricingRule, value: any) => {
+    setPricingRules(pricingRules.map(rule => 
+      rule.id === id ? { ...rule, [field]: value } : rule
+    ));
+  };
+
+  // Calculate total pricing rules
+  const activeRules = pricingRules.filter(rule => rule.isActive).length;
+  const inactiveRules = pricingRules.length - activeRules;
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Pricing Management</h1>
+        <h2 className="text-2xl font-bold tracking-tight">Pricing Management</h2>
         <p className="text-muted-foreground">
-          Update room rates, service prices, and other fees
+          Manage room rates, seasonal pricing, and special offers
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Tabs defaultValue="rooms" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="rooms">Room Rates</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
-            <TabsTrigger value="fees">Fees & Taxes</TabsTrigger>
-            <TabsTrigger value="discounts">Discounts</TabsTrigger>
-          </TabsList>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Pricing Rules
+            </CardTitle>
+            <Tag className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{pricingRules.length}</div>
+            <p className="text-xs text-muted-foreground">
+              {activeRules} active • {inactiveRules} inactive
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Room Types</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{roomTypes.length}</div>
+            <p className="text-xs text-muted-foreground">
+              Different room categories
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
-          {/* Room Rates Tab */}
-          <TabsContent value="rooms">
-            <Card>
-              <CardHeader>
-                <CardTitle>Room Rates</CardTitle>
-                <CardDescription>Update nightly rates for each room type</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="standardPrice">Standard Room</Label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-muted-foreground">₦</span>
-                      <Input
-                        id="standardPrice"
-                        type="number"
-                        className="pl-8"
-                        {...register('standardPrice', { valueAsNumber: true })}
-                      />
-                    </div>
-                    {errors.standardPrice && (
-                      <p className="text-sm text-red-500">{errors.standardPrice.message}</p>
-                    )}
-                  </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Add New Pricing Rule</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label>Room Type</Label>
+              <Select
+                value={newRule.roomType}
+                onValueChange={(value) => setNewRule({...newRule, roomType: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select room type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {roomTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Pricing Period</Label>
+              <Select
+                value={newRule.period}
+                onValueChange={(value) => setNewRule({...newRule, period: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select period" />
+                </SelectTrigger>
+                <SelectContent>
+                  {pricingPeriods.map((period) => (
+                    <SelectItem key={period.id} value={period.id}>
+                      {period.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Price per night (₦)</Label>
+              <Input
+                type="number"
+                placeholder="0.00"
+                value={newRule.price || ""}
+                onChange={(e) => setNewRule({...newRule, price: Number(e.target.value)})}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Minimum nights</Label>
+              <Input
+                type="number"
+                min="1"
+                value={newRule.minNights}
+                onChange={(e) => setNewRule({...newRule, minNights: Number(e.target.value)})}
+              />
+            </div>
+          </div>
+          
+          <div className="mt-4 flex justify-end">
+            <Button 
+              type="button" 
+              onClick={addPricingRule}
+              disabled={!newRule.roomType || !newRule.period || !newRule.price}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Pricing Rule
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="deluxePrice">Deluxe Room</Label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-muted-foreground">₦</span>
-                      <Input
-                        id="deluxePrice"
-                        type="number"
-                        className="pl-8"
-                        {...register('deluxePrice', { valueAsNumber: true })}
-                      />
-                    </div>
-                    {errors.deluxePrice && (
-                      <p className="text-sm text-red-500">{errors.deluxePrice.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="suitePrice">Suite</Label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-muted-foreground">₦</span>
-                      <Input
-                        id="suitePrice"
-                        type="number"
-                        className="pl-8"
-                        {...register('suitePrice', { valueAsNumber: true })}
-                      />
-                    </div>
-                    {errors.suitePrice && (
-                      <p className="text-sm text-red-500">{errors.suitePrice.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="familyPrice">Family Room</Label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-muted-foreground">₦</span>
-                      <Input
-                        id="familyPrice"
-                        type="number"
-                        className="pl-8"
-                        {...register('familyPrice', { valueAsNumber: true })}
-                      />
-                    </div>
-                    {errors.familyPrice && (
-                      <p className="text-sm text-red-500">{errors.familyPrice.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="executivePrice">Executive Suite</Label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-muted-foreground">₦</span>
-                      <Input
-                        id="executivePrice"
-                        type="number"
-                        className="pl-8"
-                        {...register('executivePrice', { valueAsNumber: true })}
-                      />
-                    </div>
-                    {errors.executivePrice && (
-                      <p className="text-sm text-red-500">{errors.executivePrice.message}</p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Services Tab */}
-          <TabsContent value="services">
-            <Card>
-              <CardHeader>
-                <CardTitle>Spa & Services</CardTitle>
-                <CardDescription>Update prices for spa treatments and additional services</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-medium mb-4">Spa Treatments</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="spaBasic">Basic Treatment</Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-2.5 text-muted-foreground">₦</span>
-                        <Input
-                          id="spaBasic"
-                          type="number"
-                          className="pl-8"
-                          {...register('spaBasic', { valueAsNumber: true })}
-                        />
-                      </div>
-                      {errors.spaBasic && (
-                        <p className="text-sm text-red-500">{errors.spaBasic.message}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="spaPremium">Premium Treatment</Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-2.5 text-muted-foreground">₦</span>
-                        <Input
-                          id="spaPremium"
-                          type="number"
-                          className="pl-8"
-                          {...register('spaPremium', { valueAsNumber: true })}
-                        />
-                      </div>
-                      {errors.spaPremium && (
-                        <p className="text-sm text-red-500">{errors.spaPremium.message}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="spaDeluxe">Deluxe Treatment</Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-2.5 text-muted-foreground">₦</span>
-                        <Input
-                          id="spaDeluxe"
-                          type="number"
-                          className="pl-8"
-                          {...register('spaDeluxe', { valueAsNumber: true })}
-                        />
-                      </div>
-                      {errors.spaDeluxe && (
-                        <p className="text-sm text-red-500">{errors.spaDeluxe.message}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-medium mb-4">Additional Services</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="breakfastPrice">Breakfast (per person)</Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-2.5 text-muted-foreground">₦</span>
-                        <Input
-                          id="breakfastPrice"
-                          type="number"
-                          className="pl-8"
-                          {...register('breakfastPrice', { valueAsNumber: true })}
-                        />
-                      </div>
-                      {errors.breakfastPrice && (
-                        <p className="text-sm text-red-500">{errors.breakfastPrice.message}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="lateCheckoutPrice">Late Checkout (per hour)</Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-2.5 text-muted-foreground">₦</span>
-                        <Input
-                          id="lateCheckoutPrice"
-                          type="number"
-                          className="pl-8"
-                          {...register('lateCheckoutPrice', { valueAsNumber: true })}
-                        />
-                      </div>
-                      {errors.lateCheckoutPrice && (
-                        <p className="text-sm text-red-500">{errors.lateCheckoutPrice.message}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="extraBedPrice">Extra Bed</Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-2.5 text-muted-foreground">₦</span>
-                        <Input
-                          id="extraBedPrice"
-                          type="number"
-                          className="pl-8"
-                          {...register('extraBedPrice', { valueAsNumber: true })}
-                        />
-                      </div>
-                      {errors.extraBedPrice && (
-                        <p className="text-sm text-red-500">{errors.extraBedPrice.message}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Fees & Taxes Tab */}
-          <TabsContent value="fees">
-            <Card>
-              <CardHeader>
-                <CardTitle>Fees & Taxes</CardTitle>
-                <CardDescription>Configure tax rates and service charges</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="taxRate">Tax Rate (%)</Label>
-                    <div className="relative">
-                      <Input
-                        id="taxRate"
-                        type="number"
-                        step="0.01"
-                        {...register('taxRate', { valueAsNumber: true })}
-                      />
-                    </div>
-                    {errors.taxRate && (
-                      <p className="text-sm text-red-500">{errors.taxRate.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="serviceCharge">Service Charge (%)</Label>
-                    <div className="relative">
-                      <Input
-                        id="serviceCharge"
-                        type="number"
-                        step="0.01"
-                        {...register('serviceCharge', { valueAsNumber: true })}
-                      />
-                    </div>
-                    {errors.serviceCharge && (
-                      <p className="text-sm text-red-500">{errors.serviceCharge.message}</p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Discounts Tab */}
-          <TabsContent value="discounts">
-            <Card>
-              <CardHeader>
-                <CardTitle>Discounts</CardTitle>
-                <CardDescription>Configure special discounts</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="weeklyDiscount">Weekly Stay Discount (%)</Label>
-                    <div className="relative">
-                      <Input
-                        id="weeklyDiscount"
-                        type="number"
-                        step="0.1"
-                        {...register('weeklyDiscount', { valueAsNumber: true })}
-                      />
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Applied for stays of 7+ nights
-                    </p>
-                    {errors.weeklyDiscount && (
-                      <p className="text-sm text-red-500">{errors.weeklyDiscount.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="monthlyDiscount">Monthly Stay Discount (%)</Label>
-                    <div className="relative">
-                      <Input
-                        id="monthlyDiscount"
-                        type="number"
-                        step="0.1"
-                        {...register('monthlyDiscount', { valueAsNumber: true })}
-                      />
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Applied for stays of 30+ nights
-                    </p>
-                    {errors.monthlyDiscount && (
-                      <p className="text-sm text-red-500">{errors.monthlyDiscount.message}</p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        <div className="mt-6 flex justify-end">
-          <Button type="submit" disabled={isSaving}>
-            {isSaving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                Save Changes
-              </>
-            )}
-          </Button>
-        </div>
-      </form>
+      <Card>
+        <CardHeader>
+          <CardTitle>Pricing Rules</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {pricingRules.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No pricing rules found. Add your first rule above.</p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Room Type</TableHead>
+                    <TableHead>Period</TableHead>
+                    <TableHead>Price/Night</TableHead>
+                    <TableHead>Min. Nights</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pricingRules.map((rule) => (
+                    <TableRow key={rule.id}>
+                      <TableCell className="font-medium">
+                        {roomTypes.find(rt => rt.id === rule.roomType)?.name || rule.roomType}
+                      </TableCell>
+                      <TableCell>
+                        {pricingPeriods.find(p => p.id === rule.period)?.name || rule.period}
+                      </TableCell>
+                      <TableCell>₦{rule.price.toLocaleString()}</TableCell>
+                      <TableCell>{rule.minNights} night{rule.minNights !== 1 ? 's' : ''}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <div className={`h-2.5 w-2.5 rounded-full mr-2 ${rule.isActive ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                          {rule.isActive ? 'Active' : 'Inactive'}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleRuleStatus(rule.id)}
+                          >
+                            {rule.isActive ? 'Deactivate' : 'Activate'}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-600 hover:text-red-800"
+                            onClick={() => removePricingRule(rule.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
-}
+};
+
+export default PricingManagement;

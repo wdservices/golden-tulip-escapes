@@ -1,160 +1,151 @@
-import { Room } from '@/types/room';
+import type { RoomType } from '@/types/room';
 
-export const rooms: Room[] = [
+export const roomTypes: RoomType[] = [
   {
-    id: 'standard',
-    roomNumber: '101',
-    floor: 1,
-    type: 'standard',
-    status: 'available',
-    isSmoking: false,
-    isAccessible: true,
-    lastCleaned: '2023-06-10T10:00:00Z',
-    createdAt: '2023-01-15T00:00:00Z',
-    updatedAt: '2023-06-10T10:30:00Z',
-    name: 'Standard Room',
-    description: 'Comfortable and well-appointed room with all the essential amenities for a pleasant stay.',
-    size: 28,
-    price: 45000,
-    images: [
-      '/images/rooms/standard-1.jpg',
-      '/images/rooms/standard-2.jpg',
-      '/images/rooms/standard-3.jpg'
-    ],
-    amenities: [
-      'Queen-size bed',
-      'City view',
-      'Free WiFi',
-      'Air conditioning',
-      'Flat-screen TV',
-      'Work desk',
-      'Coffee maker',
-      'Safe',
-      'Hair dryer',
-      'Telephone'
-    ],
-    maxOccupancy: 2,
-    bedType: 'queen',
-    bedCount: 1
-  },
-  {
-    id: 'deluxe',
-    roomNumber: '201',
-    floor: 2,
-    type: 'deluxe',
-    status: 'available',
-    isSmoking: false,
-    isAccessible: true,
-    lastCleaned: '2023-06-11T09:00:00Z',
-    createdAt: '2023-01-15T00:00:00Z',
-    updatedAt: '2023-06-11T09:30:00Z',
+    id: 'deluxe-room',
     name: 'Deluxe Room',
-    description: 'Spacious room with premium amenities and stunning views, perfect for a comfortable stay.',
+    description: 'Elegant and spacious room with modern amenities',
+    longDescription: 'Our Deluxe Rooms offer a perfect blend of comfort and style. Featuring a king-size bed, modern furnishings, and a private balcony with stunning views, these rooms are designed for your ultimate relaxation. The en-suite marble bathroom includes premium toiletries and a rain shower.',
+    price: 299,
     size: 35,
-    price: 65000,
-    images: [
-      '/images/rooms/deluxe-1.jpg',
-      '/images/rooms/deluxe-2.jpg',
-      '/images/rooms/deluxe-3.jpg'
-    ],
+    capacity: 2,
+    bedType: 'King Size',
     amenities: [
-      'King-size bed',
-      'Premium view',
-      'Mini bar',
-      'Work desk',
-      'Free WiFi',
-      'Flat-screen TV',
-      'Coffee maker',
       'Air conditioning',
-      'Safe',
-      'Hair dryer',
-      'Bathrobes',
-      'Slippers'
-    ],
-    maxOccupancy: 2,
-    bedType: 'king',
-    bedCount: 1
-  },
-  {
-    id: 'executive',
-    roomNumber: '301',
-    floor: 3,
-    type: 'suite',
-    status: 'available',
-    isSmoking: false,
-    isAccessible: true,
-    lastCleaned: '2023-06-12T11:00:00Z',
-    createdAt: '2023-01-15T00:00:00Z',
-    updatedAt: '2023-06-12T11:30:00Z',
-    name: 'Executive Suite',
-    description: 'Elegant suite with separate living area and premium amenities for business or leisure travelers.',
-    size: 55,
-    price: 95000,
-    images: [
-      '/images/rooms/executive-1.jpg',
-      '/images/rooms/executive-2.jpg',
-      '/images/rooms/executive-3.jpg'
-    ],
-    amenities: [
-      'King-size bed',
-      'Separate living area',
-      'Premium amenities',
-      'Concierge service',
-      'Executive lounge access',
       'Free WiFi',
       'Flat-screen TV',
       'Minibar',
-      'Nespresso machine',
-      'Air conditioning',
       'Safe',
-      'Bathrobes',
-      'Slippers',
+      'Coffee maker',
+      'Work desk',
+      'Hairdryer',
+      'Iron & ironing board',
       '24-hour room service'
     ],
-    maxOccupancy: 2,
-    bedType: 'king',
-    bedCount: 1
+    images: [
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg'
+    ],
+    vrTourUrl: 'https://webobook.com/public/648aed3e38418a65e92441d2,en?ap=true&si=false&sm=false&sp=false&sfr=false&sl=false&sop=false'
   },
   {
-    id: 'presidential',
-    roomNumber: '401',
-    floor: 4,
-    type: 'suite',
-    status: 'available',
-    isSmoking: false,
-    isAccessible: true,
-    lastCleaned: '2023-06-13T08:00:00Z',
-    createdAt: '2023-01-15T00:00:00Z',
-    updatedAt: '2023-06-13T08:30:00Z',
-    name: 'Presidential Suite',
-    description: 'The ultimate in luxury with expansive living space, premium dining options, and exceptional service.',
-    size: 120,
-    price: 150000,
-    images: [
-      '/images/rooms/presidential-1.jpg',
-      '/images/rooms/presidential-2.jpg',
-      '/images/rooms/presidential-3.jpg'
-    ],
+    id: 'executive-suite',
+    name: 'Executive Suite',
+    description: 'Luxurious suite with separate living area and premium amenities',
+    longDescription: 'The Executive Suite offers a spacious living area separate from the bedroom, perfect for both work and relaxation. Enjoy panoramic city views, a king-size bed with premium linens, and a luxurious marble bathroom with a deep soaking tub and separate rain shower. The suite also features a work desk and a comfortable seating area.',
+    price: 499,
+    size: 60,
+    capacity: 3,
+    bedType: 'King Size + Sofa Bed',
     amenities: [
-      'King-size bed',
-      'Luxury living space',
-      'Personal butler',
-      'Premium dining',
-      'Private balcony',
-      'Free WiFi',
-      'Multiple flat-screen TVs',
-      'Fully stocked minibar',
-      'Espresso machine',
-      'Air conditioning',
-      'In-room safe',
-      'Premium bathrobes',
-      'Slippers',
-      '24-hour butler service',
-      'Complimentary airport transfers',
-      'Access to executive lounge'
+      'Separate living area',
+      'Premium bedding',
+      'Nespresso machine',
+      'Complimentary minibar',
+      'Bathrobes & slippers',
+      'Premium toiletries',
+      'Bathroom TV',
+      'Bluetooth speaker',
+      'Express check-in/out',
+      'Airport transfer service'
     ],
-    maxOccupancy: 4,
-    bedType: 'king',
-    bedCount: 1
+    images: [
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg'
+    ],
+    vrTourUrl: 'https://webobook.com/public/executive-suite-vr-tour'
+  },
+  {
+    id: 'presidential-suite',
+    name: 'Presidential Suite',
+    description: 'Ultimate luxury with expansive space and premium services',
+    longDescription: 'Experience unparalleled luxury in our Presidential Suite, featuring a spacious bedroom, separate living and dining areas, a fully equipped kitchenette, and a lavish marble bathroom with a whirlpool tub. Enjoy exclusive amenities including a personal butler, private check-in, and access to the executive lounge with complimentary food and beverages throughout the day.',
+    price: 899,
+    size: 120,
+    capacity: 4,
+    bedType: 'King Size + Queen Sofa Bed',
+    amenities: [
+      'Separate living and dining areas',
+      'Kitchenette',
+      'Whirlpool tub',
+      'Bose sound system',
+      'Personal butler service',
+      'Executive lounge access',
+      'Complimentary laundry',
+      'Premium minibar',
+      'In-room massage available',
+      'Private check-in/out'
+    ],
+    images: [
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg'
+    ],
+    vrTourUrl: 'https://webobook.com/public/presidential-suite-vr-tour'
+  },
+  {
+    id: 'family-suite',
+    name: 'Family Suite',
+    description: 'Spacious accommodation perfect for families',
+    longDescription: 'Our Family Suites are designed with families in mind, featuring a master bedroom with a king-size bed and a separate area with twin beds for children. The suite includes a comfortable living space, two bathrooms, and thoughtful amenities for guests of all ages. Enjoy complimentary access to our kids\' club and family-friendly activities.',
+    price: 599,
+    size: 75,
+    capacity: 4,
+    bedType: 'King Size + 2 Twin Beds',
+    amenities: [
+      'Two bathrooms',
+      'Kids\' welcome pack',
+      'Board games',
+      'Baby cot available',
+      'Child-friendly toiletries',
+      'Bunk beds option',
+      'Microwave',
+      'Nintendo Switch',
+      'Baby sitting service',
+      'Kids\' menu'
+    ],
+    images: [
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg'
+    ],
+    vrTourUrl: 'https://webobook.com/public/family-suite-vr-tour'
+  },
+  {
+    id: 'honeymoon-suite',
+    name: 'Honeymoon Suite',
+    description: 'Romantic retreat for newlyweds and couples',
+    longDescription: 'Celebrate your love in our exquisite Honeymoon Suite, featuring a romantic four-poster bed, a spacious balcony with stunning views, and a luxurious bathroom with a freestanding bathtub. Enjoy special honeymoon amenities including champagne, chocolate-covered strawberries, and a late check-out to make your stay even more memorable.',
+    price: 699,
+    size: 65,
+    capacity: 2,
+    bedType: 'King Size Canopy Bed',
+    amenities: [
+      'Private balcony',
+      'Freestanding bathtub',
+      'Complimentary champagne',
+      'Romantic turndown service',
+      'Bath salts & candles',
+      'Bathrobes & slippers',
+      'Late check-out',
+      'Couples massage package',
+      'In-room breakfast',
+      'Flower arrangement'
+    ],
+    images: [
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg'
+    ],
+    vrTourUrl: 'https://webobook.com/public/honeymoon-suite-vr-tour'
   }
 ];
+
+export default roomTypes;

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Bed, Utensils, Waves, Calendar, Wifi, Car, Dumbbell, Shield } from "lucide-react";
@@ -81,34 +82,43 @@ export const InfoSections = () => {
   const handleCloseDialog = () => {
     setSelectedEvent(null);
   };
+  // Import room types from the rooms data file
   const roomTypes = [
     {
-      name: "Standard Room",
-      price: "₦45,000",
-      features: ["Queen-size bed", "City view", "Free Wi-Fi", "Air conditioning"],
+      id: 'deluxe-room',
+      name: 'Deluxe Room',
+      price: '₦150,000',
+      features: ['King Size bed', '35 sqm', 'City view', 'Free WiFi'],
       image: luxurySuite,
-      id: "standard"
+      description: 'Elegant and spacious room with modern amenities',
+      longDescription: 'Our Deluxe Rooms offer a perfect blend of comfort and style. Featuring a king-size bed, modern furnishings, and a private balcony with stunning views, these rooms are designed for your ultimate relaxation.'
     },
     {
-      name: "Deluxe Room",
-      price: "₦65,000",
-      features: ["King-size bed", "Premium view", "Mini bar", "Work desk"],
+      id: 'executive-suite',
+      name: 'Executive Suite',
+      price: '₦250,000',
+      features: ['King Size bed', '60 sqm', 'Living area', 'Premium amenities'],
       image: luxurySuite,
-      id: "deluxe"
+      description: 'Luxurious suite with separate living area and premium amenities',
+      longDescription: 'The Executive Suite offers a spacious living area separate from the bedroom, perfect for both work and relaxation. Enjoy panoramic city views, a king-size bed with premium linens, and a luxurious marble bathroom.'
     },
     {
-      name: "Executive Suite",
-      price: "₦95,000",
-      features: ["Separate living area", "Premium amenities", "Concierge service", "Executive lounge access"],
+      id: 'presidential-suite',
+      name: 'Presidential Suite',
+      price: '₦450,000',
+      features: ['King Size + Queen Sofa Bed', '120 sqm', 'Butler service', 'Executive lounge access'],
       image: luxurySuite,
-      id: "executive"
+      description: 'Ultimate luxury with expansive space and premium services',
+      longDescription: 'Experience unparalleled luxury in our Presidential Suite, featuring a spacious bedroom, separate living and dining areas, a fully equipped kitchenette, and a lavish marble bathroom with a whirlpool tub.'
     },
     {
-      name: "Presidential Suite",
-      price: "₦150,000",
-      features: ["Luxury living space", "Personal butler", "Premium dining", "Private balcony"],
+      id: 'honeymoon-suite',
+      name: 'Honeymoon Suite',
+      price: '₦350,000',
+      features: ['King Size bed', '65 sqm', 'Romantic decor', 'Champagne on arrival'],
       image: luxurySuite,
-      id: "presidential"
+      description: 'Romantic retreat for newlyweds and couples',
+      longDescription: 'Celebrate your love in our exquisite Honeymoon Suite, featuring a romantic four-poster bed, a spacious balcony with stunning views, and a luxurious bathroom with a freestanding bathtub.'
     }
   ];
 
@@ -181,35 +191,34 @@ export const InfoSections = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {roomTypes.map((room, index) => (
-              <Card key={index} className="card-luxury group hover:shadow-glow transition-all duration-500 h-full flex flex-col">
-                <div className="relative overflow-hidden rounded-t-2xl flex-grow">
-                  <img
-                    src={room.image}
-                    alt={room.name}
-                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-6 flex flex-col flex-grow">
-                  <div className="text-2xl font-bold text-primary mb-2">{room.price}<span className="text-sm font-normal text-muted-foreground">/night</span></div>
-                  <h3 className="text-xl font-semibold mb-3">
-                    {room.name}
-                  </h3>
-                  <ul className="space-y-2 mb-6 flex-grow">
-                    {room.features.map((feature, idx) => (
-                      <li key={idx} className="text-sm text-muted-foreground flex items-start">
-                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary mt-2 mr-2 flex-shrink-0"></span>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button 
-                    className="w-full mt-auto bg-primary hover:bg-primary/90"
-                    onClick={() => window.location.href = `/rooms#${room.id}`}
-                  >
-                    View Details
-                  </Button>
-                </div>
-              </Card>
+              <Link to={`/rooms/${room.id}`} key={index} className="block h-full">
+                <Card className="card-luxury group hover:shadow-glow transition-all duration-500 h-full flex flex-col">
+                  <div className="relative overflow-hidden rounded-t-2xl flex-grow">
+                    <img
+                      src={room.image}
+                      alt={room.name}
+                      className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="p-6 flex flex-col flex-grow">
+                    <div className="text-2xl font-bold text-primary mb-2">{room.price}<span className="text-sm font-normal text-muted-foreground">/night</span></div>
+                    <h3 className="text-xl font-semibold mb-3">
+                      {room.name}
+                    </h3>
+                    <ul className="space-y-2 mb-6 flex-grow">
+                      {room.features.map((feature, idx) => (
+                        <li key={idx} className="text-sm text-muted-foreground flex items-start">
+                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary mt-2 mr-2 flex-shrink-0"></span>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Button className="w-full mt-4">
+                      View Details
+                    </Button>
+                  </div>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>

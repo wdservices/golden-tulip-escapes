@@ -1,27 +1,214 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Search, Mail, MessageSquare, Bell, Calendar, Plus } from "lucide-react";
 
-export default function MarketingPage() {
+type CampaignStatus = 'draft' | 'scheduled' | 'sent' | 'failed';
+
+interface Campaign {
+  id: string;
+  name: string;
+  type: 'email' | 'sms' | 'push' | 'promo';
+  status: CampaignStatus;
+  scheduledDate: string;
+  recipients: number;
+  openRate?: number;
+  clickRate?: number;
+}
+
+export const MarketingPage = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("campaigns");
+  
+  // Mock data - replace with actual API call
+  const [campaigns] = useState<Campaign[]>([
+    {
+      id: "C001",
+      name: "Summer Special 2024",
+      type: "email",
+      status: "sent",
+      scheduledDate: "2024-06-01T10:00:00Z",
+      recipients: 1250,
+      openRate: 42,
+      clickRate: 8
+    },
+    // Add more mock data as needed
+  ]);
+
+  const getStatusVariant = (status: CampaignStatus) => {
+    switch (status) {
+      case 'draft':
+        return 'bg-gray-100 text-gray-800';
+      case 'scheduled':
+        return 'bg-blue-100 text-blue-800';
+      case 'sent':
+        return 'bg-green-100 text-green-800';
+      case 'failed':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'email':
+        return <Mail className="h-4 w-4" />;
+      case 'sms':
+        return <MessageSquare className="h-4 w-4" />;
+      case 'push':
+        return <Bell className="h-4 w-4" />;
+      case 'promo':
+        return <Calendar className="h-4 w-4" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Marketing Tools</h1>
-        <div className="flex space-x-2">
-          <button className="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700">
-            Create Campaign
-          </button>
-        </div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+        <h2 className="text-2xl font-bold tracking-tight">Marketing Center</h2>
+        <Button>
+          <Plus className="mr-2 h-4 w-4" />
+          Create Campaign
+        </Button>
       </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Marketing Dashboard</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-500">
-            Marketing tools page is under construction. This is a placeholder.
-          </p>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="campaigns" onValueChange={setActiveTab}>
+        <div className="flex items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+            <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="audience">Audience</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          </TabsList>
+          
+          {activeTab === "campaigns" && (
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search campaigns..."
+                className="w-full pl-8 sm:w-[250px]"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          )}
+        </div>
+        
+        <TabsContent value="campaigns" className="space-y-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+                <div>
+                  <CardTitle>Campaigns</CardTitle>
+                  <CardDescription>Manage your marketing campaigns and track their performance</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {campaigns.map((campaign) => (
+                  <Card key={campaign.id} className="overflow-hidden">
+                    <CardHeader className="p-4 pb-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <div className="p-2 rounded-full bg-primary/10 text-primary">
+                            {getTypeIcon(campaign.type)}
+                          </div>
+                          <span className="font-medium">{campaign.name}</span>
+                        </div>
+                        <Badge className={getStatusVariant(campaign.status)}>
+                          {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-4 pt-0">
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="space-y-1">
+                          <p className="text-muted-foreground">Recipients</p>
+                          <p className="font-medium">{campaign.recipients.toLocaleString()}</p>
+                        </div>
+                        {campaign.openRate !== undefined && (
+                          <div className="space-y-1">
+                            <p className="text-muted-foreground">Open Rate</p>
+                            <p className="font-medium">{campaign.openRate}%</p>
+                          </div>
+                        )}
+                        {campaign.clickRate !== undefined && (
+                          <div className="space-y-1">
+                            <p className="text-muted-foreground">Click Rate</p>
+                            <p className="font-medium">{campaign.clickRate}%</p>
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-4 flex justify-between items-center">
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(campaign.scheduledDate).toLocaleDateString()}
+                        </p>
+                        <Button variant="outline" size="sm">View Report</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="templates">
+          <Card>
+            <CardHeader>
+              <CardTitle>Email Templates</CardTitle>
+              <CardDescription>Manage your email templates for marketing campaigns</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No templates found. Create your first template to get started.</p>
+                <Button className="mt-4">Create Template</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="audience">
+          <Card>
+            <CardHeader>
+              <CardTitle>Audience Segments</CardTitle>
+              <CardDescription>Create and manage your customer segments for targeted campaigns</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No audience segments found. Create your first segment to get started.</p>
+                <Button className="mt-4">Create Segment</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="analytics">
+          <Card>
+            <CardHeader>
+              <CardTitle>Marketing Analytics</CardTitle>
+              <CardDescription>View and analyze the performance of your marketing campaigns</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No analytics data available. Send your first campaign to see performance metrics.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-}
+};
+
+export default MarketingPage;

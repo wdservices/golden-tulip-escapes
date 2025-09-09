@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, query, where, getDocs, orderBy, Timestamp } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -229,46 +229,6 @@ export const BookingsPage = () => {
             <span className="font-medium">{bookings.length}</span> bookings
           </div>
         </CardFooter>
-      </Card>
-    </div>
-  );
-};
-
-export default BookingsPage;
-            <TableHeader>
-              <TableRow>
-                <TableHead>Booking ID</TableHead>
-                <TableHead>Guest</TableHead>
-                <TableHead>Room Type</TableHead>
-                <TableHead>Check-in</TableHead>
-                <TableHead>Check-out</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {bookings.map((booking) => (
-                <TableRow key={booking.id}>
-                  <TableCell className="font-medium">{booking.id}</TableCell>
-                  <TableCell>{booking.guestName}</TableCell>
-                  <TableCell>{booking.roomType}</TableCell>
-                  <TableCell>{new Date(booking.checkIn).toLocaleDateString()}</TableCell>
-                  <TableCell>{new Date(booking.checkOut).toLocaleDateString()}</TableCell>
-                  <TableCell>${booking.amount}</TableCell>
-                  <TableCell>
-                    <Badge className={getStatusVariant(booking.status)}>
-                      {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">View</Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
       </Card>
     </div>
   );

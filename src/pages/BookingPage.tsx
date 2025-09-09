@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, Users, Bed, User, ArrowLeft } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, Users, Bed, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -195,15 +195,6 @@ const BookingPage = () => {
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 Book your stay at Nigeria's most luxurious hotel chain and create unforgettable memories.
               </p>
-              
-              <Button 
-                variant="ghost" 
-                onClick={handleBack}
-                className="mt-8 text-primary hover:bg-primary/10"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Home
-              </Button>
             </div>
           </div>
         </section>

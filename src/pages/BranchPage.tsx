@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getBranchById } from "@/services/branchService";
 import { BranchHero } from "@/components/branches/BranchHero";
 import { BranchAmenities } from "@/components/branches/BranchAmenities";
-import { BranchRooms } from "@/components/branches/BranchRooms";
 import { BranchContact } from "@/components/branches/BranchContact";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -85,9 +84,6 @@ export const BranchPage = () => {
               {branch.description}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button asChild>
-                <a href="#rooms">View Rooms & Rates</a>
-              </Button>
               <Button variant="outline" asChild>
                 <a href="#amenities">Explore Amenities</a>
               </Button>
@@ -96,7 +92,6 @@ export const BranchPage = () => {
         </div>
       </div>
 
-      <BranchRooms branch={branch} />
       <BranchAmenities amenities={branch.amenities || []} />
       <BranchContact branch={branch} />
     </div>

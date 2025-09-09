@@ -23,7 +23,7 @@ export const generateReport = async (filter: ReportFilter): Promise<ReportData> 
   const bookings = await fetchBookings(startDate, endDate, filter.bookingStatuses, filter.branchId);
 
   // Generate reports
-  const revenueData = generateRevenueReport(bookings, filter);
+  const revenueData = generateRevenueReport(bookings);
   const guestData = await generateGuestReport(bookings, filter);
   const cancellationData = generateCancellationReport(bookings, filter);
 
@@ -69,7 +69,7 @@ const fetchBookings = async (
 const generateRevenueReport = (bookings: Booking[]): RevenueReport[] => {
   // Group bookings by date
   const bookingsByDate = bookings.reduce((acc, booking) => {
-    const date = booking.checkInDate.toDate().toISOString().split('T')[0];
+    const date = new Date(booking.checkInDate).toISOString().split('T')[0];
     if (!acc[date]) {
       acc[date] = [];
     }
@@ -80,7 +80,7 @@ const generateRevenueReport = (bookings: Booking[]): RevenueReport[] => {
   // Calculate revenue metrics for each date
   return Object.entries(bookingsByDate).map(([date, dailyBookings]) => {
     const totalRevenue = dailyBookings.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0);
-    const serviceRevenue = dailyBookings.reduce((sum, booking) => sum + (booking.serviceCharges || 0), 0);
+    const serviceRevenue = dailyBookings.reduce((sum, booking) => sum + (booking.serviceCharge || 0), 0);
     const tax = dailyBookings.reduce((sum, booking) => sum + (booking.tax || 0), 0);
     const discount = dailyBookings.reduce((sum, booking) => sum + (booking.discount || 0), 0);
     const averageStay = dailyBookings.length > 0 
@@ -106,11 +106,11 @@ const generateGuestReport = async (
 ): Promise<GuestReport[]> => {
   // Group bookings by guest
   const bookingsByGuest = bookings.reduce((acc, booking) => {
-    if (!booking.guestId) return acc;
-    if (!acc[booking.guestId]) {
-      acc[booking.guestId] = [];
+    const guestId = booking.guestId || 'unknown';
+    if (!acc[guestId]) {
+      acc[guestId] = [];
     }
-    acc[booking.guestId].push(booking);
+    acc[guestId].push(booking);
     return acc;
   }, {} as Record<string, Booking[]>);
 
@@ -129,7 +129,7 @@ const generateGuestReport = async (
       
       // Sort bookings by check-in date to find first and last stay
       const sortedBookings = [...guestBookings].sort(
-        (a, b) => a.checkInDate.toMillis() - b.checkInDate.toMillis()
+        (a, b) => new Date(a.checkInDate).getTime() - new Date(b.checkInDate).getTime()
       );
       
       guestReports.push({
@@ -140,32 +140,14 @@ const generateGuestReport = async (
         totalStays,
         totalNights,
         totalSpent,
-        lastStay: sortedBookings[sortedBookings.length - 1].checkInDate.toDate().toISOString(),
+        lastStay: sortedBookings[sortedBookings.length - 1].checkInDate,
         nextStay: guestData.nextStay || undefined
       });
     } catch (error) {
       console.error(`Error processing guest ${guestId}:`, error);
     }
-      new Date(b.checkInDate).getTime() - new Date(a.checkInDate).getTime()
-    );
-    
-    const lastStay = sortedBookings[0]?.checkInDate || '';
-    const nextStay = sortedBookings.find(b => new Date(b.checkInDate) > new Date())?.checkInDate;
-    
-    guestReports.push({
-      guestId,
-      name: guestData?.name || 'Unknown Guest',
-      email: guestData?.email || 'No email',
-      phone: guestData?.phone || 'No phone',
-      totalStays,
-      totalNights,
-      totalSpent: parseFloat(totalSpent.toFixed(2)),
-      lastStay,
-      nextStay,
-      averageRating: guestData?.averageRating
-    });
   }
-  
+
   return guestReports;
 };
 
@@ -174,55 +156,45 @@ const generateCancellationReport = (
   bookings: Booking[],
   filter: ReportFilter
 ): CancellationReport[] => {
-  // Group bookings by date
-  const bookingsByDate = new Map<string, Booking[]>();
-  
-  for (const booking of bookings) {
-    if (booking.status === 'cancelled') {
-      const date = new Date(booking.updatedAt || booking.bookingDate).toISOString().split('T')[0];
-      if (!bookingsByDate.has(date)) {
-        bookingsByDate.set(date, []);
-      }
-      bookingsByDate.get(date)?.push(booking);
-    }
-  }
-  
-  // Calculate metrics for each date
-  return Array.from(bookingsByDate.entries()).map(([date, dateBookings]) => {
-    const totalBookings = dateBookings.length;
-    const cancelledBookings = dateBookings.filter(b => b.status === 'cancelled').length;
-    const cancellationRate = totalBookings > 0 ? (cancelledBookings / totalBookings) * 100 : 0;
-    const cancelledRevenue = dateBookings
-      .filter(b => b.status === 'cancelled')
-      .reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+  // Group cancellations by date and reason
+  const cancellations = bookings.filter(b => b.status === 'cancelled');
+  const cancellationsByDate = cancellations.reduce((acc, booking) => {
+    const date = booking.updatedAt ? new Date(booking.updatedAt).toISOString().split('T')[0] : 'unknown';
+    const reason = booking.cancellationReason || 'No reason provided';
+    const key = `${date}-${reason}`;
     
-    // Count cancellation reasons if available
-    const reasons = dateBookings
-      .filter(b => b.status === 'cancelled' && b.cancellationReason)
-      .reduce((acc: Record<string, number>, b) => {
-        const reason = b.cancellationReason || 'No reason provided';
-        acc[reason] = (acc[reason] || 0) + 1;
-        return acc;
-      }, {});
-    
-    // Find most common reason
-    let mostCommonReason: string | undefined;
-    let maxCount = 0;
-    
-    for (const [reason, count] of Object.entries(reasons)) {
-      if (count > maxCount) {
-        mostCommonReason = reason;
-        maxCount = count;
-      }
+    if (!acc[key]) {
+      acc[key] = {
+        date,
+        reason,
+        count: 0,
+        revenueLost: 0,
+        totalBookings: 0
+      };
     }
     
-    return {
-      date,
-      totalBookings,
-      cancelledBookings,
-      cancellationRate: parseFloat(cancellationRate.toFixed(2)),
-      cancelledRevenue: parseFloat(cancelledRevenue.toFixed(2)),
-      reason: mostCommonReason
-    };
-  }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    acc[key].count += 1;
+    acc[key].revenueLost += booking.totalAmount || 0;
+    
+    return acc;
+  }, {} as Record<string, {
+    date: string;
+    reason: string;
+    count: number;
+    revenueLost: number;
+    totalBookings: number;
+  }>);
+
+  // Calculate cancellation rates and format results
+  return Object.values(cancellationsByDate).map(item => ({
+    date: item.date,
+    totalBookings: bookings.filter(b => {
+      const bookingDate = new Date(b.checkInDate).toISOString().split('T')[0];
+      return bookingDate === item.date;
+    }).length,
+    cancelledBookings: item.count,
+    cancellationRate: item.count / (item.count + bookings.length) * 100,
+    cancelledRevenue: item.revenueLost,
+    reason: item.reason
+  }));
 };

@@ -1,15 +1,24 @@
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AdminLoadingProps {
   fullScreen?: boolean;
   size?: number;
+  className?: string;
 }
 
-export function AdminLoading({ fullScreen = true, size = 48 }: AdminLoadingProps) {
-  return (
-    <div className={`flex items-center justify-center ${fullScreen ? 'min-h-[400px]' : 'py-8'}`}>
-      <LoadingSpinner size={size} />
-      <span className="sr-only">Loading...</span>
-    </div>
-  );
-}
+export const AdminLoading = ({
+  fullScreen = false,
+  size = 24,
+  className,
+}: AdminLoadingProps) => {
+  if (fullScreen) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50">
+        <Loader2 className={cn("h-8 w-8 animate-spin text-primary", className)} />
+      </div>
+    );
+  }
+
+  return <Loader2 className={cn("animate-spin text-primary", className)} size={size} />;
+};

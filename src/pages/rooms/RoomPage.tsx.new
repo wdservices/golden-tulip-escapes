@@ -1,0 +1,151 @@
+import { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Bed, Wifi, Users, Ruler, Coffee, Tv, AirVent, Utensils } from 'lucide-react';
+import { roomTypes } from '../../data/rooms';
+import type { RoomType } from '../../types/room';
+
+export default function RoomPage() {
+  const { id } = useParams<{ id: string }>();
+  const [room, setRoom] = useState<RoomType | null>(null);
+
+  useEffect(() => {
+    const selectedRoom = roomTypes.find(room => room.id === id);
+    if (selectedRoom) {
+      setRoom(selectedRoom);
+    }
+  }, [id]);
+
+  if (!room) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Room not found</h2>
+          <Link to="/">
+            <Button variant="outline" className="text-white border-white hover:bg-white/10">
+              Back to Home
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* Hero Image */}
+      <div className="relative h-96 overflow-hidden">
+        <img 
+          src={room.images?.[0] || '/images/rooms/placeholder-room.jpg'} 
+          alt={room.name}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+          <div className="text-center px-4">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">{room.name}</h1>
+            <p className="text-xl text-gray-200 max-w-2xl mx-auto">{room.description}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Room Details */}
+      <section className="py-12 px-4 max-w-4xl mx-auto">
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold mb-6 text-gold-400">Room Details</h2>
+          <p className="text-gray-300 mb-8 text-lg">{room.longDescription || room.description}</p>
+          
+          <div className="grid grid-cols-1 gap-6 mb-12">
+            <div className="bg-gray-800/50 rounded-xl p-6">
+              <h3 className="text-2xl font-bold mb-6 text-gold-400">Room Features</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gold-400/20 rounded-full">
+                    <Bed className="w-5 h-5 text-gold-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Bed Type</h4>
+                    <p className="text-gray-400 text-sm">{room.bedType}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gold-400/20 rounded-full">
+                    <Users className="w-5 h-5 text-gold-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Capacity</h4>
+                    <p className="text-gray-400 text-sm">{room.capacity} {room.capacity > 1 ? 'guests' : 'guest'}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gold-400/20 rounded-full">
+                    <Ruler className="w-5 h-5 text-gold-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Room Size</h4>
+                    <p className="text-gray-400 text-sm">{room.size} m²</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gold-400/20 rounded-full">
+                    <Wifi className="w-5 h-5 text-gold-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Free WiFi</h4>
+                    <p className="text-gray-400 text-sm">High-speed internet</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gray-800/50 rounded-xl p-6">
+              <h3 className="text-2xl font-bold mb-6 text-gold-400">Amenities</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {room.amenities?.map((amenity, index) => (
+                  <div key={index} className="flex items-center space-x-3">
+                    <div className="p-1">
+                      <span className="text-gold-400">•</span>
+                    </div>
+                    <span className="text-gray-300">{amenity}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <Link to={`/book?room=${room.id}`} className="inline-block">
+              <Button size="lg" className="bg-gold-500 hover:bg-gold-600 text-white text-lg px-12 py-6">
+                Book Now for ${room.price?.toLocaleString()}/night
+              </Button>
+            </Link>
+            <p className="mt-4 text-gray-400 text-sm">
+              Best rate guaranteed. No booking fees.
+            </p>
+          </div>
+          
+          {/* Special Offers */}
+          <div className="mt-6 bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
+            <h4 className="font-bold text-lg mb-3">Special Offers</h4>
+            <ul className="space-y-3">
+              <li className="flex items-start space-x-3">
+                <div className="mt-1">
+                  <div className="w-2 h-2 rounded-full bg-gold-400"></div>
+                </div>
+                <span className="text-sm text-gray-300">Free cancellation up to 48 hours before check-in</span>
+              </li>
+              <li className="flex items-start space-x-3">
+                <div className="mt-1">
+                  <div className="w-2 h-2 rounded-full bg-gold-400"></div>
+                </div>
+                <span className="text-sm text-gray-300">No booking fees</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}

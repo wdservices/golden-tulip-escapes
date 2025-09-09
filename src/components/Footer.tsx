@@ -101,30 +101,6 @@ export const Footer = () => {
             </ul>
           </div>
 
-          {/* Admin Dashboard Button - Only visible to admins */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-primary">Admin</h3>
-            {isAdmin(currentUser) ? (
-              <Link to="/admin" className="block w-full">
-                <Button variant="default" className="w-full mb-4 bg-amber-600 text-white hover:bg-amber-700">
-                  <Lock className="mr-2 h-4 w-4" />
-                  Admin Dashboard
-                </Button>
-              </Link>
-            ) : (
-              <div className="text-sm text-muted-foreground mb-4">
-                Admin access required
-              </div>
-            )}
-            {/* Debug info - remove in production */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="text-xs text-muted-foreground mt-2">
-                <div>Logged in: {currentUser ? 'Yes' : 'No'}</div>
-                <div>Role: {currentUser?.role || 'none'}</div>
-                <div>Email: {currentUser?.email || 'none'}</div>
-              </div>
-            )}
-          </div>
 
           {/* Contact Info */}
           <div>

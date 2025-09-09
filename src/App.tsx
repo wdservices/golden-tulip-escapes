@@ -8,19 +8,19 @@ import Index from "./pages/Index";
 import { BookPage } from "./pages/BookPage";
 import BookingPage from "./pages/BookingPage";
 import { lazy, Suspense } from 'react';
-import { AdminDashboard } from "@/pages/admin/AdminDashboard";
-// AdminTestPage is now lazy loaded
-import { AdminLoading } from "@/components/admin/AdminLoading";
+import AdminDashboard from "./pages/AdminDashboard";
+import { AdminLoading } from "./components/admin/AdminLoading";
 import { AuthPage } from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { UserDashboard } from "./pages/UserDashboard";
 import { BranchPage } from "./pages/BranchPage";
 import { ChatbotFloatingButton } from "./components/chat/ChatbotFloatingButton";
-import RoomsPage from "./pages/RoomsPage";
+import RoomPage from "./pages/rooms/RoomPage";
 
 // Lazy load admin components
 const BookingsPage = lazy(() => import("@/pages/admin/BookingsPage"));
+const RoomsPage = lazy(() => import("@/pages/admin/RoomsPage"));
 const ClientsPage = lazy(() => import("@/pages/admin/ClientsPage"));
 const MarketingPage = lazy(() => import("@/pages/admin/MarketingPage"));
 const PaymentsPage = lazy(() => import("@/pages/admin/PaymentsPage"));
@@ -28,11 +28,12 @@ const ReportsPage = lazy(() => import("@/pages/admin/ReportsPage"));
 const BranchesPage = lazy(() => import("@/pages/admin/BranchesPage"));
 const SettingsPage = lazy(() => import("@/pages/admin/settings/SettingsPage"));
 const PricingManagement = lazy(() => import("@/pages/admin/PricingManagement"));
-const AdminTestPage = lazy(() => import("@/pages/admin/AdminTestPage"));
 const DashboardHome = lazy(() => import("@/pages/admin/DashboardHome"));
 
 // Loading component for Suspense fallback
 const LoadingFallback = () => <AdminLoading fullScreen={true} size={48} />;
+
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,7 +58,7 @@ const App = () => (
             <Route path="/book" element={<BookPage />} />
             <Route path="/booking/:id" element={<BookingPage />} />
             <Route path="/branch/:id" element={<BranchPage />} />
-            <Route path="/rooms" element={<RoomsPage />} />
+            <Route path="/rooms/:id" element={<RoomPage />} />
             <Route
               path="/booking"
               element={
@@ -108,11 +109,6 @@ const App = () => (
                   <BookingsPage />
                 </Suspense>
               } />
-              <Route path="test" element={
-                <Suspense fallback={<LoadingFallback />}>
-                  <AdminTestPage />
-                </Suspense>
-              } />
               <Route path="rooms" element={
                 <Suspense fallback={<LoadingFallback />}>
                   <RoomsPage />
@@ -144,21 +140,16 @@ const App = () => (
                 </Suspense>
               } />
               <Route path="settings" element={
-                <ProtectedRoute requiredRole="admin">
-                  <Suspense fallback={<LoadingFallback />}>
-                    <SettingsPage />
-                  </Suspense>
-                </ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <SettingsPage />
+                </Suspense>
               } />
               <Route path="pricing" element={
-                <ProtectedRoute requiredRole="admin">
-                  <Suspense fallback={<LoadingFallback />}>
-                    <PricingManagement />
-                  </Suspense>
-                </ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <PricingManagement />
+                </Suspense>
               } />
             </Route>
-            {/* Branch Pages */}
             {/* 404 - Keep this last */}
             <Route path="*" element={<NotFound />} />
           </Routes>
