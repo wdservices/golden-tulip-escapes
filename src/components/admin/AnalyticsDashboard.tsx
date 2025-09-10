@@ -53,14 +53,14 @@ export const AnalyticsDashboard = () => {
 
   // Revenue by day
   const revenueByDay = filteredBookings.reduce((acc, booking) => {
-    const dateStr = format(booking.date, 'MMM dd');
+    const dateStr = format(booking.date, 'MM/dd');
     acc[dateStr] = (acc[dateStr] || 0) + booking.amount;
     return acc;
   }, {} as Record<string, number>);
 
   // Booking trends
   const bookingsByDay = filteredBookings.reduce((acc, booking) => {
-    const dateStr = format(booking.date, 'MMM dd');
+    const dateStr = format(booking.date, 'MM/dd');
     acc[dateStr] = (acc[dateStr] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -123,16 +123,53 @@ export const AnalyticsDashboard = () => {
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { position: 'top' as const },
     },
     scales: {
+      x: {
+        ticks: {
+          maxRotation: 45,
+          minRotation: 0,
+          maxTicksLimit: 7,
+          font: {
+            size: 11
+          }
+        }
+      },
       y: {
         beginAtZero: true,
         ticks: {
           callback: function(value: any) {
             return '₦' + value.toLocaleString();
           }
+        }
+      }
+    }
+  };
+
+  const barChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' as const },
+    },
+    scales: {
+      x: {
+        ticks: {
+          maxRotation: 45,
+          minRotation: 0,
+          maxTicksLimit: 7,
+          font: {
+            size: 11
+          }
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
         }
       }
     }
@@ -205,7 +242,9 @@ export const AnalyticsDashboard = () => {
             <CardDescription>Daily revenue for the selected period</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            <Line data={revenueData} options={chartOptions} />
+            <div className="h-[300px]">
+              <Line data={revenueData} options={chartOptions} />
+            </div>
           </CardContent>
         </Card>
         
@@ -215,10 +254,13 @@ export const AnalyticsDashboard = () => {
             <CardDescription>Breakdown by room category</CardDescription>
           </CardHeader>
           <CardContent>
-            <Pie data={roomTypeData} options={{
-              responsive: true,
-              plugins: { legend: { position: 'bottom' as const } },
-            }} />
+            <div className="h-[300px]">
+              <Pie data={roomTypeData} options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' as const } },
+              }} />
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -230,7 +272,9 @@ export const AnalyticsDashboard = () => {
             <CardDescription>Daily booking count</CardDescription>
           </CardHeader>
           <CardContent>
-            <Bar data={bookingTrends} options={chartOptions} />
+            <div className="h-[300px]">
+              <Bar data={bookingTrends} options={barChartOptions} />
+            </div>
           </CardContent>
         </Card>
         

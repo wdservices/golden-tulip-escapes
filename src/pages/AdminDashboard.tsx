@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,11 +39,12 @@ import {
   Trash2,
   DollarSign,
   TrendingUp,
+  Tag,
 } from "lucide-react";
 
 // Import components
 import DashboardStats from "@/components/admin/DashboardStats";
-import RecentBookings from "@/components/admin/RecentBookings";
+import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import RevenueSnapshot from "@/components/admin/RevenueSnapshot";
 import ClientActivity from "@/components/admin/ClientActivity";
 
@@ -169,7 +171,17 @@ interface Ad {
 
 const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get current active tab from URL path
+  const getActiveTab = () => {
+    const path = location.pathname;
+    if (path === '/admin' || path === '/admin/') return 'dashboard';
+    return path.split('/admin/')[1] || 'dashboard';
+  };
+  
+  const activeTab = getActiveTab();
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
   const [newAd, setNewAd] = useState<Ad>({
     title: "",
@@ -232,6 +244,7 @@ const AdminDashboard = () => {
               { id: 'bookings', label: 'Bookings', icon: Calendar },
               { id: 'rooms', label: 'Rooms', icon: Bed },
               { id: 'clients', label: 'Clients', icon: Users },
+              { id: 'pricing', label: 'Pricing', icon: Tag },
               { id: 'marketing', label: 'Marketing', icon: Megaphone },
               { id: 'payments', label: 'Payments', icon: CreditCard },
               { id: 'reports', label: 'Reports', icon: BarChart2 },
@@ -242,7 +255,7 @@ const AdminDashboard = () => {
                 key={item.id}
                 variant={activeTab === item.id ? 'secondary' : 'ghost'}
                 className={`w-full justify-start ${!isSidebarOpen ? 'justify-center' : ''}`}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => navigate(`/admin/${item.id === 'dashboard' ? '' : item.id}`)}
               >
                 <item.icon className="h-5 w-5" />
                 {isSidebarOpen && <span className="ml-2">{item.label}</span>}
@@ -278,8 +291,9 @@ const AdminDashboard = () => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-6">
-          {activeTab === 'dashboard' && (
+        <main className="flex-1 overflow-y-auto">
+          {activeTab === 'dashboard' ? (
+            <div className="p-6">
             <div className="space-y-6">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
@@ -346,59 +360,12 @@ const AdminDashboard = () => {
                 </Card>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="col-span-4">
-                  <CardHeader>
-                    <CardTitle>Recent Bookings</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <RecentBookings />
-                  </CardContent>
-                </Card>
-                <Card className="col-span-3">
-                  <CardHeader>
-                    <CardTitle>Quick Stats</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">
-                          Occupancy Rate
-                        </p>
-                        <div className="h-2 w-full bg-muted rounded-full mt-1">
-                          <div 
-                            className="h-full bg-primary rounded-full" 
-                            style={{ width: `${stats.occupancyRate}%` }}
-                          />
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {stats.occupancyRate}% of rooms occupied
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">
-                          Active Promotions
-                        </p>
-                        <p className="text-2xl font-bold">
-                          {mockAds.filter(ad => ad.status === 'active').length}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+              {/* Analytics Section */}
+              <AnalyticsDashboard />
             </div>
-          )}
-          
-          {activeTab !== 'dashboard' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  {activeTab} management will be available soon.
-                </p>
-              </CardHeader>
-            </Card>
+            </div>
+          ) : (
+            <Outlet />
           )}
         </main>
       </div>
