@@ -9,15 +9,15 @@ const spa = luxurySuite;
 
 const branches: Branch[] = [
   {
-    id: "main",
-    name: "GRA",
-    fullName: "Golden Tulip GRA",
-    location: "Government Reserved Area, Port Harcourt",
+    id: "port-harcourt",
+    name: "Port Harcourt Hotel",
+    fullName: "GOLDEN TULIP PORT HARCOURT HOTEL",
+    location: "GRA Phase II, Port Harcourt",
     description: "Our flagship location offering premium luxury and world-class amenities in the heart of the city.",
     image: hotelExterior,
-    address: "123 GRA Phase 2, Port Harcourt, Rivers State, Nigeria",
-    phone: "+234 803 123 4567",
-    email: "gra@goldentulip.com",
+    address: "1c Evo Crescent Off Evo Road, GRA Phase II, Port Harcourt, Rivers State",
+    phone: "+234 905 777 7780",
+    email: "reservations@goldentulipportharcourt.com",
     checkInTime: "2:00 PM",
     checkOutTime: "12:00 PM",
     amenities: [
@@ -53,15 +53,15 @@ const branches: Branch[] = [
     gallery: [hotelExterior, hotelLobby, luxurySuite, restaurant, pool, spa]
   },
   {
-    id: "waterlines",
-    name: "Waterlines",
-    fullName: "Golden Tulip Waterlines",
-    location: "Waterlines, Port Harcourt",
-    description: "Experience waterfront luxury with stunning views of the Bonny River.",
+    id: "stadium-31",
+    name: "31 Stadium Rd.",
+    fullName: "GOLDEN TULIP PORT HARCOURT, 31 STADIUM RD.",
+    location: "Stadium Road, Port Harcourt",
+    description: "Experience luxury with stunning views and premium amenities in the heart of Port Harcourt.",
     image: hotelLobby,
-    address: "45 Marine Base Road, Waterlines, Port Harcourt, Nigeria",
-    phone: "+234 803 234 5678",
-    email: "waterlines@goldentulip.com",
+    address: "31 Ken Saro Wiwa, Stadium Road, Port Harcourt, Rivers State",
+    phone: "+234 704 338 3142",
+    email: "reservationsgt@rivotels.com",
     checkInTime: "2:00 PM",
     checkOutTime: "12:00 PM",
     amenities: [
@@ -83,7 +83,7 @@ const branches: Branch[] = [
       },
       {
         name: "Deluxe Room with River View",
-        description: "Spacious room with stunning views of the Bonny River",
+        description: "Spacious room with stunning views",
         priceRange: "₦55,000 - ₦75,000",
         capacity: 2
       },
@@ -97,15 +97,15 @@ const branches: Branch[] = [
     gallery: [hotelLobby, pool, luxurySuite, restaurant, spa, hotelExterior]
   },
   {
-    id: "airforce",
-    name: "Airforce Base",
-    fullName: "Golden Tulip Airforce Base",
-    location: "Airforce Base, Port Harcourt",
-    description: "Premium business hotel located near the airport with easy access to major business districts.",
+    id: "garden-city",
+    name: "Garden City",
+    fullName: "GOLDEN TULIP PORT HARCOURT, GARDEN CITY",
+    location: "Stadium Road, Port Harcourt",
+    description: "Premium business hotel with easy access to major business districts and attractions.",
     image: luxurySuite,
-    address: "Airforce Base, Airport Road, Port Harcourt, Nigeria",
-    phone: "+234 803 345 6789",
-    email: "airforce@goldentulip.com",
+    address: "63 Ken Saro Wiwa, Stadium Road, Port Harcourt, Rivers State",
+    phone: "+234 704 215 6775",
+    email: "reservations@rivotels.com",
     checkInTime: "2:00 PM",
     checkOutTime: "12:00 PM",
     amenities: [
@@ -116,7 +116,6 @@ const branches: Branch[] = [
       "Conference Facilities",
       "24/7 Room Service",
       "Business Center",
-      "Airport Shuttle",
       "Free Parking"
     ],
     roomTypes: [
@@ -142,15 +141,15 @@ const branches: Branch[] = [
     gallery: [luxurySuite, hotelLobby, hotelExterior, restaurant, pool, spa]
   },
   {
-    id: "oyigbo",
-    name: "Oyigbo",
-    fullName: "Golden Tulip Oyigbo",
-    location: "Oyigbo, Rivers State",
+    id: "evergreen",
+    name: "Evergreen",
+    fullName: "GOLDEN TULIP PORT HARCOURT, EVERGREEN.",
+    location: "GRA Phase III, Port Harcourt",
     description: "A serene getaway destination with beautiful landscapes and premium comfort.",
     image: restaurant,
-    address: "KM 5, East-West Road, Oyigbo, Rivers State, Nigeria",
-    phone: "+234 803 456 7890",
-    email: "oyigbo@goldentulip.com",
+    address: "Plot F35 Woke Street, Off Sani Abacha Road, GRA Phase III, Port Harcourt, Rivers State",
+    phone: "+234 906 243 5584",
+    email: "reservations@rivotelinternational.com",
     checkInTime: "2:00 PM",
     checkOutTime: "12:00 PM",
     amenities: [
@@ -195,9 +194,9 @@ export const getAllBranches = (): Branch[] => {
   return branches;
 };
 
-// Get all branches except the main (GRA) branch
+// Get all branches
 export const getMainBranches = (): Branch[] => {
-  return branches.filter(branch => branch.id !== 'main');
+  return branches;
 };
 
 // Get only the main branch

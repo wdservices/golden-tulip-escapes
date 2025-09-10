@@ -1,28 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Bed, Wifi, Users, Ruler, ArrowLeft, MapPin, Clock, Calendar, User, Phone, Mail } from 'lucide-react';
+import { Bed, Users, Ruler, ArrowLeft, MapPin, Clock, Calendar, User, Phone, Mail, Tv, Coffee, Refrigerator, ShieldCheck, Wifi, Wind } from 'lucide-react';
 import { roomTypes } from '../../data/rooms';
 import type { RoomType } from '../../types/room';
 
 // Amenity icon mapping
 const amenityIcons: Record<string, JSX.Element> = {
   'Wifi': <Wifi className="h-5 w-5" />,
-  'Air conditioning': <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h10a4 4 0 004-4v-4m-8 1.5a.5.5 0 11-1 0 .5.5 0 011 0z" />
-  </svg>,
-  'TV': <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-  </svg>,
-  'Minibar': <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-  </svg>,
-  'Safe': <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-  </svg>,
-  'Coffee maker': <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-  </svg>
+  'Air conditioning': <Wind className="h-5 w-5" />,
+  'TV': <Tv className="h-5 w-5" />,
+  'Minibar': <Refrigerator className="h-5 w-5" />,
+  'Safe': <ShieldCheck className="h-5 w-5" />,
+  'Coffee maker': <Coffee className="h-5 w-5" />
 };
 
 export default function RoomPage() {
@@ -171,7 +161,7 @@ export default function RoomPage() {
                 {room.amenities?.map((amenity, index) => (
                   <div key={index} className="flex items-center space-x-4 p-4 bg-background/30 rounded-xl border border-border/10 hover:border-primary/20 transition-all duration-300 group">
                     <div className="p-2 bg-primary/10 rounded-lg text-primary group-hover:scale-110 transition-transform">
-                      {amenityIcons[amenity] || <Wifi className="h-5 w-5" />}
+                      {amenityIcons[amenity] || <ShieldCheck className="h-5 w-5" />}
                     </div>
                     <span className="text-foreground">{amenity}</span>
                   </div>

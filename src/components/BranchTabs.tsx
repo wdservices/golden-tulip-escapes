@@ -13,16 +13,18 @@ export const BranchTabs = ({ activeTab, onTabChange }: BranchTabsProps) => {
   const navigate = useNavigate();
   
   const handleBranchClick = (branchId: string) => {
+    // Deactivate navigation for the first location card (GRA/Port Harcourt Hotel)
+    if (branchId === "port-harcourt") {
+      // Just update the active tab but don't navigate
+      onTabChange(branchId);
+      return;
+    }
+    
+    // For other branches, update tab and navigate
     onTabChange(branchId);
     navigate(`/branches/${branchId}`);
   };
   const branches = [
-    { 
-      id: "port-harcourt", 
-      name: "Golden Tulip Port Harcourt Hotel", 
-      location: "1c Evo Crescent Off Evo Road, GRA Phase II, Port Harcourt, Rivers State",
-      image: hotelExterior
-    },
     { 
       id: "stadium-31", 
       name: "Golden Tulip Port Harcourt, 31 Stadium Rd.", 
@@ -60,7 +62,7 @@ export const BranchTabs = ({ activeTab, onTabChange }: BranchTabsProps) => {
             {branches.map((branch) => (
               <div 
                 key={branch.id}
-                className="group block cursor-pointer"
+                className={`group block ${branch.id === "port-harcourt" ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
                 onClick={() => handleBranchClick(branch.id)}
               >
                 <div 
@@ -77,6 +79,13 @@ export const BranchTabs = ({ activeTab, onTabChange }: BranchTabsProps) => {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                    {branch.id === "port-harcourt" && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+                        <span className="bg-red-600 text-white px-3 py-1 rounded-md font-bold transform rotate-12 text-lg">
+                          UNAVAILABLE
+                        </span>
+                      </div>
+                    )}
                     <div className="absolute bottom-0 left-0 right-0">
                       <div className="backdrop-blur-sm bg-black/60 p-4 rounded-b-xl">
                         <h3 className="text-lg font-serif font-bold text-white mb-1">

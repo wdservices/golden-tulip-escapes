@@ -19,7 +19,7 @@ export default function RoomsPage() {
 
       {/* Rooms Grid */}
       <section className="py-16 px-4 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {roomTypes.map((room) => (
             <div key={room.id} className="bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700 hover:border-gold-400/50 transition-colors">
               <div className="relative h-64">

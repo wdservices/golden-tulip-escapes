@@ -12,28 +12,28 @@ export const Footer = () => {
   const { currentUser } = useAuth();
   const branches = [
     {
-      name: "GRA (Head Branch)",
-      address: "Plot 123, Government Reserved Area, Port Harcourt, Rivers State",
-      phone: "+234 803 123 4567",
-      email: "gra@goldentuliphotels.ng"
+      name: "GOLDEN TULIP PORT HARCOURT HOTEL",
+      address: "1c Evo Crescent Off Evo Road, GRA Phase II, Port Harcourt, Rivers State",
+      phone: "+234 905 777 7780",
+      email: "reservations@goldentulipportharcourt.com"
     },
     {
-      name: "Waterlines Branch",
-      address: "45 Waterlines Street, Port Harcourt, Rivers State",
-      phone: "+234 803 123 4568",
-      email: "waterlines@goldentuliphotels.ng"
+      name: "GOLDEN TULIP PORT HARCOURT, 31 STADIUM RD.",
+      address: "31 Ken Saro Wiwa, Stadium Road, Port Harcourt, Rivers State",
+      phone: "+234 704 338 3142",
+      email: "reservationsgt@rivotels.com"
     },
     {
-      name: "Airforce Base Branch",
-      address: "Near NAF Base, Port Harcourt, Rivers State",
-      phone: "+234 803 123 4569",
-      email: "airforce@goldentuliphotels.ng"
+      name: "GOLDEN TULIP PORT HARCOURT, GARDEN CITY",
+      address: "63 Ken Saro Wiwa, Stadium Road, Port Harcourt, Rivers State",
+      phone: "+234 704 215 6775",
+      email: "reservations@rivotels.com"
     },
     {
-      name: "Oyigbo Branch",
-      address: "Lagos-Port Harcourt Expressway, Oyigbo, Rivers State",
-      phone: "+234 803 123 4570",
-      email: "oyigbo@goldentuliphotels.ng"
+      name: "GOLDEN TULIP PORT HARCOURT, EVERGREEN.",
+      address: "Plot F35 Woke Street, Off Sani Abacha Road, GRA Phase III, Port Harcourt, Rivers State",
+      phone: "+234 906 243 5584",
+      email: "reservations@rivotelinternational.com"
     }
   ];
 
@@ -131,21 +131,21 @@ export const Footer = () => {
                 <Phone className="h-5 w-5 text-primary mt-0.5" />
                 <div>
                   <p className="text-secondary-foreground/80">Reservations</p>
-                  <p className="font-semibold">+234 803 123 4567</p>
+                  <p className="font-semibold">+234 905 777 7780</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
                 <Mail className="h-5 w-5 text-primary mt-0.5" />
                 <div>
                   <p className="text-secondary-foreground/80">Email</p>
-                  <p className="font-semibold">info@goldentuliphotels.ng</p>
+                  <p className="font-semibold">reservations@goldentulipportharcourt.com</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
                 <MapPin className="h-5 w-5 text-primary mt-0.5" />
                 <div>
                   <p className="text-secondary-foreground/80">Head Office</p>
-                  <p className="font-semibold">GRA, Port Harcourt</p>
+                  <p className="font-semibold">1c Evo Crescent, GRA Phase II, Port Harcourt</p>
                 </div>
               </div>
             </div>

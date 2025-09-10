@@ -22,11 +22,7 @@ export const BranchPage = () => {
       return;
     }
 
-    // Redirect to home if trying to access the main (GRA) branch page
-    if (branchId === 'main') {
-      navigate('/', { replace: true });
-      return;
-    }
+    // No need to redirect any branch pages now
 
     // Simulate API call
     const fetchBranch = async () => {

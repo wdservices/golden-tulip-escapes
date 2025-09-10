@@ -2,25 +2,24 @@ import type { RoomType } from '@/types/room';
 
 export const roomTypes: RoomType[] = [
   {
-    id: 'deluxe-room',
-    name: 'Deluxe Room',
-    description: 'Elegant and spacious room with modern amenities',
-    longDescription: 'Our Deluxe Rooms offer a perfect blend of comfort and style. Featuring a king-size bed, modern furnishings, and a private balcony with stunning views, these rooms are designed for your ultimate relaxation. The en-suite marble bathroom includes premium toiletries and a rain shower.',
-    price: 299,
+    id: 'standard-room',
+    name: 'Standard Room',
+    description: 'Affordable comfort with modern amenities perfect for business and leisure travelers in Port Harcourt.',
+    longDescription: 'Our Standard Rooms offer a perfect blend of comfort and style. Featuring a king-size bed, modern furnishings, and city views, these rooms are designed for your ultimate relaxation. The en-suite bathroom includes premium toiletries and a rain shower.',
+    price: 108450,
     size: 35,
     capacity: 2,
     bedType: 'King Size',
     amenities: [
+      'King-size bed',
+      'City view',
+      'Free Wi-Fi',
+      'Concierge services',
       'Air conditioning',
-      'Free WiFi',
-      'Flat-screen TV',
-      'Minibar',
-      'Safe',
-      'Coffee maker',
+      'Smart TV',
       'Work desk',
-      'Hairdryer',
-      'Iron & ironing board',
-      '24-hour room service'
+      'Coffee/tea maker',
+      'Complimentary breakfast'
     ],
     images: [
       '/images/rooms/placeholder-room.jpg',
@@ -31,25 +30,24 @@ export const roomTypes: RoomType[] = [
     vrTourUrl: 'https://webobook.com/public/648aed3e38418a65e92441d2,en?ap=true&si=false&sm=false&sp=false&sfr=false&sl=false&sop=false'
   },
   {
-    id: 'executive-suite',
-    name: 'Executive Suite',
-    description: 'Luxurious suite with separate living area and premium amenities',
-    longDescription: 'The Executive Suite offers a spacious living area separate from the bedroom, perfect for both work and relaxation. Enjoy panoramic city views, a king-size bed with premium linens, and a luxurious marble bathroom with a deep soaking tub and separate rain shower. The suite also features a work desk and a comfortable seating area.',
-    price: 499,
+    id: 'superior-room',
+    name: 'Superior Room',
+    description: 'Spacious design with upgraded features, blending elegance and convenience for a relaxing stay.',
+    longDescription: 'The Superior Room offers a spacious design with upgraded features, perfect for both work and relaxation. Enjoy city views, a king-size bed with premium linens, and a luxurious bathroom with a rain shower. The room also features a work desk and a comfortable seating area.',
+    price: 121860,
     size: 60,
     capacity: 3,
     bedType: 'King Size + Sofa Bed',
     amenities: [
-      'Separate living area',
-      'Premium bedding',
-      'Nespresso machine',
-      'Complimentary minibar',
-      'Bathrobes & slippers',
-      'Premium toiletries',
-      'Bathroom TV',
-      'Bluetooth speaker',
-      'Express check-in/out',
-      'Airport transfer service'
+      'King-size bed',
+      'City view',
+      'Free Wi-Fi',
+      'Concierge services',
+      'Air conditioning',
+      'Smart TV',
+      'Work desk',
+      'Coffee/tea maker',
+      'Complimentary breakfast'
     ],
     images: [
       '/images/rooms/placeholder-room.jpg',
@@ -60,28 +58,26 @@ export const roomTypes: RoomType[] = [
     vrTourUrl: 'https://webobook.com/public/executive-suite-vr-tour'
   },
   {
-    id: 'presidential-suite',
-    name: 'Presidential Suite',
-    description: 'Ultimate luxury with expansive space and premium services',
-    longDescription: 'Experience unparalleled luxury in our Presidential Suite, featuring a spacious bedroom, separate living and dining areas, a fully equipped kitchenette, and a lavish marble bathroom with a whirlpool tub. Enjoy exclusive amenities including a personal butler, private check-in, and access to the executive lounge with complimentary food and beverages throughout the day.',
-    price: 899,
+    id: 'premium-standard-room',
+    name: 'Premium Standard Room',
+    description: 'Enjoy premium comfort with enhanced amenities and stylish décor at an unbeatable value.',
+    longDescription: 'Enjoy premium comfort with enhanced amenities and stylish décor at an unbeatable value. Our Premium Standard Rooms feature a king-size bed, city views, and modern amenities to ensure a comfortable and productive stay.',
+    price: 122940,
     size: 120,
     capacity: 4,
     bedType: 'King Size + Queen Sofa Bed',
     amenities: [
-      'Separate living and dining areas',
-      'Kitchenette',
-      'Whirlpool tub',
-      'Bose sound system',
-      'Personal butler service',
-      'Executive lounge access',
-      'Complimentary laundry',
-      'Premium minibar',
-      'In-room massage available',
-      'Private check-in/out'
+      'King-size bed',
+      'City view',
+      'Free Wi-Fi',
+      'Concierge services',
+      'Air conditioning',
+      'Smart TV',
+      'Work desk',
+      'Coffee/tea maker',
+      'Complimentary breakfast'
     ],
     images: [
-      '/images/rooms/placeholder-room.jpg',
       '/images/rooms/placeholder-room.jpg',
       '/images/rooms/placeholder-room.jpg',
       '/images/rooms/placeholder-room.jpg',
@@ -90,27 +86,28 @@ export const roomTypes: RoomType[] = [
     vrTourUrl: 'https://webobook.com/public/presidential-suite-vr-tour'
   },
   {
-    id: 'family-suite',
-    name: 'Family Suite',
-    description: 'Spacious accommodation perfect for families',
-    longDescription: 'Our Family Suites are designed with families in mind, featuring a master bedroom with a king-size bed and a separate area with twin beds for children. The suite includes a comfortable living space, two bathrooms, and thoughtful amenities for guests of all ages. Enjoy complimentary access to our kids\' club and family-friendly activities.',
-    price: 599,
+    id: 'premium-superior-room',
+    name: 'Premium Superior Room',
+    description: 'Refined interiors, extra space, and thoughtful touches designed for longer, more relaxing stays.',
+    longDescription: 'Refined interiors, extra space, and thoughtful touches designed for longer, more relaxing stays. Our Premium Superior Rooms offer a king-size bed, city views, and premium amenities to ensure a comfortable and enjoyable stay.',
+    price: 139230,
     size: 75,
     capacity: 4,
     bedType: 'King Size + 2 Twin Beds',
     amenities: [
-      'Two bathrooms',
-      'Kids\' welcome pack',
-      'Board games',
-      'Baby cot available',
-      'Child-friendly toiletries',
-      'Bunk beds option',
-      'Microwave',
-      'Nintendo Switch',
-      'Baby sitting service',
-      'Kids\' menu'
+      'King-size bed',
+      'City view',
+      'Free Wi-Fi',
+      'Concierge services',
+      'Air conditioning',
+      'Smart TV',
+      'Work desk',
+      'Coffee/tea maker',
+      'Complimentary breakfast'
     ],
     images: [
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
       '/images/rooms/placeholder-room.jpg',
       '/images/rooms/placeholder-room.jpg',
       '/images/rooms/placeholder-room.jpg'
@@ -118,25 +115,54 @@ export const roomTypes: RoomType[] = [
     vrTourUrl: 'https://webobook.com/public/family-suite-vr-tour'
   },
   {
-    id: 'honeymoon-suite',
-    name: 'Honeymoon Suite',
-    description: 'Romantic retreat for newlyweds and couples',
-    longDescription: 'Celebrate your love in our exquisite Honeymoon Suite, featuring a romantic four-poster bed, a spacious balcony with stunning views, and a luxurious bathroom with a freestanding bathtub. Enjoy special honeymoon amenities including champagne, chocolate-covered strawberries, and a late check-out to make your stay even more memorable.',
-    price: 699,
-    size: 65,
+    id: 'deluxe-room',
+    name: 'Deluxe',
+    description: 'Luxury accommodation with sophisticated details, ideal for travelers seeking comfort and class.',
+    longDescription: 'Luxury accommodation with sophisticated details, ideal for travelers seeking comfort and class. Our Deluxe Rooms feature a king-size bed, city views, and premium amenities to ensure a luxurious and comfortable stay.',
+    price: 177480,
+    size: 70,
     capacity: 2,
-    bedType: 'King Size Canopy Bed',
+    bedType: 'King Size',
     amenities: [
-      'Private balcony',
-      'Freestanding bathtub',
-      'Complimentary champagne',
-      'Romantic turndown service',
-      'Bath salts & candles',
-      'Bathrobes & slippers',
-      'Late check-out',
-      'Couples massage package',
-      'In-room breakfast',
-      'Flower arrangement'
+      'King-size bed',
+      'City view',
+      'Free Wi-Fi',
+      'Concierge services',
+      'Air conditioning',
+      'Smart TV',
+      'Work desk',
+      'Coffee/tea maker',
+      'Complimentary breakfast'
+    ],
+    images: [
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg'
+    ],
+    vrTourUrl: 'https://webobook.com/public/honeymoon-suite-vr-tour'
+  },
+  {
+    id: 'premium-diplomatic-suite',
+    name: 'Premium Diplomatic Suite',
+    description: 'Exclusive setting with top-tier facilities, created for executives and distinguished guests.',
+    longDescription: 'Exclusive setting with top-tier facilities, created for executives and distinguished guests. Our Premium Diplomatic Suite features a king-size bed, city views, separate living room area, and office space to ensure a productive and comfortable stay.',
+    price: 245070,
+    size: 80,
+    capacity: 2,
+    bedType: 'King Size',
+    amenities: [
+      'King-size bed',
+      'City view',
+      'Free Wi-Fi',
+      'Concierge services',
+      'Air conditioning',
+      'Separate Living Room Area',
+      'Office Space',
+      'Smart TV',
+      'Coffee/tea maker',
+      'Complimentary breakfast'
     ],
     images: [
       '/images/rooms/placeholder-room.jpg',
@@ -144,7 +170,65 @@ export const roomTypes: RoomType[] = [
       '/images/rooms/placeholder-room.jpg',
       '/images/rooms/placeholder-room.jpg'
     ],
-    vrTourUrl: 'https://webobook.com/public/honeymoon-suite-vr-tour'
+    vrTourUrl: 'https://webobook.com/public/premium-diplomatic-suite-vr-tour'
+  },
+  {
+    id: 'ambassadorial-suite',
+    name: 'Ambassadorial Suite',
+    description: 'Expansive suite offering refined luxury, separate lounge, and premium hospitality for elite travelers.',
+    longDescription: 'Expansive suite offering refined luxury, separate lounge, and premium hospitality for elite travelers. Our Ambassadorial Suite features a king-size bed, city views, separate living area, and office space to ensure a luxurious and comfortable stay.',
+    price: 354150,
+    size: 100,
+    capacity: 4,
+    bedType: 'King Size',
+    amenities: [
+      'King-size bed',
+      'City view',
+      'Free Wi-Fi',
+      'Concierge services',
+      'Air conditioning',
+      'Separate Living Area',
+      'Office Space',
+      'Premium Amenities',
+      'Smart TV',
+      'Executive Lounge'
+    ],
+    images: [
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg'
+    ],
+    vrTourUrl: 'https://webobook.com/public/ambassadorial-suite-vr-tour'
+  },
+  {
+    id: 'presidential-suite',
+    name: 'Presidential Suite',
+    description: 'The ultimate in Golden Tulip Port Harcourt hotel. Luxurious, spacious, elegant, and designed for unforgettable stays.',
+    longDescription: 'The ultimate in Golden Tulip Port Harcourt hotel. Luxurious, spacious, elegant, and designed for unforgettable stays. Our Presidential Suite features a king-size bed, city views, luxury living space, and office space to ensure an unforgettable and comfortable stay.',
+    price: 520650,
+    size: 120,
+    capacity: 4,
+    bedType: 'King Size',
+    amenities: [
+      'King-size bed',
+      'City view',
+      'Free Wi-Fi',
+      'Concierge services',
+      'Premium dining',
+      'Air conditioning',
+      'Luxury Living Space',
+      'Office Space',
+      'Premium Amenities',
+      'Smart TV'
+    ],
+    images: [
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg',
+      '/images/rooms/placeholder-room.jpg'
+    ],
+    vrTourUrl: 'https://webobook.com/public/presidential-suite-vr-tour'
   }
 ];
 

@@ -57,7 +57,8 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/book" element={<BookPage />} />
             <Route path="/booking/:id" element={<BookingPage />} />
-            <Route path="/branch/:id" element={<BranchPage />} />
+            <Route path="/branch/:branchId" element={<BranchPage />} />
+            <Route path="/branches/:branchId" element={<BranchPage />} />
             <Route path="/rooms/:id" element={<RoomPage />} />
             <Route
               path="/booking"
@@ -73,14 +74,6 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="user" redirectTo="/auth">
                   <UserDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/branches/:id"
-              element={
-                <ProtectedRoute>
-                  <BranchPage />
                 </ProtectedRoute>
               }
             />
