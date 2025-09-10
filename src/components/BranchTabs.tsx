@@ -14,42 +14,32 @@ export const BranchTabs = ({ activeTab, onTabChange }: BranchTabsProps) => {
   
   const handleBranchClick = (branchId: string) => {
     onTabChange(branchId);
-    if (branchId === 'main') {
-      navigate('/');
-    }
+    navigate(`/branches/${branchId}`);
   };
   const branches = [
     { 
-      id: "main", 
-      name: "GRA", 
-      fullName: "Head Branch", 
-      location: "Government Reserved Area",
-      image: hotelExterior,
-      description: "Our flagship location"
+      id: "port-harcourt", 
+      name: "Golden Tulip Port Harcourt Hotel", 
+      location: "1c Evo Crescent Off Evo Road, GRA Phase II, Port Harcourt, Rivers State",
+      image: hotelExterior
     },
     { 
-      id: "waterlines", 
-      name: "Waterlines", 
-      fullName: "Waterlines Branch", 
-      location: "Port Harcourt",
-      image: hotelLobby,
-      description: "Waterfront luxury experience"
+      id: "stadium-31", 
+      name: "Golden Tulip Port Harcourt, 31 Stadium Rd.", 
+      location: "31 Ken Saro Wiwa, Stadium Road, Port Harcourt, Rivers State",
+      image: hotelLobby
     },
     { 
-      id: "airforce", 
-      name: "Airforce", 
-      fullName: "Airforce Base", 
-      location: "Port Harcourt",
-      image: luxurySuite,
-      description: "Premium business hotel"
+      id: "garden-city", 
+      name: "Golden Tulip Port Harcourt, Garden City", 
+      location: "63 Ken Saro Wiwa, Stadium Road, Port Harcourt, Rivers State",
+      image: luxurySuite
     },
     { 
-      id: "oyigbo", 
-      name: "Oyigbo", 
-      fullName: "Oyigbo Branch", 
-      location: "Rivers State",
-      image: restaurant,
-      description: "Serene getaway destination"
+      id: "evergreen", 
+      name: "Golden Tulip Port Harcourt, Evergreen", 
+      location: "Plot F35 Woke Street, Off Sani Abacha Road, GRA Phase III, Port Harcourt, Rivers State",
+      image: restaurant
     }
   ];
 
@@ -70,15 +60,9 @@ export const BranchTabs = ({ activeTab, onTabChange }: BranchTabsProps) => {
             {branches.map((branch) => (
               <div 
                 key={branch.id}
-                className="group block"
+                className="group block cursor-pointer"
                 onClick={() => handleBranchClick(branch.id)}
               >
-                {branch.id !== 'main' ? (
-                  <Link 
-                    to={`/branches/${branch.id}`}
-                    className="block"
-                    onClick={(e) => e.stopPropagation()}
-                  >
                 <div 
                   className={`luxury-branch-card group ${
                     activeTab === branch.id 
@@ -86,48 +70,23 @@ export const BranchTabs = ({ activeTab, onTabChange }: BranchTabsProps) => {
                       : "luxury-branch-card-inactive"
                   }`}
                 >
-                  <div className="relative overflow-hidden rounded-xl h-48">
+                  <div className="relative overflow-hidden rounded-xl h-64">
                     <img 
                       src={branch.image} 
-                      alt={branch.fullName}
+                      alt={branch.name}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0">
-                      <div className="backdrop-blur-sm bg-black/30 p-4 rounded-b-xl">
-                        <h3 className="text-xl font-serif font-bold text-white mb-1 text-gradient-gold-light">
+                      <div className="backdrop-blur-sm bg-black/60 p-4 rounded-b-xl">
+                        <h3 className="text-lg font-serif font-bold text-white mb-1">
                           {branch.name}
                         </h3>
-                        <p className="text-white/90 text-sm mb-1">{branch.location}</p>
-                        <p className="text-white/80 text-xs">{branch.description}</p>
+                        <p className="text-white/90 text-sm">{branch.location}</p>
                       </div>
                     </div>
                   </div>
-                  </div>
-                  </Link>
-                ) : (
-                  <div className="cursor-pointer">
-                    <div className="luxury-branch-card group">
-                      <div className="relative overflow-hidden rounded-xl h-48">
-                        <img 
-                          src={branch.image} 
-                          alt={branch.fullName}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                        <div className="absolute bottom-0 left-0 right-0">
-                          <div className="backdrop-blur-sm bg-black/30 p-4 rounded-b-xl">
-                            <h3 className="text-xl font-serif font-bold text-white mb-1 text-gradient-gold-light">
-                              {branch.name}
-                            </h3>
-                            <p className="text-white/90 text-sm mb-1">{branch.location}</p>
-                            <p className="text-white/80 text-xs">{branch.description}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
             ))}
           </div>
