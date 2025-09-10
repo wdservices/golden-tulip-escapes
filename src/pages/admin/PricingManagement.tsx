@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Edit, Hotel, Loader2, Tag } from "lucide-react";
+import { Plus, Trash2, Edit, Hotel, Loader2, Tag, Droplet } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 
@@ -249,7 +249,7 @@ const PricingManagement = () => {
             Room Pricing
           </TabsTrigger>
           <TabsTrigger value="spa" className="flex items-center gap-2">
-            <span className="h-4 w-4">💆</span>
+            <Droplet className="h-4 w-4" />
             Spa Services
           </TabsTrigger>
         </TabsList>
