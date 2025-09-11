@@ -180,17 +180,12 @@ const CorporateHallsPage: React.FC = () => {
                     <div className="mb-4 flex-grow">
                       <h4 className="font-semibold text-gradient-gold mb-3">Features</h4>
                       <ul className="space-y-2">
-                        {hall.features.slice(0, 4).map((feature, idx) => (
+                        {hall.features.map((feature, idx) => (
                           <li key={idx} className="text-sm text-muted-foreground flex items-center">
                             <Check className="h-3 w-3 mr-2 text-primary" />
                             {feature}
                           </li>
                         ))}
-                        {hall.features.length > 4 && (
-                          <li className="text-sm text-muted-foreground/70 italic">
-                            +{hall.features.length - 4} more features
-                          </li>
-                        )}
                       </ul>
                     </div>
 
