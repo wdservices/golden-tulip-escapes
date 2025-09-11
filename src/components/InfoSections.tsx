@@ -13,14 +13,142 @@ const eventTypes = [
   {
     id: "corporate",
     title: "Corporate Events",
-    description: "Host your next corporate event in our state-of-the-art facilities, equipped with the latest technology and professional support.",
+    description: "The Golden Tulip Port Harcourt Hotel is a perfect location to organize private business meetings, trainings, lectures, seminars, interviews, product launches, or for family gatherings and dinners.",
+    threeSixtyImages: [
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg"
+    ],
+    venues: [
+      {
+        name: "Anioma Hall",
+        capacity: "100 - 200 guests",
+        priceRange: "From ₦1,000,000 per day",
+        features: [
+          "Professional meeting rooms",
+          "Conference facilities",
+          "Catering services",
+          "Audio/Visual equipment",
+          "Dedicated event coordinator",
+          "High-speed Wi-Fi",
+          "Projector & screen",
+          "Microphone & sound system",
+          "Whiteboard & flip charts"
+        ]
+      },
+      {
+        name: "Abuja Hall",
+        capacity: "80 - 150 guests",
+        priceRange: "From ₦750,000 per day",
+        features: [
+          "Professional meeting rooms",
+          "Conference facilities",
+          "Catering services",
+          "Audio/Visual equipment",
+          "Dedicated event coordinator",
+          "High-speed Wi-Fi",
+          "Projector & screen",
+          "Microphone & sound system",
+          "Whiteboard & flip charts"
+        ]
+      },
+      {
+        name: "Lagos Hall",
+        capacity: "30 - 40 guests",
+        priceRange: "From ₦400,000 per day",
+        features: [
+          "Professional meeting rooms",
+          "Conference facilities",
+          "Catering services",
+          "Audio/Visual equipment",
+          "Dedicated event coordinator",
+          "High-speed Wi-Fi",
+          "Projector & screen",
+          "Microphone & sound system",
+          "Whiteboard & flip charts"
+        ]
+      },
+      {
+        name: "Rivers Hall - Boardroom",
+        capacity: "18 - 25 guests",
+        priceRange: "From ₦400,000 per day",
+        features: [
+          "Professional meeting rooms",
+          "Conference facilities",
+          "Catering services",
+          "Audio/Visual equipment",
+          "Dedicated event coordinator",
+          "High-speed Wi-Fi",
+          "Projector & screen",
+          "Microphone & sound system",
+          "Whiteboard & flip charts"
+        ]
+      },
+      {
+        name: "Kano Hall",
+        capacity: "18 - 25 guests",
+        priceRange: "From ₦300,000 per day",
+        features: [
+          "Professional meeting rooms",
+          "Conference facilities",
+          "Catering services",
+          "Audio/Visual equipment",
+          "Dedicated event coordinator",
+          "High-speed Wi-Fi",
+          "Projector & screen",
+          "Microphone & sound system",
+          "Whiteboard & flip charts"
+        ]
+      },
+      {
+        name: "The Marquee",
+        capacity: "40 - 100 guests",
+        priceRange: "From ₦500,000 per day",
+        features: [
+          "Professional meeting rooms",
+          "Conference facilities",
+          "Catering services",
+          "Audio/Visual equipment",
+          "Dedicated event coordinator",
+          "High-speed Wi-Fi",
+          "Projector & screen",
+          "Microphone & sound system",
+          "Whiteboard & flip charts"
+        ]
+      },
+      {
+        name: "The Pavilion/ Event Centre",
+        capacity: "100 - 300 guests",
+        priceRange: "From ₦3,000,000 per day",
+        features: [
+          "Professional meeting rooms",
+          "Conference facilities",
+          "Catering services",
+          "Audio/Visual equipment",
+          "Dedicated event coordinator",
+          "High-speed Wi-Fi",
+          "Projector & screen",
+          "Microphone & sound system",
+          "Whiteboard & flip charts"
+        ]
+      }
+    ],
     features: [
       "Professional meeting rooms",
       "Conference facilities",
       "Catering services",
       "Audio/Visual equipment"
     ],
-    capacity: "10 - 500 guests",
+    capacity: "18 - 300 guests",
     includes: [
       "Dedicated event coordinator",
       "High-speed Wi-Fi",
@@ -28,12 +156,26 @@ const eventTypes = [
       "Microphone & sound system",
       "Whiteboard & flip charts"
     ],
-    priceRange: "From ₦150,000 per day"
+    priceRange: "From ₦300,000 per day"
   },
   {
     id: "weddings",
     title: "Weddings",
     description: "Create magical moments in our beautiful venues, with expert wedding planners to bring your dream wedding to life.",
+    threeSixtyImages: [
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg"
+    ],
     features: [
       "Elegant ballrooms",
       "Outdoor ceremony spaces",
@@ -54,31 +196,49 @@ const eventTypes = [
     id: "special-occasions",
     title: "Special Occasions",
     description: "Celebrate life's special moments with us, from birthdays to anniversaries and everything in between.",
+    threeSixtyImages: [
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg",
+      "/images/hotel-360-preview.jpg"
+    ],
     features: [
-      "Private dining rooms",
       "Custom decoration",
       "Themed events",
-      "Entertainment options"
+      "Entertainment options",
+      "Custom menu planning"
     ],
     capacity: "10 - 200 guests",
     includes: [
-      "Custom menu planning",
       "Room setup and cleanup",
       "Audiovisual equipment",
       "Dedicated service staff",
       "Cake and dessert options"
     ],
-    priceRange: "From ₦100,000"
+    priceRange: "Custom packages available"
   }
 ];
 
 export const InfoSections = () => {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+  const [showAllEvents, setShowAllEvents] = useState<boolean>(false);
   
-  const handleLearnMore = (eventId: string) => {
-    setSelectedEvent(eventId);
+  const handleOpenDialog = (event: any) => {
+    if (event.id === "corporate") {
+      window.location.href = `/corporate-halls`;
+    } else {
+      setSelectedEvent(event.id);
+    }
   };
-  
+
   const handleCloseDialog = () => {
     setSelectedEvent(null);
   };
@@ -210,6 +370,30 @@ export const InfoSections = () => {
     { icon: Waves, name: "Swimming Pool", description: "Outdoor pool with poolside service" },
     { icon: Calendar, name: "Event Spaces", description: "Conference rooms and banquet halls" }
   ];
+
+  const allAmenities = [
+    "Free High-Speed Wi-Fi (Throughout the property)",
+    "Swimming Pool (Outdoor pool with poolside service)",
+    "Fitness Center (24/7 access with modern equipment)",
+    "Spa & Wellness Center (Massage, facials, and body treatments)",
+    "Restaurant & Bar (International and local cuisine)",
+    "Conference Rooms (Fully equipped for business meetings)",
+    "Business Center (Printing, copying, and secretarial services)",
+    "24/7 Front Desk",
+    "Airport Shuttle (Available on request)",
+    "Valet Parking (Complimentary parking service)",
+    "Secure Parking",
+    "Room Service (24-hour service)",
+    "Laundry & Dry Cleaning (Same-day service available)",
+    "24/7 Security (Professional security services)",
+    "Concierge Service (Tour arrangements and local recommendations)",
+    "Car Rental",
+    "Safe-in room",
+    "Awakening calls on request",
+    "Installations for people with disabilities"
+  ];
+  
+  const [showAllAmenities, setShowAllAmenities] = useState(false);
 
   return (
     <div className="space-y-16">
@@ -397,30 +581,47 @@ export const InfoSections = () => {
             <h2 className="text-4xl font-serif font-bold mb-4 text-gradient-gold">
               Events & Conferences
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Host memorable events in our elegant venues with professional event planning services
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+              The Golden Tulip Port Harcourt Hotel is a perfect location to organize private business meetings, trainings, lectures, seminars, interviews, product launches, or for family gatherings and dinners.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {eventTypes.map((event) => (
-              <Card key={event.id} className="card-luxury text-center h-full flex flex-col">
-                <CardContent className="p-8 flex-1 flex flex-col">
-                  <div className="flex-1">
-                    <Calendar className="h-12 w-12 text-primary mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-3">{event.title}</h3>
-                    <p className="text-muted-foreground mb-4">{event.features[0]}</p>
-                  </div>
-                  <Button 
-                    className="btn-outline-luxury mt-4"
-                    onClick={() => handleLearnMore(event.id)}
-                  >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {(showAllEvents ? eventTypes : eventTypes.slice(0, 3)).map((event, index) => (
+              <Card key={index} className="card-luxury group transition-all duration-500 h-full flex flex-col">
+                <CardContent className="flex flex-col items-center p-6 text-center">
+                  <Calendar className="h-16 w-16 text-primary mb-4" />
+                  <h3 className="text-2xl font-serif font-bold text-gradient-gold mb-2">{event.title}</h3>
+                  <p className="text-muted-foreground text-sm mb-4 flex-grow">{event.description}</p>
+                  <Button onClick={() => handleOpenDialog(event)} className="btn-luxury w-full">
                     Learn More
                   </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
+          
+          {!showAllEvents && eventTypes.length > 3 && (
+            <div className="text-center mt-8">
+              <Button 
+                onClick={() => setShowAllEvents(true)} 
+                className="btn-luxury"
+              >
+                View All Events
+              </Button>
+            </div>
+          )}
+          
+          {showAllEvents && (
+            <div className="text-center mt-8">
+              <Button 
+                onClick={() => setShowAllEvents(false)} 
+                className="btn-outline-luxury"
+              >
+                Show Less
+              </Button>
+            </div>
+          )}
           
           {/* Event Details Dialog */}
           <EventDetailsDialog 
@@ -443,17 +644,52 @@ export const InfoSections = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {amenities.map((amenity, index) => (
-              <Card key={index} className="card-luxury group hover:shadow-glow transition-all duration-300">
-                <CardContent className="p-6 text-center">
-                  <amenity.icon className="h-12 w-12 text-primary mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-                  <h3 className="text-lg font-semibold mb-2">{amenity.name}</h3>
-                  <p className="text-muted-foreground text-sm">{amenity.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {!showAllAmenities ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {amenities.map((amenity, index) => (
+                  <Card key={index} className="card-luxury group hover:shadow-glow transition-all duration-300">
+                    <CardContent className="p-6 text-center">
+                      <amenity.icon className="h-12 w-12 text-primary mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
+                      <h3 className="text-lg font-semibold mb-2">{amenity.name}</h3>
+                      <p className="text-muted-foreground text-sm">{amenity.description}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              <div className="text-center mt-8">
+                <Button 
+                  onClick={() => setShowAllAmenities(true)} 
+                  className="btn-luxury"
+                >
+                  View All Amenities
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {allAmenities.map((amenity, index) => (
+                  <Card key={index} className="card-luxury group hover:shadow-glow transition-all duration-300">
+                    <CardContent className="p-6 text-center">
+                      <div className="h-12 w-12 flex items-center justify-center mx-auto mb-4">
+                        <div className="w-3 h-3 rounded-full bg-primary"></div>
+                      </div>
+                      <p className="text-center">{amenity}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              <div className="text-center mt-8">
+                <Button 
+                  onClick={() => setShowAllAmenities(false)} 
+                  className="btn-luxury"
+                >
+                  Show Less
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </section>
     </div>

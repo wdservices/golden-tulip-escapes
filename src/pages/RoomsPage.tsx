@@ -19,53 +19,53 @@ export default function RoomsPage() {
 
       {/* Rooms Grid */}
       <section className="py-16 px-4 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="whitespace-nowrap overflow-x-auto pb-6 -mx-4 scrollbar-hide">
           {roomTypes.map((room) => (
-            <div key={room.id} className="bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700 hover:border-gold-400/50 transition-colors">
-              <div className="relative h-64">
-                <img 
-                  src={room.images?.[0] || '/placeholder-room.jpg'} 
-                  alt={room.name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-                  From ${room.price?.toLocaleString()}/night
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-xl font-bold">{room.name}</h3>
-                  <div className="flex items-center text-yellow-400">
-                    <Star className="w-5 h-5 fill-current" />
-                    <span className="ml-1">4.9</span>
+                <div key={room.id} className="inline-block w-80 mx-3 first:ml-0 last:mr-0 bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700 hover:border-gold-400/50 transition-colors" style={{ minWidth: '320px' }}>
+                  <div className="relative h-64">
+                    <img 
+                      src={room.images?.[0] || '/placeholder-room.jpg'} 
+                      alt={room.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                      From ${room.price?.toLocaleString()}/night
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-xl font-bold">{room.name}</h3>
+                      <div className="flex items-center text-yellow-400">
+                        <Star className="w-5 h-5 fill-current" />
+                        <span className="ml-1">4.9</span>
+                      </div>
+                    </div>
+                    <p className="text-gray-400 text-sm mb-4 line-clamp-2">{room.description}</p>
+                    
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <div className="flex items-center text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
+                        <Users className="w-3 h-3 mr-1" />
+                        {room.capacity} {room.capacity > 1 ? 'Guests' : 'Guest'}
+                      </div>
+                      <div className="flex items-center text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
+                        <span>Size: {room.size} m²</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center mt-4">
+                      <Link to={`/rooms/${room.id}`} className="group">
+                        <Button variant="link" className="text-gold-400 p-0 group-hover:underline">
+                          View Details <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                      </Link>
+                      <Link to={`/book?room=${room.id}`}>
+                        <Button className="bg-gold-500 hover:bg-gold-600 text-white">
+                          Book Now
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 </div>
-                <p className="text-gray-400 text-sm mb-4 line-clamp-2">{room.description}</p>
-                
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <div className="flex items-center text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
-                    <Users className="w-3 h-3 mr-1" />
-                    {room.capacity} {room.capacity > 1 ? 'Guests' : 'Guest'}
-                  </div>
-                  <div className="flex items-center text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
-                    <span>Size: {room.size} m²</span>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center mt-4">
-                  <Link to={`/rooms/${room.id}`} className="group">
-                    <Button variant="link" className="text-gold-400 p-0 group-hover:underline">
-                      View Details <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
-                  <Link to={`/book?room=${room.id}`}>
-                    <Button className="bg-gold-500 hover:bg-gold-600 text-white">
-                      Book Now
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
           ))}
         </div>
       </section>

@@ -17,6 +17,7 @@ import { UserDashboard } from "./pages/UserDashboard";
 import { BranchPage } from "./pages/BranchPage";
 import { ChatbotFloatingButton } from "./components/chat/ChatbotFloatingButton";
 import RoomPage from "./pages/rooms/RoomPage";
+import CorporateHallsPage from "./pages/CorporateHallsPage";
 
 // Lazy load admin components
 const BookingsPage = lazy(() => import("@/pages/admin/BookingsPage"));
@@ -60,6 +61,7 @@ const App = () => (
             <Route path="/branch/:branchId" element={<BranchPage />} />
             <Route path="/branches/:branchId" element={<BranchPage />} />
             <Route path="/rooms/:id" element={<RoomPage />} />
+            <Route path="/corporate-halls" element={<CorporateHallsPage />} />
             <Route
               path="/booking"
               element={

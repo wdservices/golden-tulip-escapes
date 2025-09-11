@@ -13,14 +13,6 @@ export const BranchTabs = ({ activeTab, onTabChange }: BranchTabsProps) => {
   const navigate = useNavigate();
   
   const handleBranchClick = (branchId: string) => {
-    // Deactivate navigation for the first location card (GRA/Port Harcourt Hotel)
-    if (branchId === "port-harcourt") {
-      // Just update the active tab but don't navigate
-      onTabChange(branchId);
-      return;
-    }
-    
-    // For other branches, update tab and navigate
     onTabChange(branchId);
     navigate(`/branches/${branchId}`);
   };
@@ -53,16 +45,16 @@ export const BranchTabs = ({ activeTab, onTabChange }: BranchTabsProps) => {
             Choose Your Golden Tulip Experience
           </h2>
           <p className="text-muted-foreground/80 max-w-2xl mx-auto text-lg">
-            Four premium locations across Rivers State, each offering unique luxury experiences
+            Three premium locations across Rivers State, each offering unique luxury experiences
           </p>
         </div>
         
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-2 gap-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-wrap md:flex-nowrap gap-4 md:gap-6">
             {branches.map((branch) => (
               <div 
                 key={branch.id}
-                className={`group block ${branch.id === "port-harcourt" ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
+                className="group block cursor-pointer flex-1 min-w-[320px] md:min-w-[380px]"
                 onClick={() => handleBranchClick(branch.id)}
               >
                 <div 
@@ -72,23 +64,16 @@ export const BranchTabs = ({ activeTab, onTabChange }: BranchTabsProps) => {
                       : "luxury-branch-card-inactive"
                   }`}
                 >
-                  <div className="relative overflow-hidden rounded-xl h-64">
+                  <div className="relative overflow-hidden rounded-xl h-56 md:h-64">
                     <img 
                       src={branch.image} 
                       alt={branch.name}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                    {branch.id === "port-harcourt" && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
-                        <span className="bg-red-600 text-white px-3 py-1 rounded-md font-bold transform rotate-12 text-lg">
-                          UNAVAILABLE
-                        </span>
-                      </div>
-                    )}
                     <div className="absolute bottom-0 left-0 right-0">
                       <div className="backdrop-blur-sm bg-black/60 p-4 rounded-b-xl">
-                        <h3 className="text-lg font-serif font-bold text-white mb-1">
+                        <h3 className="text-base font-serif font-bold text-white mb-1">
                           {branch.name}
                         </h3>
                         <p className="text-white/90 text-sm">{branch.location}</p>
