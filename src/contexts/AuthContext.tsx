@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { UserProfile } from '@/types/auth';
 import { auth, googleProvider, db } from '@/lib/firebase';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { createSession, endUserSessions } from '@/utils/session';
 import { 
   signInWithEmailAndPassword,
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
     
     // Check if user is admin based on email (only allow specific admin emails)
-    const adminEmails = ['admin@example.com'];
+    const adminEmails = ['admin@example.com', 'hello.goldentulip@gmail.com'];
     const isAdminUser = adminEmails.includes(user.email?.toLowerCase() || '');
     
     // Get creation and last sign-in times
@@ -94,6 +94,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (user && navigateFn) {
           navigateFn('/dashboard');
         }
+      }, (error) => {
+        console.error('Auth state change error:', error);
+        setIsLoading(false);
       });
     }
 
@@ -112,44 +115,62 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
       setIsLoading(true);
       
-      // Sign in with email and password
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // Create timeout promises for authentication and Firestore operations
+      const authTimeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Authentication timeout')), 10000)
+      );
+
+      const firestoreTimeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Firestore timeout')), 3000) // Reduced timeout for faster login
+      );
+
+      // Authenticate user with timeout
+      const userCredential = await Promise.race([
+        signInWithEmailAndPassword(auth, email, password),
+        authTimeoutPromise
+      ]);
+      
       const user = userCredential.user;
       
-      // Check for admin email
-      const isAdmin = email.toLowerCase() === 'hello.goldentulip@gmail.com';
+      // Check if user exists in Firestore with timeout, but don't wait for it
+      // This allows immediate navigation while data loads in background
+      const checkUserPromise = getDoc(doc(db, 'users', user.uid))
+        .catch(err => {
+          console.warn('User profile check failed:', err);
+          return { exists: () => false }; // Gracefully handle Firestore issues
+        });
+
+      // Don't wait for Firestore check, return immediately
+      const isAdminUser = ['admin@example.com', 'hello.goldentulip@gmail.com'].includes(user.email?.toLowerCase() || '');
       
-      // Update local user state
+      // Start background Firestore operations without blocking navigation
+      checkUserPromise.then(doc => {
+        if (!doc.exists()) {
+          // Create user profile if it doesn't exist
+          setDoc(doc(db, 'users', user.uid), {
+            name: user.displayName || email.split('@')[0],
+            email: user.email,
+            phone: user.phoneNumber || '',
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          }).catch(console.warn);
+        }
+      });
+
+      // Update local user state immediately
       const userProfile: UserProfile = {
         id: user.uid,
         email: user.email || '',
         name: user.displayName || '',
         displayName: user.displayName || '',
         photoURL: user.photoURL || '',
-        role: isAdmin ? 'admin' : 'user',
+        role: isAdminUser ? 'admin' : 'user',
         lastLogin: new Date().toISOString()
       };
       
       setCurrentUser(userProfile);
       
-      // Update Firestore in the background (don't await it)
-      const userRef = doc(db, 'users', user.uid);
-      const userData = {
-        ...userProfile,
-        lastLogin: serverTimestamp()
-      };
-      
-      setDoc(userRef, userData, { merge: true }).catch(firestoreError => {
-        console.warn('Firestore update warning:', firestoreError);
-      });
-      
-      // Create a new session (don't await to prevent blocking login)
-      createSession(user.uid).catch(error => {
-        console.warn('Session creation warning:', error);
-      });
-      
-      // Return the appropriate redirect path based on user role
-      return isAdmin ? '/admin' : '/dashboard';
+      return isAdminUser ? '/admin' : '/dashboard';
     } catch (error: any) {
       console.error('Login error:', error);
       setError(error.message || 'Failed to log in');

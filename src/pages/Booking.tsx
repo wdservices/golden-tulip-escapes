@@ -323,103 +323,48 @@ const Booking = () => {
                     </div>
                   </div>
 
-                      {/* Dates and Guests */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Check-in Date */}
-                        <div className="space-y-2">
-                          <Label className="text-base font-medium">Check-in Date</Label>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full justify-start text-left font-normal booking-date-input h-12",
-                                  !bookingData.checkInDate && "text-muted-foreground"
-                                )}
-                              >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {bookingData.checkInDate ? format(bookingData.checkInDate, "PPP") : "Select date"}
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={bookingData.checkInDate}
-                                onSelect={(date) => setBookingData(prev => ({ ...prev, checkInDate: date }))}
-                                disabled={(date) => date < new Date()}
-                                initialFocus
-                                className="p-3 pointer-events-auto"
-                              />
-                            </PopoverContent>
-                          </Popover>
+                      {/* Room Type Selection */}
+                  <div className="space-y-6">
+                    <Label className="text-2xl font-serif font-semibold text-gradient-gold mb-6 block">
+                      Select Your Luxury Room
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {roomTypes.map((room) => (
+                        <div
+                          key={room.id}
+                          className={`relative border-2 rounded-2xl p-6 cursor-pointer transition-all duration-500 ${
+                            bookingData.roomType === room.id
+                              ? 'border-amber-500 bg-gradient-to-br from-amber-500/20 via-amber-600/10 to-amber-700/5 shadow-2xl shadow-amber-500/30 transform scale-105'
+                              : 'border-border/30 bg-gradient-to-br from-card/60 to-card/40 hover:border-amber-400/50 hover:shadow-xl hover:shadow-amber-500/10'
+                          }`}
+                          onClick={() => setBookingData(prev => ({ ...prev, roomType: room.id }))}
+                        >
+                          <div className="relative overflow-hidden rounded-xl mb-4">
+                            <img
+                              src={room.image}
+                              alt={room.name}
+                              className="w-full h-48 object-cover rounded-xl transition-transform duration-500 hover:scale-110"
+                            />
+                            {bookingData.roomType === room.id && (
+                              <div className="absolute top-3 right-3 bg-amber-500 text-white p-2 rounded-full">
+                                <Check className="w-5 h-5" />
+                              </div>
+                            )}
+                          </div>
+                          <h3 className="font-serif font-bold text-2xl text-primary mb-2">{room.name}</h3>
+                          <p className="text-3xl font-bold text-gradient-gold mb-4">₦{room.price.toLocaleString()}/night</p>
+                          <div className="space-y-2">
+                            {room.features.map((feature, index) => (
+                              <div key={index} className="flex items-center text-muted-foreground">
+                                <Star className="w-4 h-4 mr-2 text-amber-500" />
+                                <span className="text-sm">{feature}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-
-                        {/* Check-out Date */}
-                        <div className="space-y-2">
-                          <Label className="text-base font-medium">Check-out Date</Label>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full justify-start text-left font-normal booking-date-input h-12",
-                                  !bookingData.checkOutDate && "text-muted-foreground"
-                                )}
-                              >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {bookingData.checkOutDate ? format(bookingData.checkOutDate, "PPP") : "Select date"}
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={bookingData.checkOutDate}
-                                onSelect={(date) => setBookingData(prev => ({ ...prev, checkOutDate: date }))}
-                                disabled={(date) => date <= (bookingData.checkInDate || new Date())}
-                                initialFocus
-                                className="p-3 pointer-events-auto"
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                      </div>
-
-                      {/* Guests */}
-                      <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label className="text-base font-medium flex items-center">
-                            <Users className="h-4 w-4 mr-2 text-primary" />
-                            Adults
-                          </Label>
-                          <Select value={bookingData.adults.toString()} onValueChange={(value) => setBookingData(prev => ({ ...prev, adults: parseInt(value) }))}>
-                            <SelectTrigger className="booking-select h-12">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="booking-dropdown">
-                              {[1, 2, 3, 4, 5, 6].map(num => (
-                                <SelectItem key={num} value={num.toString()} className="booking-dropdown-item">
-                                  {num} Adult{num > 1 ? 's' : ''}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-base font-medium">Children</Label>
-                          <Select value={bookingData.children.toString()} onValueChange={(value) => setBookingData(prev => ({ ...prev, children: parseInt(value) }))}>
-                            <SelectTrigger className="booking-select h-12">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="booking-dropdown">
-                              {[0, 1, 2, 3, 4].map(num => (
-                                <SelectItem key={num} value={num.toString()} className="booking-dropdown-item">
-                                  {num} {num === 1 ? 'Child' : 'Children'}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+                      ))}
+                    </div>
+                  </div>
                     </CardContent>
                   </Card>
 
@@ -524,70 +469,75 @@ const Booking = () => {
                 </form>
 
                 {/* Booking Summary Sidebar */}
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-1">
                   <div className="sticky top-24 space-y-6">
-                    <Card className="luxury-booking-card">
-                      <CardHeader>
-                        <CardTitle className="text-gradient-gold text-xl">Booking Summary</CardTitle>
+                    <Card className="card-luxury border-l-4 border-l-amber-500 shadow-glow">
+                      <CardHeader className="border-b border-amber-500/20">
+                        <CardTitle className="text-2xl font-serif text-gradient-gold">
+                          Booking Summary
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Your luxury reservation details
+                        </p>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent className="space-y-6 p-6">
                         {bookingData.branch && (
-                          <div className="summary-item">
-                            <div className="flex items-center mb-2">
-                              <MapPin className="h-4 w-4 mr-2 text-primary" />
-                              <span className="text-sm text-muted-foreground">Location</span>
+                          <div className="space-y-3">
+                            <div className="flex items-center">
+                              <MapPin className="h-5 w-5 mr-3 text-amber-500" />
+                              <span className="text-sm font-semibold text-gradient-gold">Location</span>
                             </div>
-                            <p className="font-medium">{branches.find(b => b.id === bookingData.branch)?.name}</p>
+                            <p className="font-medium text-primary ml-8">{branches.find(b => b.id === bookingData.branch)?.name}</p>
                           </div>
                         )}
 
                         {bookingData.roomType && (
-                          <div className="summary-item">
-                            <div className="flex items-center mb-2">
-                              <Bed className="h-4 w-4 mr-2 text-primary" />
-                              <span className="text-sm text-muted-foreground">Room Type</span>
+                          <div className="space-y-3">
+                            <div className="flex items-center">
+                              <Bed className="h-5 w-5 mr-3 text-amber-500" />
+                              <span className="text-sm font-semibold text-gradient-gold">Room Type</span>
                             </div>
-                            <p className="font-medium">{roomTypes.find(r => r.id === bookingData.roomType)?.name}</p>
+                            <p className="font-medium text-primary ml-8">{roomTypes.find(r => r.id === bookingData.roomType)?.name}</p>
                           </div>
                         )}
 
                         {bookingData.checkInDate && bookingData.checkOutDate && (
-                          <div className="summary-item">
-                            <div className="flex items-center mb-2">
-                              <CalendarIcon className="h-4 w-4 mr-2 text-primary" />
-                              <span className="text-sm text-muted-foreground">Stay Duration</span>
+                          <div className="space-y-3">
+                            <div className="flex items-center">
+                              <CalendarIcon className="h-5 w-5 mr-3 text-amber-500" />
+                              <span className="text-sm font-semibold text-gradient-gold">Stay Duration</span>
                             </div>
-                            <p className="font-medium">
+                            <p className="font-medium text-primary ml-8">
                               {Math.ceil((bookingData.checkOutDate.getTime() - bookingData.checkInDate.getTime()) / (1000 * 60 * 60 * 24))} nights
                             </p>
                           </div>
                         )}
 
-                        <div className="summary-item">
-                          <div className="flex items-center mb-2">
-                            <Users className="h-4 w-4 mr-2 text-primary" />
-                            <span className="text-sm text-muted-foreground">Guests</span>
+                        <div className="space-y-3">
+                          <div className="flex items-center">
+                            <Users className="h-5 w-5 mr-3 text-amber-500" />
+                            <span className="text-sm font-semibold text-gradient-gold">Guests</span>
                           </div>
-                          <p className="font-medium">{bookingData.adults} Adults, {bookingData.children} Children</p>
+                          <p className="font-medium text-primary ml-8">{bookingData.adults} Adults, {bookingData.children} Children</p>
                         </div>
 
-                        <div className="border-t pt-4 space-y-3">
-                          <div className="flex justify-between text-sm">
-                            <span>Room Rate</span>
-                            <span>₦{(roomTypes.find(r => r.id === bookingData.roomType)?.price || 0).toLocaleString()}</span>
+                        <div className="border-t border-amber-500/20 pt-6 space-y-4">
+                          <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Room Rate</span>
+                            <span className="font-semibold">₦{(roomTypes.find(r => r.id === bookingData.roomType)?.price || 0).toLocaleString()}</span>
                           </div>
                           {bookingData.addOns.length > 0 && (
-                            <div className="flex justify-between text-sm">
-                              <span>Add-ons</span>
-                              <span>₦{bookingData.addOns.reduce((total, addOnId) => {
+                            <div className="flex justify-between items-center">
+                              <span className="text-muted-foreground">Add-ons</span>
+                              <span className="font-semibold">₦{bookingData.addOns.reduce((total, addOnId) => {
                                 const addOn = addOns.find(a => a.id === addOnId);
                                 return total + (addOn ? addOn.price : 0);
                               }, 0).toLocaleString()}</span>
                             </div>
                           )}
-                          <div className="flex justify-between font-bold text-lg pt-3 border-t">
-                            <span className="text-gradient-gold">Total</span>
-                            <span className="text-gradient-gold">₦{calculateTotal().toLocaleString()}</span>
+                          <div className="flex justify-between items-center border-t border-amber-500/20 pt-4">
+                            <span className="text-lg font-serif font-bold text-gradient-gold">Total</span>
+                            <span className="text-2xl font-bold text-gradient-gold">₦{calculateTotal().toLocaleString()}</span>
                           </div>
                         </div>
 
@@ -633,18 +583,18 @@ const Booking = () => {
 
                         <Button
                           type="submit"
-                          className="btn-luxury w-full h-12 mt-6"
+                          className="btn-luxury w-full h-14 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                           disabled={isSubmitting}
                         >
                           {isSubmitting ? (
                             <>
-                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                              Processing...
+                              <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                              Processing Your Reservation...
                             </>
                           ) : (
                             <>
-                              <CreditCard className="h-4 w-4 mr-2" />
-                              {bookingData.bookForClient ? 'Book for Client' : 'Proceed to Payment'}
+                              <CreditCard className="h-5 w-5 mr-2" />
+                              {bookingData.bookForClient ? 'Book for Client' : 'Secure Your Luxury Stay'}
                             </>
                           )}
                         </Button>
@@ -652,18 +602,28 @@ const Booking = () => {
                     </Card>
 
                     {/* Trust Indicators */}
-                    <Card className="luxury-booking-card">
-                      <CardContent className="p-4">
-                        <div className="text-center space-y-2">
-                          <div className="flex justify-center space-x-2 text-xs text-muted-foreground">
-                            <span>🔒 Secure Payment</span>
-                            <span>•</span>
-                            <span>💯 Best Price Guarantee</span>
+                    <Card className="card-luxury bg-gradient-to-br from-amber-500/5 to-amber-600/5 border-amber-500/20">
+                      <CardContent className="p-6">
+                        <div className="text-center space-y-4">
+                          <div className="flex justify-center space-x-4 text-sm">
+                            <div className="flex items-center space-x-2 text-amber-600">
+                              <Shield className="w-5 h-5" />
+                              <span className="font-semibold">Secure Payment</span>
+                            </div>
+                            <div className="flex items-center space-x-2 text-amber-600">
+                              <Award className="w-5 h-5" />
+                              <span className="font-semibold">Best Price</span>
+                            </div>
                           </div>
-                          <div className="flex justify-center space-x-2 text-xs text-muted-foreground">
-                            <span>📞 24/7 Support</span>
-                            <span>•</span>
-                            <span>🚫 Free Cancellation</span>
+                          <div className="flex justify-center space-x-4 text-sm">
+                            <div className="flex items-center space-x-2 text-amber-600">
+                              <Phone className="w-5 h-5" />
+                              <span className="font-semibold">24/7 Support</span>
+                            </div>
+                            <div className="flex items-center space-x-2 text-amber-600">
+                              <RefreshCw className="w-5 h-5" />
+                              <span className="font-semibold">Free Cancellation</span>
+                            </div>
                           </div>
                         </div>
                       </CardContent>

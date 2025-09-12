@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, Users, Bed, User, ArrowLeft } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, Users, Bed, User, ArrowLeft, Shield, Clock, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,12 +39,12 @@ interface BookingFormData {
   specialRequests: string;
 }
 
-// Mock Data
+// Correct Branch Data from Landing Page
 const branches = [
-  { id: "port-harcourt", name: "Golden Tulip GRA", location: "Government Reserved Area, Port Harcourt" },
-  { id: "waterlines", name: "Golden Tulip Waterlines", location: "Waterfront, Port Harcourt" },
-  { id: "airforce", name: "Golden Tulip Airforce", location: "Airforce Base Area, Port Harcourt" },
-  { id: "oyigbo", name: "Golden Tulip Oyigbo", location: "Serene Retreat, Oyigbo, Rivers State" }
+  { id: "gra", name: "Golden Tulip Port Harcourt Hotel", location: "1c Evo Crescent Off Evo Road, GRA Phase II, Port Harcourt, Rivers State" },
+  { id: "stadium-31", name: "Golden Tulip Port Harcourt, 31 Stadium Rd.", location: "31 Ken Saro Wiwa, Stadium Road, Port Harcourt, Rivers State" },
+  { id: "garden-city", name: "Golden Tulip Port Harcourt, Garden City", location: "63 Ken Saro Wiwa, Stadium Road, Port Harcourt, Rivers State" },
+  { id: "evergreen", name: "Golden Tulip Port Harcourt, Evergreen", location: "Plot F35 Woke Street, Off Sani Abacha Road, GRA Phase III, Port Harcourt, Rivers State" }
 ];
 
 const roomTypes = [
@@ -236,19 +236,19 @@ const BookingPage = () => {
                             value={bookingData.branch}
                             onValueChange={(value) => setBookingData(prev => ({ ...prev, branch: value }))}
                           >
-                            <SelectTrigger className="h-14 pl-12 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors">
-                              <SelectValue placeholder="Choose your preferred location" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl">
-                              {branches.map(branch => (
-                                <SelectItem key={branch.id} value={branch.id} className="py-4 px-4 hover:bg-amber-50/50">
-                                  <div>
-                                    <div className="font-semibold text-amber-900">{branch.name}</div>
-                                    <div className="text-sm text-amber-700">{branch.location}</div>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
+                            <SelectTrigger className="h-14 pl-12 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors text-amber-900">
+                            <SelectValue placeholder="Choose your preferred location" />
+                          </SelectTrigger>
+                            <SelectContent className="bg-gradient-to-r from-amber-600 to-orange-600 backdrop-blur-sm rounded-xl shadow-2xl border-amber-200/50">
+                            {branches.map(branch => (
+                              <SelectItem key={branch.id} value={branch.id} className="py-4 px-4 hover:from-amber-700 hover:to-orange-700 focus:from-amber-700 focus:to-orange-700 transition-all duration-300 text-white">
+                                <div>
+                                  <div className="font-semibold text-white">{branch.name}</div>
+                                  <div className="text-sm text-amber-100">{branch.location}</div>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
                           </Select>
                         </div>
                       </div>
@@ -263,28 +263,24 @@ const BookingPage = () => {
                             value={bookingData.roomType}
                             onValueChange={(value) => setBookingData(prev => ({ ...prev, roomType: value }))}
                           >
-                            <SelectTrigger className="h-14 pl-12 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors">
-                              <SelectValue placeholder="Select your room type" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl min-w-[350px]">
-                              {roomTypes.map(room => (
-                                <SelectItem 
-                                  key={room.id} 
-                                  value={room.id}
-                                  className="py-4 px-4 hover:bg-amber-50/50"
-                                >
-                                  <div className="flex items-center justify-between w-full">
-                                    <div>
-                                      <div className="font-semibold text-amber-900">{room.name}</div>
-                                      <div className="text-sm text-amber-700 mt-1">{room.description}</div>
-                                    </div>
-                                    <div className="text-lg font-bold text-amber-600 ml-4">
-                                      {formatCurrency(room.price)}
-                                    </div>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
+                            <SelectTrigger className="h-14 pl-12 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors text-amber-900">
+                            <SelectValue placeholder="Select your room type" />
+                          </SelectTrigger>
+                            <SelectContent className="bg-gradient-to-r from-amber-600 to-orange-600 backdrop-blur-sm rounded-xl shadow-2xl border-amber-200/50 min-w-[350px]">
+                        {roomTypes.map(room => (
+                          <SelectItem key={room.id} value={room.id} className="py-4 px-4 hover:from-amber-700 hover:to-orange-700 focus:from-amber-700 focus:to-orange-700 transition-all duration-300 text-white">
+                            <div className="flex items-center justify-between w-full">
+                              <div>
+                                <div className="font-semibold text-white">{room.name}</div>
+                                <div className="text-sm text-amber-100 mt-1">{room.description}</div>
+                              </div>
+                              <div className="text-lg font-bold text-amber-100 ml-4">
+                                {formatCurrency(room.price)}
+                              </div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                           </Select>
                         </div>
                       </div>
@@ -298,15 +294,15 @@ const BookingPage = () => {
                           <PopoverTrigger asChild>
                             <Button
                               variant="outline"
-                              className="w-full justify-start text-left font-normal h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors"
-                            >
-                              <CalendarIcon className="mr-3 h-5 w-5 text-amber-600" />
-                              {bookingData.checkInDate ? (
-                                format(bookingData.checkInDate, "PPP")
-                              ) : (
-                                <span className="text-amber-700">Select check-in date</span>
-                              )}
-                            </Button>
+                            className="w-full justify-start text-left font-normal h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors text-amber-900"
+                          >
+                            <CalendarIcon className="mr-3 h-5 w-5 text-amber-600" />
+                            {bookingData.checkInDate ? (
+                              format(bookingData.checkInDate, "PPP")
+                            ) : (
+                              <span className="text-amber-700">Select check-in date</span>
+                            )}
+                          </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0 rounded-xl shadow-2xl" align="start">
                             <Calendar
@@ -327,16 +323,16 @@ const BookingPage = () => {
                           <PopoverTrigger asChild>
                             <Button
                               variant="outline"
-                              className="w-full justify-start text-left font-normal h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors"
-                              disabled={!bookingData.checkInDate}
-                            >
-                              <CalendarIcon className="mr-3 h-5 w-5 text-amber-600" />
-                              {bookingData.checkOutDate ? (
-                                format(bookingData.checkOutDate, "PPP")
-                              ) : (
-                                <span className="text-amber-700">Select check-out date</span>
-                              )}
-                            </Button>
+                            className="w-full justify-start text-left font-normal h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors text-amber-900"
+                            disabled={!bookingData.checkInDate}
+                          >
+                            <CalendarIcon className="mr-3 h-5 w-5 text-amber-600" />
+                            {bookingData.checkOutDate ? (
+                              format(bookingData.checkOutDate, "PPP")
+                            ) : (
+                              <span className="text-amber-700">Select check-out date</span>
+                            )}
+                          </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0 rounded-xl shadow-2xl" align="start">
                             <Calendar
@@ -367,12 +363,12 @@ const BookingPage = () => {
                             setBookingData(prev => ({ ...prev, adults: parseInt(value) }))
                           }
                         >
-                          <SelectTrigger className="h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors">
+                          <SelectTrigger className="h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors text-amber-900">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl">
+                          <SelectContent className="bg-gradient-to-r from-amber-600 to-orange-600 backdrop-blur-sm rounded-xl shadow-2xl border-amber-200/50">
                             {[1, 2, 3, 4, 5, 6].map(num => (
-                              <SelectItem key={num} value={num.toString()} className="py-3">
+                              <SelectItem key={num} value={num.toString()} className="py-3 text-white hover:from-amber-700 hover:to-orange-700 focus:from-amber-700 focus:to-orange-700 transition-all duration-300">
                                 {num} {num === 1 ? 'Adult' : 'Adults'}
                               </SelectItem>
                             ))}
@@ -388,12 +384,12 @@ const BookingPage = () => {
                             setBookingData(prev => ({ ...prev, children: parseInt(value) }))
                           }
                         >
-                          <SelectTrigger className="h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors">
+                          <SelectTrigger className="h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors text-amber-900">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl">
+                          <SelectContent className="bg-gradient-to-r from-amber-600 to-orange-600 backdrop-blur-sm rounded-xl shadow-2xl border-amber-200/50">
                             {[0, 1, 2, 3, 4].map(num => (
-                              <SelectItem key={num} value={num.toString()} className="py-3">
+                              <SelectItem key={num} value={num.toString()} className="py-3 text-white hover:from-amber-700 hover:to-orange-700 focus:from-amber-700 focus:to-orange-700 transition-all duration-300">
                                 {num} {num === 1 ? 'Child' : 'Children'}
                               </SelectItem>
                             ))}
@@ -417,7 +413,7 @@ const BookingPage = () => {
                             type="text" 
                             value={bookingData.firstName}
                             onChange={(e) => setBookingData(prev => ({ ...prev, firstName: e.target.value }))}
-                            className="h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors focus:ring-amber-500"
+                            className="h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors focus:ring-amber-500 text-amber-900 placeholder:text-amber-600/70"
                             placeholder="Enter your first name"
                             required
                           />
@@ -429,7 +425,7 @@ const BookingPage = () => {
                             type="text" 
                             value={bookingData.lastName}
                             onChange={(e) => setBookingData(prev => ({ ...prev, lastName: e.target.value }))}
-                            className="h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors focus:ring-amber-500"
+                            className="h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors focus:ring-amber-500 text-amber-900 placeholder:text-amber-600/70"
                             placeholder="Enter your last name"
                             required
                           />
@@ -441,7 +437,7 @@ const BookingPage = () => {
                             type="email" 
                             value={bookingData.email}
                             onChange={(e) => setBookingData(prev => ({ ...prev, email: e.target.value }))}
-                            className="h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors focus:ring-amber-500"
+                            className="h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors focus:ring-amber-500 text-amber-900 placeholder:text-amber-600/70"
                             placeholder="your.email@example.com"
                             required
                           />
@@ -453,7 +449,7 @@ const BookingPage = () => {
                             type="tel" 
                             value={bookingData.phone}
                             onChange={(e) => setBookingData(prev => ({ ...prev, phone: e.target.value }))}
-                            className="h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors focus:ring-amber-500"
+                            className="h-14 bg-white/80 border-amber-200/50 rounded-xl hover:border-amber-400 transition-colors focus:ring-amber-500 text-amber-900 placeholder:text-amber-600/70"
                             placeholder="+234 XXX XXX XXXX"
                             required
                           />
@@ -467,7 +463,7 @@ const BookingPage = () => {
                           onChange={(e) => setBookingData(prev => ({ ...prev, specialRequests: e.target.value }))}
                           rows={4}
                           placeholder="Tell us about any special requirements, dietary restrictions, or preferences..."
-                          className="w-full rounded-xl border-amber-200/50 bg-white/80 px-4 py-3 text-sm placeholder:text-amber-600/50 focus:ring-2 focus:ring-amber-500 focus:border-amber-400 transition-all"
+                          className="w-full rounded-xl border-amber-200/50 bg-white/80 px-4 py-3 text-sm text-amber-900 placeholder:text-amber-600/70 focus:ring-2 focus:ring-amber-500 focus:border-amber-400 transition-all"
                         />
                       </div>
                     </div>
@@ -479,46 +475,46 @@ const BookingPage = () => {
           <div className="lg:col-span-1">
             <div className="sticky top-8 space-y-6">
               {/* Booking Summary - Variant 3: Emerald */}
-              <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl border-l-4 border-l-emerald-500 overflow-hidden">
-                <div className="bg-gradient-to-r from-emerald-500/10 to-transparent px-8 py-6 border-b border-white/20">
-                  <h3 className="text-xl font-serif font-bold text-emerald-900">Booking Summary</h3>
+              <div className="bg-amber-800/60 backdrop-blur-sm rounded-2xl shadow-xl border-l-4 border-l-emerald-500 overflow-hidden">
+                <div className="bg-gradient-to-r from-emerald-500/20 to-transparent px-8 py-6 border-b border-amber-600/30">
+                  <h3 className="text-xl font-serif font-bold text-white">Booking Summary</h3>
                 </div>
                 <div className="p-8 space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-amber-700">Check-in:</span>
-                    <span className="font-medium text-amber-900">{bookingData.checkInDate ? format(bookingData.checkInDate, "MMM dd, yyyy") : "Not selected"}</span>
+                    <span className="text-sm text-amber-200">Check-in:</span>
+                    <span className="font-medium text-white">{bookingData.checkInDate ? format(bookingData.checkInDate, "MMM dd, yyyy") : "Not selected"}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-amber-700">Check-out:</span>
-                    <span className="font-medium text-amber-900">{bookingData.checkOutDate ? format(bookingData.checkOutDate, "MMM dd, yyyy") : "Not selected"}</span>
+                    <span className="text-sm text-amber-200">Check-out:</span>
+                    <span className="font-medium text-white">{bookingData.checkOutDate ? format(bookingData.checkOutDate, "MMM dd, yyyy") : "Not selected"}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-amber-700">Guests:</span>
-                    <span className="font-medium text-amber-900">
+                    <span className="text-sm text-amber-200">Guests:</span>
+                    <span className="font-medium text-white">
                       {bookingData.adults} Adult{bookingData.adults !== 1 ? 's' : ''}
                       {bookingData.children > 0 && `, ${bookingData.children} Child${bookingData.children !== 1 ? 'ren' : ''}`}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-amber-700">Location:</span>
-                    <span className="font-medium text-amber-900">{branches.find(b => b.id === bookingData.branch)?.name || "Not selected"}</span>
+                    <span className="text-sm text-amber-200">Location:</span>
+                    <span className="font-medium text-white">{branches.find(b => b.id === bookingData.branch)?.name || "Not selected"}</span>
                   </div>
                   {bookingData.roomType && (
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-amber-700">Room Type:</span>
-                      <span className="font-medium text-amber-900">{getSelectedRoom()?.name}</span>
+                      <span className="text-sm text-amber-200">Room Type:</span>
+                      <span className="font-medium text-white">{getSelectedRoom()?.name}</span>
                     </div>
                   )}
                   {bookingData.checkInDate && bookingData.checkOutDate && (
-                    <div className="pt-4 border-t border-white/20">
+                    <div className="pt-4 border-t border-amber-600/30">
                       <div className="flex justify-between items-center font-semibold">
-                        <span className="text-amber-900">Total Nights:</span>
-                        <span className="text-amber-900">{Math.ceil((bookingData.checkOutDate.getTime() - bookingData.checkInDate.getTime()) / (1000 * 60 * 60 * 24))}</span>
+                        <span className="text-amber-100">Total Nights:</span>
+                        <span className="text-amber-100">{Math.ceil((bookingData.checkOutDate.getTime() - bookingData.checkInDate.getTime()) / (1000 * 60 * 60 * 24))}</span>
                       </div>
                       {bookingData.roomType && (
                         <div className="flex justify-between items-center font-bold text-lg mt-2">
-                          <span className="text-gradient-gold">Total Price:</span>
-                          <span className="text-gradient-gold">{formatCurrency(calculateTotal())}</span>
+                          <span className="text-amber-300">Total Price:</span>
+                          <span className="text-amber-300">{formatCurrency(calculateTotal())}</span>
                         </div>
                       )}
                     </div>
@@ -527,19 +523,19 @@ const BookingPage = () => {
               </div>
 
               {/* Security Badges - Variant 4: Violet */}
-              <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl border-l-4 border-l-violet-500 overflow-hidden">
+              <div className="bg-amber-800/60 backdrop-blur-sm rounded-2xl shadow-xl border-l-4 border-l-violet-500 overflow-hidden">
                 <div className="p-6 space-y-4">
                   <div className="flex items-center space-x-3">
-                    <Shield className="h-5 w-5 text-amber-600" />
-                    <span className="text-sm text-amber-700">Secure Payment</span>
+                    <Shield className="h-5 w-5 text-amber-300" />
+                    <span className="text-sm text-amber-200">Secure Payment</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Clock className="h-5 w-5 text-amber-600" />
-                    <span className="text-sm text-amber-700">Free Cancellation</span>
+                    <Clock className="h-5 w-5 text-amber-300" />
+                    <span className="text-sm text-amber-200">Free Cancellation</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Headphones className="h-5 w-5 text-amber-600" />
-                    <span className="text-sm text-amber-700">24/7 Support</span>
+                    <Headphones className="h-5 w-5 text-amber-300" />
+                    <span className="text-sm text-amber-200">24/7 Support</span>
                   </div>
                 </div>
               </div>

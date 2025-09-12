@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Loader2, Lock, Mail, User, Phone } from "lucide-react";
+import { AlertCircle, Loader2, Lock, Mail, User, Phone, Eye, EyeOff } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 // Define separate schemas for login and register
@@ -73,10 +73,11 @@ const registerFields: FormField<RegisterFormData> = [
   },
 ];
 
-export const LoginForm = () => {
+export default function LoginForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const { login, register: registerUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -233,13 +234,28 @@ export const LoginForm = () => {
               </a>
             )}
           </div>
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            {...register("password")}
-            disabled={isLoading}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              {...register("password")}
+              disabled={isLoading}
+              className="pr-10"
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+              onClick={() => setShowPassword(!showPassword)}
+              disabled={isLoading}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
           {errors.password && (
             <p className="text-sm text-red-500">{errors.password.message}</p>
           )}

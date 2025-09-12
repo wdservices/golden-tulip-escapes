@@ -79,15 +79,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route path="/book" element={<Navigate to="/booking" replace />} />
-            <Route
-              path="/new-booking"
-              element={
-                <ProtectedRoute>
-                  <BookingPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/new-booking" element={<Navigate to="/booking" replace />} />
             {/* Admin Routes - Only accessible to admin users */}
             <Route path="/admin" element={
               <ProtectedRoute requiredRole="admin" redirectTo="/dashboard">

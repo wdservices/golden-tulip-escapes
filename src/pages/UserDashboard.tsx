@@ -11,7 +11,7 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { format } from "date-fns";
 import type { Booking } from "@/types/booking";
 import type { User } from "@/types/auth";
-import { collection, query, where, getDocs, orderBy, Timestamp } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, limit, Timestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { FeedbackForm } from "@/components/feedback/FeedbackForm";
@@ -53,29 +53,38 @@ export const UserDashboard = () => {
   const [searchParams] = useSearchParams();
   const [showWelcome, setShowWelcome] = useState(false);
 
-  // Helper function to load user data
+  // Helper function to load user data with performance optimizations
   const loadUserData = useCallback(async () => {
     if (!currentUser) return;
 
     setIsLoading(true);
+    
+    // Add timeout to prevent hanging requests
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Request timeout')), 10000)
+    );
+
     try {
       // Use the current user data from Firebase
       setProfileData(currentUser);
 
-      // Initialize empty arrays in case of errors
+      // Limit query to recent bookings for performance
       const bookings: Booking[] = [];
       const branchCount: Record<string, number> = {};
 
       try {
-        // Fetch user's bookings from Firestore
+        // Fetch user's bookings from Firestore with limit for performance
         const bookingsRef = collection(db, 'bookings');
         const q = query(
           bookingsRef, 
           where('userId', '==', currentUser.id),
-          orderBy('checkInDate', 'desc')
+          orderBy('checkInDate', 'desc'),
+          limit(50) // Limit to prevent performance issues
         );
 
-        const querySnapshot = await getDocs(q);
+        // Race between Firestore query and timeout
+        const queryPromise = getDocs(q);
+        const querySnapshot = await Promise.race([queryPromise, timeoutPromise]) as any;
         
         querySnapshot.forEach((doc) => {
           const data = doc.data() as Booking;
@@ -116,8 +125,8 @@ export const UserDashboard = () => {
       const past = bookings
         .filter(b => new Date(b.checkOutDate) < now);
 
-      // Calculate total nights stayed
-      const totalNights = past.reduce((total, booking) => {
+      // Calculate total nights stayed (limit to prevent performance issues)
+      const totalNights = past.slice(0, 20).reduce((total, booking) => {
         const checkIn = new Date(booking.checkInDate);
         const checkOut = new Date(booking.checkOutDate);
         const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
@@ -151,7 +160,10 @@ export const UserDashboard = () => {
 
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
-      toast.error("Failed to load dashboard data. Please refresh the page.");
+      // Don't show toast for network issues, just log them
+      if (error instanceof Error && !error.message.includes('network')) {
+        toast.error("Failed to load dashboard data. Please refresh the page.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -198,6 +210,12 @@ export const UserDashboard = () => {
         setIsLoading(false);
       });
     }
+
+    // Cleanup function to prevent Firestore connection issues
+    return () => {
+      // Reset loading state when component unmounts
+      setIsLoading(false);
+    };
   }, [currentUser, isAuthenticated, isAuthLoading, navigate, searchParams, loadUserData]);
 
   const handleViewBookingDetails = (bookingId: string) => {
@@ -248,7 +266,7 @@ export const UserDashboard = () => {
     </div>
   );
 
-  if (isAuthLoading || isLoading) {
+  if (isAuthLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <LoadingSpinner />
@@ -256,18 +274,11 @@ export const UserDashboard = () => {
     );
   }
 
-  // Handle case when user data couldn't be loaded
-  if (!profileData || !bookingStats) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-12">
-          <h2 className="text-xl font-semibold mb-2">Unable to load dashboard</h2>
-          <p className="text-muted-foreground mb-4">We couldn't load your dashboard data.</p>
-          <Button onClick={() => window.location.reload()}>Try Again</Button>
-        </div>
-      </div>
-    );
-  }
+  // Show dashboard skeleton immediately - no full page loading
+  const isInitialLoad = isLoading && !profileData;
+
+  // Show dashboard skeleton immediately - never show "unable to load" page
+  // Data will load in background or show empty states
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -288,22 +299,36 @@ export const UserDashboard = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <div className="flex items-center space-x-4">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src="" alt={profileData.name} />
-            <AvatarFallback className="bg-gradient-to-br from-amber-500 to-amber-700 text-white text-2xl">
-              {profileData.name
-                .split(" ")
-                .map(n => n[0])
-                .join("")}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <h1 className="text-2xl font-bold">{getGreeting()}, {profileData.name}</h1>
-            <p className="text-muted-foreground">Here's what's happening with your bookings</p>
-          </div>
+          {isInitialLoad ? (
+            <>
+              <div className="h-16 w-16 rounded-full bg-gray-200 animate-pulse" />
+              <div>
+                <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-2" />
+                <div className="h-4 w-64 bg-gray-200 rounded animate-pulse" />
+              </div>
+            </>
+          ) : (
+            <>
+              <Avatar className="h-16 w-16">
+                <AvatarImage src="" alt={profileData?.name || ''} />
+                <AvatarFallback className="bg-gradient-to-br from-amber-500 to-amber-700 text-white text-2xl">
+                  {profileData?.name
+                    .split(" ")
+                    .map(n => n[0])
+                    .join("")}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h1 className="text-2xl font-bold">
+                  {getGreeting()}, {profileData?.name || 'Guest'}
+                </h1>
+                <p className="text-muted-foreground">Here's what's happening with your bookings</p>
+              </div>
+            </>
+          )}
         </div>
         <div className="flex items-center space-x-4">
-          {showWelcome && <WelcomeMessage />}
+          {showWelcome && !isInitialLoad && <WelcomeMessage />}
           <Button 
             variant="outline" 
             onClick={handleLogout}
@@ -317,30 +342,44 @@ export const UserDashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-        <StatCard
-          title="Total Stays"
-          value={bookingStats?.totalBookings || 0}
-          icon={<Home className="h-4 w-4" />}
-          description={`${bookingStats?.totalNights || 0} total nights`}
-        />
-        <StatCard
-          title="Upcoming Trips"
-          value={upcomingBookings.length}
-          icon={<Calendar className="h-4 w-4" />}
-          description={`${upcomingBookings.length} booked`}
-        />
-        <StatCard
-          title="Loyalty Points"
-          value={bookingStats?.loyaltyPoints || 0}
-          icon={<Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
-          description="Earn more with each stay"
-        />
-        <StatCard
-          title="Favorite Branch"
-          value={bookingStats?.favoriteBranch || "—"}
-          icon={<MapPin className="h-4 w-4 text-rose-500" />}
-          description={getLastStayInfo()}
-        />
+        {isInitialLoad ? (
+          <>
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white rounded-lg border p-6">
+                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse mb-2" />
+                <div className="h-8 w-16 bg-gray-200 rounded animate-pulse mb-2" />
+                <div className="h-3 w-32 bg-gray-200 rounded animate-pulse" />
+              </div>
+            ))}
+          </>
+        ) : (
+          <>
+            <StatCard
+              title="Total Stays"
+              value={bookingStats?.totalBookings || 0}
+              icon={<Home className="h-4 w-4" />}
+              description={`${bookingStats?.totalNights || 0} total nights`}
+            />
+            <StatCard
+              title="Upcoming Trips"
+              value={upcomingBookings.length}
+              icon={<Calendar className="h-4 w-4" />}
+              description={`${upcomingBookings.length} booked`}
+            />
+            <StatCard
+              title="Loyalty Points"
+              value={bookingStats?.loyaltyPoints || 0}
+              icon={<Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
+              description="Earn more with each stay"
+            />
+            <StatCard
+              title="Favorite Branch"
+              value={bookingStats?.favoriteBranch || "—"}
+              icon={<MapPin className="h-4 w-4 text-rose-500" />}
+              description={getLastStayInfo()}
+            />
+          </>
+        )}
 
         {/* Upcoming Bookings List */}
         <div className="space-y-4">

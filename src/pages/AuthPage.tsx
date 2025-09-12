@@ -1,4 +1,4 @@
-import { LoginForm } from "@/components/auth/LoginForm";
+import LoginForm from "@/components/auth/LoginForm";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
