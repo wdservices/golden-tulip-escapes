@@ -6,10 +6,13 @@ import { HeroSection } from "@/components/HeroSection";
 import { BranchTabs } from "@/components/BranchTabs";
 import { InfoSections } from "@/components/InfoSections";
 import { Footer } from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const Index = () => {
   // Don't set main as the default active tab
   const [activeBranch, setActiveBranch] = useState<string | null>(null);
+  const [showFullAbout, setShowFullAbout] = useState(false);
 
   const handleTabChange = (branch: string) => {
     // If clicking on main branch, reset the active tab
@@ -49,30 +52,135 @@ const Index = () => {
         <InfoSections />
         
         {/* About Section */}
-        <section id="about" className="py-16 bg-gradient-card">
+        <section id="about" className="py-20 bg-gradient-to-b from-background via-muted/10 to-background">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-4xl font-serif font-bold mb-6 text-gradient-gold">
-                About Golden Tulip Hotels
-              </h2>
-              <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                Golden Tulip Hotels represents the pinnacle of luxury hospitality in Rivers State, Nigeria. 
-                With four strategically located branches, we offer our guests unparalleled access to the best 
-                of Port Harcourt and surrounding areas. Our commitment to excellence, combined with warm 
-                Nigerian hospitality, creates unforgettable experiences for business and leisure travelers alike.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-primary mb-2">4</div>
-                  <p className="text-muted-foreground">Premium Locations</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-primary mb-2">200+</div>
-                  <p className="text-muted-foreground">Luxury Rooms & Suites</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-primary mb-2">24/7</div>
-                  <p className="text-muted-foreground">Concierge Service</p>
+            <div className="max-w-5xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-5xl font-serif font-bold mb-4 text-gradient-gold">
+                  About Golden Tulip
+                </h2>
+                <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                  Experience unparalleled luxury and hospitality in the heart of Port Harcourt
+                </p>
+              </div>
+
+              <div className="card-luxury border-l-4 border-l-amber-500 bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-glow">
+                <div className="space-y-8">
+                  {/* Main Content - Collapsible */}
+                  <div className="prose prose-lg max-w-none">
+                    <div className={`transition-all duration-700 ease-in-out ${showFullAbout ? 'max-h-none' : 'max-h-80 overflow-hidden relative'}`}>
+                      <div className="space-y-6">
+                        <div>
+                          <h3 className="text-2xl font-serif font-semibold mb-4 text-gradient-gold">
+                            First-Class International Business Hotel
+                          </h3>
+                          <p className="text-muted-foreground leading-relaxed mb-4">
+                            Golden Tulip Port Harcourt Hotel is a first-class, 4-Star International Business Hotel. The Flagship Location is situated in the Government Residential Area (G. R. A) of Port Harcourt the Garden City of Nigeria. This Exclusive Residential Area provides a serene and peaceful environment while offering proximity to a variety of other attractions and amenities in the area.
+                          </p>
+                          <p className="text-muted-foreground leading-relaxed">
+                            Conveniently located 35 kilometers from Port Harcourt International Airport, the Hotel is close to the Port Harcourt Polo Club, Genesis Deluxe Cinema, Everyday Emporium Shopping Mall, Air Assault Golf Course and the Famous Shell Club.
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="text-2xl font-serif font-semibold mb-4 text-gradient-rose">
+                            Prime Location & Accessibility
+                          </h3>
+                          <p className="text-muted-foreground leading-relaxed">
+                            The Hotel is located 1km from the Aba Expressway with an easy access link to the Port Harcourt International Airport, Omagwa, 35km away. The primary means of transportation to and fro the Airport is by Taxi or Car Hire, both of which can be arranged at the Hotel's Reception.
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="text-2xl font-serif font-semibold mb-4 text-gradient-emerald">
+                            World-Class Accommodation
+                          </h3>
+                          <p className="text-muted-foreground leading-relaxed">
+                            The Golden Tulip Chain of Hotels is a living mix of our high international standard of full-service Hotel offering excellent accommodation in long stay suites, relaxing resorts and state of art meeting facilities. The Individual Golden Tulip Hotels deliver high quality accommodation combined with the unique personality of its staff and the local flavors of its location.
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="text-2xl font-serif font-semibold mb-4 text-gradient-violet">
+                            Luxury Amenities & Services
+                          </h3>
+                          <p className="text-muted-foreground leading-relaxed mb-4">
+                            This business-friendly Hotel has a portfolio of four properties in Port Harcourt with a combined capacity of 245 rooms fully air-conditioned Guestrooms equipped with separate Bathtubs and showers, make up/shaving mirrors, hair dryers and complimentary bath amenities.
+                          </p>
+                          <p className="text-muted-foreground leading-relaxed">
+                            Additional In-room facilities and general Hotel Services include electronic safes, Television equipped with premium satellite channels, turndown service, an iron and ironing board available on request. All 245 rooms are en-suite, offering complimentary high-speed internet, smoke detectors, Refrigerators, Coffee Tea Makers and Complimentary bottled water.
+                          </p>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-amber-500/10 to-rose-500/10 rounded-2xl p-6 border border-amber-500/20">
+                          <h3 className="text-2xl font-serif font-semibold mb-4 text-gradient-gold text-center">
+                            Our Commitment to Excellence
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <h4 className="text-lg font-semibold mb-3 text-primary">Room Features</h4>
+                              <ul className="text-muted-foreground space-y-1 text-sm">
+                                <li>• Ultra-firm comfortable mattresses with Orthopedic mattresses available on request</li>
+                                <li>• City/courtyard views from all rooms</li>
+                                <li>• All beds feature premium bedding</li>
+                                <li>• Climate-controlled air conditioning</li>
+                              </ul>
+                            </div>
+                            <div>
+                              <h4 className="text-lg font-semibold mb-3 text-primary">Service Philosophy</h4>
+                              <ul className="text-muted-foreground space-y-1 text-sm">
+                                <li>• Wide service options to fit customer choices</li>
+                                <li>• Uniform service standards of excellence across all properties</li>
+                                <li>• Refreshingly uncomplicated quality accommodation</li>
+                                <li>• Enduring value for money and refreshing guest experience</li>
+                              </ul>
+                            </div>
+                          </div>
+                          <div className="mt-6 text-center">
+                            <p className="text-lg font-semibold text-primary mb-2">Welcome to "Tranquility and Comfort in the heart of the Garden City"</p>
+                            <p className="text-muted-foreground">We promise an enduring value for money and the most refreshing guest experience at any of our hotel properties. "Playtime, Anytime"</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Read More Button */}
+                    <div className="text-center mt-8">
+                      <Button 
+                        onClick={() => setShowFullAbout(!showFullAbout)}
+                        className="btn-luxury group"
+                        size="lg"
+                      >
+                        {showFullAbout ? (
+                          <>
+                            Show Less
+                            <ChevronUp className="ml-2 h-4 w-4 group-hover:translate-y-[-2px] transition-transform" />
+                          </>
+                        ) : (
+                          <>
+                            Read More About Golden Tulip
+                            <ChevronDown className="ml-2 h-4 w-4 group-hover:translate-y-[2px] transition-transform" />
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Stats Section */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+                    <div className="text-center bg-gradient-to-br from-amber-500/10 to-amber-600/10 rounded-2xl p-6 border border-amber-500/20">
+                      <div className="text-4xl font-bold text-gradient-gold mb-2">4</div>
+                      <p className="text-muted-foreground font-medium">Premium Locations</p>
+                    </div>
+                    <div className="text-center bg-gradient-to-br from-rose-500/10 to-rose-600/10 rounded-2xl p-6 border border-rose-500/20">
+                      <div className="text-4xl font-bold text-gradient-rose mb-2">245</div>
+                      <p className="text-muted-foreground font-medium">Fully Equipped Rooms</p>
+                    </div>
+                    <div className="text-center bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 rounded-2xl p-6 border border-emerald-500/20">
+                      <div className="text-4xl font-bold text-gradient-emerald mb-2">24/7</div>
+                      <p className="text-muted-foreground font-medium">Full-Service Support</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

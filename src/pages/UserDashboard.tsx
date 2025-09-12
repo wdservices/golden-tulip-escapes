@@ -62,33 +62,40 @@ export const UserDashboard = () => {
       // Use the current user data from Firebase
       setProfileData(currentUser);
 
-      // Fetch user's bookings from Firestore
-      const bookingsRef = collection(db, 'bookings');
-      const q = query(
-        bookingsRef, 
-        where('userId', '==', currentUser.id),
-        orderBy('checkInDate', 'desc')
-      );
-
-      const querySnapshot = await getDocs(q);
+      // Initialize empty arrays in case of errors
       const bookings: Booking[] = [];
       const branchCount: Record<string, number> = {};
 
-      querySnapshot.forEach((doc) => {
-        const data = doc.data() as Booking;
-        bookings.push({
-          ...data,
-          id: doc.id,
-          checkInDate: (data.checkInDate as unknown as Timestamp).toDate().toISOString(),
-          checkOutDate: (data.checkOutDate as unknown as Timestamp).toDate().toISOString(),
-          bookingDate: (data.bookingDate as unknown as Timestamp).toDate().toISOString(),
-        });
+      try {
+        // Fetch user's bookings from Firestore
+        const bookingsRef = collection(db, 'bookings');
+        const q = query(
+          bookingsRef, 
+          where('userId', '==', currentUser.id),
+          orderBy('checkInDate', 'desc')
+        );
 
-        // Count branch usage
-        if (data.branchName) {
-          branchCount[data.branchName] = (branchCount[data.branchName] || 0) + 1;
-        }
-      });
+        const querySnapshot = await getDocs(q);
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data() as Booking;
+          bookings.push({
+            ...data,
+            id: doc.id,
+            checkInDate: (data.checkInDate as unknown as Timestamp).toDate().toISOString(),
+            checkOutDate: (data.checkOutDate as unknown as Timestamp).toDate().toISOString(),
+            bookingDate: (data.bookingDate as unknown as Timestamp).toDate().toISOString(),
+          });
+
+          // Count branch usage
+          if (data.branchName) {
+            branchCount[data.branchName] = (branchCount[data.branchName] || 0) + 1;
+          }
+        });
+      } catch (firestoreError) {
+        console.warn("Could not load booking data:", firestoreError);
+        // Continue with empty bookings array if Firestore fails
+      }
 
       // Calculate favorite branch
       let favorite = "";
@@ -185,7 +192,11 @@ export const UserDashboard = () => {
     }
 
     if (currentUser) {
-      loadUserData();
+      loadUserData().catch(error => {
+        console.error("Failed to load dashboard data:", error);
+        // Don't redirect on data loading failure, show the dashboard with error state
+        setIsLoading(false);
+      });
     }
   }, [currentUser, isAuthenticated, isAuthLoading, navigate, searchParams, loadUserData]);
 
@@ -406,11 +417,11 @@ export const UserDashboard = () => {
                     <Clock className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
                     <p className="text-muted-foreground">No upcoming stays</p>
                     <Button 
-                      className="mt-4" 
-                      onClick={() => navigate('/book')}
-                    >
-                      Book a Stay
-                    </Button>
+                    className="mt-4" 
+                    onClick={() => navigate('/booking')}
+                  >
+                    Book a Stay
+                  </Button>
                   </div>
                 )}
               </CardContent>
@@ -538,9 +549,9 @@ export const UserDashboard = () => {
               <Button 
                 onClick={() => {
                   if (!isAuthenticated) {
-                    navigate("/auth", { state: { from: "/book" } });
+                    navigate("/auth", { state: { from: "/booking" } });
                   } else {
-                    navigate("/book");
+                    navigate("/booking");
                   }
                 }}
               >

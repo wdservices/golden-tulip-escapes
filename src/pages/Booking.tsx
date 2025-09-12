@@ -264,91 +264,64 @@ const Booking = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header activeTab="" onTabChange={() => {}} />
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+      <Header activeTab="booking" onTabChange={() => {}} />
 
-      <main className="pt-20">
-        {/* Hero Section */}
-        <section className="py-16 bg-gradient-to-r from-black via-black/90 to-black relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-hero opacity-80"></div>
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="text-center">
-              <h1 className="text-5xl md:text-6xl font-serif font-bold mb-6 text-gradient-gold">
-                Reserve Your Golden Experience
-              </h1>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Book your stay at Nigeria's most luxurious hotel chain and create unforgettable memories
-              </p>
-            </div>
+      <main className="container mx-auto px-4 py-12">
+        <div className="max-w-7xl mx-auto">
+          {/* Luxury Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-serif font-bold text-gradient-gold mb-4">
+              Book Your Luxury Stay
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Experience unparalleled elegance and world-class hospitality at Golden Tulip Port Harcourt
+            </p>
           </div>
-        </section>
 
-        {/* Booking Form */}
-        <section className="py-12">
-          <div className="container mx-auto px-4">
-            <div className="max-w-7xl mx-auto">
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-
-                {/* Main Booking Form */}
-                <form onSubmit={handleSubmitBooking} className="lg:col-span-3 space-y-6">
-
-                  {/* Booking Details */}
-                  <Card className="luxury-booking-card">
-                    <CardHeader>
-                      <CardTitle className="text-gradient-gold text-2xl">
-                        Booking Details
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      {/* Location and Room Selection */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label className="text-base font-medium flex items-center">
-                            <MapPin className="h-4 w-4 mr-2 text-primary" />
-                            Select Location
-                          </Label>
-                          <Select value={bookingData.branch} onValueChange={(value) => setBookingData(prev => ({ ...prev, branch: value }))}>
-                            <SelectTrigger className="booking-select h-12">
-                              <SelectValue placeholder="Choose your preferred location" />
-                            </SelectTrigger>
-                            <SelectContent className="booking-dropdown">
-                              {branches.map((branch) => (
-                                <SelectItem key={branch.id} value={branch.id} className="booking-dropdown-item">
-                                  <div className="flex flex-col">
-                                    <span className="font-medium">{branch.name}</span>
-                                    <span className="text-xs text-muted-foreground">{branch.location}</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Booking Form */}
+            <div className="lg:col-span-2">
+              <Card className="card-luxury border-l-4 border-l-amber-500 shadow-glow">
+                <CardHeader className="border-b border-amber-500/20">
+                  <CardTitle className="text-3xl font-serif text-gradient-gold">
+                    Reservation Details
+                  </CardTitle>
+                  <p className="text-muted-foreground mt-2">
+                    Customize your perfect stay with our premium accommodations
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-8 p-8">
+                  {/* Branch Selection */}
+                  <div className="space-y-4">
+                    <Label className="text-lg font-semibold text-gradient-gold mb-4 block">
+                      Select Your Preferred Branch
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {branches.map((branch) => (
+                        <div
+                          key={branch.id}
+                          className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 ${
+                            bookingData.branch === branch.id
+                              ? 'border-amber-500 bg-gradient-to-br from-amber-500/10 to-amber-600/10 shadow-lg shadow-amber-500/20'
+                              : 'border-border/50 bg-card/50 hover:border-amber-400/50 hover:shadow-md'
+                          }`}
+                          onClick={() => setBookingData(prev => ({ ...prev, branch: branch.id }))}
+                        >
+                          <img
+                            src={branch.image}
+                            alt={branch.name}
+                            className="w-full h-40 object-cover rounded-lg mb-3"
+                          />
+                          <h3 className="font-semibold text-primary text-lg">{branch.name}</h3>
+                          <p className="text-sm text-muted-foreground flex items-center">
+                            <MapPin className="w-4 h-4 mr-2 text-amber-500" />
+                            {branch.location}
+                          </p>
                         </div>
-
-                        <div className="space-y-2">
-                          <Label className="text-base font-medium flex items-center">
-                            <Bed className="h-4 w-4 mr-2 text-primary" />
-                            Room Type
-                          </Label>
-                          <Select value={bookingData.roomType} onValueChange={(value) => setBookingData(prev => ({ ...prev, roomType: value }))}>
-                            <SelectTrigger className="booking-select h-12">
-                              <SelectValue placeholder="Choose room type" />
-                            </SelectTrigger>
-                            <SelectContent className="booking-dropdown">
-                              {roomTypes.map((room) => (
-                                <SelectItem key={room.id} value={room.id} className="booking-dropdown-item">
-                                  <div className="flex justify-between items-center w-full">
-                                    <div className="flex flex-col">
-                                      <span className="font-medium">{room.name}</span>
-                                      <span className="text-xs text-muted-foreground">{room.features[0]}</span>
-                                    </div>
-                                    <span className="text-primary font-semibold text-sm">₦{room.price.toLocaleString()}</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+                      ))}
+                    </div>
+                  </div>
 
                       {/* Dates and Guests */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

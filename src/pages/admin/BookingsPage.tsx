@@ -218,13 +218,16 @@ export const BookingsPage = () => {
                 Create Booking
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Create New Booking</DialogTitle>
               </DialogHeader>
-              <div className="p-6 text-center text-muted-foreground">
-                <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Booking creation form will be implemented here</p>
+              <div className="p-0">
+                <iframe 
+                  src="/booking" 
+                  className="w-full h-[80vh] border-0 rounded-lg"
+                  title="Create Booking"
+                />
               </div>
             </DialogContent>
           </Dialog>
