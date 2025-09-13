@@ -2,13 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { format } from 'date-fns';
+import { Home, Calendar, Star, Plus, CheckCircle, LogOut, Clock, MapPin, MessageSquare } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Calendar, CheckCircle, Clock, Home, MapPin, Star, LogOut, MessageSquare } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
-import { format } from "date-fns";
 import type { Booking } from "@/types/booking";
 import type { User } from "@/types/auth";
 import { collection, query, where, getDocs, orderBy, limit, Timestamp } from "firebase/firestore";
@@ -43,20 +43,44 @@ const LoadingSpinner = () => (
 export const UserDashboard = () => {
   const { currentUser, isAuthenticated, isLoading: isAuthLoading, logout } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
-  const [isLoading, setIsLoading] = useState(true);
-  const [profileData, setProfileData] = useState<User | null>(null);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [isLoading, setIsLoading] = useState(false); // Start with false to prevent initial loading screen
+  const [profileData, setProfileData] = useState<Partial<User>>({
+    name: '',
+    email: '',
+    joinDate: new Date().toISOString(),
+    lastLogin: new Date().toISOString(),
+    role: 'user',
+    preferences: {}
+  });
   const [bookingStats, setBookingStats] = useState<DashboardStats | null>(null);
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
   const [pastBookings, setPastBookings] = useState<Booking[]>([]);
   const [favoriteBranch, setFavoriteBranch] = useState<string>("");
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [showWelcome, setShowWelcome] = useState(false);
+
+  // Helper function to safely format dates
+  const safeFormatDate = (dateString?: string, formatString: string = 'MMM d, yyyy') => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return isNaN(date.getTime()) ? 'Invalid date' : format(date, formatString);
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
+  };
 
   // Helper function to load user data with performance optimizations
   const loadUserData = useCallback(async () => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      console.log('No current user available');
+      setIsLoading(false);
+      return;
+    }
 
+    console.log('Loading user data for:', currentUser.email, 'Role:', currentUser.role);
     setIsLoading(true);
     
     // Add timeout to prevent hanging requests
@@ -68,9 +92,16 @@ export const UserDashboard = () => {
       // Use the current user data from Firebase
       setProfileData(currentUser);
 
-      // Limit query to recent bookings for performance
+      // Initialize with default values
       const bookings: Booking[] = [];
       const branchCount: Record<string, number> = {};
+      let stats: DashboardStats = {
+        totalBookings: 0,
+        totalNights: 0,
+        loyaltyPoints: 0,
+        upcomingTrips: 0,
+        pastTrips: 0
+      };
 
       try {
         // Fetch user's bookings from Firestore with limit for performance
@@ -87,18 +118,24 @@ export const UserDashboard = () => {
         const querySnapshot = await Promise.race([queryPromise, timeoutPromise]) as any;
         
         querySnapshot.forEach((doc) => {
-          const data = doc.data() as Booking;
-          bookings.push({
-            ...data,
-            id: doc.id,
-            checkInDate: (data.checkInDate as unknown as Timestamp).toDate().toISOString(),
-            checkOutDate: (data.checkOutDate as unknown as Timestamp).toDate().toISOString(),
-            bookingDate: (data.bookingDate as unknown as Timestamp).toDate().toISOString(),
-          });
+          try {
+            const data = doc.data() as Booking;
+            const booking = {
+              ...data,
+              id: doc.id,
+              checkInDate: data.checkInDate ? (data.checkInDate as unknown as Timestamp).toDate().toISOString() : new Date().toISOString(),
+              checkOutDate: data.checkOutDate ? (data.checkOutDate as unknown as Timestamp).toDate().toISOString() : new Date().toISOString(),
+              bookingDate: data.bookingDate ? (data.bookingDate as unknown as Timestamp).toDate().toISOString() : new Date().toISOString(),
+            };
+            
+            bookings.push(booking);
 
-          // Count branch usage
-          if (data.branchName) {
-            branchCount[data.branchName] = (branchCount[data.branchName] || 0) + 1;
+            // Count branch usage
+            if (data.branchName) {
+              branchCount[data.branchName] = (branchCount[data.branchName] || 0) + 1;
+            }
+          } catch (error) {
+            console.error('Error processing booking data:', error);
           }
         });
       } catch (firestoreError) {
@@ -186,7 +223,7 @@ export const UserDashboard = () => {
     return "No past stays";
   }, [pastBookings, bookingStats]);
 
-  // Load user data on component mount and when auth state changes
+  // Load user data on mount and when currentUser changes
   useEffect(() => {
     // Check for welcome flag in URL
     if (searchParams.get('welcome') === 'true') {
@@ -194,19 +231,36 @@ export const UserDashboard = () => {
       toast.success('Registration successful! Welcome to Golden Tulip Escapes!', {
         duration: 5000,
       });
-      // Clean up the URL
-      navigate('/dashboard', { replace: true });
+      // Handle redirection if not authenticated
+      if (!isAuthenticated) {
+        navigate('/auth', { 
+          state: { 
+            from: window.location.pathname,
+            message: 'Please sign in to access your dashboard' 
+          }, 
+          replace: true 
+        });
+      }
     }
 
     if (!isAuthLoading && !isAuthenticated) {
-      navigate("/auth", { state: { from: "/dashboard" } });
+      navigate('/auth', { 
+        state: { 
+          from: window.location.pathname,
+          message: 'Please sign in to access your dashboard' 
+        }, 
+        replace: true 
+      });
       return;
     }
 
     if (currentUser) {
+      console.log('UserDashboard: Loading user data for:', currentUser.email);
+      setIsLoading(true);
       loadUserData().catch(error => {
         console.error("Failed to load dashboard data:", error);
-        // Don't redirect on data loading failure, show the dashboard with error state
+        toast.error("Failed to load dashboard data. Some features may be limited.");
+      }).finally(() => {
         setIsLoading(false);
       });
     }
@@ -249,6 +303,21 @@ export const UserDashboard = () => {
     return 'Good evening';
   };
 
+  // Set active tab based on URL
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['overview', 'bookings', 'profile', 'preferences', 'reviews'].includes(tab)) {
+      setActiveTab(tab);
+    }
+    
+    // Show welcome message on first visit
+    const hasSeenWelcome = sessionStorage.getItem('hasSeenWelcome');
+    if (!hasSeenWelcome) {
+      setShowWelcome(true);
+      sessionStorage.setItem('hasSeenWelcome', 'true');
+    }
+  }, [searchParams]);
+
   // Welcome Message Component
   const WelcomeMessage = () => (
     <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
@@ -266,22 +335,22 @@ export const UserDashboard = () => {
     </div>
   );
 
-  if (isAuthLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <LoadingSpinner />
-      </div>
-    );
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!currentUser) {
+      navigate('/auth');
+    }
+  }, [currentUser, navigate]);
+
+  if (!currentUser) {
+    return null;
   }
 
-  // Show dashboard skeleton immediately - no full page loading
-  const isInitialLoad = isLoading && !profileData;
-
-  // Show dashboard skeleton immediately - never show "unable to load" page
-  // Data will load in background or show empty states
+  // Show skeleton loaders during initial data load
+  const showSkeletons = isLoading && !profileData?.id;
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 animate-fade-in">
       {showWelcome && (
         <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
           <div className="flex">
@@ -299,7 +368,7 @@ export const UserDashboard = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <div className="flex items-center space-x-4">
-          {isInitialLoad ? (
+          {showSkeletons ? (
             <>
               <div className="h-16 w-16 rounded-full bg-gray-200 animate-pulse" />
               <div>
@@ -328,7 +397,7 @@ export const UserDashboard = () => {
           )}
         </div>
         <div className="flex items-center space-x-4">
-          {showWelcome && !isInitialLoad && <WelcomeMessage />}
+          {showWelcome && !showSkeletons && <WelcomeMessage />}
           <Button 
             variant="outline" 
             onClick={handleLogout}
@@ -342,27 +411,25 @@ export const UserDashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-        {isInitialLoad ? (
-          <>
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-lg border p-6">
-                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse mb-2" />
-                <div className="h-8 w-16 bg-gray-200 rounded animate-pulse mb-2" />
-                <div className="h-3 w-32 bg-gray-200 rounded animate-pulse" />
-              </div>
-            ))}
-          </>
+        {showSkeletons ? (
+          [1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white rounded-lg border p-6 animate-pulse">
+              <div className="h-4 w-1/2 bg-gray-200 rounded mb-2"></div>
+              <div className="h-8 w-3/4 bg-gray-200 rounded mb-2"></div>
+              <div className="h-3 w-2/3 bg-gray-100 rounded"></div>
+            </div>
+          ))
         ) : (
           <>
             <StatCard
               title="Total Stays"
-              value={bookingStats?.totalBookings || 0}
-              icon={<Home className="h-4 w-4" />}
-              description={`${bookingStats?.totalNights || 0} total nights`}
+              value={bookingStats?.totalBookings?.toString() || '0'}
+              icon={<Home className="h-4 w-4 text-muted-foreground" />}
+              description="All-time bookings"
             />
             <StatCard
               title="Upcoming Trips"
-              value={upcomingBookings.length}
+              value={upcomingBookings.length.toString()}
               icon={<Calendar className="h-4 w-4" />}
               description={`${upcomingBookings.length} booked`}
             />
@@ -678,22 +745,22 @@ export const UserDashboard = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Full Name</p>
-                  <p className="font-medium">{profileData.name}</p>
+                  <p className="font-medium">{profileData?.name || 'Not available'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="font-medium">{profileData.email}</p>
+                  <p className="font-medium">{profileData?.email || 'Not available'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Member Since</p>
                   <p className="font-medium">
-                    {format(new Date(profileData.joinDate), 'MMM d, yyyy')}
+                    {safeFormatDate(profileData?.joinDate)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Last Login</p>
                   <p className="font-medium">
-                    {format(new Date(profileData.lastLogin), 'MMM d, yyyy h:mm a')}
+                    {safeFormatDate(profileData.lastLogin, 'MMM d, yyyy h:mm a')}
                   </p>
                 </div>
               </div>

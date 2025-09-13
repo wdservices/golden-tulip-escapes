@@ -36,18 +36,18 @@ export const EventDetailsDialog = ({ isOpen, onClose, event }: EventDetailsDialo
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[1200px] max-h-[90vh] overflow-y-auto p-0 overflow-hidden bg-gradient-card border border-primary/20 shadow-2xl rounded-2xl">
+      <DialogContent className="sm:max-w-[1200px] max-h-[90vh] overflow-y-auto p-0 bg-gradient-card border border-primary/20 shadow-2xl rounded-2xl">
         <div className="relative">
-          <div className="p-6 md:p-10">
+          <div className="p-6 md:p-10 max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-3xl lg:text-4xl font-serif font-bold text-center mb-4 text-gradient-gold">
                 {event.title}
               </DialogTitle>
             </DialogHeader>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
               <div className="order-2 md:order-1">
-                <p className="text-muted-foreground mb-6 leading-relaxed">{event.description}</p>
+                <p className="text-muted-foreground mb-4 md:mb-6 leading-relaxed">{event.description}</p>
                 
                 {event.venues ? (
                   <div className="mt-8">
@@ -125,14 +125,14 @@ export const EventDetailsDialog = ({ isOpen, onClose, event }: EventDetailsDialo
                   </div>
                 )}
                 
-                <div className="mt-10 flex justify-center">
-                  <Button className="btn-luxury px-8 py-3">
+                <div className="mt-6 md:mt-10 flex justify-center">
+                  <Button className="btn-luxury px-6 md:px-8 py-2 md:py-3">
                     Inquire Now
                   </Button>
                 </div>
               </div>
               
-              <div className="h-96 md:h-auto order-1 md:order-2 bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl overflow-hidden border border-primary/20">
+              <div className="h-64 sm:h-80 md:h-auto order-1 md:order-2 bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl overflow-hidden border border-primary/20">
                 <div className="h-full relative">
                   <iframe 
                     id="evrFramePopup" 

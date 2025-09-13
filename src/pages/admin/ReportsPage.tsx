@@ -5,8 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Download, BarChart, LineChart, PieChart, Filter } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { addDays, format } from "date-fns";
-import { Calendar as CalendarIcon } from "@/components/ui/calendar";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ReportType = 'revenue' | 'occupancy' | 'bookings' | 'guests';
@@ -18,7 +19,7 @@ interface ReportData {
 
 export const ReportsPage = () => {
   const [activeTab, setActiveTab] = useState<ReportType>('revenue');
-  const [date, setDate] = useState<DateRange | undefined>({
+  const [date, setDate] = useState<DateRange>({
     from: addDays(new Date(), -30),
     to: new Date(),
   });
@@ -67,10 +68,11 @@ export const ReportsPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+      <div className="flex flex-col items-center space-y-4">
         <h2 className="text-2xl font-bold tracking-tight">Reports & Analytics</h2>
-        <div className="flex items-center space-x-2">
-          <Popover>
+        <div className="flex items-center justify-center w-full">
+          <div className="relative">
+            <Popover>
             <PopoverTrigger asChild>
               <Button
                 id="date"
@@ -84,21 +86,22 @@ export const ReportsPage = () => {
                 {dateRangeString}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
+            <PopoverContent className="w-auto p-0 z-[100]" align="start" side="bottom" sideOffset={5} style={{ position: 'absolute' }}>
+              <CalendarComponent
                 initialFocus
                 mode="range"
                 defaultMonth={date?.from}
                 selected={date}
-                onSelect={setDate}
+                onSelect={(range?: DateRange) => range && setDate(range)}
                 numberOfMonths={2}
               />
             </PopoverContent>
-          </Popover>
-          <Button variant="outline" size="icon">
+            </Popover>
+          </div>
+          <Button variant="outline" size="icon" className="ml-2">
             <Filter className="h-4 w-4" />
           </Button>
-          <Button>
+          <Button className="ml-2">
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>

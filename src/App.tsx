@@ -52,7 +52,10 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <ChatbotFloatingButton />
+          <Routes>
+            <Route path="/admin/*" element={null} />
+            <Route path="*" element={<ChatbotFloatingButton />} />
+          </Routes>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />

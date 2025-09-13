@@ -14,6 +14,7 @@ import {
   UserInfo
 } from 'firebase/auth';
 import { isAdmin } from '@/utils/auth';
+import { toast } from 'sonner';
 
 interface AuthContextType {
   currentUser: UserProfile | null;
@@ -71,37 +72,87 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Handle auth state changes
   useEffect(() => {
     let unsubscribe: () => void;
+    let firestoreCleanup: (() => void) | null = null;
 
     // Check for mock user in window object for development
     const checkForMockUser = () => {
       if (process.env.NODE_ENV === 'development' && window.mockUser) {
         console.log('Using mock user:', window.mockUser);
-        setCurrentUser(window.mockUser as UserProfile);
+        const mockProfile = window.mockUser as UserProfile;
+        setCurrentUser(mockProfile);
+        setFirebaseUser({
+          uid: mockProfile.id,
+          email: mockProfile.email,
+          displayName: mockProfile.name,
+          // Add other required Firebase User properties
+        } as FirebaseAuthUser);
         setIsLoading(false);
         return true;
       }
       return false;
     };
 
+    // Function to handle Firestore operations with retry logic
+    const handleFirestoreOperations = async (user: FirebaseAuthUser | null) => {
+      if (!user) return;
+      
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(userDocRef);
+        
+        if (!docSnap.exists()) {
+          await setDoc(userDocRef, {
+            name: user.displayName || user.email?.split('@')[0] || 'User',
+            email: user.email,
+            phone: user.phoneNumber || '',
+            photoURL: user.photoURL || '',
+            role: 'user',
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          });
+        }
+      } catch (error) {
+        console.error('Error in Firestore operations:', error);
+        // Don't block the auth flow if Firestore is down
+        toast.warning('Connected to auth service, but having trouble with database. Some features may be limited.');
+      }
+    };
+
     // Only check Firebase auth if we're not in a mock user session
     if (!checkForMockUser()) {
-      unsubscribe = onAuthStateChanged(auth, (user) => {
-        setFirebaseUser(user);
-        setCurrentUser(mapFirebaseUser(user));
-        setIsLoading(false);
-        
-        // If user is logged in and we have a navigation function, redirect to dashboard
-        if (user && navigateFn) {
-          navigateFn('/dashboard');
+      unsubscribe = onAuthStateChanged(auth, async (user) => {
+        try {
+          const userProfile = mapFirebaseUser(user);
+          setFirebaseUser(user);
+          setCurrentUser(userProfile);
+          
+          // Handle Firestore operations in the background
+          if (user) {
+            handleFirestoreOperations(user).catch(console.error);
+          }
+          
+          // Only redirect if not already on the dashboard or admin page
+          if (user && navigateFn) {
+            const currentPath = window.location.pathname;
+            if (!currentPath.startsWith('/dashboard') && !currentPath.startsWith('/admin')) {
+              navigateFn('/dashboard');
+            }
+          }
+        } catch (error) {
+          console.error('Error in auth state change:', error);
+        } finally {
+          setIsLoading(false);
         }
       }, (error) => {
         console.error('Auth state change error:', error);
+        setError(error.message);
         setIsLoading(false);
       });
     }
 
     return () => {
       if (unsubscribe) unsubscribe();
+      if (firestoreCleanup) firestoreCleanup();
     };
   }, [navigateFn]);
 
@@ -134,28 +185,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // Check if user exists in Firestore with timeout, but don't wait for it
       // This allows immediate navigation while data loads in background
-      const checkUserPromise = getDoc(doc(db, 'users', user.uid))
-        .catch(err => {
-          console.warn('User profile check failed:', err);
-          return { exists: () => false }; // Gracefully handle Firestore issues
-        });
-
-      // Don't wait for Firestore check, return immediately
-      const isAdminUser = ['admin@example.com', 'hello.goldentulip@gmail.com'].includes(user.email?.toLowerCase() || '');
+      const userDocRef = doc(db, 'users', user.uid);
       
-      // Start background Firestore operations without blocking navigation
-      checkUserPromise.then(doc => {
-        if (!doc.exists()) {
+      // Check if user document exists in Firestore
+      getDoc(userDocRef).then((docSnap) => {
+        if (!docSnap.exists()) {
           // Create user profile if it doesn't exist
-          setDoc(doc(db, 'users', user.uid), {
-            name: user.displayName || email.split('@')[0],
+          const userData = {
+            name: user.displayName || user.email?.split('@')[0] || 'User',
             email: user.email,
             phone: user.phoneNumber || '',
+            photoURL: user.photoURL || '',
+            role: 'user',
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
-          }).catch(console.warn);
+          };
+          
+          setDoc(userDocRef, userData).catch(err => {
+            console.warn('Error creating user profile:', err);
+          });
         }
+      }).catch(err => {
+        console.warn('Error checking user profile:', err);
       });
+
+      // Don't wait for Firestore check, return immediately
+      const isAdminUser = ['admin@example.com', 'hello.goldentulip@gmail.com']
+        .includes(user.email?.toLowerCase() || '');
 
       // Update local user state immediately
       const userProfile: UserProfile = {
@@ -243,6 +299,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsLoading(true);
       
+      // Clear the current user first to prevent ProtectedRoute from redirecting to auth
+      setCurrentUser(null);
+      setFirebaseUser(null);
+      
       // End all active sessions
       if (firebaseUser) {
         await endUserSessions(firebaseUser.uid);
@@ -251,14 +311,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Sign out from Firebase
       await firebaseSignOut(auth);
       
-      // Clear the current user
-      setCurrentUser(null);
-      setFirebaseUser(null);
-      
-      // Navigate to landing page instead of login
-      if (navigateFn) {
-        navigateFn('/');
-      }
+      // Navigate to landing page
+      window.location.href = '/';
       
       return true;
     } catch (error) {

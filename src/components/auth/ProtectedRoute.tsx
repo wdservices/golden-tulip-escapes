@@ -1,8 +1,9 @@
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { isAdmin } from "@/utils/auth";
+import { toast } from "sonner";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,36 +16,60 @@ export const ProtectedRoute = ({ children, requiredRole, redirectTo }: Protected
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Only redirect if we're not already on the login page
-    if (!isLoading && !isAuthenticated && location.pathname !== '/auth') {
-      navigate('/auth', { state: { from: location }, replace: true });
-    }
-  }, [isLoading, isAuthenticated, location, navigate]);
+  // Memoize the computed values to prevent unnecessary re-renders
+  const isUserAdmin = useMemo(() => isAdmin(currentUser), [currentUser]);
+  const isAuthorized = useMemo(() => {
+    if (!requiredRole) return true;
+    if (requiredRole === 'admin') return isUserAdmin;
+    return true; // Regular users are always authorized for user routes
+  }, [requiredRole, isUserAdmin]);
 
+  // Handle redirections based on auth state
+  useEffect(() => {
+    if (isLoading) return; // Don't do anything while loading
+
+    // Redirect to login if not authenticated
+    if (!isAuthenticated) {
+      const redirectPath = location.pathname !== '/auth' ? location.pathname : '/';
+      navigate('/auth', { 
+        state: { 
+          from: redirectPath,
+          message: 'Please sign in to continue' 
+        }, 
+        replace: true 
+      });
+      return;
+    }
+
+    // Check role-based access
+    if (requiredRole === 'admin' && !isUserAdmin) {
+      const targetPath = redirectTo || '/dashboard';
+      console.warn(`Unauthorized access attempt to ${location.pathname} by ${currentUser?.email}`);
+      toast.warning('You do not have permission to access this page');
+      navigate(targetPath, { replace: true });
+    }
+  }, [isLoading, isAuthenticated, isUserAdmin, requiredRole, redirectTo, location, navigate, currentUser]);
+
+  // Show loading state
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size={48} />
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center space-y-4 p-6 bg-card rounded-lg shadow-sm">
+          <LoadingSpinner size={48} />
+          <p className="text-muted-foreground">Checking your access...</p>
+        </div>
       </div>
     );
   }
 
+  // Handle unauthenticated users
   if (!isAuthenticated) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return null; // Navigation is handled by the effect
   }
 
-  // Check if user has the required role
-  if (requiredRole) {
-    const isUserAdmin = isAdmin(currentUser);
-    
-    // If user is not authorized for this route
-    if ((requiredRole === 'admin' && !isUserAdmin) || 
-        (requiredRole === 'user' && isUserAdmin)) {
-      // Redirect to the specified path or default paths based on user role
-      const redirectPath = redirectTo || (isUserAdmin ? '/admin' : '/dashboard');
-      return <Navigate to={redirectPath} replace />;
-    }
+  // Handle unauthorized access (wrong role)
+  if (requiredRole && !isAuthorized) {
+    return null; // Navigation is handled by the effect
   }
 
   return <>{children}</>;

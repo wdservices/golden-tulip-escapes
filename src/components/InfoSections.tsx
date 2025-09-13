@@ -230,6 +230,7 @@ const eventTypes = [
 export const InfoSections = () => {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [showAllEvents, setShowAllEvents] = useState<boolean>(false);
+  const [showAllSpaServices, setShowAllSpaServices] = useState(false);
   
   const handleOpenDialog = (event: any) => {
     if (event.id === "corporate") {
@@ -341,24 +342,24 @@ export const InfoSections = () => {
 
   const spaServices = [
     {
-      name: "Relaxation Massage",
-      duration: "60 minutes",
-      price: "₦25,000"
+      name: "Massage Therapy",
+      duration: "Available on request",
+      price: "Available on request"
     },
     {
-      name: "Deep Tissue Massage",
-      duration: "90 minutes",
-      price: "₦35,000"
+      name: "Body Treatment",
+      duration: "Available on request",
+      price: "Available on request"
     },
     {
-      name: "Couples Spa Package",
-      duration: "120 minutes",
-      price: "₦60,000"
+      name: "Facial Treatment",
+      duration: "Available on request",
+      price: "Available on request"
     },
     {
-      name: "Full Day Wellness",
-      duration: "6 hours",
-      price: "₦85,000"
+      name: "Body Wax",
+      duration: "Available on request",
+      price: "Available on request"
     }
   ];
 
@@ -447,60 +448,118 @@ export const InfoSections = () => {
         </div>
       </section>
 
-      {/* Dining Section */}
-      <section id="dining" className="py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/90"></div>
-        <div className="container mx-auto px-4 relative z-10">
+      {/* Culinary Artistry Section */}
+      <section id="dining" className="py-20 bg-gradient-to-b from-background to-muted/10">
+        <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-5xl font-serif font-bold mb-6 text-gradient-gold">
-              Culinary Artistry
+              Dining Options
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Embark on an extraordinary gastronomic journey crafted by world-renowned chefs
+              Discover exceptional culinary experiences crafted by our award-winning chefs
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-            {diningOptions.map((option, index) => (
-              <div key={index} className="dining-experience-card group">
-                <div className="relative overflow-hidden rounded-2xl h-64 mb-6">
-                  <img
-                    src={restaurant}
-                    alt={option.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                  <div className="absolute top-4 right-4">
-                    <div className="glass-badge">
-                      <Utensils className="h-4 w-4 text-primary" />
+          <div className="max-w-6xl mx-auto">
+            <div className="bg-card rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-glow transition-all duration-300">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Anioma Restaurant - Now smaller and integrated */}
+                <div className="lg:col-span-2">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="md:w-1/4">
+                      <div className="w-full h-32 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl flex items-center justify-center mb-4">
+                        <svg className="h-12 w-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h18M3 21h18M12 3v18" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="md:w-3/4">
+                      <h3 className="text-2xl font-serif font-bold text-gradient-gold mb-3">
+                        Anioma Restaurant
+                      </h3>
+                      <p className="text-sm font-semibold text-primary mb-2">Fine Dining Restaurant</p>
+                      <p className="text-muted-foreground mb-3 text-sm leading-relaxed">
+                        Our famous Anioma Restaurant offers excellent cuisine with exotic buffet and à la carte menu for both continental and African dishes.
+                      </p>
+                      <div className="mb-2">
+                        <span className="text-sm font-semibold text-primary">Cuisine: </span>
+                        <span className="text-muted-foreground text-sm">International & Nigerian</span>
+                      </div>
+                      <div className="mb-2">
+                        <span className="text-sm font-semibold text-primary">Hours: </span>
+                        <span className="text-muted-foreground text-sm">6:00 AM - 10:00 PM</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <h3 className="text-2xl font-serif font-bold text-gradient-gold-light mb-2">
-                      {option.name}
-                    </h3>
-                    <p className="text-primary/90 font-medium text-sm mb-1">{option.type}</p>
+                  
+                  <div className="mt-4 pt-4 border-t border-border/50">
+                    <h4 className="text-md font-semibold text-primary mb-3">Features</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                        <span className="text-xs text-muted-foreground">Breakfast buffet</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                        <span className="text-xs text-muted-foreground">Buffet & À la carte</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                        <span className="text-xs text-muted-foreground">Sunday Brunch</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                        <span className="text-xs text-muted-foreground">Private dining</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="px-2">
-                  <p className="text-muted-foreground mb-3 text-sm">{option.cuisine}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground/70">{option.hours}</span>
-                    <Button size="sm" className="btn-luxury-sm">
-                      Explore Menu
-                    </Button>
+
+                {/* Bubbles Bar & Room Service - Now integrated into the main card */}
+                <div className="space-y-4">
+                  {/* Bubbles Bar */}
+                  <div className="bg-muted/30 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg className="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-serif font-bold text-gradient-gold mb-1">
+                          Bubbles Bar
+                        </h3>
+                        <p className="text-xs font-semibold text-primary mb-1">Bar & Lounge</p>
+                        <p className="text-xs text-muted-foreground mb-1">
+                          Cocktails, mocktails & finger foods in a cozy environment.
+                        </p>
+                        <p className="text-xs text-muted-foreground">Hours: 24hrs</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Room Service */}
+                  <div className="bg-muted/30 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg className="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-serif font-bold text-gradient-gold mb-1">
+                          Room Service
+                        </h3>
+                        <p className="text-xs text-muted-foreground mb-1">
+                          À la carte menu available 24/7 for continental & African dishes.
+                        </p>
+                        <p className="text-xs text-muted-foreground">Available: 24/7</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <div className="inline-flex items-center space-x-4 bg-black/30 backdrop-blur-lg border border-primary/20 rounded-full px-8 py-4">
-              <span className="text-gradient-gold font-semibold">Reserve Your Table</span>
-              <Button className="btn-luxury">
-                Book Now
-              </Button>
             </div>
           </div>
         </div>
@@ -545,9 +604,9 @@ export const InfoSections = () => {
 
               {/* Spa Services Section */}
               <div className="space-y-4">
-                {spaServices.map((service, index) => (
+                {(showAllSpaServices ? spaServices : spaServices.slice(0, 2)).map((service, index) => (
                   <div key={index} className="spa-service-card group">
-                    <div className="flex items-center justify-between p-6">
+                    <div className="flex items-start justify-between p-6">
                       <div className="flex-1">
                         <div className="flex items-center mb-3">
                           <div className="glass-badge mr-3">
@@ -557,7 +616,12 @@ export const InfoSections = () => {
                             {service.name}
                           </h3>
                         </div>
-                        <p className="text-muted-foreground text-sm mb-2">{service.duration}</p>
+                        <p className="text-muted-foreground text-sm mb-3 leading-relaxed">
+                          {service.name === "Massage Therapy" && "Indulge in a bespoke full-body massage that blends expert touch with the finest oils and techniques. Each session is a personalized escape designed to melt away tension, stimulate circulation, and restore inner harmony in a serene, upscale setting."}
+                          {service.name === "Body Treatment" && "Elevate your wellness with our signature body treatment—a decadent experience that combines exfoliation, and nourishing hydration. Designed to detoxify, tone, and revitalize from head to toe in an ambiance of refined elegance."}
+                          {service.name === "Facial Treatment" && "Immerse yourself in luxurious facials designed to address specific dermatological concerns, including acne, dehydration, and aging. Utilizing medical-grade products and advanced techniques, this treatment promotes optimal skin health and visible improvement."}
+                          {service.name === "Body Wax" && "Experience silky-smooth skin with our premium waxing service, using the finest waxes and soothing care treatments. Delivered in a plush, private environment for ultimate comfort and confidence."}
+                        </p>
                         <div className="flex items-center space-x-4">
                           <div className="text-2xl font-bold text-primary">{service.price}</div>
                           <Button size="sm" className="btn-luxury-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -568,6 +632,28 @@ export const InfoSections = () => {
                     </div>
                   </div>
                 ))}
+                
+                {!showAllSpaServices && spaServices.length > 2 && (
+                  <div className="text-center pt-4">
+                    <Button 
+                      onClick={() => setShowAllSpaServices(true)} 
+                      className="btn-luxury"
+                    >
+                      View More Services
+                    </Button>
+                  </div>
+                )}
+                
+                {showAllSpaServices && (
+                  <div className="text-center pt-4">
+                    <Button 
+                      onClick={() => setShowAllSpaServices(false)} 
+                      className="btn-outline-luxury"
+                    >
+                      Show Less
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -690,6 +776,119 @@ export const InfoSections = () => {
               </div>
             </>
           )}
+        </div>
+      </section>
+
+      {/* Hotel Information Section */}
+      <section id="info" className="py-20 bg-gradient-to-b from-muted/20 to-transparent">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-serif font-bold mb-6 text-gradient-gold">
+              Essential Information
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Everything you need to know for a seamless stay
+            </p>
+          </div>
+
+          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Operating Hours */}
+            <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-glow transition-all duration-300">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-serif font-bold text-gradient-gold mb-2">Operating Hours</h3>
+              </div>
+              <div className="space-y-3 text-center">
+                <div className="flex justify-between items-center py-2 border-b border-border/50">
+                  <span className="text-muted-foreground">Check-in</span>
+                  <span className="font-semibold text-primary">2:00 PM</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-border/50">
+                  <span className="text-muted-foreground">Check-out</span>
+                  <span className="font-semibold text-primary">12:00 PM</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-border/50">
+                  <span className="text-muted-foreground">Front Desk</span>
+                  <span className="font-semibold text-primary">24/7</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-border/50">
+                  <span className="text-muted-foreground">Restaurant</span>
+                  <span className="font-semibold text-primary">6:00 AM - 10:00 PM</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-muted-foreground">Bar</span>
+                  <span className="font-semibold text-primary">24 Hours</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Methods */}
+            <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-glow transition-all duration-300">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-serif font-bold text-gradient-gold mb-2">Payment Methods</h3>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <span className="text-muted-foreground">Cash (NGN, USD)</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <span className="text-muted-foreground">Credit/Debit Cards</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <span className="text-muted-foreground">Bank Transfer</span>
+                </div>
+                <div className="mt-4 text-sm text-muted-foreground">
+                  <span className="font-semibold">Accepted Cards:</span> Visa, Mastercard, Verve
+                </div>
+              </div>
+            </div>
+
+            {/* Policies */}
+            <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-glow transition-all duration-300">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-serif font-bold text-gradient-gold mb-2">Policies</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center py-2 border-b border-border/50">
+                  <span className="text-muted-foreground">Cancellation</span>
+                  <span className="font-semibold text-primary text-sm">24 hours prior</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-border/50">
+                  <span className="text-muted-foreground">Children</span>
+                  <span className="font-semibold text-primary text-sm">Under 12 stay free</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-border/50">
+                  <span className="text-muted-foreground">Pets</span>
+                  <span className="font-semibold text-primary text-sm">Not allowed</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-border/50">
+                  <span className="text-muted-foreground">Smoking</span>
+                  <span className="font-semibold text-primary text-sm">Designated areas</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-muted-foreground">ID Required</span>
+                  <span className="font-semibold text-primary text-sm">Valid photo ID</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>

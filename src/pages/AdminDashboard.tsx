@@ -40,6 +40,8 @@ import {
   DollarSign,
   TrendingUp,
   Tag,
+  LogOut, 
+  ArrowLeft
 } from "lucide-react";
 
 // Import components
@@ -178,10 +180,16 @@ const AdminDashboard = () => {
   const getActiveTab = () => {
     const path = location.pathname;
     if (path === '/admin' || path === '/admin/') return 'dashboard';
-    return path.split('/admin/')[1] || 'dashboard';
+    const segment = path.split('/admin/')[1]?.split('/')[0];
+    return segment || 'dashboard';
   };
   
   const activeTab = getActiveTab();
+  
+  // Handle navigation to admin routes
+  const handleNavigation = (path: string) => {
+    navigate(path);
+  };
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
   const [newAd, setNewAd] = useState<Ad>({
     title: "",
@@ -255,12 +263,24 @@ const AdminDashboard = () => {
                 key={item.id}
                 variant={activeTab === item.id ? 'secondary' : 'ghost'}
                 className={`w-full justify-start ${!isSidebarOpen ? 'justify-center' : ''}`}
-                onClick={() => navigate(`/admin/${item.id === 'dashboard' ? '' : item.id}`)}
+                onClick={() => handleNavigation(item.id === 'dashboard' ? '/admin' : `/admin/${item.id}`)}
               >
                 <item.icon className="h-5 w-5" />
                 {isSidebarOpen && <span className="ml-2">{item.label}</span>}
               </Button>
             ))}
+          </div>
+          
+          {/* Exit Button */}
+          <div className="mt-auto p-4 border-t">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => window.location.href = '/'}
+            >
+              <ArrowLeft className="h-5 w-5 mr-2" />
+              {isSidebarOpen && <span>Exit to Home</span>}
+            </Button>
           </div>
         </nav>
       </div>

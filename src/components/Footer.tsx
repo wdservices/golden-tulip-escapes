@@ -64,14 +64,31 @@ export const Footer = () => {
               Experience unparalleled luxury and hospitality across our four premium locations in Rivers State, Nigeria.
             </p>
             <div className="flex space-x-4">
-              <Button variant="ghost" size="sm" className="p-2 hover:text-primary">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="p-2 hover:text-primary"
+                onClick={() => window.open('https://www.facebook.com/729416683793056?ref=_xav_ig_profile_page_web', '_blank')}
+              >
                 <Facebook className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="sm" className="p-2 hover:text-primary">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="p-2 hover:text-primary"
+                onClick={() => window.open('https://www.instagram.com/goldentulipphchotels/#', '_blank')}
+              >
                 <Instagram className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="sm" className="p-2 hover:text-primary">
-                <Twitter className="h-5 w-5" />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="p-2 hover:text-primary"
+                onClick={() => window.open('https://www.tiktok.com/@goldentulipporthar?_t=ZM-8zbeMrCagFx&_r=1', '_blank')}
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19.589 6.686a4.039 4.039 0 0 1-2.25-2.605 4.03 4.03 0 0 0-2.348-1.523C14.34 2.447 12.03 2 9.857 2 7.684 2 5.374 2.447 3.998 2.558c-1.376.11-2.605.663-3.523 1.523C.558 4.94 0 6.17 0 7.5v9c0 1.33.558 2.56 1.475 3.42.918.86 2.147 1.413 3.523 1.523 1.376.11 2.686.558 3.86.558 1.173 0 2.483-.447 3.86-.558 1.376-.11 2.605-.663 3.522-1.523.918-.86 1.476-2.09 1.476-3.42V7.5c0-1.33-.558-2.56-1.476-3.42a4.039 4.039 0 0 1-2.25-2.605zM9.857 16.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+                </svg>
               </Button>
               <Button 
                 variant="ghost" 
