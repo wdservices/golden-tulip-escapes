@@ -38,15 +38,61 @@ service cloud.firestore {
     
     // Users collection rules
     match /users/{userId} {
-      // Allow users to read their own profile
+      // Allow users to read their own profile and admins to read any profile
       allow read: if request.auth != null && 
                   (request.auth.uid == userId || 
-                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+                   isAdmin());
       
-      // Allow users to update their own profile
+      // Allow users to update their own profile and admins to update any profile
       allow update: if request.auth != null && 
-                    request.auth.uid == userId &&
-                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'phone', 'preferences', 'lastLogin', 'role', 'email', 'displayName', 'photoURL']);
+                   (request.auth.uid == userId || isAdmin()) &&
+                   (isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'phone', 'preferences', 'lastLogin', 'email', 'displayName', 'photoURL']));
+      
+      // Allow admins to create user documents (for user management)
+      allow create: if request.auth != null && isAdmin();
+    }
+    
+    // Branches collection rules
+    match /branches/{branchId} {
+      // Allow read access to all authenticated users
+      allow read: if request.auth != null;
+      
+      // Only allow admins to create, update, or delete branches
+      allow create, update, delete: if isAdmin();
+      
+      // Nested rooms collection
+      match /rooms/{roomId} {
+        // Allow read access to all authenticated users
+        allow read: if request.auth != null;
+        
+        // Only allow admins to manage rooms
+        allow create, update, delete: if isAdmin();
+      }
+    }
+    
+    // Bookings collection rules
+    match /bookings/{bookingId} {
+      // Allow users to read their own bookings and admins to read all bookings
+      allow read: if request.auth != null && 
+                 (request.auth.uid == resource.data.userId || isAdmin());
+      
+      // Allow authenticated users to create bookings and admins to manage all bookings
+      allow create: if request.auth != null && 
+                   (request.auth.uid == request.resource.data.userId || isAdmin());
+      
+      // Allow users to update their own bookings and admins to update any booking
+      allow update: if request.auth != null && 
+                   (request.auth.uid == resource.data.userId || isAdmin());
+      
+      // Allow users to delete their own bookings and admins to delete any booking
+      allow delete: if request.auth != null && 
+                   (request.auth.uid == resource.data.userId || isAdmin());
+    }
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
   }
 }

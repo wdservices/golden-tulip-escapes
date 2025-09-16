@@ -252,6 +252,7 @@ const AdminDashboard = () => {
               { id: 'bookings', label: 'Bookings', icon: Calendar },
               { id: 'rooms', label: 'Rooms', icon: Bed },
               { id: 'clients', label: 'Clients', icon: Users },
+              { id: 'users', label: 'User Management', icon: Users },
               { id: 'pricing', label: 'Pricing', icon: Tag },
               { id: 'marketing', label: 'Marketing', icon: Megaphone },
               { id: 'payments', label: 'Payments', icon: CreditCard },
@@ -314,75 +315,7 @@ const AdminDashboard = () => {
         <main className="flex-1 overflow-y-auto">
           {activeTab === 'dashboard' ? (
             <div className="p-6">
-            <div className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Total Bookings
-                    </CardTitle>
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{mockBookings.length}</div>
-                    <p className="text-xs text-muted-foreground">
-                      +20.1% from last month
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Available Rooms
-                    </CardTitle>
-                    <Bed className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {mockRooms.reduce((sum, room) => sum + room.available, 0)}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {mockRooms.length} room types
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Total Revenue
-                    </CardTitle>
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      ₦{mockBookings.reduce((sum, booking) => sum + booking.amount, 0).toLocaleString()}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      +19% from last month
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Active Users
-                    </CardTitle>
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {mockUsers.filter(user => user.status === 'active').length}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {mockUsers.length} total users
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Analytics Section */}
               <AnalyticsDashboard />
-            </div>
             </div>
           ) : (
             <Outlet />

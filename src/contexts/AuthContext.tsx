@@ -24,6 +24,7 @@ interface AuthContextType {
   logout: () => Promise<boolean>; // Returns success status
   signInWithGoogle: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  updateUserRole: (userId: string, role: 'admin' | 'user') => Promise<void>;
   setupNavigation: (navigate: (to: string) => void) => void;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -379,18 +380,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateUserRole = async (userId: string, role: 'admin' | 'user') => {
+    if (!currentUser || currentUser.role !== 'admin') {
+      throw new Error('Unauthorized: Only admins can update user roles');
+    }
+    
+    const userDocRef = doc(db, 'users', userId);
+    await setDoc(userDocRef, { role }, { merge: true });
+    
+    // If updating the current user, update local state
+    if (currentUser.id === userId) {
+      setCurrentUser({ ...currentUser, role });
+    }
+    
+    toast.success(`User role updated to ${role}`);
+  };
+
   const value: AuthContextType = {
     currentUser,
     firebaseUser,
-    login: useCallback(login, [navigateFn]),
-    register: useCallback(register, [navigateFn]),
-    logout: useCallback(logout, [navigateFn]),
-    signInWithGoogle: useCallback(signInWithGoogle, [navigateFn]),
-    updateProfile: useCallback(updateProfile, [firebaseUser]),
-    setupNavigation: useCallback((navigate) => setNavigateFn(() => navigate), []),
+    login,
+    register,
+    logout,
+    signInWithGoogle,
+    updateProfile,
+    updateUserRole,
+    setupNavigation,
     isAuthenticated: !!currentUser,
     isLoading,
-    error
+    error,
   };
 
   return (

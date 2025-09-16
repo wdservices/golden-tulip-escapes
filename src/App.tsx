@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { DatabaseProvider } from "@/contexts/DatabaseContext";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import { BookPage } from "./pages/BookPage";
@@ -12,12 +13,15 @@ import AdminDashboard from "./pages/AdminDashboard";
 import { AdminLoading } from "./components/admin/AdminLoading";
 import { AuthPage } from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
+import { ErrorBoundary } from "react-error-boundary";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { UserDashboard } from "./pages/UserDashboard";
 import { BranchPage } from "./pages/BranchPage";
 import { ChatbotFloatingButton } from "./components/chat/ChatbotFloatingButton";
 import RoomPage from "./pages/rooms/RoomPage";
 import CorporateHallsPage from "./pages/CorporateHallsPage";
+import { Button } from "@/components/ui/button";
+import { AdminPanel } from "./components/admin/AdminPanel";
 
 // Lazy load admin components
 const BookingsPage = lazy(() => import("@/pages/admin/BookingsPage"));
@@ -45,9 +49,29 @@ const queryClient = new QueryClient({
   },
 });
 
+// Error boundary fallback component
+const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) => {
+  return (
+    <div role="alert" className="p-4 max-w-2xl mx-auto mt-10 text-center">
+      <h2 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h2>
+      <pre className="bg-gray-100 p-4 rounded-md mb-6 text-left overflow-x-auto">
+        {error.message}
+      </pre>
+      <Button onClick={resetErrorBoundary} variant="default">
+        Try again
+      </Button>
+    </div>
+  );
+};
+
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
+  <ErrorBoundary
+    FallbackComponent={ErrorFallback}
+    onReset={() => window.location.reload()}
+  >
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <DatabaseProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -129,10 +153,13 @@ const App = () => (
                   <BranchesPage />
                 </Suspense>
               } />
-              <Route path="settings" element={
+              <Route path="settings/*" element={
                 <Suspense fallback={<LoadingFallback />}>
                   <SettingsPage />
                 </Suspense>
+              } />
+              <Route path="users" element={
+                <AdminPanel />
               } />
               <Route path="pricing" element={
                 <Suspense fallback={<LoadingFallback />}>
@@ -145,8 +172,10 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+        </DatabaseProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
