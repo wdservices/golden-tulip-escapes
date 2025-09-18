@@ -13,57 +13,59 @@ export const BranchPolicies = ({ policies, paymentMethods, operatingHours }: Bra
   }
 
   return (
-    <section className="py-16 bg-gray-50" id="policies">
+    <section className="py-20 bg-gradient-to-b from-muted/20 to-background" id="policies">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-serif font-bold mb-4 text-gradient-gold">
             Hotel Information
           </h2>
-          <div className="w-24 h-1 bg-amber-600 mx-auto mt-4"></div>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Important details about our policies and services
+          </p>
         </div>
 
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
           {operatingHours && (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <Info className="h-5 w-5 text-amber-700 mr-2" />
+            <div className="card-luxury bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm rounded-xl p-8 hover:shadow-glow transition-all duration-300">
+              <h3 className="text-xl font-serif font-bold text-gradient-gold mb-6 flex items-center">
+                <Info className="h-5 w-5 text-amber-600 mr-3" />
                 Operating Hours
               </h3>
-              <ul className="space-y-3">
-                <li className="flex justify-between">
-                  <span className="text-gray-600">Check-in:</span>
-                  <span className="text-gray-900 font-medium">{operatingHours.checkIn}</span>
+              <ul className="space-y-4">
+                <li className="flex justify-between items-center group">
+                  <span className="text-muted-foreground">Check-in:</span>
+                  <span className="text-foreground font-medium">{operatingHours.checkIn}</span>
                 </li>
-                <li className="flex justify-between">
-                  <span className="text-gray-600">Check-out:</span>
-                  <span className="text-gray-900 font-medium">{operatingHours.checkOut}</span>
+                <li className="flex justify-between items-center group">
+                  <span className="text-muted-foreground">Check-out:</span>
+                  <span className="text-foreground font-medium">{operatingHours.checkOut}</span>
                 </li>
-                <li className="flex justify-between">
-                  <span className="text-gray-600">Front Desk:</span>
-                  <span className="text-gray-900 font-medium">{operatingHours.frontDesk}</span>
+                <li className="flex justify-between items-center group">
+                  <span className="text-muted-foreground">Front Desk:</span>
+                  <span className="text-foreground font-medium">{operatingHours.frontDesk}</span>
                 </li>
-                <li className="flex justify-between">
-                  <span className="text-gray-600">Restaurant:</span>
-                  <span className="text-gray-900 font-medium">{operatingHours.restaurant}</span>
+                <li className="flex justify-between items-center group">
+                  <span className="text-muted-foreground">Restaurant:</span>
+                  <span className="text-foreground font-medium">{operatingHours.restaurant}</span>
                 </li>
-                <li className="flex justify-between">
-                  <span className="text-gray-600">Bar:</span>
-                  <span className="text-gray-900 font-medium">{operatingHours.bar}</span>
+                <li className="flex justify-between items-center group">
+                  <span className="text-muted-foreground">Bar:</span>
+                  <span className="text-foreground font-medium">{operatingHours.bar}</span>
                 </li>
               </ul>
             </div>
           )}
 
           {paymentMethods && paymentMethods.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <CreditCard className="h-5 w-5 text-amber-700 mr-2" />
+            <div className="card-luxury bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm rounded-xl p-8 hover:shadow-glow transition-all duration-300">
+              <h3 className="text-xl font-serif font-bold text-gradient-gold mb-6 flex items-center">
+                <CreditCard className="h-5 w-5 text-amber-600 mr-3" />
                 Payment Methods
               </h3>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {paymentMethods.map((method, index) => (
-                  <li key={index} className="text-gray-700 flex items-start">
-                    <span className="text-amber-600 mr-2">•</span>
+                  <li key={index} className="text-muted-foreground flex items-start group">
+                    <span className="text-amber-500 mr-2 group-hover:text-amber-600 transition-colors">•</span>
                     {method}
                   </li>
                 ))}
@@ -72,14 +74,14 @@ export const BranchPolicies = ({ policies, paymentMethods, operatingHours }: Bra
           )}
 
           {policies && policies.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md p-6 md:col-span-2">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
+            <div className="card-luxury bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm rounded-xl p-8 hover:shadow-glow transition-all duration-300 md:col-span-2">
+              <h3 className="text-xl font-serif font-bold text-gradient-gold mb-6">
                 Hotel Policies
               </h3>
-              <ul className="space-y-2">
+              <ul className="space-y-3 grid grid-cols-1 md:grid-cols-2 gap-4">
                 {policies.map((policy, index) => (
-                  <li key={index} className="text-gray-700 flex items-start">
-                    <span className="text-amber-600 mr-2">•</span>
+                  <li key={index} className="text-muted-foreground flex items-start group">
+                    <span className="text-amber-500 mr-2 group-hover:text-amber-600 transition-colors">•</span>
                     {policy}
                   </li>
                 ))}

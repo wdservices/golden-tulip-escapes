@@ -71,20 +71,20 @@ export const BranchPage = () => {
   }
 
   return (
-    <div className="bg-white">
+    <div className="min-h-screen bg-background">
       <BranchHero branch={branch} />
       
-      <div className="bg-white py-16">
+      <div className="py-20 bg-gradient-to-b from-background via-muted/10 to-background">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl md:text-5xl font-serif font-bold mb-4 text-gradient-gold">
               Welcome to {branch.fullName}
             </h2>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8">
               {branch.description}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button variant="outline" asChild>
+              <Button variant="outline" asChild className="text-lg px-6 py-5">
                 <a href="#amenities">Explore Amenities</a>
               </Button>
             </div>

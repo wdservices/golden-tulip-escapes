@@ -9,52 +9,51 @@ export const BranchDining = ({ diningOptions }: BranchDiningProps) => {
   if (!diningOptions || diningOptions.length === 0) return null;
 
   return (
-    <section className="py-16 bg-gray-50" id="dining">
+    <section className="py-20 bg-gradient-to-b from-background via-muted/10 to-background" id="dining">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-serif font-bold mb-4 text-gradient-gold">
             Dining Options
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Experience exceptional culinary delights at our restaurants and bars
           </p>
-          <div className="w-24 h-1 bg-amber-600 mx-auto mt-4"></div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {diningOptions.map((option, index) => (
             <div 
               key={index}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+              className="card-luxury bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm rounded-3xl overflow-hidden hover:shadow-glow transition-all duration-300"
             >
-              <div className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="bg-amber-100 p-3 rounded-full mr-4">
-                    <Utensils className="h-6 w-6 text-amber-700" />
+              <div className="p-8">
+                <div className="flex items-center mb-6">
+                  <div className="bg-amber-500/10 p-3 rounded-full mr-4">
+                    <Utensils className="h-6 w-6 text-amber-500" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">{option.name}</h3>
-                    <p className="text-gray-600 text-sm">{option.type}</p>
+                    <h3 className="text-xl font-serif font-semibold text-gradient-gold">{option.name}</h3>
+                    <p className="text-muted-foreground">{option.type}</p>
                   </div>
                 </div>
                 
-                <div className="mb-4">
-                  <div className="flex items-center mb-2">
-                    <Clock className="h-4 w-4 text-amber-700 mr-2" />
-                    <span className="text-gray-700 text-sm">{option.hours}</span>
+                <div className="mb-6 space-y-3">
+                  <div className="flex items-center">
+                    <Clock className="h-5 w-5 text-amber-500 mr-3" />
+                    <span className="text-muted-foreground">{option.hours}</span>
                   </div>
                   <div className="flex items-center">
-                    <List className="h-4 w-4 text-amber-700 mr-2" />
-                    <span className="text-gray-700 text-sm">{option.cuisine}</span>
+                    <List className="h-5 w-5 text-amber-500 mr-3" />
+                    <span className="text-muted-foreground">{option.cuisine}</span>
                   </div>
                 </div>
 
-                <div className="mt-4">
-                  <h4 className="text-sm font-semibold text-gray-900 mb-2">Features:</h4>
-                  <ul className="space-y-1">
+                <div className="mt-6 bg-gradient-to-br from-amber-50/30 to-amber-100/20 p-4 rounded-2xl">
+                  <h4 className="text-md font-serif font-semibold text-gradient-gold mb-3">Highlights</h4>
+                  <ul className="space-y-2">
                     {option.features.map((feature, idx) => (
-                      <li key={idx} className="text-gray-600 text-sm flex items-start">
-                        <span className="text-amber-600 mr-2">•</span>
+                      <li key={idx} className="text-muted-foreground flex items-start group">
+                        <span className="text-amber-500 mr-2 group-hover:text-amber-600 transition-colors">•</span>
                         {feature}
                       </li>
                     ))}
