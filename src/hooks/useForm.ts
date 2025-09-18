@@ -39,8 +39,8 @@ type UseFormReturn<T> = {
 
 export const useForm = <T extends Record<string, any>>(
   initialValues: T,
-  onSubmit: (values: T) => Promise<void> | void,
-  validationRules?: { [K in keyof T]?: ValidationRule }
+  validationRules?: { [K in keyof T]?: ValidationRule },
+  onSubmit?: (values: T) => Promise<void> | void
 ): UseFormReturn<T> => {
   const [values, setValues] = useState<T>(initialValues);
   const [errors, setErrors] = useState<{ [K in keyof T]?: string | null }>({});

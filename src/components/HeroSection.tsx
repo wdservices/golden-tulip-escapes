@@ -95,6 +95,7 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
       navigate('/booking');
     }
   };
+  
   // Fallback images in case 360 viewer fails
   const fallbackImages = [
     { src: "/images/hotel-exterior.jpg", alt: "Golden Tulip Hotel Exterior", title: "Welcome to Luxury" },

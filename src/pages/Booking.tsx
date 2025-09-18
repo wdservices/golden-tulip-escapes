@@ -9,15 +9,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon, MapPin, Users, Bed, Utensils, Waves, Car, CreditCard, Phone, Mail, User, UserPlus } from "lucide-react";
+import { CalendarIcon, MapPin, Users, Bed, Utensils, Waves, Car, CreditCard, Phone, Mail, User, UserPlus, Check, Star, Shield, Award, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Header } from "@/components/Header";
+// Remove Header import
+// import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import luxurySuite from "@/assets/luxury-suite.jpg";
 import hotelExterior from "@/assets/hotel-exterior.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
-import { collection, addDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, where, getDocs, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useNavigate } from "react-router-dom";
 
@@ -45,6 +46,7 @@ const Booking = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const { branches: dbBranches, isLoading: branchesLoading, error: branchesError } = useBranches();
 
   // Check if user is admin on component mount
   useEffect(() => {
@@ -71,12 +73,11 @@ const Booking = () => {
     clientName: ""
   });
 
-  const branches = [
-    { id: "main", name: "GRA Head Branch", location: "Government Reserved Area", image: hotelExterior },
-    { id: "waterlines", name: "Waterlines Branch", location: "Port Harcourt Waterfront", image: luxurySuite },
-    { id: "airforce", name: "Airforce Base", location: "Port Harcourt", image: hotelExterior },
-    { id: "oyigbo", name: "Oyigbo Branch", location: "Rivers State", image: luxurySuite }
-  ];
+  // Map database branches to include default images
+  const branches = dbBranches.map((branch, index) => ({
+    ...branch,
+    image: index % 2 === 0 ? hotelExterior : luxurySuite
+  }));
 
   const roomTypes = [
     {
@@ -202,12 +203,12 @@ const Booking = () => {
         branchName: branches.find(b => b.id === bookingData.branch)?.name || '',
         roomType: bookingData.roomType,
         roomNumber: '', // Will be assigned at check-in
-        checkInDate: bookingData.checkInDate.toISOString(),
-        checkOutDate: bookingData.checkOutDate.toISOString(),
+        checkInDate: Timestamp.fromDate(bookingData.checkInDate),
+        checkOutDate: Timestamp.fromDate(bookingData.checkOutDate),
         status: 'confirmed' as const,
         paymentStatus: 'pending' as const,
         totalAmount: calculateTotal(),
-        bookingDate: new Date().toISOString(),
+        bookingDate: Timestamp.fromDate(new Date()),
         guests: bookingData.adults + bookingData.children,
         adults: bookingData.adults,
         children: bookingData.children,
@@ -228,7 +229,10 @@ const Booking = () => {
         discount: 0, // Apply any discounts
         source: 'website',
         marketSegment: 'leisure',
-        rateCode: 'BAR' // Best Available Rate
+        rateCode: 'BAR', // Best Available Rate
+        nights: bookingData.checkInDate && bookingData.checkOutDate
+          ? Math.ceil((bookingData.checkOutDate.getTime() - bookingData.checkInDate.getTime()) / (1000 * 60 * 60 * 24))
+          : 1
       };
 
       await addDoc(bookingRef, newBooking);
@@ -265,7 +269,8 @@ const Booking = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
-      <Header activeTab="booking" onTabChange={() => {}} />
+      {/* Remove Header component */}
+      {/* <Header activeTab="booking" onTabChange={() => {}} /> */}
 
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-7xl mx-auto">
@@ -297,30 +302,52 @@ const Booking = () => {
                     <Label className="text-lg font-semibold text-gradient-gold mb-4 block">
                       Select Your Preferred Branch
                     </Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {branches.map((branch) => (
-                        <div
-                          key={branch.id}
-                          className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 ${
-                            bookingData.branch === branch.id
-                              ? 'border-amber-500 bg-gradient-to-br from-amber-500/10 to-amber-600/10 shadow-lg shadow-amber-500/20'
-                              : 'border-border/50 bg-card/50 hover:border-amber-400/50 hover:shadow-md'
-                          }`}
-                          onClick={() => setBookingData(prev => ({ ...prev, branch: branch.id }))}
+                    {branchesLoading ? (
+                      <div className="flex items-center justify-center py-12">
+                        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+                        <span className="ml-2 text-muted-foreground">Loading branches...</span>
+                      </div>
+                    ) : branchesError ? (
+                      <div className="text-center py-12">
+                        <p className="text-red-500 mb-4">Error loading branches: {branchesError}</p>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => window.location.reload()}
+                          className="text-amber-600 border-amber-600 hover:bg-amber-50"
                         >
-                          <img
-                            src={branch.image}
-                            alt={branch.name}
-                            className="w-full h-40 object-cover rounded-lg mb-3"
-                          />
-                          <h3 className="font-semibold text-primary text-lg">{branch.name}</h3>
-                          <p className="text-sm text-muted-foreground flex items-center">
-                            <MapPin className="w-4 h-4 mr-2 text-amber-500" />
-                            {branch.location}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+                          Try Again
+                        </Button>
+                      </div>
+                    ) : branches.length === 0 ? (
+                      <div className="text-center py-12">
+                        <p className="text-muted-foreground">No branches available at the moment.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {branches.map((branch) => (
+                          <div
+                            key={branch.id}
+                            className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 ${
+                              bookingData.branch === branch.id
+                                ? 'border-amber-500 bg-gradient-to-br from-amber-500/10 to-amber-600/10 shadow-lg shadow-amber-500/20'
+                                : 'border-border/50 bg-card/50 hover:border-amber-400/50 hover:shadow-md'
+                            }`}
+                            onClick={() => setBookingData(prev => ({ ...prev, branch: branch.id }))}
+                          >
+                            <img
+                              src={branch.image}
+                              alt={branch.name}
+                              className="w-full h-40 object-cover rounded-lg mb-3"
+                            />
+                            <h3 className="font-semibold text-primary text-lg">{branch.name}</h3>
+                            <p className="text-sm text-muted-foreground flex items-center">
+                              <MapPin className="w-4 h-4 mr-2 text-amber-500" />
+                              {branch.location}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                       {/* Room Type Selection */}

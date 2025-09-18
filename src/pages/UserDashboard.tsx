@@ -12,8 +12,7 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import type { Booking } from "@/types/booking";
 import type { User } from "@/types/auth";
 import { collection, query, where, getDocs, orderBy, limit, Timestamp } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
+import { db } from "@/lib/firebase";
 import { FeedbackForm } from "@/components/feedback/FeedbackForm";
 
 // Define the dashboard stats interface
@@ -80,7 +79,10 @@ export const UserDashboard = () => {
       return;
     }
 
-    console.log('Loading user data for:', currentUser.email, 'Role:', currentUser.role);
+    // Store currentUser reference to avoid race conditions
+    const user = currentUser;
+
+    console.log('Loading user data for:', user.email, 'Role:', user.role);
     setIsLoading(true);
     
     // Add timeout to prevent hanging requests
@@ -90,7 +92,7 @@ export const UserDashboard = () => {
 
     try {
       // Use the current user data from Firebase
-      setProfileData(currentUser);
+      setProfileData(user);
 
       // Initialize with default values
       const bookings: Booking[] = [];
@@ -103,12 +105,25 @@ export const UserDashboard = () => {
         pastTrips: 0
       };
 
+      // Helper to normalize Firestore Timestamp or ISO string to ISO string
+      const toIso = (v: any) => {
+        if (!v) return new Date().toISOString();
+        if (typeof v === 'string') {
+          const d = new Date(v);
+          return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+        }
+        if (typeof (v as any).toDate === 'function') {
+          try { return (v as any).toDate().toISOString(); } catch { return new Date().toISOString(); }
+        }
+        try { return new Date(v).toISOString(); } catch { return new Date().toISOString(); }
+      };
+
       try {
         // Fetch user's bookings from Firestore with limit for performance
         const bookingsRef = collection(db, 'bookings');
         const q = query(
-          bookingsRef, 
-          where('userId', '==', currentUser.id),
+          bookingsRef,
+          where('userId', '==', user.id),
           orderBy('checkInDate', 'desc'),
           limit(50) // Limit to prevent performance issues
         );
@@ -123,16 +138,16 @@ export const UserDashboard = () => {
             const booking = {
               ...data,
               id: doc.id,
-              checkInDate: data.checkInDate ? (data.checkInDate as unknown as Timestamp).toDate().toISOString() : new Date().toISOString(),
-              checkOutDate: data.checkOutDate ? (data.checkOutDate as unknown as Timestamp).toDate().toISOString() : new Date().toISOString(),
-              bookingDate: data.bookingDate ? (data.bookingDate as unknown as Timestamp).toDate().toISOString() : new Date().toISOString(),
+              checkInDate: toIso((data as any).checkInDate),
+              checkOutDate: toIso((data as any).checkOutDate),
+              bookingDate: toIso((data as any).bookingDate),
             };
             
             bookings.push(booking);
 
             // Count branch usage
-            if (data.branchName) {
-              branchCount[data.branchName] = (branchCount[data.branchName] || 0) + 1;
+            if ((data as any).branchName) {
+              branchCount[(data as any).branchName as string] = (branchCount[(data as any).branchName as string] || 0) + 1;
             }
           } catch (error) {
             console.error('Error processing booking data:', error);
@@ -140,9 +155,45 @@ export const UserDashboard = () => {
         });
       } catch (firestoreError) {
         console.warn("Could not load booking data:", firestoreError);
+        // Fallback if missing index: query without orderBy and sort locally
+        if (firestoreError?.code === 'failed-precondition' || `${firestoreError?.message || ''}`.includes('The query requires an index')) {
+          try {
+            const bookingsRef = collection(db, 'bookings');
+            const q2 = query(
+              bookingsRef,
+              where('userId', '==', user.id),
+              limit(50)
+            );
+            const qs2 = await Promise.race([getDocs(q2), timeoutPromise]) as any;
+
+            qs2.forEach((doc: any) => {
+              try {
+                const data = doc.data() as Booking;
+                const booking = {
+                  ...data,
+                  id: doc.id,
+                  checkInDate: toIso((data as any).checkInDate),
+                  checkOutDate: toIso((data as any).checkOutDate),
+                  bookingDate: toIso((data as any).bookingDate),
+                };
+                bookings.push(booking);
+                if ((data as any).branchName) {
+                  branchCount[(data as any).branchName as string] = (branchCount[(data as any).branchName as string] || 0) + 1;
+                }
+              } catch (e) {
+                console.error('Error processing booking data (fallback):', e);
+              }
+            });
+
+            // Sort by checkInDate DESC to mimic original orderBy
+            bookings.sort((a, b) => new Date(b.checkInDate).getTime() - new Date(a.checkInDate).getTime());
+          } catch (fallbackErr) {
+            console.warn('Fallback bookings query also failed:', fallbackErr);
+          }
+        }
         // Continue with empty bookings array if Firestore fails
       }
-
+      
       // Calculate favorite branch
       let favorite = "";
       let maxCount = 0;
@@ -199,7 +250,11 @@ export const UserDashboard = () => {
       console.error("Failed to load dashboard data:", error);
       // Don't show toast for network issues, just log them
       if (error instanceof Error && !error.message.includes('network')) {
-        toast.error("Failed to load dashboard data. Please refresh the page.");
+        toast({
+          title: "Error",
+          description: "Failed to load dashboard data. Please refresh the page.",
+          variant: "destructive"
+        });
       }
     } finally {
       setIsLoading(false);
@@ -228,8 +283,9 @@ export const UserDashboard = () => {
     // Check for welcome flag in URL
     if (searchParams.get('welcome') === 'true') {
       setShowWelcome(true);
-      toast.success('Registration successful! Welcome to Golden Tulip Escapes!', {
-        duration: 5000,
+      toast({
+        title: "Success",
+        description: "Registration successful! Welcome to Golden Tulip Escapes!"
       });
       // Handle redirection if not authenticated
       if (!isAuthenticated) {
@@ -259,7 +315,11 @@ export const UserDashboard = () => {
       setIsLoading(true);
       loadUserData().catch(error => {
         console.error("Failed to load dashboard data:", error);
-        toast.error("Failed to load dashboard data. Some features may be limited.");
+        toast({
+          title: "Error",
+          description: "Failed to load dashboard data. Some features may be limited.",
+          variant: "destructive"
+        });
       }).finally(() => {
         setIsLoading(false);
       });
@@ -286,12 +346,18 @@ export const UserDashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
-      navigate('/auth');
-      toast.success('Successfully logged out');
+      await logout();
+      toast({
+        title: "Success",
+        description: "Successfully logged out"
+      });
     } catch (error) {
-      console.error('Failed to log out', error);
-      toast.error('Failed to log out. Please try again.');
+      console.error('Logout error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 

@@ -41,6 +41,7 @@ export interface Room extends BaseDocument {
   isAvailable: boolean;
   branchId: string;
   roomNumber: string;
+  roomCount?: number; // Number of rooms of this type
 }
 
 export type RoomType = 'standard' | 'deluxe' | 'suite' | 'family' | 'executive';

@@ -17,10 +17,17 @@ export function AdminPanel() {
       setUpdatingUserId(userId);
       const newRole = currentRole === 'admin' ? 'user' : 'admin';
       await updateUserRole(userId, newRole as 'admin' | 'user');
-      toast.success(`User role updated to ${newRole}`);
+      toast({
+        title: "Success",
+        description: `User role updated to ${newRole}`
+      });
     } catch (error) {
       console.error('Error updating role:', error);
-      toast.error('Failed to update user role');
+      toast({
+        title: "Error",
+        description: "Failed to update user role",
+        variant: "destructive"
+      });
     } finally {
       setUpdatingUserId(null);
     }

@@ -8,6 +8,7 @@ import { Search, Plus, MapPin, Phone, Mail, Globe, Building, Edit, Trash2, Loade
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDatabase } from "@/contexts/DatabaseContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { BranchForm } from "@/components/admin/BranchForm";
 import { RoomForm } from "@/components/admin/RoomForm";
@@ -17,32 +18,11 @@ export type BranchStatus = 'active' | 'inactive' | 'maintenance';
 export interface Branch {
   id?: string;
   name: string;
-  location: {
-    address: string;
-    city: string;
-    state: string;
-    country: string;
-    coordinates: {
-      lat: number;
-      lng: number;
-    };
-  };
-  contact: {
-    email: string;
-    phone: string;
-    website: string;
-  };
+  address: string;
+  email: string;
+  location: string;
+  phone: string;
   status: BranchStatus;
-  description: string;
-  amenities: string[];
-  policies: {
-    checkIn: string;
-    checkOut: string;
-    cancellation: string;
-    pets: string;
-    payment: string;
-  };
-  images: string[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -51,14 +31,9 @@ interface Room {
   id?: string;
   roomNumber: string;
   type: string;
-  price: number;
-  capacity: number;
-  size: number;
-  bedType: string;
-  view: string;
-  description: string;
+  pricePerNight: number;
+  availability: boolean;
   amenities: string[];
-  status: 'available' | 'occupied' | 'maintenance';
   images: string[];
   branchId: string;
   createdAt?: string;
@@ -74,28 +49,63 @@ export const BranchesPage = () => {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddRoomDialogOpen, setIsAddRoomDialogOpen] = useState(false);
+  
+  // Get auth context
+  const { currentUser, isAuthenticated } = useAuth();
+  console.log('BranchesPage - Auth state:', { currentUser, isAuthenticated });
   const [branchRooms, setBranchRooms] = useState<Room[]>([]);
   
   const { queryDocuments, addDocument, updateDocument, deleteDocument } = useDatabase();
 
+  // Fetch branches with performance logging
+  const fetchBranches = async () => {
+    const startTime = performance.now();
+    console.log('Fetching branches...');
+    
+    try {
+      setIsLoading(true);
+      const branchesData = await queryDocuments<Branch>('branches', []);
+      setBranches(branchesData);
+      console.log(`Fetched ${branchesData.length} branches`);
+      
+      const endTime = performance.now();
+      console.log(`Branches fetched in ${Math.round(endTime - startTime)}ms`);
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load branches",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchBranches = async () => {
-      try {
-        setIsLoading(true);
-        const branchesData = await queryDocuments<Branch>('branches', []);
-        setBranches(branchesData);
-      } catch (error) {
-        console.error('Error fetching branches:', error);
-        toast.error('Failed to load branches');
-      } finally {
-        setIsLoading(false);
+    fetchBranches();
+    
+    // Add event listener for database updates
+    const handleDatabaseUpdate = (event: CustomEvent) => {
+      const { collectionPath } = event.detail;
+      
+      // Only refresh if branches collection was updated
+      if (collectionPath === 'branches' || collectionPath.startsWith('branches/')) {
+        console.log('Database update detected, refreshing branches data...');
+        fetchBranches();
       }
     };
-
-    fetchBranches();
+    
+    window.addEventListener('database-update', handleDatabaseUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('database-update', handleDatabaseUpdate as EventListener);
+    };
   }, []);
 
-  const getStatusVariant = (status: BranchStatus) => {
+  const getStatusVariant = (status: BranchStatus | undefined) => {
+    if (!status) return 'bg-gray-100 text-gray-800';
+    
     switch (status) {
       case 'active':
         return 'bg-green-100 text-green-800';
@@ -109,16 +119,29 @@ export const BranchesPage = () => {
   };
 
   const handleViewBranch = async (branch: Branch) => {
+    console.log(`Viewing branch: ${branch.name} (${branch.id})`);
     setSelectedBranch(branch);
     try {
       setIsLoading(true);
+      const startTime = performance.now();
+      
       // Fetch rooms for this branch
+      console.log(`Fetching rooms for branch ${branch.id}...`);
       const rooms = await queryDocuments<Room>(`branches/${branch.id}/rooms`, []);
+      console.log(`Fetched ${rooms.length} rooms for branch ${branch.id}`);
       setBranchRooms(rooms);
+      
+      const endTime = performance.now();
+      console.log(`Branch view data loaded in ${Math.round(endTime - startTime)}ms`);
+      
       setIsViewDialogOpen(true);
     } catch (error) {
       console.error('Error fetching rooms:', error);
-      toast.error('Failed to load room information');
+      toast({
+        title: "Error",
+        description: "Failed to load room information",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -146,11 +169,18 @@ export const BranchesPage = () => {
         const updatedBranches = await queryDocuments<Branch>('branches', []);
         setBranches(updatedBranches);
         
-        toast.success('Branch and associated rooms deleted successfully');
-      } catch (error) {
-        console.error('Error deleting branch:', error);
-        toast.error('Failed to delete branch');
-      } finally {
+        toast({
+           title: "Success",
+           description: "Branch and associated rooms deleted successfully"
+         });
+       } catch (error) {
+         console.error('Error deleting branch:', error);
+         toast({
+           title: "Error",
+           description: "Failed to delete branch",
+           variant: "destructive"
+         });
+       } finally {
         setIsLoading(false);
       }
     }
@@ -163,16 +193,40 @@ export const BranchesPage = () => {
 
   const handleRoomAdded = async () => {
     if (selectedBranch) {
-      const rooms = await queryDocuments<Room>(`branches/${selectedBranch.id}/rooms`, []);
-      setBranchRooms(rooms);
-    }
+      console.log(`Refreshing rooms for branch ${selectedBranch.id}`);
+      const startTime = performance.now();
+      
+      try {
+        const rooms = await queryDocuments<Room>(`branches/${selectedBranch.id}/rooms`, []);
+        console.log(`Fetched ${rooms.length} rooms for branch ${selectedBranch.id}`);
+        setBranchRooms(rooms);
+        
+        const endTime = performance.now();
+        console.log(`Rooms refreshed in ${Math.round(endTime - startTime)}ms`);
+        console.log(`Performance: Room refresh operation took ${Math.round(endTime - startTime)}ms`);
+      } catch (error) {
+         console.error('Error refreshing rooms:', error);
+         toast({
+           title: "Error",
+           description: "Failed to refresh room data",
+           variant: "destructive"
+         });
+       }
+     } else {
+       console.error('No branch selected when trying to refresh rooms');
+       toast({
+         title: "Error",
+         description: "Could not refresh rooms: No branch selected",
+         variant: "destructive"
+       });
+     }
     setIsAddRoomDialogOpen(false);
   };
 
   const filteredBranches = branches.filter(branch => 
     branch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    branch.location.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    branch.location.country.toLowerCase().includes(searchTerm.toLowerCase())
+    branch.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    branch.address.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -193,26 +247,28 @@ export const BranchesPage = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button onClick={() => setIsDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Branch
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl">
+            <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Add New Branch</DialogTitle>
                 <DialogDescription>
-                  Add a new hotel branch to the system. Fill in the details below.
+                  Fill in the details below to add a new branch to your hotel chain.
                 </DialogDescription>
               </DialogHeader>
-              <BranchForm onSuccess={() => {
-                // Refresh branches list
-                queryDocuments<Branch>('branches', []).then(updatedBranches => {
-                  setBranches(updatedBranches);
-                });
-              }} />
+              <BranchForm 
+                onSuccess={() => {
+                  console.log('Branch form submitted successfully');
+                  setIsDialogOpen(false);
+                  // Branches will be refreshed via the database-update event listener
+                }}
+                onCancel={() => setIsDialogOpen(false)}
+              />
             </DialogContent>
           </Dialog>
         </div>
@@ -236,56 +292,42 @@ export const BranchesPage = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Branch</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Rooms</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredBranches.map((branch) => (
+              <TableHead>Address</TableHead>
+              <TableHead>Contact</TableHead>
+              <TableHead>Rooms</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-[100px]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredBranches.map((branch) => (
                 <TableRow key={branch.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleViewBranch(branch)}>
                   <TableCell className="font-medium">
                     <div className="flex items-center">
                       <Building className="h-5 w-5 mr-2 text-primary" />
                       <div>
                         <div className="font-medium">{branch.name}</div>
-                        <div className="text-sm text-muted-foreground">{branch.contact.email}</div>
+                        <div className="text-sm text-muted-foreground">{branch.email}</div>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center text-sm">
                       <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
-                      <span>{branch.location.city}, {branch.location.country}</span>
+                      <span>{branch.location}</span>
                     </div>
-                    <div className="text-sm text-muted-foreground">{branch.location.address}</div>
+                    <div className="text-sm text-muted-foreground">{branch.address}</div>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
                       <div className="flex items-center">
                         <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className="text-sm">{branch.contact.phone}</span>
+                        <span className="text-sm">{branch.phone}</span>
                       </div>
                       <div className="flex items-center">
                         <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className="text-sm">{branch.contact.email}</span>
+                        <span className="text-sm">{branch.email}</span>
                       </div>
-                      {branch.contact.website && (
-                        <div className="flex items-center">
-                          <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <a 
-                            href={branch.contact.website.startsWith('http') ? branch.contact.website : `https://${branch.contact.website}`} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-sm text-primary hover:underline"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {branch.contact.website.replace(/^https?:\/\//, '')}
-                          </a>
-                        </div>
-                      )}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -294,8 +336,8 @@ export const BranchesPage = () => {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge className={getStatusVariant(branch.status)}>
-                      {branch.status.charAt(0).toUpperCase() + branch.status.slice(1)}
+                    <Badge className={getStatusVariant(branch.status || 'inactive')}>
+                      {branch.status ? branch.status.charAt(0).toUpperCase() + branch.status.slice(1) : 'Inactive'}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -338,269 +380,126 @@ export const BranchesPage = () => {
           {selectedBranch && (
             <>
               <DialogHeader>
-                <DialogTitle>{selectedBranch.name}</DialogTitle>
+                <DialogTitle className="text-2xl">{selectedBranch.name}</DialogTitle>
                 <DialogDescription>
-                  {selectedBranch.location.city}, {selectedBranch.location.country}
+                  <div className="flex items-center text-sm mt-1">
+                    <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
+                    <span>{selectedBranch.address}, {selectedBranch.location}</span>
+                  </div>
                 </DialogDescription>
               </DialogHeader>
-              <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
+              
+              <Tabs defaultValue="details">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="details">Branch Details</TabsTrigger>
                   <TabsTrigger value="rooms">Rooms</TabsTrigger>
-                  <TabsTrigger value="policies">Policies</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="overview" className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div>
-                        <h3 className="text-lg font-medium">Contact Information</h3>
-                        <div className="mt-2 space-y-2 text-sm">
-                          <div className="flex items-center">
-                            <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                            <span>{selectedBranch.location.address}, {selectedBranch.location.city}, {selectedBranch.location.country}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                            <span>{selectedBranch.contact.phone}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                            <span>{selectedBranch.contact.email}</span>
-                          </div>
-                          {selectedBranch.contact.website && (
-                            <div className="flex items-center">
-                              <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
-                              <a 
-                                href={selectedBranch.contact.website.startsWith('http') ? selectedBranch.contact.website : `https://${selectedBranch.contact.website}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-primary hover:underline"
-                              >
-                                {selectedBranch.contact.website.replace(/^https?:\/\//, '')}
-                              </a>
-                            </div>
-                          )}
+                <TabsContent value="details" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Contact Information</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        <div className="flex items-center">
+                          <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                          <span>{selectedBranch.email}</span>
                         </div>
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-lg font-medium">Description</h3>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          {selectedBranch.description || 'No description provided.'}
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-lg font-medium">Amenities</h3>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {selectedBranch.amenities?.length > 0 ? (
-                            selectedBranch.amenities.map((amenity, index) => (
-                              <Badge key={index} variant="outline">
-                                {amenity}
-                              </Badge>
-                            ))
-                          ) : (
-                            <p className="text-sm text-muted-foreground">No amenities listed.</p>
-                          )}
+                        <div className="flex items-center">
+                          <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+                          <span>{selectedBranch.phone}</span>
                         </div>
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                     
-                    <div className="space-y-4">
-                      <div>
-                        <h3 className="text-lg font-medium">Check-in/Check-out</h3>
-                        <div className="mt-2 space-y-2 text-sm">
-                          <div className="flex items-center">
-                            <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                            <span>Check-in: {selectedBranch.policies.checkIn}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                            <span>Check-out: {selectedBranch.policies.checkOut}</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-lg font-medium">Cancellation Policy</h3>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          {selectedBranch.policies.cancellation}
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-lg font-medium">Pet Policy</h3>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          {selectedBranch.policies.pets}
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-lg font-medium">Payment Policy</h3>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          {selectedBranch.policies.payment}
-                        </p>
-                      </div>
-                    </div>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Status</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <Badge className={getStatusVariant(selectedBranch.status)}>
+                          {selectedBranch.status || 'Inactive'}
+                        </Badge>
+                      </CardContent>
+                    </Card>
                   </div>
                 </TabsContent>
                 
                 <TabsContent value="rooms" className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-medium">Rooms</h3>
-                    <Button 
-                      size="sm" 
-                      onClick={() => {
-                        setIsViewDialogOpen(false);
-                        handleAddRoom(selectedBranch);
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
+                    <h3 className="text-lg font-medium">Rooms ({branchRooms.length})</h3>
+                    <Button onClick={() => handleAddRoom(selectedBranch)}>
+                      <Plus className="mr-2 h-4 w-4" />
                       Add Room
                     </Button>
                   </div>
                   
-                  {isLoading ? (
-                    <div className="flex justify-center items-center h-32">
-                      <Loader2 className="h-6 w-6 animate-spin" />
-                    </div>
-                  ) : branchRooms.length === 0 ? (
-                    <div className="text-center py-8 border rounded-lg">
-                      <p className="text-muted-foreground">No rooms added yet</p>
-                      <Button 
-                        variant="outline" 
-                        className="mt-4"
-                        onClick={() => {
-                          setIsViewDialogOpen(false);
-                          handleAddRoom(selectedBranch);
-                        }}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Your First Room
-                      </Button>
-                    </div>
+                  {branchRooms.length === 0 ? (
+                    <Card>
+                      <CardContent className="flex flex-col items-center justify-center py-10">
+                        <Home className="h-8 w-8 text-muted-foreground" />
+                        <p className="mt-2 text-sm text-muted-foreground">No rooms added yet</p>
+                        <Button variant="outline" className="mt-4" onClick={() => handleAddRoom(selectedBranch)}>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Add your first room
+                        </Button>
+                      </CardContent>
+                    </Card>
                   ) : (
-                    <div className="border rounded-lg overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Room Number</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead>Capacity</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="w-[100px]">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {branchRooms.map((room) => (
-                            <TableRow key={room.id}>
-                              <TableCell className="font-medium">{room.roomNumber}</TableCell>
-                              <TableCell>{room.type}</TableCell>
-                              <TableCell>${room.price.toLocaleString()}</TableCell>
-                              <TableCell>{room.capacity} {room.capacity > 1 ? 'guests' : 'guest'}</TableCell>
-                              <TableCell>
-                                <Badge 
-                                  variant={room.status === 'available' ? 'default' : 'secondary'}
-                                  className={room.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}
-                                >
-                                  {room.status.charAt(0).toUpperCase() + room.status.slice(1)}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {branchRooms.map((room) => (
+                        <Card key={room.id}>
+                          <CardHeader className="pb-2">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <CardTitle className="text-base">{room.type}</CardTitle>
+                                <CardDescription>Room {room.roomNumber}</CardDescription>
+                              </div>
+                              <Badge variant="outline" className={
+                                room.availability === true ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }>
+                                {room.availability === true ? 'Available' : 'Unavailable'}
+                              </Badge>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-2 pt-0">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Price:</span>
+                              <span className="font-medium">₦{room.pricePerNight}/night</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {room.amenities.slice(0, 3).map((amenity, index) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {amenity}
                                 </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex space-x-1">
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <Edit className="h-4 w-4" />
-                                    <span className="sr-only">Edit</span>
-                                  </Button>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    className="h-8 w-8 text-red-500 hover:text-red-600"
-                                    onClick={async () => {
-                                      if (confirm('Are you sure you want to delete this room?')) {
-                                        try {
-                                          await deleteDocument(`branches/${selectedBranch.id}/rooms`, room.id!);
-                                          const updatedRooms = await queryDocuments<Room>(`branches/${selectedBranch.id}/rooms`, []);
-                                          setBranchRooms(updatedRooms);
-                                          toast.success('Room deleted successfully');
-                                        } catch (error) {
-                                          console.error('Error deleting room:', error);
-                                          toast.error('Failed to delete room');
-                                        }
-                                      }
-                                    }}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                    <span className="sr-only">Delete</span>
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                              ))}
+                              {room.amenities.length > 3 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  +{room.amenities.length - 3} more
+                                </Badge>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
                   )}
                 </TabsContent>
-                
-                <TabsContent value="policies" className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-medium">Policies</h3>
-                    <div className="mt-4 space-y-4">
-                      <div>
-                        <h4 className="font-medium">Check-in/Check-out</h4>
-                        <div className="mt-2 text-sm text-muted-foreground grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <div className="flex items-center">
-                              <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                              <span>Check-in: {selectedBranch.policies.checkIn}</span>
-                            </div>
-                            <div className="flex items-center">
-                              <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                              <span>Check-out: {selectedBranch.policies.checkOut}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium">Cancellation Policy</h4>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          {selectedBranch.policies.cancellation}
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium">Pet Policy</h4>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          {selectedBranch.policies.pets}
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium">Payment Policy</h4>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          {selectedBranch.policies.payment}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
               </Tabs>
               
-              <DialogFooter>
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setIsViewDialogOpen(false);
-                    setIsEditDialogOpen(true);
-                  }}
-                >
-                  Edit Branch
-                </Button>
-                <Button onClick={() => setIsViewDialogOpen(false)}>Done</Button>
+              <DialogFooter className="flex justify-between">
+                <div className="flex space-x-2">
+                  <Button variant="outline" onClick={() => handleEditBranch(selectedBranch)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Branch
+                  </Button>
+                  <Button variant="outline" onClick={() => handleAddRoom(selectedBranch)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Room
+                  </Button>
+                </div>
+                <Button variant="ghost" onClick={() => setIsViewDialogOpen(false)}>Close</Button>
               </DialogFooter>
             </>
           )}
@@ -609,31 +508,22 @@ export const BranchesPage = () => {
       
       {/* Edit Branch Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Edit Branch</DialogTitle>
             <DialogDescription>
-              Update the branch details below.
+              Make changes to the branch information below.
             </DialogDescription>
           </DialogHeader>
           {selectedBranch && (
             <BranchForm 
-              branch={selectedBranch} 
+              branch={selectedBranch}
               onSuccess={() => {
-                // Refresh branches list
-                queryDocuments<Branch>('branches', []).then(updatedBranches => {
-                  setBranches(updatedBranches);
-                  setIsEditDialogOpen(false);
-                  
-                  // If we were viewing this branch, update the selected branch data
-                  if (selectedBranch) {
-                    const updatedBranch = updatedBranches.find(b => b.id === selectedBranch.id);
-                    if (updatedBranch) {
-                      setSelectedBranch(updatedBranch);
-                    }
-                  }
-                });
-              }} 
+                console.log('Branch updated successfully');
+                setIsEditDialogOpen(false);
+                // Branches will be refreshed via the database-update event listener
+              }}
+              onCancel={() => setIsEditDialogOpen(false)}
             />
           )}
         </DialogContent>
@@ -641,7 +531,7 @@ export const BranchesPage = () => {
       
       {/* Add Room Dialog */}
       <Dialog open={isAddRoomDialogOpen} onOpenChange={setIsAddRoomDialogOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Add New Room</DialogTitle>
             <DialogDescription>
@@ -650,15 +540,33 @@ export const BranchesPage = () => {
           </DialogHeader>
           {selectedBranch && (
             <RoomForm 
-              branchId={selectedBranch.id!} 
-              onSuccess={() => {
-                handleRoomAdded();
-                // Reopen the view dialog if it was open
-                if (isViewDialogOpen) {
+              branchId={selectedBranch.id!}
+              onSubmit={async (newRoom) => {
+                try {
+                  setIsLoading(true);
+                  await addDocument(`branches/${selectedBranch.id}/rooms`, newRoom);
+                  
+                  // Refresh rooms list
+                  const updatedRooms = await queryDocuments<Room>(`branches/${selectedBranch.id}/rooms`, []);
+                  setBranchRooms(updatedRooms);
+                  
                   setIsAddRoomDialogOpen(false);
-                  setIsViewDialogOpen(true);
+                   toast({
+                     title: "Success",
+                     description: "Room added successfully"
+                   });
+                 } catch (error) {
+                   console.error('Error adding room:', error);
+                   toast({
+                     title: "Error",
+                     description: "Failed to add room",
+                     variant: "destructive"
+                   });
+                 } finally {
+                  setIsLoading(false);
                 }
-              }} 
+              }}
+              onCancel={() => setIsAddRoomDialogOpen(false)}
             />
           )}
         </DialogContent>

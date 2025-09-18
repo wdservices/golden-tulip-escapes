@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { UserProfile } from '@/types/auth';
 import { auth, googleProvider, db } from '@/lib/firebase';
-import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { createSession, endUserSessions } from '@/utils/session';
+import { setDoc, doc } from 'firebase/firestore';
 import { 
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -11,10 +11,11 @@ import {
   onAuthStateChanged,
   updateProfile as firebaseUpdateProfile,
   User as FirebaseAuthUser,
+  getIdTokenResult,
   UserInfo
 } from 'firebase/auth';
 import { isAdmin } from '@/utils/auth';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   currentUser: UserProfile | null;
@@ -34,6 +35,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  console.log('AuthProvider initialized');
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseAuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,21 +43,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [navigateFn, setNavigateFn] = useState<((to: string) => void) | null>(null);
 
   // Map Firebase user to our UserProfile type
-  const mapFirebaseUser = (user: FirebaseAuthUser | null): UserProfile | null => {
-    if (!user) return null;
+  const mapFirebaseUser = async (user: FirebaseAuthUser | null): Promise<UserProfile | null> => {
+    if (!user) {
+      console.log('No Firebase user found');
+      return null;
+    }
+    
+    console.log('Firebase user found:', user.uid, user.email);
     
     // In development, check for mock user first
     if (process.env.NODE_ENV === 'development' && window.mockUser) {
+      console.log('Using mock user in development');
       return window.mockUser as UserProfile;
     }
     
-    // Check if user is admin based on email (only allow specific admin emails)
-    const adminEmails = ['admin@example.com', 'hello.goldentulip@gmail.com'];
-    const isAdminUser = adminEmails.includes(user.email?.toLowerCase() || '');
+    // Get user claims to check role
+    const idTokenResult = await user.getIdTokenResult();
+    const hasAdminClaim = idTokenResult.claims.role === 'admin';
+    
+    // Check if user is admin by email (fallback if claims not set)
+    const ADMIN_EMAILS = ['hello.goldentulip@gmail.com'];
+    const isAdminByEmail = user.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
+    
+    const isAdminUser = hasAdminClaim || isAdminByEmail;
+    
+    console.log('Role detection for', user.email, ':', {
+      hasAdminClaim,
+      isAdminByEmail,
+      isAdminUser,
+      claims: idTokenResult.claims
+    });
     
     // Get creation and last sign-in times
-    const creationTime = (user.metadata as any)?.creationTime;
-    const lastSignInTime = (user.metadata as any)?.lastSignInTime || new Date().toISOString();
+    const creationTime = user.metadata.creationTime;
+    const lastSignInTime = user.metadata.lastSignInTime || new Date().toISOString();
     
     return {
       id: user.uid,
@@ -93,29 +114,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return false;
     };
 
-    // Function to handle Firestore operations with retry logic
-    const handleFirestoreOperations = async (user: FirebaseAuthUser | null) => {
+    // Function to handle user data operations using Firebase Auth
+    const handleUserData = async (user: FirebaseAuthUser | null) => {
       if (!user) return;
       
       try {
-        const userDocRef = doc(db, 'users', user.uid);
-        const docSnap = await getDoc(userDocRef);
-        
-        if (!docSnap.exists()) {
-          await setDoc(userDocRef, {
-            name: user.displayName || user.email?.split('@')[0] || 'User',
-            email: user.email,
-            phone: user.phoneNumber || '',
-            photoURL: user.photoURL || '',
-            role: 'user',
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
+        // Check if user needs profile update
+        if (!user.displayName) {
+          await firebaseUpdateProfile(user, {
+            displayName: user.email?.split('@')[0] || 'User'
           });
+          console.log('Updated user profile in Firebase Auth');
         }
-      } catch (error) {
-        console.error('Error in Firestore operations:', error);
-        // Don't block the auth flow if Firestore is down
-        toast.warning('Connected to auth service, but having trouble with database. Some features may be limited.');
+        
+        toast({
+          title: "Success",
+          description: "Successfully signed in!",
+        });
+      } catch (error: any) {
+        console.error('Error in Firebase Auth operations:', error);
+        toast({
+          title: "Error",
+          description: "Error updating user profile. Some features may be limited.",
+          variant: "destructive"
+        });
       }
     };
 
@@ -123,30 +145,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!checkForMockUser()) {
       unsubscribe = onAuthStateChanged(auth, async (user) => {
         try {
-          const userProfile = mapFirebaseUser(user);
+          const userProfile = await mapFirebaseUser(user);
           setFirebaseUser(user);
           setCurrentUser(userProfile);
           
-          // Handle Firestore operations in the background
+          // Handle user data operations in Firebase Auth
           if (user) {
-            handleFirestoreOperations(user).catch(console.error);
+            handleUserData(user).catch((error) => {
+              console.error('Background Firebase Auth operation failed:', error);
+            });
           }
           
-          // Only redirect if not already on the dashboard or admin page
-          if (user && navigateFn) {
-            const currentPath = window.location.pathname;
-            if (!currentPath.startsWith('/dashboard') && !currentPath.startsWith('/admin')) {
-              navigateFn('/dashboard');
-            }
+          // Auto-redirect based on user role
+          if (userProfile && navigateFn && window.location.pathname === '/auth') {
+            const targetPath = userProfile.role === 'admin' ? '/admin' : '/dashboard';
+            navigateFn(targetPath);
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error in auth state change:', error);
+          toast({
+            title: "Authentication Error",
+            description: `Authentication error: ${error.message || 'Unknown error occurred'}`,
+            variant: "destructive"
+          });
         } finally {
           setIsLoading(false);
         }
       }, (error) => {
         console.error('Auth state change error:', error);
         setError(error.message);
+        toast({
+          title: "Authentication Error",
+          description: `Authentication error: ${error.message}`,
+          variant: "destructive"
+        });
         setIsLoading(false);
       });
     }
@@ -167,54 +199,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
       setIsLoading(true);
       
-      // Create timeout promises for authentication and Firestore operations
-      const authTimeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Authentication timeout')), 10000)
-      );
-
-      const firestoreTimeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Firestore timeout')), 3000) // Reduced timeout for faster login
-      );
-
-      // Authenticate user with timeout
-      const userCredential = await Promise.race([
-        signInWithEmailAndPassword(auth, email, password),
-        authTimeoutPromise
-      ]);
-      
+      // Authenticate user
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
-      // Check if user exists in Firestore with timeout, but don't wait for it
-      // This allows immediate navigation while data loads in background
-      const userDocRef = doc(db, 'users', user.uid);
+      // Force token refresh to get latest claims
+      await user.getIdToken(true);
       
-      // Check if user document exists in Firestore
-      getDoc(userDocRef).then((docSnap) => {
-        if (!docSnap.exists()) {
-          // Create user profile if it doesn't exist
-          const userData = {
-            name: user.displayName || user.email?.split('@')[0] || 'User',
-            email: user.email,
-            phone: user.phoneNumber || '',
-            photoURL: user.photoURL || '',
-            role: 'user',
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-          };
-          
-          setDoc(userDocRef, userData).catch(err => {
-            console.warn('Error creating user profile:', err);
-          });
-        }
-      }).catch(err => {
-        console.warn('Error checking user profile:', err);
-      });
-
-      // Don't wait for Firestore check, return immediately
-      const isAdminUser = ['admin@example.com', 'hello.goldentulip@gmail.com']
-        .includes(user.email?.toLowerCase() || '');
-
-      // Update local user state immediately
+      // Get fresh token result with updated claims
+      const idTokenResult = await user.getIdTokenResult(true);
+      const isAdminUser = idTokenResult.claims.role === 'admin';
+      
+      // Create session
+      await createSession(user.uid);
+      
+      // Update local user state
       const userProfile: UserProfile = {
         id: user.uid,
         email: user.email || '',
@@ -224,6 +223,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         role: isAdminUser ? 'admin' : 'user',
         lastLogin: new Date().toISOString()
       };
+      
+      // Ensure user document exists in appropriate Firestore collection (required for security rules)
+      try {
+        if (isAdminUser) {
+          // Ensure admin user document exists in adminUsers collection
+          const adminUserDocRef = doc(db, 'adminUsers', user.uid);
+          await setDoc(adminUserDocRef, {
+            email: userProfile.email,
+            name: userProfile.name,
+            phone: user.phoneNumber || '',
+            branchId: 'main', // Default branch
+            isActive: true,
+            createdAt: user.metadata.creationTime || new Date().toISOString(),
+            lastLogin: new Date().toISOString()
+          }, { merge: true }); // Use merge to avoid overwriting existing data
+          console.log('Admin user document ensured in adminUsers collection for:', userProfile.email);
+        } else {
+          // Ensure regular user document exists in users collection
+          const userDocRef = doc(db, 'users', user.uid);
+          await setDoc(userDocRef, {
+            ...userProfile,
+            joinDate: user.metadata.creationTime || new Date().toISOString(),
+            preferences: {}
+          }, { merge: true }); // Use merge to avoid overwriting existing data
+          console.log('User document ensured in users collection for:', userProfile.email);
+        }
+      } catch (firestoreError) {
+        console.error('Failed to ensure user document in Firestore:', firestoreError);
+        // Continue with login even if Firestore save fails
+      }
       
       setCurrentUser(userProfile);
       
@@ -246,34 +275,58 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       
       // Update profile with display name
-      await firebaseUpdateProfile(userCredential.user, { displayName: name });
+      await firebaseUpdateProfile(userCredential.user, { 
+        displayName: name,
+        phoneNumber: phone // Note: phoneNumber updates require additional verification
+      });
       
-      // Check if this is the test admin user
-      const isTestAdmin = email === 'admin@example.com' && process.env.NODE_ENV === 'development';
-      
-      // Create user object
+      // Create user object using metadata from Firebase Auth
       const user: UserProfile = {
         id: userCredential.user.uid,
         name,
         email,
         phone,
         photoURL: userCredential.user.photoURL || undefined,
-        joinDate: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-        role: isAdmin || isTestAdmin ? 'admin' : 'user',
+        joinDate: userCredential.user.metadata.creationTime || new Date().toISOString(),
+        lastLogin: userCredential.user.metadata.lastSignInTime || new Date().toISOString(),
+        role: isAdmin ? 'admin' : 'user',
         preferences: {}
       };
       
-      // For test admin in development, set the mock user
-      if (isTestAdmin) {
-        // @ts-ignore - Setting mock user for development
-        window.mockUser = user;
+      // Save user document to appropriate Firestore collection
+      try {
+        if (isAdmin) {
+          // Save admin users to adminUsers collection
+          const adminUserDoc = {
+            email: user.email,
+            name: user.name,
+            phone: user.phone,
+            branchId: 'main', // Default branch for new admin users
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            lastLogin: user.lastLogin
+          };
+          await setDoc(doc(db, 'adminUsers', userCredential.user.uid), adminUserDoc);
+          console.log('Admin user document saved to adminUsers collection:', adminUserDoc);
+        } else {
+          // Save regular users to users collection
+          await setDoc(doc(db, 'users', userCredential.user.uid), user);
+          console.log('User document saved to users collection:', user);
+        }
+      } catch (firestoreError) {
+        console.error('Failed to save user document to Firestore:', firestoreError);
+        // Continue with registration even if Firestore save fails
       }
+      
+      // Create session
+      await createSession(userCredential.user.uid);
       
       setCurrentUser(user);
       
       if (navigateFn) {
-        navigateFn('/dashboard');
+        // Redirect based on user role
+        const targetPath = isAdmin ? '/admin' : '/dashboard';
+        navigateFn(targetPath);
       }
       
       return user;
@@ -298,43 +351,55 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      setIsLoading(true);
+      // Redirect immediately to avoid showing loading states
+      window.location.href = '/';
       
-      // Clear the current user first to prevent ProtectedRoute from redirecting to auth
+      // Clear the current user state
       setCurrentUser(null);
       setFirebaseUser(null);
       
-      // End all active sessions
+      // End all active sessions in background
       if (firebaseUser) {
-        await endUserSessions(firebaseUser.uid);
+        endUserSessions(firebaseUser.uid).catch(console.error);
       }
       
-      // Sign out from Firebase
-      await firebaseSignOut(auth);
-      
-      // Navigate to landing page
-      window.location.href = '/';
+      // Sign out from Firebase in background
+      firebaseSignOut(auth).catch(console.error);
       
       return true;
     } catch (error) {
       console.error('Logout error:', error);
-      setError('Failed to log out');
-      throw error;
-    } finally {
-      setIsLoading(false);
+      // Even if there's an error, redirect to landing page
+      window.location.href = '/';
+      return false;
     }
   };
 
   const signInWithGoogle = async () => {
     try {
-      setError(null);
       setIsLoading(true);
-      await signInWithPopup(auth, googleProvider);
-      // Navigation is handled by the auth state change listener
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign in with Google');
-      console.error('Google sign in error:', err);
-      throw err;
+      setError(null);
+      
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      
+      // Force token refresh to get latest claims
+      await user.getIdToken(true);
+      
+      // Get fresh token result with updated claims
+      const idTokenResult = await user.getIdTokenResult(true);
+      
+      // Create a session
+      await createSession(user.uid);
+      
+      // Navigate based on role from claims
+      if (navigateFn) {
+        navigateFn(idTokenResult.claims.role === 'admin' ? '/admin' : '/dashboard');
+      }
+    } catch (error: any) {
+      console.error('Google sign in error:', error);
+      setError(error.message);
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -384,16 +449,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!currentUser || currentUser.role !== 'admin') {
       throw new Error('Unauthorized: Only admins can update user roles');
     }
-    
-    const userDocRef = doc(db, 'users', userId);
-    await setDoc(userDocRef, { role }, { merge: true });
-    
-    // If updating the current user, update local state
-    if (currentUser.id === userId) {
-      setCurrentUser({ ...currentUser, role });
+
+    try {
+      // Call your backend API endpoint that uses Firebase Admin SDK to set custom claims
+      const response = await fetch('/api/auth/set-custom-claims', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, role })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user role');
+      }
+
+      // Force token refresh to get new claims
+      if (firebaseUser && firebaseUser.uid === userId) {
+        await firebaseUser.getIdToken(true);
+      }
+
+      // Update local state if it's the current user
+      if (currentUser.id === userId) {
+        setCurrentUser({ ...currentUser, role });
+      }
+
+      toast({
+        title: "Success",
+        description: `User role updated to ${role}`,
+      });
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update user role",
+        variant: "destructive"
+      });
+      throw error;
     }
-    
-    toast.success(`User role updated to ${role}`);
   };
 
   const value: AuthContextType = {
@@ -418,10 +511,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useAuth = (): AuthContextType => {
+// Function to refresh the auth token
+const refreshAuthToken = async () => {
+  try {
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      await currentUser.getIdToken(true); // Force token refresh
+      console.log('Auth token refreshed successfully');
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Error refreshing auth token:', error);
+    return false;
+  }
+};
+
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
+    console.error('useAuth must be used within an AuthProvider');
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  return context;
+  
+  // Add token refresh method to the context
+  const enhancedContext = {
+    ...context,
+    refreshAuthToken
+  };
+  
+  return enhancedContext;
 };

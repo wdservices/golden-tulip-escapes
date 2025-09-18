@@ -2,13 +2,15 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DatabaseProvider } from "@/contexts/DatabaseContext";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+// Remove ChatbotFloatingButton import
+// import { ChatbotFloatingButton } from "@/components/chat/ChatbotFloatingButton";
+import { lazy, Suspense } from 'react';
 import Index from "./pages/Index";
 import { BookPage } from "./pages/BookPage";
 import BookingPage from "./pages/BookingPage";
-import { lazy, Suspense } from 'react';
 import AdminDashboard from "./pages/AdminDashboard";
 import { AdminLoading } from "./components/admin/AdminLoading";
 import { AuthPage } from "./pages/AuthPage";
@@ -17,26 +19,31 @@ import { ErrorBoundary } from "react-error-boundary";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { UserDashboard } from "./pages/UserDashboard";
 import { BranchPage } from "./pages/BranchPage";
-import { ChatbotFloatingButton } from "./components/chat/ChatbotFloatingButton";
 import RoomPage from "./pages/rooms/RoomPage";
+import PublicRoomsPage from "./pages/RoomsPage";
 import CorporateHallsPage from "./pages/CorporateHallsPage";
 import { Button } from "@/components/ui/button";
 import { AdminPanel } from "./components/admin/AdminPanel";
 
+
 // Lazy load admin components
 const BookingsPage = lazy(() => import("@/pages/admin/BookingsPage"));
-const RoomsPage = lazy(() => import("@/pages/admin/RoomsPage"));
+const AdminRoomsPage = lazy(() => import("@/pages/admin/RoomsPage"));
 const ClientsPage = lazy(() => import("@/pages/admin/ClientsPage"));
 const MarketingPage = lazy(() => import("@/pages/admin/MarketingPage"));
 const PaymentsPage = lazy(() => import("@/pages/admin/PaymentsPage"));
 const ReportsPage = lazy(() => import("@/pages/admin/ReportsPage"));
 const BranchesPage = lazy(() => import("@/pages/admin/BranchesPage"));
 const SettingsPage = lazy(() => import("@/pages/admin/settings/SettingsPage"));
-const PricingManagement = lazy(() => import("@/pages/admin/PricingManagement"));
 const DashboardHome = lazy(() => import("@/pages/admin/DashboardHome"));
 
 // Loading component for Suspense fallback
-const LoadingFallback = () => <AdminLoading fullScreen={true} size={48} />;
+const LoadingFallback = () => (
+  <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
+    <AdminLoading size={48} />
+    <p className="mt-4 text-muted-foreground">Loading page content...</p>
+  </div>
+);
 
 
 
@@ -70,23 +77,22 @@ const App = () => (
     onReset={() => window.location.reload()}
   >
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <DatabaseProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/admin/*" element={null} />
-            <Route path="*" element={<ChatbotFloatingButton />} />
-          </Routes>
-          <Routes>
+          <AuthProvider>
+            <DatabaseProvider>
+              {/* Remove ChatbotFloatingButton component */}
+              {/* <ChatbotFloatingButton /> */}
+              <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/book" element={<BookPage />} />
             <Route path="/booking/:id" element={<BookingPage />} />
             <Route path="/branch/:branchId" element={<BranchPage />} />
             <Route path="/branches/:branchId" element={<BranchPage />} />
+            <Route path="/rooms" element={<PublicRoomsPage />} />
             <Route path="/rooms/:id" element={<RoomPage />} />
             <Route path="/corporate-halls" element={<CorporateHallsPage />} />
             <Route
@@ -97,6 +103,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+
             {/* User Dashboard - Only accessible to non-admin users */}
             <Route
               path="/dashboard"
@@ -125,7 +132,7 @@ const App = () => (
               } />
               <Route path="rooms" element={
                 <Suspense fallback={<LoadingFallback />}>
-                  <RoomsPage />
+                  <AdminRoomsPage />
                 </Suspense>
               } />
               <Route path="clients" element={
@@ -158,22 +165,15 @@ const App = () => (
                   <SettingsPage />
                 </Suspense>
               } />
-              <Route path="users" element={
-                <AdminPanel />
-              } />
-              <Route path="pricing" element={
-                <Suspense fallback={<LoadingFallback />}>
-                  <PricingManagement />
-                </Suspense>
-              } />
+              {/* User Management and Pricing routes removed */}
             </Route>
             {/* 404 - Keep this last */}
             <Route path="*" element={<NotFound />} />
-          </Routes>
+              </Routes>
+            </DatabaseProvider>
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
-        </DatabaseProvider>
-      </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );

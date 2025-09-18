@@ -1,9 +1,35 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Star, Wifi, Coffee, Tv, AirVent, Utensils, Users } from 'lucide-react';
-import { roomTypes } from '../data/rooms';
+import { useRooms } from '@/hooks/useRooms';
+import { useState, useEffect } from 'react';
+import { useDatabase } from '@/contexts/DatabaseContext';
 
 export default function RoomsPage() {
+  // Get the first branch ID for now - in a real app, you might want to select a branch
+  const [selectedBranchId, setSelectedBranchId] = useState<string | undefined>(undefined);
+  const { rooms, roomTypes, isLoading } = useRooms(selectedBranchId);
+  const { queryDocuments } = useDatabase();
+
+  // Get the first branch ID on component mount
+  useEffect(() => {
+    const fetchFirstBranch = async () => {
+      try {
+        // Fetch branches directly using the database context
+        const branches = await queryDocuments('branches', []);
+        if (branches && branches.length > 0) {
+          setSelectedBranchId(branches[0].id);
+        } else {
+          console.error('No branches found');
+        }
+      } catch (error) {
+        console.error('Error fetching branches:', error);
+      }
+    };
+
+    fetchFirstBranch();
+  }, [queryDocuments]);
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Hero Section */}
@@ -19,8 +45,19 @@ export default function RoomsPage() {
 
       {/* Rooms Grid */}
       <section className="py-16 px-4 max-w-7xl mx-auto">
-        <div className="whitespace-nowrap overflow-x-auto pb-6 -mx-4 scrollbar-hide">
-          {roomTypes.map((room) => (
+        {isLoading ? (
+          <div className="text-center py-12">
+            <p className="text-xl text-gray-400">Loading room information...</p>
+          </div>
+        ) : (
+          <div className="whitespace-nowrap overflow-x-auto pb-6 -mx-4 scrollbar-hide">
+            {roomTypes.map((room) => {
+              // Count how many rooms of this type are available
+              const roomsOfThisType = rooms.filter(r => r.type === room.id);
+              const availableRooms = roomsOfThisType.filter(r => r.availability).length;
+              const totalRooms = roomsOfThisType.length;
+              
+              return (
                 <div key={room.id} className="inline-block w-80 mx-3 first:ml-0 last:mr-0 bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700 hover:border-gold-400/50 transition-colors" style={{ minWidth: '320px' }}>
                   <div className="relative h-64">
                     <img 
@@ -29,7 +66,7 @@ export default function RoomsPage() {
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-                      From ${room.price?.toLocaleString()}/night
+                      From ₦{room.price?.toLocaleString()}/night
                     </div>
                   </div>
                   <div className="p-6">
@@ -50,6 +87,9 @@ export default function RoomsPage() {
                       <div className="flex items-center text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
                         <span>Size: {room.size} m²</span>
                       </div>
+                      <div className="flex items-center text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
+                        <span>Available: {availableRooms}/{totalRooms}</span>
+                      </div>
                     </div>
                     
                     <div className="flex justify-between items-center mt-4">
@@ -66,8 +106,10 @@ export default function RoomsPage() {
                     </div>
                   </div>
                 </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* Features Section */}
@@ -103,25 +145,10 @@ export default function RoomsPage() {
               <div className="w-16 h-16 bg-gold-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <AirVent className="w-8 h-8 text-gold-400" />
               </div>
-              <h3 className="font-semibold mb-1">Air Conditioning</h3>
-              <p className="text-sm text-gray-400">Climate control in all rooms</p>
+              <h3 className="font-semibold mb-1">Climate Control</h3>
+              <p className="text-sm text-gray-400">Individual temperature settings</p>
             </div>
           </div>
-        </div>
-      </section>
-      
-      {/* CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-gold-600/10 to-gold-800/10">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gold-400">Ready for an Unforgettable Stay?</h2>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Book your perfect room today and experience luxury redefined at our hotel.
-          </p>
-          <Link to="/book">
-            <Button size="lg" className="bg-gold-500 hover:bg-gold-600 text-white text-lg px-8 py-6">
-              Book Your Stay Now
-            </Button>
-          </Link>
         </div>
       </section>
     </div>

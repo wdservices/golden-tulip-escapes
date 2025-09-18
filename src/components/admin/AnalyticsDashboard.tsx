@@ -1,6 +1,6 @@
-import { Line, Bar, Pie } from 'react-chartjs-2';
+import { Line, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, BarChart2, TrendingUp, Users, Clock, DollarSign, Home, Activity } from 'lucide-react';
+import { Calendar, TrendingUp, Users, DollarSign, Home, Bed } from 'lucide-react';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import {
   Chart as ChartJS,
@@ -8,13 +8,15 @@ import {
   LinearScale,
   PointElement,
   LineElement,
-  BarElement,
   ArcElement,
   Title,
   Tooltip,
   Legend,
 } from 'chart.js';
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from 'react';
+import { useAllRooms, useRooms } from '@/hooks/useRooms';
+import { useBookings } from '@/hooks/useBookings';
 
 // Register ChartJS components
 ChartJS.register(
@@ -22,23 +24,17 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
-  BarElement,
   ArcElement,
   Title,
   Tooltip,
   Legend
 );
 
-// Mock data - replace with actual API calls
-const mockBookings = [
-  { id: 1, date: subDays(new Date(), 6), amount: 45000, status: 'completed', guests: 2, roomType: 'Deluxe' },
-  { id: 2, date: subDays(new Date(), 5), amount: 32000, status: 'completed', guests: 1, roomType: 'Standard' },
-  { id: 3, date: subDays(new Date(), 4), amount: 52000, status: 'completed', guests: 3, roomType: 'Suite' },
-  { id: 4, date: subDays(new Date(), 3), amount: 41000, status: 'completed', guests: 2, roomType: 'Deluxe' },
-  { id: 5, date: subDays(new Date(), 2), amount: 38000, status: 'completed', guests: 1, roomType: 'Standard' },
-  { id: 6, date: subDays(new Date(), 1), amount: 48000, status: 'confirmed', guests: 2, roomType: 'Deluxe' },
-  { id: 7, date: new Date(), amount: 55000, status: 'confirmed', guests: 4, roomType: 'Suite' },
-];
+// Helper function to format room type names
+const formatRoomTypeName = (type: string): string => {
+  // Capitalize first letter and replace underscores with spaces
+  return type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, ' ');
+};
 
 export const AnalyticsDashboard = () => {
   const dateRange = {
@@ -46,38 +42,57 @@ export const AnalyticsDashboard = () => {
     to: new Date(),
   };
 
+  // Get room data from Firestore for GRA branch only (main branch)
+  const { rooms, isLoading: roomsLoading, error: roomsError } = useRooms('main');
+  
+  // Get real booking data from Firestore
+  const { bookings, isLoading: bookingsLoading, error: bookingsError } = useBookings();
+
   // Process data for charts
-  const filteredBookings = mockBookings.filter(
-    booking => booking.date >= startOfDay(dateRange.from) && booking.date <= endOfDay(dateRange.to)
+  const filteredBookings = bookings.filter(
+    booking => booking.checkInDate >= startOfDay(dateRange.from) && booking.checkInDate <= endOfDay(dateRange.to)
   );
 
   // Revenue by day
   const revenueByDay = filteredBookings.reduce((acc, booking) => {
-    const dateStr = format(booking.date, 'MM/dd');
-    acc[dateStr] = (acc[dateStr] || 0) + booking.amount;
+    const dateStr = format(booking.checkInDate, 'MM/dd');
+    acc[dateStr] = (acc[dateStr] || 0) + booking.totalAmount;
     return acc;
   }, {} as Record<string, number>);
 
-  // Booking trends
-  const bookingsByDay = filteredBookings.reduce((acc, booking) => {
-    const dateStr = format(booking.date, 'MM/dd');
-    acc[dateStr] = (acc[dateStr] || 0) + 1;
+  // Room type distribution - using real room data
+  const roomTypeCount = rooms.reduce((acc, room) => {
+    const formattedType = formatRoomTypeName(room.type);
+    acc[formattedType] = (acc[formattedType] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  // Room type distribution
-  const roomTypeCount = filteredBookings.reduce((acc, booking) => {
-    acc[booking.roomType] = (acc[booking.roomType] || 0) + 1;
+  // Room availability by type
+  const roomAvailability = rooms.reduce((acc, room) => {
+    const formattedType = formatRoomTypeName(room.type);
+    if (!acc[formattedType]) {
+      acc[formattedType] = { total: 0, available: 0, occupied: 0 };
+    }
+    acc[formattedType].total += 1;
+    // Check if room is available based on availability property
+    if (room.availability) {
+      acc[formattedType].available += 1;
+    } else {
+      acc[formattedType].occupied += 1;
+    }
     return acc;
-  }, {} as Record<string, number>);
+  }, {} as Record<string, { total: number, available: number, occupied: number }>);
 
   // Calculate metrics
-  const totalRooms = 50;
-  const bookedRooms = filteredBookings.length;
-  const occupancyRate = Math.min(100, Math.round((bookedRooms / totalRooms) * 100));
-  const totalRevenue = Object.values(revenueByDay).reduce((sum, val) => sum + val, 0);
+  const totalRooms = rooms.length;
+  const availableRooms = rooms.filter(room => room.availability).length;
+  const occupiedRooms = totalRooms - availableRooms;
+  
+  // Calculate total revenue from all bookings (not just filtered ones)
+  const totalRevenue = bookings.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0);
+  
   const averageGuests = filteredBookings.length > 0 
-    ? Math.round(filteredBookings.reduce((sum, b) => sum + b.guests, 0) / filteredBookings.length * 10) / 10 
+    ? Math.round(filteredBookings.reduce((sum, b) => sum + (b.guestCount || 0), 0) / filteredBookings.length * 10) / 10 
     : 0;
 
   // Chart data
@@ -86,20 +101,17 @@ export const AnalyticsDashboard = () => {
     datasets: [{
       label: 'Revenue (₦)',
       data: Object.values(revenueByDay),
-      borderColor: 'rgba(180, 83, 9, 0.8)',
-      backgroundColor: 'rgba(180, 83, 9, 0.1)',
-      tension: 0.3,
-      fill: true
-    }]
-  };
-
-  const bookingTrends = {
-    labels: Object.keys(bookingsByDay),
-    datasets: [{
-      label: 'Bookings',
-      data: Object.values(bookingsByDay),
-      backgroundColor: 'rgba(146, 64, 14, 0.8)',
-      borderColor: 'rgba(146, 64, 14, 0.8)',
+      borderColor: 'rgba(34, 197, 94, 1)', // Vibrant green
+      backgroundColor: 'rgba(34, 197, 94, 0.2)',
+      tension: 0.4,
+      fill: true,
+      pointBackgroundColor: 'rgba(34, 197, 94, 1)',
+      pointBorderColor: '#fff',
+      pointHoverBackgroundColor: '#fff',
+      pointHoverBorderColor: 'rgba(34, 197, 94, 1)',
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      borderWidth: 3
     }]
   };
 
@@ -108,16 +120,23 @@ export const AnalyticsDashboard = () => {
     datasets: [{
       data: Object.values(roomTypeCount),
       backgroundColor: [
-        'rgba(180, 83, 9, 0.8)',
-        'rgba(146, 64, 14, 0.8)',
-        'rgba(120, 53, 15, 0.8)',
+        'rgba(59, 130, 246, 0.8)',  // Blue
+        'rgba(16, 185, 129, 0.8)',  // Green
+        'rgba(249, 115, 22, 0.8)',  // Orange
+        'rgba(139, 92, 246, 0.8)',  // Purple
+        'rgba(236, 72, 153, 0.8)',  // Pink
+        'rgba(234, 179, 8, 0.8)',   // Yellow
       ],
       borderColor: [
-        'rgba(180, 83, 9, 1)',
-        'rgba(146, 64, 14, 1)',
-        'rgba(120, 53, 15, 1)',
+        'rgba(59, 130, 246, 1)',  // Blue
+        'rgba(16, 185, 129, 1)',  // Green
+        'rgba(249, 115, 22, 1)',  // Orange
+        'rgba(139, 92, 246, 1)',  // Purple
+        'rgba(236, 72, 153, 1)',  // Pink
+        'rgba(234, 179, 8, 1)',   // Yellow
       ],
-      borderWidth: 1,
+      borderWidth: 2,
+      hoverOffset: 10,
     }]
   };
 
@@ -125,55 +144,130 @@ export const AnalyticsDashboard = () => {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'top' as const },
+      legend: { 
+        position: 'top' as const,
+        labels: {
+          font: {
+            size: 12,
+            weight: 'bold'
+          },
+          padding: 20,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: {
+          size: 14,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 13
+        },
+        padding: 12,
+        cornerRadius: 6,
+        displayColors: false,
+        callbacks: {
+          label: function(context: any) {
+            return '₦' + context.parsed.y.toLocaleString();
+          }
+        }
+      }
     },
     scales: {
       x: {
+        grid: {
+          display: false
+        },
         ticks: {
           maxRotation: 45,
           minRotation: 0,
           maxTicksLimit: 7,
           font: {
-            size: 11
-          }
+            size: 11,
+            weight: 'bold'
+          },
+          color: 'rgba(100, 116, 139, 0.8)'
         }
       },
       y: {
         beginAtZero: true,
+        grid: {
+          color: 'rgba(226, 232, 240, 0.5)'
+        },
         ticks: {
           callback: function(value: any) {
             return '₦' + value.toLocaleString();
-          }
+          },
+          font: {
+            size: 11,
+            weight: 'bold'
+          },
+          color: 'rgba(100, 116, 139, 0.8)',
+          padding: 10
         }
       }
+    },
+    elements: {
+      line: {
+        tension: 0.4
+      }
+    },
+    interaction: {
+      mode: 'index' as const,
+      intersect: false
+    },
+    hover: {
+      mode: 'nearest' as const,
+      intersect: true
+    },
+    animation: {
+      duration: 1000
     }
   };
 
-  const barChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top' as const },
-    },
-    scales: {
-      x: {
-        ticks: {
-          maxRotation: 45,
-          minRotation: 0,
-          maxTicksLimit: 7,
-          font: {
-            size: 11
-          }
-        }
-      },
-      y: {
-        beginAtZero: true,
-        ticks: {
-          stepSize: 1
-        }
-      }
-    }
-  };
+  // Loading and error states
+  if (roomsLoading || bookingsLoading) {
+    return (
+      <div className="flex items-center justify-center h-[400px]">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-lg font-medium">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (roomsError || bookingsError) {
+    return (
+      <div className="flex items-center justify-center h-[400px]">
+        <div className="text-center space-y-4 max-w-md">
+          <div className="bg-red-100 text-red-800 p-4 rounded-lg">
+            <h3 className="text-lg font-bold mb-2">Error Loading Data</h3>
+            <p>{roomsError || bookingsError}</p>
+          </div>
+          <Button onClick={() => window.location.reload()} variant="outline">
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // No data state
+  if ((!rooms || rooms.length === 0) && (!bookings || bookings.length === 0)) {
+    return (
+      <div className="flex items-center justify-center h-[400px]">
+        <div className="text-center space-y-4 max-w-md">
+          <div className="bg-blue-100 text-blue-800 p-4 rounded-lg">
+            <h3 className="text-lg font-bold mb-2">No Data Available</h3>
+            <p>There are no rooms or bookings data available to display. Add some rooms and bookings to see analytics.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -202,22 +296,9 @@ export const AnalyticsDashboard = () => {
             <Home className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{filteredBookings.length}</div>
+            <div className="text-2xl font-bold">{bookings.length}</div>
             <p className="text-xs text-muted-foreground">
-              {filteredBookings.length > 0 ? '↑ 12% from last month' : 'No bookings yet'}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Occupancy Rate</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{occupancyRate}%</div>
-            <p className="text-xs text-muted-foreground">
-              {occupancyRate > 75 ? 'High occupancy' : 'Moderate occupancy'}
+              {bookings.length > 0 ? `${bookings.length} total bookings` : 'No bookings yet'}
             </p>
           </CardContent>
         </Card>
@@ -232,6 +313,68 @@ export const AnalyticsDashboard = () => {
             <p className="text-xs text-muted-foreground">per booking</p>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Room Availability</CardTitle>
+            <Bed className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{availableRooms}/{totalRooms}</div>
+            <p className="text-xs text-muted-foreground">rooms available</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Room Status Cards */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Available Rooms by Type</CardTitle>
+            <CardDescription>Number of rooms available for each type</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {Object.entries(roomAvailability).map(([type, data]) => (
+                <div key={type} className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium leading-none">{type}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {data.available} of {data.total} available
+                    </p>
+                  </div>
+                  <div className="font-bold">
+                    {Math.round((data.available / data.total) * 100)}%
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Occupied Rooms by Type</CardTitle>
+            <CardDescription>Number of rooms occupied for each type</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {Object.entries(roomAvailability).map(([type, data]) => (
+                <div key={type} className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium leading-none">{type}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {data.occupied} of {data.total} occupied
+                    </p>
+                  </div>
+                  <div className="font-bold">
+                    {Math.round((data.occupied / data.total) * 100)}%
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Charts */}
@@ -243,7 +386,13 @@ export const AnalyticsDashboard = () => {
           </CardHeader>
           <CardContent className="pl-2">
             <div className="h-[300px]">
-              <Line data={revenueData} options={chartOptions} />
+              {Object.keys(revenueByDay).length > 0 ? (
+                <Line data={revenueData} options={chartOptions} />
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-muted-foreground">No revenue data available for the selected period</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -255,56 +404,50 @@ export const AnalyticsDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
-              <Pie data={roomTypeData} options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' as const } },
-              }} />
+              {Object.keys(roomTypeCount).length > 0 ? (
+                <Pie data={roomTypeData} options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { 
+                    legend: { 
+                      position: 'bottom' as const,
+                      labels: {
+                        font: {
+                          size: 12,
+                          weight: 'bold'
+                        },
+                        padding: 15,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                      }
+                    },
+                    tooltip: {
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                      },
+                      bodyFont: {
+                        size: 13
+                      },
+                      padding: 12,
+                      cornerRadius: 6
+                    }
+                  },
+                  animation: {
+                    animateScale: true,
+                    animateRotate: true,
+                    duration: 1000
+                  },
+                  cutout: '60%',
+                  radius: '90%'
+                }} />
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-muted-foreground">No room type data available</p>
+                </div>
+              )}
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Booking Trends</CardTitle>
-            <CardDescription>Daily booking count</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <Bar data={bookingTrends} options={barChartOptions} />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Latest bookings and updates</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {filteredBookings.slice(0, 4).map((booking) => (
-              <div key={booking.id} className="flex items-center space-x-4">
-                <div className="rounded-full bg-amber-100 p-2">
-                  <Clock className="h-4 w-4 text-amber-700" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium leading-none">
-                    {booking.roomType} Booking #{booking.id}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {format(booking.date, 'MMM d, yyyy')} • {booking.guests} guest{booking.guests > 1 ? 's' : ''}
-                  </p>
-                </div>
-                <div className="font-medium">
-                  {new Intl.NumberFormat('en-NG', {
-                    style: 'currency',
-                    currency: 'NGN',
-                  }).format(booking.amount)}
-                </div>
-              </div>
-            ))}
           </CardContent>
         </Card>
       </div>

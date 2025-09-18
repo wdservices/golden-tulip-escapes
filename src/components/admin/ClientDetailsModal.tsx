@@ -48,41 +48,59 @@ export const ClientDetailsModal = ({ client, isOpen, onClose, onUpdate }: Client
           updatedAt: new Date(),
         });
         
-        toast.success("Client updated successfully");
+        toast({
+          title: "Success",
+          description: "Client updated successfully"
+        });
         onUpdate();
         setIsEditing(false);
       } catch (error) {
         console.error("Error updating client:", error);
-        toast.error("Failed to update client");
+        toast({
+          title: "Error",
+          description: "Failed to update client",
+          variant: "destructive"
+        });
       } finally {
         setIsSaving(false);
       }
     }
   );
 
+  // Only update form values when client ID changes or when modal opens
   useEffect(() => {
-    if (client) {
+    if (client && isOpen) {
+      const lastSignInDate = client.lastSignInAt ? (
+        client.lastSignInAt instanceof Date ? client.lastSignInAt :
+        typeof client.lastSignInAt === 'object' && client.lastSignInAt.toDate ?
+        client.lastSignInAt.toDate() : new Date(client.lastSignInAt)
+      ) : null;
+
       setValues({
         displayName: client.displayName || "",
         email: client.email || "",
         phoneNumber: client.phoneNumber || "",
-        status: (client.lastSignInAt && 
-          new Date().getTime() - client.lastSignInAt.toDate().getTime() < 30 * 24 * 60 * 60 * 1000
+        status: (lastSignInDate && 
+          new Date().getTime() - lastSignInDate.getTime() < 30 * 24 * 60 * 60 * 1000
         ) ? 'active' : 'inactive',
         isAdmin: client.isAdmin || false,
       });
     }
-  }, [client, setValues]);
+  }, [client?.id, isOpen, setValues]); // Only depend on client ID and modal open state
 
   if (!client) return null;
 
-  const lastActive = client.lastSignInAt 
-    ? formatDateTime(client.lastSignInAt.toDate())
-    : 'Never';
+  const lastActive = client.lastSignInAt ? formatDateTime(
+    client.lastSignInAt instanceof Date ? client.lastSignInAt :
+    typeof client.lastSignInAt === 'object' && client.lastSignInAt.toDate ?
+    client.lastSignInAt.toDate() : new Date(client.lastSignInAt)
+  ) : 'Never';
 
-  const joinDate = client.createdAt 
-    ? formatDate(client.createdAt.toDate())
-    : 'N/A';
+  const joinDate = client.createdAt ? formatDate(
+    client.createdAt instanceof Date ? client.createdAt :
+    typeof client.createdAt === 'object' && client.createdAt.toDate ?
+    client.createdAt.toDate() : new Date(client.createdAt)
+  ) : 'N/A';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

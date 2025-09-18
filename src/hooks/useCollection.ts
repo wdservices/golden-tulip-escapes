@@ -27,6 +27,35 @@ export const useCollection = <T extends { id: string }>(collectionPath: string) 
     } catch (err) {
       setError(err as Error);
       console.error(`Error fetching ${collectionPath}:`, err);
+      
+      // Check if it's a permission or connection error
+      if (err instanceof Error && err.message && 
+          (err.message.includes('permission') || 
+           err.message.includes('network') || 
+           err.message.includes('unavailable') ||
+           err.message.includes('unauthorized') ||
+           err.message.includes('400') ||
+           err.message.includes('ERR_ABORTED'))) {
+        
+        console.warn(`Firebase error detected in useCollection for ${collectionPath}, attempting to reconnect...`);
+        try {
+          // Import and use the reconnectFirebase function
+          const { reconnectFirebase } = await import('@/lib/firebase');
+          const reconnected = await reconnectFirebase();
+          
+          if (reconnected) {
+            console.log(`Successfully reconnected to Firebase, retrying fetch for ${collectionPath}`);
+            // Retry the operation after successful reconnection
+            const retryResult = await queryDocuments<T>(collectionPath, []);
+            setData(retryResult);
+            setError(null);
+          } else {
+            console.error(`Failed to reconnect to Firebase for ${collectionPath}`);
+          }
+        } catch (reconnectError) {
+          console.error('Error during Firebase reconnection:', reconnectError);
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -42,6 +71,35 @@ export const useCollection = <T extends { id: string }>(collectionPath: string) 
     } catch (err) {
       setError(err as Error);
       console.error(`Error querying ${collectionPath}:`, err);
+      
+      // Check if it's a permission or connection error
+      if (err instanceof Error && err.message && 
+          (err.message.includes('permission') || 
+           err.message.includes('network') || 
+           err.message.includes('unavailable') ||
+           err.message.includes('unauthorized') ||
+           err.message.includes('400') ||
+           err.message.includes('ERR_ABORTED'))) {
+        
+        console.warn(`Firebase error detected in useCollection query for ${collectionPath}, attempting to reconnect...`);
+        try {
+          // Import and use the reconnectFirebase function
+          const { reconnectFirebase } = await import('@/lib/firebase');
+          const reconnected = await reconnectFirebase();
+          
+          if (reconnected) {
+            console.log(`Successfully reconnected to Firebase, retrying query for ${collectionPath}`);
+            // Retry the operation after successful reconnection
+            const retryResult = await queryDocuments<T>(collectionPath, conditions);
+            setData(retryResult);
+            setError(null);
+          } else {
+            console.error(`Failed to reconnect to Firebase for ${collectionPath} query`);
+          }
+        } catch (reconnectError) {
+          console.error('Error during Firebase reconnection:', reconnectError);
+        }
+      }
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, query, where, getDocs, orderBy, Timestamp } from "firebase/firestore";
+import { collection, query, where, onSnapshot, orderBy, Timestamp, getDocs, doc, updateDoc } from "firebase/firestore";
 import { format, subDays, isToday, isYesterday } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
 import { 
   Search, 
   Eye, 
@@ -32,25 +33,40 @@ import {
   CreditCard,
   Bed,
   Star,
-  Edit
+  Edit,
+  BedDouble,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { db } from "@/lib/firebase";
+import { exportBookingsToCSV, downloadFile } from "@/lib/export-utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Booking, BookingStatus } from "@/types/booking";
 import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { DateRangePresets } from "@/components/ui/date-range-presets";
+import { BookingDetailsDialog } from "@/components/admin/BookingDetailsDialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useCollection } from "@/hooks/useCollection";
+import { BookingsTable } from "@/components/bookings/BookingsTable";
 
 export const BookingsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [statusFilter, setStatusFilter] = useState<BookingStatus | 'all'>('all');
   const [branchFilter, setBranchFilter] = useState<string>('all');
+  const [roomTypeFilter, setRoomTypeFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [showBookingDetails, setShowBookingDetails] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [showCreateBooking, setShowCreateBooking] = useState(false);
   const { currentUser } = useAuth();
+  const { toast } = useToast();
+  const bookingsCollection = useCollection<Booking>("bookings");
 
   // Fetch bookings from Firestore
   useEffect(() => {
@@ -58,6 +74,13 @@ export const BookingsPage = () => {
       try {
         setIsLoading(true);
         setError(null);
+        
+        // Check if user is authenticated
+        if (!currentUser) {
+          setError("You must be logged in to view bookings.");
+          setIsLoading(false);
+          return;
+        }
         
         // Start with base query
         let q = query(
@@ -77,16 +100,123 @@ export const BookingsPage = () => {
         })) as Booking[];
 
         setBookings(bookingsData);
-      } catch (err) {
+        
+        // Show success toast if data loaded successfully
+        if (bookingsData.length > 0) {
+          toast({
+            title: "Bookings loaded",
+            description: `${bookingsData.length} bookings retrieved successfully.`,
+          });
+        } else {
+          toast({
+            title: "No bookings found",
+            description: "No booking records match your criteria.",
+          });
+        }
+      } catch (err: any) {
         console.error("Error fetching bookings:", err);
-        setError("Failed to load bookings. Please try again later.");
+        
+        // Handle Firebase permission errors specifically
+        if (err.message && err.message.includes("permission")) {
+          setError("You don't have permission to access bookings. Please contact an administrator.");
+          toast({
+            variant: "destructive",
+            title: "Permission denied",
+            description: "You don't have sufficient permissions to view bookings.",
+          });
+        } else {
+          setError("Failed to load bookings. Please try again later.");
+          toast({
+            variant: "destructive",
+            title: "Error loading bookings",
+            description: err.message || "An unexpected error occurred.",
+          });
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchBookings();
-  }, [currentUser]);
+  }, [currentUser, toast]);
+  useEffect(() => {
+    // realtime listener for bookings collection with optional branch filter
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      if (!currentUser) {
+        setError("You must be logged in to view bookings.");
+        setIsLoading(false);
+        return;
+      }
+
+      let q = query(
+        collection(db, "bookings"),
+        orderBy("checkInDate", "desc")
+      );
+
+      if (currentUser?.branch && currentUser.role !== 'admin') {
+        q = query(q, where("branchId", "==", currentUser.branch));
+      }
+
+      let initialized = false;
+      let previousIds = new Set<string>();
+
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const bookingsData = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as Booking[];
+        setBookings(bookingsData);
+
+        // Track new docs after initial load to notify
+        const currentIds = new Set(bookingsData.map(b => b.id));
+        if (initialized) {
+          for (const id of currentIds) {
+            if (!previousIds.has(id)) {
+              const newBooking = bookingsData.find(b => b.id === id);
+              toast({
+                title: "New booking received",
+                description: newBooking?.guestName ? `${newBooking.guestName} just booked.` : `Booking #${id.slice(0,8)} added.`,
+              });
+            }
+          }
+        }
+        previousIds = currentIds;
+        if (!initialized) {
+          initialized = true;
+          setIsLoading(false);
+          if (bookingsData.length > 0) {
+            toast({
+              title: "Bookings loaded",
+              description: `${bookingsData.length} bookings retrieved successfully.`,
+            });
+          }
+        }
+      }, (err) => {
+        console.error("Error listening to bookings:", err);
+        setIsLoading(false);
+        if (err.message && err.message.includes("permission")) {
+          setError("You don't have permission to access bookings. Please contact an administrator.");
+          toast({
+            variant: "destructive",
+            title: "Permission denied",
+            description: "You don't have sufficient permissions to view bookings.",
+          });
+        } else {
+          setError("Failed to load bookings. Please try again later.");
+          toast({
+            variant: "destructive",
+            title: "Error loading bookings",
+            description: err.message || "An unexpected error occurred.",
+          });
+        }
+      });
+
+      return () => unsubscribe();
+    } catch (e) {
+      console.error(e);
+      setIsLoading(false);
+    }
+  }, [currentUser, toast]);
 
   // Filter bookings based on search and filters
   const filteredBookings = bookings.filter(booking => {
@@ -98,29 +228,30 @@ export const BookingsPage = () => {
 
     const matchesStatus = statusFilter === "all" || booking.status === statusFilter;
     const matchesBranch = branchFilter === "all" || booking.branchId === branchFilter;
+    const matchesRoomType = roomTypeFilter === "all" || booking.roomType === roomTypeFilter;
     
     const matchesDate = !dateRange || 
       !dateRange.from || 
       !dateRange.to || 
-      (new Date(booking.checkInDate) >= dateRange.from && 
-       new Date(booking.checkOutDate) <= dateRange.to);
+      (booking.checkInDate.toDate() >= dateRange.from && 
+       booking.checkOutDate.toDate() <= dateRange.to);
 
-    return matchesSearch && matchesStatus && matchesBranch && matchesDate;
+    return matchesSearch && matchesStatus && matchesBranch && matchesRoomType && matchesDate;
   });
 
   // Get recent bookings (last 7 days)
   const recentBookings = bookings.filter(booking => {
-    const bookingDate = new Date(booking.bookingDate || booking.createdAt || '');
+    const bookingDate = (booking.bookingDate || booking.createdAt)?.toDate() || new Date();
     const sevenDaysAgo = subDays(new Date(), 7);
     return bookingDate >= sevenDaysAgo;
   });
 
   // Get today's check-ins and check-outs
   const todayCheckIns = bookings.filter(booking => 
-    isToday(new Date(booking.checkInDate))
+    isToday(booking.checkInDate.toDate())
   );
   const todayCheckOuts = bookings.filter(booking => 
-    isToday(new Date(booking.checkOutDate))
+    isToday(booking.checkOutDate.toDate())
   );
 
   // Get unique branches for filter
@@ -164,11 +295,68 @@ export const BookingsPage = () => {
     }).format(amount);
   };
 
-  const getRelativeTime = (date: string) => {
-    const bookingDate = new Date(date);
+  const getRelativeTime = (date: Timestamp | undefined) => {
+    if (!date) return 'Unknown';
+    const bookingDate = date.toDate();
     if (isToday(bookingDate)) return 'Today';
     if (isYesterday(bookingDate)) return 'Yesterday';
     return format(bookingDate, 'MMM d');
+  };
+
+  // Update booking status in Firestore
+  const updateBookingStatus = async (bookingId: string, newStatus: BookingStatus) => {
+    try {
+      // Get reference to the booking document
+      const bookingRef = doc(db, "bookings", bookingId);
+      
+      // Update the status field
+      await updateDoc(bookingRef, {
+        status: newStatus,
+        updatedAt: Timestamp.now()
+      });
+      
+      // Show success toast
+      toast({
+        title: "Booking updated",
+        description: `Booking status changed to ${newStatus}`,
+        variant: "default"
+      });
+      
+      // If status is completed, update room availability
+      if (newStatus === "completed") {
+        // Find the booking in our local state
+        const booking = bookings.find(b => b.id === bookingId);
+        if (booking && booking.roomId && booking.branchId) {
+          try {
+            // Get the room document reference
+            const roomRef = doc(db, "branches", booking.branchId, "rooms", booking.roomId);
+            
+            // Update the room availability
+            await updateDoc(roomRef, {
+              available: true,
+              lastCheckoutDate: Timestamp.now()
+            });
+            
+            console.log(`Room ${booking.roomId} marked as available after checkout`);
+          } catch (roomError) {
+            console.error("Error updating room availability:", roomError);
+            // Don't fail the whole operation if room update fails
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error("Error updating booking status:", error);
+      toast({
+        title: "Update failed",
+        description: error.message || "Failed to update booking status",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  // Handler for status change from BookingsTable
+  const handleStatusChange = (bookingId: string, newStatus: BookingStatus) => {
+    updateBookingStatus(bookingId, newStatus);
   };
 
   if (isLoading) {
@@ -198,6 +386,12 @@ export const BookingsPage = () => {
 
   return (
     <div className="space-y-8 p-6">
+      {/* Booking Details Dialog */}
+      <BookingDetailsDialog
+        booking={selectedBooking}
+        open={showBookingDetails}
+        onOpenChange={setShowBookingDetails}
+      />
       {/* Header Section */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div className="space-y-2">
@@ -207,7 +401,20 @@ export const BookingsPage = () => {
           </p>
         </div>
         <div className="flex items-center space-x-3">
-          <Button variant="outline" size="sm" className="admin-card">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="admin-card"
+            onClick={() => {
+               const csvData = exportBookingsToCSV(filteredBookings);
+               const timestamp = new Date().toISOString().split('T')[0];
+               downloadFile(csvData, `bookings-export-${timestamp}.csv`, 'text/csv');
+               toast({
+                 title: "Export successful",
+                 description: `${filteredBookings.length} bookings exported to CSV`,
+               });
+             }}
+          >
             <Download className="h-4 w-4 mr-2" />
             Export Data
           </Button>
@@ -345,12 +552,33 @@ export const BookingsPage = () => {
                       </SelectContent>
                     </Select>
                   )}
+                  
+                  <Select value={roomTypeFilter} onValueChange={setRoomTypeFilter}>
+                    <SelectTrigger className="w-[180px] booking-select">
+                      <BedDouble className="mr-2 h-4 w-4" />
+                      <SelectValue placeholder="Room Type" />
+                    </SelectTrigger>
+                    <SelectContent className="booking-dropdown">
+                      <SelectItem value="all">All Room Types</SelectItem>
+                      <SelectItem value="standard-room">Standard Room</SelectItem>
+                      <SelectItem value="superior-room">Superior Room</SelectItem>
+                      <SelectItem value="deluxe-room">Deluxe Room</SelectItem>
+                      <SelectItem value="junior-suite">Junior Suite</SelectItem>
+                      <SelectItem value="executive-suite">Executive Suite</SelectItem>
+                      <SelectItem value="presidential-suite">Presidential Suite</SelectItem>
+                      <SelectItem value="penthouse">Penthouse</SelectItem>
+                      <SelectItem value="villa">Villa</SelectItem>
+                    </SelectContent>
+                  </Select>
 
-                  <DateRangePicker
-                    dateRange={dateRange || { from: undefined, to: undefined }}
-                    onDateRangeChange={setDateRange}
-                    className="w-[250px]"
-                  />
+                  <div className="flex items-center gap-2">
+                    <DateRangePicker
+                      dateRange={dateRange || { from: undefined, to: undefined }}
+                      onDateRangeChange={setDateRange}
+                      className="w-[250px]"
+                    />
+                    <DateRangePresets onSelect={setDateRange} />
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -359,163 +587,80 @@ export const BookingsPage = () => {
           {/* Bookings Table */}
           <Card className="admin-card">
             <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border/30">
-                    <TableHead className="font-semibold">Booking Details</TableHead>
-                    <TableHead className="font-semibold">Guest Information</TableHead>
-                    <TableHead className="font-semibold">Stay Details</TableHead>
-                    <TableHead className="font-semibold">Amount</TableHead>
-                    <TableHead className="font-semibold">Status</TableHead>
-                    <TableHead className="font-semibold text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredBookings.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="h-32 text-center">
-                        <div className="flex flex-col items-center space-y-3">
-                          <Calendar className="h-8 w-8 text-muted-foreground opacity-50" />
-                          <div>
-                            <p className="font-medium">
-                              {searchTerm || statusFilter !== 'all' || dateRange
-                                ? 'No matching bookings found'
-                                : 'No bookings available'}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Try adjusting your search criteria
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredBookings.map((booking) => (
-                      <TableRow key={booking.id} className="border-border/20 hover:bg-muted/20 transition-colors">
-                        <TableCell>
-                          <div className="space-y-1">
-                            <p className="font-medium text-sm">#{booking.id.substring(0, 8)}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {getRelativeTime(booking.bookingDate || booking.createdAt || '')}
-                            </p>
-                            {booking.branchName && (
-                              <div className="flex items-center text-xs text-muted-foreground">
-                                <MapPin className="h-3 w-3 mr-1" />
-                                {booking.branchName}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="flex items-center space-x-2">
-                              <User className="h-3 w-3 text-muted-foreground" />
-                              <p className="font-medium text-sm">{booking.guestName || 'N/A'}</p>
-                            </div>
-                            {booking.guestEmail && (
-                              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                                <Mail className="h-3 w-3" />
-                                {booking.guestEmail}
-                              </div>
-                            )}
-                            {booking.guestPhone && (
-                              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                                <Phone className="h-3 w-3" />
-                                {booking.guestPhone}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="flex items-center space-x-2">
-                              <Bed className="h-3 w-3 text-muted-foreground" />
-                              <p className="text-sm capitalize">{booking.roomType}</p>
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              <p>Check-in: {format(new Date(booking.checkInDate), 'MMM d, yyyy')}</p>
-                              <p>Check-out: {format(new Date(booking.checkOutDate), 'MMM d, yyyy')}</p>
-                            </div>
-                            {booking.guests && (
-                              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                                <Users className="h-3 w-3" />
-                                {booking.guests} guest{booking.guests > 1 ? 's' : ''}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <p className="font-semibold text-primary">
-                              {formatCurrency(booking.totalAmount)}
-                            </p>
-                            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                              <CreditCard className="h-3 w-3" />
-                              <span className="capitalize">{booking.paymentStatus || 'pending'}</span>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={`${getStatusVariant(booking.status)} border capitalize flex items-center space-x-1 w-fit`}>
-                            {getStatusIcon(booking.status)}
-                            <span>{booking.status}</span>
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent align="end" className="w-48 p-2">
-                              <div className="flex flex-col space-y-1">
-                                <Button variant="ghost" size="sm" className="justify-start">
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View Details
-                                </Button>
-                                <Button variant="ghost" size="sm" className="justify-start">
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Edit Booking
-                                </Button>
-                                {booking.status !== "completed" && (
-                                  <Button variant="ghost" size="sm" className="justify-start text-green-600">
-                                    <CheckCircle className="h-4 w-4 mr-2" />
-                                    Mark Complete
-                                  </Button>
-                                )}
-                                {booking.status !== "cancelled" && (
-                                  <Button variant="ghost" size="sm" className="justify-start text-red-600">
-                                    <XCircle className="h-4 w-4 mr-2" />
-                                    Cancel
-                                  </Button>
-                                )}
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+              <BookingsTable 
+                bookings={filteredBookings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)} 
+                isLoading={isLoading} 
+                onEdit={(booking) => {
+                  setSelectedBooking(booking);
+                  setShowBookingDetails(true);
+                }} 
+                onStatusChange={handleStatusChange} 
+              />
+              {filteredBookings.length > 0 && (
+                <div className="flex items-center justify-between p-4 border-t border-border/30">
+                  <div className="flex items-center gap-2">
+                    <Select
+                      value={itemsPerPage.toString()}
+                      onValueChange={(value) => {
+                        setItemsPerPage(parseInt(value));
+                        setCurrentPage(1); // Reset to first page when changing items per page
+                      }}
+                    >
+                      <SelectTrigger className="w-[120px]">
+                        <SelectValue placeholder="Per page" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5">5 per page</SelectItem>
+                        <SelectItem value="10">10 per page</SelectItem>
+                        <SelectItem value="20">20 per page</SelectItem>
+                        <SelectItem value="50">50 per page</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-muted-foreground">
+                      Showing {Math.min((currentPage - 1) * itemsPerPage + 1, filteredBookings.length)} to {Math.min(currentPage * itemsPerPage, filteredBookings.length)} of {filteredBookings.length} bookings
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, Math.ceil(filteredBookings.length / itemsPerPage)) }, (_, i) => {
+                        const pageNumber = i + 1;
+                        return (
+                          <Button
+                            key={pageNumber}
+                            variant={currentPage === pageNumber ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setCurrentPage(pageNumber)}
+                            className="w-8 h-8 p-0"
+                          >
+                            {pageNumber}
+                          </Button>
+                        );
+                      })}
+                      {Math.ceil(filteredBookings.length / itemsPerPage) > 5 && (
+                        <span className="text-muted-foreground mx-1">...</span>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, Math.ceil(filteredBookings.length / itemsPerPage)))}
+                      disabled={currentPage === Math.ceil(filteredBookings.length / itemsPerPage)}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
-            <CardFooter className="border-t border-border/30 px-6 py-4">
-              <div className="flex items-center justify-between w-full">
-                <div className="text-sm text-muted-foreground">
-                  Showing <span className="font-medium text-foreground">{filteredBookings.length}</span> of{' '}
-                  <span className="font-medium text-foreground">{bookings.length}</span> bookings
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm">
-                    Previous
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Next
-                  </Button>
-                </div>
-              </div>
-            </CardFooter>
           </Card>
         </TabsContent>
 
@@ -536,7 +681,14 @@ export const BookingsPage = () => {
               ) : (
                 <div className="space-y-4">
                   {recentBookings.slice(0, 10).map((booking) => (
-                    <div key={booking.id} className="flex items-center justify-between p-4 rounded-lg border border-border/30 hover:bg-muted/20 transition-colors">
+                    <div 
+                      key={booking.id} 
+                      className="flex items-center justify-between p-4 rounded-lg border border-border/30 hover:bg-muted/20 transition-colors cursor-pointer"
+                      onClick={() => {
+                        setSelectedBooking(booking);
+                        setShowBookingDetails(true);
+                      }}
+                    >
                       <div className="flex items-center space-x-4">
                         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
                           <User className="h-5 w-5 text-primary" />
@@ -580,7 +732,14 @@ export const BookingsPage = () => {
                 ) : (
                   <div className="space-y-3">
                     {todayCheckIns.map((booking) => (
-                      <div key={booking.id} className="flex items-center justify-between p-3 rounded-lg border border-border/30">
+                      <div 
+                        key={booking.id} 
+                        className="flex items-center justify-between p-3 rounded-lg border border-border/30 cursor-pointer hover:bg-muted/20 transition-colors"
+                        onClick={() => {
+                          setSelectedBooking(booking);
+                          setShowBookingDetails(true);
+                        }}
+                      >
                         <div>
                           <p className="font-medium">{booking.guestName || 'Guest'}</p>
                           <p className="text-sm text-muted-foreground">{booking.roomType}</p>
@@ -611,7 +770,14 @@ export const BookingsPage = () => {
                 ) : (
                   <div className="space-y-3">
                     {todayCheckOuts.map((booking) => (
-                      <div key={booking.id} className="flex items-center justify-between p-3 rounded-lg border border-border/30">
+                      <div 
+                        key={booking.id} 
+                        className="flex items-center justify-between p-3 rounded-lg border border-border/30 cursor-pointer hover:bg-muted/20 transition-colors"
+                        onClick={() => {
+                          setSelectedBooking(booking);
+                          setShowBookingDetails(true);
+                        }}
+                      >
                         <div>
                           <p className="font-medium">{booking.guestName || 'Guest'}</p>
                           <p className="text-sm text-muted-foreground">{booking.roomType}</p>

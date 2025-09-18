@@ -8,16 +8,24 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false
+      }
+    },
     headers: {
       'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), display-capture=(), clipboard-write=self',
       'Content-Security-Policy': [
         "default-src 'self';",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://webobook.com;",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://webobook.com https://apis.google.com;",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;",
         "img-src 'self' data: https:;",
         "font-src 'self' data: https://fonts.gstatic.com;",
         "frame-src 'self' https://webobook.com;",
-        "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebase.com https://webobook.com;"
+        // Allow Firebase/Google endpoints for Firestore/Auth and dev sockets
+        "connect-src 'self' https://firestore.googleapis.com https://www.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://apis.google.com https://*.googleapis.com https://*.gstatic.com https://*.firebaseio.com https://*.firebase.com ws: wss:;"
       ].join(' '),
       'Feature-Policy': "camera 'none'; microphone 'none'; geolocation 'none'; display-capture 'none'; clipboard-write 'self'",
     },

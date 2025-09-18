@@ -23,7 +23,11 @@ export function FeedbackForm({ className = '', userId, userEmail, onSuccess }: F
     e.preventDefault();
     
     if (!type || !message.trim()) {
-      toast.error('Please fill in all fields');
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -39,13 +43,20 @@ export function FeedbackForm({ className = '', userId, userEmail, onSuccess }: F
         createdAt: serverTimestamp(),
       });
       
-      toast.success('Thank you for your feedback!');
+      toast({
+        title: "Success",
+        description: "Thank you for your feedback!"
+      });
       setMessage('');
       setType('');
       onSuccess?.();
     } catch (error) {
       console.error('Error submitting feedback:', error);
-      toast.error('Failed to submit feedback. Please try again.');
+      toast({
+        title: "Error",
+        description: "Failed to submit feedback. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }

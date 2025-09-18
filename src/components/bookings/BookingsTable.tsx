@@ -36,11 +36,15 @@ export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: B
 
     const matchesStatus = statusFilter === "all" || booking.status === statusFilter;
 
+    // Handle date range filtering with proper Timestamp conversion
     const matchesDateRange =
       !dateRange.from ||
       !dateRange.to ||
-      (new Date(booking.checkInDate) >= dateRange.from &&
-        new Date(booking.checkInDate) <= dateRange.to);
+      (booking.checkInDate instanceof Timestamp
+        ? (booking.checkInDate.toDate() >= dateRange.from && 
+           booking.checkInDate.toDate() <= dateRange.to)
+        : (new Date(booking.checkInDate) >= dateRange.from && 
+           new Date(booking.checkInDate) <= dateRange.to));
 
     return matchesSearch && matchesStatus && matchesDateRange;
   });
@@ -146,8 +150,18 @@ export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: B
                   </TableCell>
                   <TableCell>{booking.branchName}</TableCell>
                   <TableCell className="capitalize">{booking.roomType}</TableCell>
-                  <TableCell>{format(new Date(booking.checkInDate), "MMM dd, yyyy")}</TableCell>
-                  <TableCell>{format(new Date(booking.checkOutDate), "MMM dd, yyyy")}</TableCell>
+                  <TableCell>
+                    {booking.checkInDate instanceof Timestamp 
+                      ? format(booking.checkInDate.toDate(), "MMM dd, yyyy")
+                      : format(new Date(booking.checkInDate), "MMM dd, yyyy")
+                    }
+                  </TableCell>
+                  <TableCell>
+                    {booking.checkOutDate instanceof Timestamp 
+                      ? format(booking.checkOutDate.toDate(), "MMM dd, yyyy")
+                      : format(new Date(booking.checkOutDate), "MMM dd, yyyy")
+                    }
+                  </TableCell>
                   <TableCell>
                     <Badge
                       variant={

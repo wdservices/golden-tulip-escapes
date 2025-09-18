@@ -1,16 +1,15 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow read access to all users for public data
+    // Allow read access to all authenticated users for public data
     match /{document=**} {
-      allow read: if true;
+      allow read: if request.auth != null;
     }
     
     // Feedback collection rules
     match /feedback/{feedbackId} {
       // Allow anyone to submit feedback
-      allow create: if request.resource.data is object &&
-                    request.resource.data.keys().hasAll(['type', 'message']) &&
+      allow create: if request.resource.data.keys().hasAll(['type', 'message']) &&
                     (request.resource.data.type == 'suggestion' || 
                      request.resource.data.type == 'complaint') &&
                     request.resource.data.message is string &&
@@ -33,7 +32,8 @@ service cloud.firestore {
       // Allow users to read their own sessions
       allow read: if request.auth != null && 
                   (request.auth.uid == resource.data.userId || 
-                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+                   (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+                    get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
     }
     
     // Users collection rules
@@ -74,25 +74,34 @@ service cloud.firestore {
     match /bookings/{bookingId} {
       // Allow users to read their own bookings and admins to read all bookings
       allow read: if request.auth != null && 
-                 (request.auth.uid == resource.data.userId || isAdmin());
+                 (request.auth.uid == resource.data.userId || 
+                  (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+                   get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
       
       // Allow authenticated users to create bookings and admins to manage all bookings
       allow create: if request.auth != null && 
-                   (request.auth.uid == request.resource.data.userId || isAdmin());
+                   (request.auth.uid == request.resource.data.userId || 
+                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+                     get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
       
       // Allow users to update their own bookings and admins to update any booking
       allow update: if request.auth != null && 
-                   (request.auth.uid == resource.data.userId || isAdmin());
+                   (request.auth.uid == resource.data.userId || 
+                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+                     get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
       
       // Allow users to delete their own bookings and admins to delete any booking
       allow delete: if request.auth != null && 
-                   (request.auth.uid == resource.data.userId || isAdmin());
+                   (request.auth.uid == resource.data.userId || 
+                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+                     get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
     }
     
     // Helper function to check if user is admin
     function isAdmin() {
       return request.auth != null && 
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+             exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true;
     }
   }
 }

@@ -80,7 +80,7 @@ const generateRevenueReport = (bookings: Booking[]): RevenueReport[] => {
   // Calculate revenue metrics for each date
   return Object.entries(bookingsByDate).map(([date, dailyBookings]) => {
     const totalRevenue = dailyBookings.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0);
-    const serviceRevenue = dailyBookings.reduce((sum, booking) => sum + (booking.serviceCharges || 0), 0);
+    const serviceRevenue = dailyBookings.reduce((sum, booking) => sum + (booking.serviceCharge || 0), 0);
     const tax = dailyBookings.reduce((sum, booking) => sum + (booking.tax || 0), 0);
     const discount = dailyBookings.reduce((sum, booking) => sum + (booking.discount || 0), 0);
     const averageStay = dailyBookings.length > 0 
@@ -134,36 +134,18 @@ const generateGuestReport = async (
       
       guestReports.push({
         guestId,
-        name: guestData.name || 'Unknown Guest',
-        email: guestData.email || '',
-        phone: guestData.phone || '',
+        name: (guestData as any).name || 'Unknown Guest',
+        email: (guestData as any).email || '',
+        phone: (guestData as any).phone || '',
         totalStays,
         totalNights,
         totalSpent,
         lastStay: sortedBookings[sortedBookings.length - 1].checkInDate.toDate().toISOString(),
-        nextStay: guestData.nextStay || undefined
+        nextStay: (guestData as any).nextStay || undefined
       });
     } catch (error) {
       console.error(`Error processing guest ${guestId}:`, error);
     }
-      new Date(b.checkInDate).getTime() - new Date(a.checkInDate).getTime()
-    );
-    
-    const lastStay = sortedBookings[0]?.checkInDate || '';
-    const nextStay = sortedBookings.find(b => new Date(b.checkInDate) > new Date())?.checkInDate;
-    
-    guestReports.push({
-      guestId,
-      name: guestData?.name || 'Unknown Guest',
-      email: guestData?.email || 'No email',
-      phone: guestData?.phone || 'No phone',
-      totalStays,
-      totalNights,
-      totalSpent: parseFloat(totalSpent.toFixed(2)),
-      lastStay,
-      nextStay,
-      averageRating: guestData?.averageRating
-    });
   }
   
   return guestReports;
@@ -179,7 +161,7 @@ const generateCancellationReport = (
   
   for (const booking of bookings) {
     if (booking.status === 'cancelled') {
-      const date = new Date(booking.updatedAt || booking.bookingDate).toISOString().split('T')[0];
+      const date = (booking.updatedAt || booking.bookingDate || booking.checkInDate).toDate().toISOString().split('T')[0];
       if (!bookingsByDate.has(date)) {
         bookingsByDate.set(date, []);
       }

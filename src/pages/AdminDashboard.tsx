@@ -37,9 +37,7 @@ import {
   Eye,
   Edit,
   Trash2,
-  DollarSign,
   TrendingUp,
-  Tag,
   LogOut, 
   ArrowLeft
 } from "lucide-react";
@@ -50,115 +48,26 @@ import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import RevenueSnapshot from "@/components/admin/RevenueSnapshot";
 import ClientActivity from "@/components/admin/ClientActivity";
 
-// Mock Data
-const mockUsers = [
-  { id: 1, name: "John Doe", email: "john@email.com", phone: "+234 801 234 5678", totalBookings: 3, status: "active", joinDate: "2024-01-15" },
-  { id: 2, name: "Jane Smith", email: "jane@email.com", phone: "+234 802 345 6789", totalBookings: 1, status: "active", joinDate: "2024-02-20" },
-  { id: 3, name: "Mike Johnson", email: "mike@email.com", phone: "+234 803 456 7890", totalBookings: 5, status: "inactive", joinDate: "2023-12-10" },
-];
+// Import hooks for Firestore data
+import { useAuthUsers } from "@/hooks/useAuthUsers";
+import { useCollection } from "@/hooks/useCollection";
 
-const mockBookings = [
-  { 
-    id: "BK001", 
-    guest: "John Doe", 
-    branch: "GRA Head Branch", 
-    room: "Executive Suite", 
-    checkIn: "2024-12-28", 
-    checkOut: "2024-12-30", 
-    status: "confirmed", 
-    amount: 190000,
-    guests: 2
-  },
-  { 
-    id: "BK002", 
-    guest: "Jane Smith", 
-    branch: "Waterlines Branch", 
-    room: "Deluxe Room", 
-    checkIn: "2024-12-29", 
-    checkOut: "2024-12-31", 
-    status: "pending", 
-    amount: 130000,
-    guests: 1
-  },
-  { 
-    id: "BK003", 
-    guest: "Mike Johnson", 
-    branch: "GRA Head Branch", 
-    room: "Presidential Suite", 
-    checkIn: "2024-12-25", 
-    checkOut: "2024-12-27",
-    status: "completed",
-    amount: 250000,
-    guests: 2
-  },
-  { 
-    id: "BK004", 
-    guest: "Sarah Williams", 
-    branch: "Airforce Base", 
-    room: "Standard Room", 
-    checkIn: "2024-12-30", 
-    checkOut: "2025-01-02",
-    status: "confirmed",
-    amount: 180000,
-    guests: 2
-  },
-  { 
-    id: "BK005", 
-    guest: "David Brown", 
-    branch: "Oyigbo Branch", 
-    room: "Deluxe Room", 
-    checkIn: "2024-12-24", 
-    checkOut: "2024-12-26",
-    status: "cancelled",
-    amount: 140000,
-    guests: 1
-  }
-];
 
-const mockRooms = [
-  { id: 1, name: "Executive Suite", branch: "GRA Head Branch", price: 95000, total: 15, available: 3, occupied: 12, status: "active" },
-  { id: 2, name: "Deluxe Room", branch: "Waterlines Branch", price: 65000, total: 20, available: 8, occupied: 12, status: "active" },
-  { id: 3, name: "Presidential Suite", branch: "GRA Head Branch", price: 125000, total: 5, available: 1, occupied: 4, status: "active" },
-  { id: 4, name: "Standard Room", branch: "Airforce Base", price: 45000, total: 25, available: 15, occupied: 10, status: "active" },
-  { id: 5, name: "Family Suite", branch: "Oyigbo Branch", price: 75000, total: 10, available: 2, occupied: 8, status: "maintenance" },
-];
+// We'll fetch real bookings from Firestore
 
-const mockAds = [
-  { 
-    id: 'AD001',
-    title: 'Summer Special', 
-    description: 'Get 20% off on all room bookings for stays in June and July',
-    discount: '20%',
-    validUntil: '2024-07-31',
-    status: 'active'
-  },
-  { 
-    id: 'AD002',
-    title: 'Weekend Getaway', 
-    description: '15% off for weekend stays (Friday to Sunday)',
-    discount: '15%',
-    validUntil: '2024-12-31',
-    status: 'active'
-  },
-  { 
-    id: 'AD003',
-    title: 'Early Bird Offer', 
-    description: 'Book 30 days in advance and get 10% off',
-    discount: '10%',
-    validUntil: '2024-12-31',
-    status: 'expired'
-  }
-];
+// We'll fetch real rooms from Firestore
+
+// We'll fetch real ads from Firestore
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
   { id: 'bookings', label: 'Bookings', icon: Calendar },
   { id: 'rooms', label: 'Rooms & Facilities', icon: Bed },
   { id: 'clients', label: 'Clients', icon: Users },
-  { id: 'marketing', label: 'Marketing', icon: Megaphone },
-  { id: 'payments', label: 'Payments & Finance', icon: CreditCard },
-  { id: 'reports', label: 'Reports & Analytics', icon: BarChart2 },
   { id: 'branches', label: 'Branches', icon: Building2 },
+  { id: 'reports', label: 'Reports & Analytics', icon: BarChart2 },
+  { id: 'payments', label: 'Payments & Finance', icon: CreditCard },
+  { id: 'marketing', label: 'Marketing', icon: Megaphone },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -176,6 +85,15 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
+  // Fetch real data from Firestore
+  const { mergedUsers, loading: usersLoading, error: usersError } = useAuthUsers();
+  const { documents: bookings, loading: bookingsLoading, error: bookingsError } = useCollection('bookings');
+  const { documents: rooms, loading: roomsLoading, error: roomsError } = useCollection('rooms');
+  const { documents: ads, loading: adsLoading, error: adsError } = useCollection('promotions');
+  
+  // Loading state for the dashboard
+  const isLoading = usersLoading || bookingsLoading || roomsLoading || adsLoading;
+  
   // Get current active tab from URL path
   const getActiveTab = () => {
     const path = location.pathname;
@@ -190,6 +108,7 @@ const AdminDashboard = () => {
   const handleNavigation = (path: string) => {
     navigate(path);
   };
+  
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
   const [newAd, setNewAd] = useState<Ad>({
     title: "",
@@ -202,11 +121,12 @@ const AdminDashboard = () => {
     setActiveSubmenu(activeSubmenu === itemId ? null : itemId);
   };
 
+  // Calculate dashboard stats from real data
   const stats = {
-    totalUsers: mockUsers.length,
-    totalBookings: mockBookings.length,
-    totalRevenue: mockBookings.reduce((sum, booking) => sum + booking.amount, 0),
-    occupancyRate: Math.round((mockRooms.reduce((sum, room) => sum + room.occupied, 0) / mockRooms.reduce((sum, room) => sum + room.total, 0)) * 100)
+    totalUsers: mergedUsers?.length || 0,
+    totalBookings: bookings?.length || 0,
+    totalRevenue: bookings?.reduce((sum, booking) => sum + (booking.amount || 0), 0) || 0,
+    occupancyRate: rooms?.length ? Math.round((rooms.filter(room => !room.availability).length / rooms.length) * 100) : 0
   };
 
   const getStatusBadge = (status: string) => {
@@ -222,13 +142,56 @@ const AdminDashboard = () => {
     return <Badge variant={variants[status] || "outline"}>{status}</Badge>;
   };
 
-  const handleCreateAd = () => {
+  // Get the addDocument function from the promotions collection
+  const { addDocument: addPromotion } = useCollection('promotions');
+  
+  const handleCreateAd = async () => {
     if (newAd.title && newAd.discount && newAd.validUntil) {
-      // In real app, this would call an API
-      console.log("Creating ad:", newAd);
-      setNewAd({ title: "", discount: "", validUntil: "", description: "" });
+      try {
+        // Add the ad to Firestore promotions collection
+        await addPromotion({
+          ...newAd,
+          status: 'active',
+          createdAt: new Date().toISOString()
+        });
+        
+        // Reset the form
+        setNewAd({ title: "", discount: "", validUntil: "", description: "" });
+      } catch (error) {
+        console.error("Error creating promotion:", error);
+      }
     }
   };
+
+  // Show loading state if data is still loading
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Show error state if there was an error fetching data
+  if (usersError || bookingsError || roomsError || adsError) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-destructive">Error loading dashboard data</h2>
+          <p className="text-muted-foreground">
+            {usersError?.message || bookingsError?.message || roomsError?.message || adsError?.message}
+          </p>
+          <Button 
+            variant="outline" 
+            className="mt-4" 
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-background">
@@ -252,8 +215,6 @@ const AdminDashboard = () => {
               { id: 'bookings', label: 'Bookings', icon: Calendar },
               { id: 'rooms', label: 'Rooms', icon: Bed },
               { id: 'clients', label: 'Clients', icon: Users },
-              { id: 'users', label: 'User Management', icon: Users },
-              { id: 'pricing', label: 'Pricing', icon: Tag },
               { id: 'marketing', label: 'Marketing', icon: Megaphone },
               { id: 'payments', label: 'Payments', icon: CreditCard },
               { id: 'reports', label: 'Reports', icon: BarChart2 },

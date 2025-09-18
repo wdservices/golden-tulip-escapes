@@ -14,7 +14,6 @@ export const BranchTabs = ({ activeTab, onTabChange }: BranchTabsProps) => {
   
   const handleBranchClick = (branchId: string) => {
     onTabChange(branchId);
-    navigate(`/branches/${branchId}`);
   };
   const branches = [
     { 
@@ -31,9 +30,10 @@ export const BranchTabs = ({ activeTab, onTabChange }: BranchTabsProps) => {
     },
     { 
       id: "evergreen", 
-      name: "Golden Tulip Port Harcourt, Evergreen", 
+      name: "Golden Tulip Hotel Evergreen", 
       location: "Plot F35 Woke Street, Off Sani Abacha Road, GRA Phase III, Port Harcourt, Rivers State",
-      image: restaurant
+      image: restaurant,
+      description: "A serene getaway destination with beautiful landscapes and premium comfort."
     }
   ];
 
@@ -50,39 +50,40 @@ export const BranchTabs = ({ activeTab, onTabChange }: BranchTabsProps) => {
         </div>
         
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap md:flex-nowrap gap-4 md:gap-6">
-            {branches.map((branch) => (
-              <div 
-                key={branch.id}
-                className="group block cursor-pointer flex-1 min-w-[320px] md:min-w-[380px]"
-                onClick={() => handleBranchClick(branch.id)}
-              >
-                <div 
-                  className={`luxury-branch-card group ${
-                    activeTab === branch.id 
-                      ? "luxury-branch-card-active" 
-                      : "luxury-branch-card-inactive"
-                  }`}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {branches.map((branch) => {
+              return (
+                <Link 
+                  to={`/branches/${branch.id}`}
+                  key={branch.id}
+                  className={`block transition-all duration-300 ${activeTab === branch.id ? 'ring-2 ring-amber-500 rounded-xl' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleBranchClick(branch.id);
+                    navigate(`/branches/${branch.id}`);
+                  }}
                 >
-                  <div className="relative overflow-hidden rounded-xl h-56 md:h-64">
-                    <img 
-                      src={branch.image} 
-                      alt={branch.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0">
-                      <div className="backdrop-blur-sm bg-black/60 p-4 rounded-b-xl">
-                        <h3 className="text-base font-serif font-bold text-white mb-1">
-                          {branch.name}
-                        </h3>
-                        <p className="text-white/90 text-sm">{branch.location}</p>
+                  <div className="luxury-branch-card group">
+                    <div className="relative overflow-hidden rounded-xl h-56 md:h-64">
+                      <img 
+                        src={branch.image} 
+                        alt={branch.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0">
+                        <div className="backdrop-blur-sm bg-black/60 p-4 rounded-b-xl">
+                          <h3 className="text-base font-serif font-bold text-white mb-1">
+                            {branch.name}
+                          </h3>
+                          <p className="text-white/90 text-sm">{branch.location}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>

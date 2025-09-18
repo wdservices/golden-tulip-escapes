@@ -3,9 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { useDatabase } from "@/contexts/DatabaseContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { BranchStatus } from "@/pages/admin/BranchesPage";
+import { reconnectFirebase } from "@/lib/firebase";
 
 interface BranchFormProps {
   branch?: any;
@@ -13,250 +17,382 @@ interface BranchFormProps {
   onCancel?: () => void;
 }
 
-type BranchStatus = 'active' | 'inactive' | 'maintenance';
-
 export const BranchForm = ({ branch, onSuccess, onCancel }: BranchFormProps) => {
   const { addDocument, updateDocument } = useDatabase();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: branch?.name || '',
-    location: branch?.location || {
-      address: '',
-      city: '',
-      state: '',
-      country: 'Nigeria',
-      coordinates: {
-        lat: 0,
-        lng: 0
-      }
-    },
-    contact: branch?.contact || {
-      email: '',
-      phone: '',
-      website: ''
-    },
-    description: branch?.description || '',
+    address: branch?.address || '',
+    email: branch?.email || '',
+    location: branch?.location || '',
+    phone: branch?.phone || '',
     status: (branch?.status as BranchStatus) || 'active',
-    amenities: branch?.amenities || [],
-    policies: branch?.policies || {
-      checkIn: '14:00',
-      checkOut: '12:00',
-      cancellation: 'Free cancellation up to 24 hours before check-in',
-      pets: 'Not allowed',
-      payment: 'Credit card required at check-in'
-    }
   });
+
+  const branchStatuses = [
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' },
+    { value: 'maintenance', label: 'Maintenance' },
+  ];
+
+  // Get auth context at component level instead of inside handleSubmit
+  const { currentUser, refreshAuthToken } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log('Submitting branch form...');
+    const startTime = performance.now();
+    
+    console.log('Current user submitting branch form:', currentUser);
+    console.log('Current user keys:', currentUser ? Object.keys(currentUser) : 'No user');
+    console.log('Current user ID property:', currentUser?.id);
+    
+    // Check if user is admin
+    if (!currentUser || currentUser.role !== 'admin') {
+      console.error('Permission denied: Only admins can manage branches');
+      toast({
+        title: "Error",
+        description: "Permission denied: Only admins can manage branches",
+        variant: "destructive"
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Store currentUser reference to avoid race conditions
+    const user = currentUser;
+    
+    // Verify authentication is still valid
+    if (!user.id) {
+      console.error('User authentication issue: Missing user ID');
+      toast({
+        title: "Error",
+        description: "Authentication error. Attempting to reconnect...",
+        variant: "destructive"
+      });
+      
+      // Try to reconnect Firebase and refresh auth token
+      const reconnected = await reconnectFirebase();
+      
+      // Check if reconnection was successful and user is now authenticated
+      if (reconnected && user) {
+        // Try to get the current user again after reconnection
+        await refreshAuthToken();
+        
+        // If still no valid user, ask to refresh page
+        if (!user.id) {
+          toast({
+            title: "Error",
+            description: "Authentication error persists. Please refresh the page and try again.",
+            variant: "destructive"
+          });
+          setIsLoading(false);
+          return;
+        }
+        
+        toast({
+          title: "Success",
+          description: "Reconnected successfully. Continuing submission..."
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Could not reconnect. Please refresh the page and try again.",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+    }
+    
+    // Refresh auth token before database operations
+    try {
+      console.log('Refreshing authentication token...');
+      const refreshed = await refreshAuthToken();
+      console.log('Token refresh result:', refreshed ? 'Success' : 'Failed');
+      
+      // Double check user authentication after token refresh
+      if (!user || !user.id) {
+        console.error('User authentication issue: Still missing user ID after token refresh');
+        toast({
+          title: "Error",
+          description: "Authentication error. Please refresh the page and try again.",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+    } catch (tokenError) {
+      console.error('Failed to refresh authentication token:', tokenError);
+      // Continue anyway, the operation might still succeed
+    }
 
     try {
+      // Ensure we have a valid user ID before proceeding
+      if (!user || !user.id) {
+        console.error('Cannot update branch: User ID is missing');
+        toast({
+          title: "Error",
+          description: "Authentication error. Please refresh the page and try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       const branchData = {
-        ...formData,
+        name: formData.name,
+        address: formData.address,
+        email: formData.email,
+        location: formData.location,
+        phone: formData.phone,
+        status: formData.status,
         updatedAt: new Date().toISOString(),
       };
+      
+      console.log('Branch data to submit:', branchData);
 
-      if (branch) {
-        await updateDocument('branches', branch.id, branchData);
-        toast.success('Branch updated successfully');
+      if (branch && branch.id) {
+        console.log(`Updating branch with ID: ${branch.id}`);
+        const updateStartTime = performance.now();
+        let retryCount = 0;
+        const maxRetries = 2;
+        let success = false;
+        
+        const attemptUpdate = async (): Promise<boolean> => {
+          try {
+            await updateDocument('branches', branch.id, branchData);
+            const updateEndTime = performance.now();
+            console.log(`Performance: Branch update operation took ${Math.round(updateEndTime - updateStartTime)}ms`);
+            success = true;
+            toast({
+              title: "Success",
+              description: "Branch updated successfully"
+            });
+            // Call onSuccess callback after successful update
+            if (onSuccess) onSuccess();
+            return true;
+          } catch (updateError: any) {
+            console.error('Error updating branch:', updateError);
+            
+            // Check if it's a Firebase session error (400 Bad Request)
+            if (updateError.message && 
+                (updateError.message.includes('400') || 
+                 updateError.message.includes('Bad Request') || 
+                 updateError.message.includes('permission'))) {
+              
+              if (retryCount < maxRetries) {
+                console.log(`Retrying update operation (${retryCount + 1}/${maxRetries})...`);
+                retryCount++;
+                // Wait a moment before retrying
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return attemptUpdate();
+              } else {
+                toast({
+                  title: "Error",
+                  description: "Session expired. Please refresh the page and try again.",
+                  variant: "destructive"
+                });
+              }
+            } else {
+              toast({
+                title: "Error",
+                description: "Failed to update branch",
+                variant: "destructive"
+              });
+            }
+            
+            return false;
+          }
+        };
+        
+        if (!(await attemptUpdate())) {
+          throw new Error('Failed to update branch after retries');
+        }
       } else {
+        console.log('Adding new branch');
         branchData.createdAt = new Date().toISOString();
-        await addDocument('branches', branchData);
-        toast.success('Branch added successfully');
+        const addStartTime = performance.now();
+        let retryCount = 0;
+        const maxRetries = 2;
+        
+        const attemptAdd = async (): Promise<boolean> => {
+          try {
+            // Double-check user authentication before proceeding
+            if (!currentUser || !currentUser.id) {
+              console.error('Cannot add branch: User ID is missing');
+              toast({
+                title: "Error",
+                description: "Authentication error. Attempting to reconnect...",
+                variant: "destructive"
+              });
+              
+              // Try to reconnect Firebase and refresh auth token
+              const reconnected = await reconnectFirebase();
+              
+              // Check if reconnection was successful and user is now authenticated
+              if (reconnected && currentUser) {
+                // Try to get the current user again after reconnection
+                await refreshAuthToken();
+                
+                // If still no valid user, ask to refresh page
+                if (!currentUser || !currentUser.id) {
+                  toast({
+                    title: "Error",
+                    description: "Authentication error persists. Please refresh the page and try again.",
+                    variant: "destructive"
+                  });
+                  return false;
+                }
+                
+                toast({
+                  title: "Success",
+                  description: "Reconnected successfully. Continuing submission..."
+                });
+              } else {
+                toast({
+                  title: "Error",
+                  description: "Could not reconnect. Please refresh the page and try again.",
+                  variant: "destructive"
+                });
+                return false;
+              }
+            }
+            
+            await addDocument('branches', branchData);
+            const addEndTime = performance.now();
+            console.log(`Performance: Branch add operation took ${Math.round(addEndTime - addStartTime)}ms`);
+            toast({
+              title: "Success",
+              description: "Branch added successfully"
+            });
+            // Call onSuccess callback after successful add
+            if (onSuccess) onSuccess();
+            return true;
+          } catch (addError: any) {
+            console.error('Error adding branch:', addError);
+            
+            // Check if it's a Firebase session error (400 Bad Request)
+            if (addError.message && 
+                (addError.message.includes('400') || 
+                 addError.message.includes('Bad Request') || 
+                 addError.message.includes('permission'))) {
+              
+              if (retryCount < maxRetries) {
+                console.log(`Retrying add operation (${retryCount + 1}/${maxRetries})...`);
+                retryCount++;
+                // Wait a moment before retrying
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return attemptAdd();
+              } else {
+                toast({
+                  title: "Error",
+                  description: "Session expired. Please refresh the page and try again.",
+                  variant: "destructive"
+                });
+              }
+            } else {
+              toast({
+                title: "Error",
+                description: "Failed to add branch",
+                variant: "destructive"
+              });
+            }
+            
+            return false;
+          }
+        };
+        
+        if (!(await attemptAdd())) {
+          throw new Error('Failed to add branch after retries');
+        }
       }
 
-      onSuccess?.();
+      const endTime = performance.now();
+      console.log(`Branch form submission completed in ${Math.round(endTime - startTime)}ms`);
+      // onSuccess is now called directly after successful operations
     } catch (error) {
       console.error('Error saving branch:', error);
-      toast.error('Failed to save branch');
+      toast({
+        title: "Error",
+        description: "Failed to save branch",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleLocationChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      location: {
-        ...prev.location,
-        [field]: value
-      }
-    }));
-  };
-
-  const handleContactChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      contact: {
-        ...prev.contact,
-        [field]: value
-      }
-    }));
-  };
-
-  const handlePolicyChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      policies: {
-        ...prev.policies,
-        [field]: value
-      }
-    }));
-  };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <h3 className="text-lg font-medium">Basic Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">Branch Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Status</Label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({...formData, status: e.target.value as BranchStatus})}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="maintenance">Maintenance</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Location</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="address">Address *</Label>
-              <Input
-                id="address"
-                value={formData.location.address}
-                onChange={(e) => handleLocationChange('address', e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="city">City *</Label>
-              <Input
-                id="city"
-                value={formData.location.city}
-                onChange={(e) => handleLocationChange('city', e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="state">State</Label>
-              <Input
-                id="state"
-                value={formData.location.state}
-                onChange={(e) => handleLocationChange('state', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="country">Country *</Label>
-              <Input
-                id="country"
-                value={formData.location.country}
-                onChange={(e) => handleLocationChange('country', e.target.value)}
-                required
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Contact Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.contact.email}
-                onChange={(e) => handleContactChange('email', e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone *</Label>
-              <Input
-                id="phone"
-                value={formData.contact.phone}
-                onChange={(e) => handleContactChange('phone', e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="website">Website</Label>
-              <Input
-                id="website"
-                value={formData.contact.website}
-                onChange={(e) => handleContactChange('website', e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Policies</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="checkIn">Check-in Time</Label>
-              <Input
-                id="checkIn"
-                type="time"
-                value={formData.policies.checkIn}
-                onChange={(e) => handlePolicyChange('checkIn', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="checkOut">Check-out Time</Label>
-              <Input
-                id="checkOut"
-                type="time"
-                value={formData.policies.checkOut}
-                onChange={(e) => handlePolicyChange('checkOut', e.target.value)}
-              />
-            </div>
-
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="cancellation">Cancellation Policy</Label>
-              <Input
-                id="cancellation"
-                value={formData.policies.cancellation}
-                onChange={(e) => handlePolicyChange('cancellation', e.target.value)}
-              />
-            </div>
-          </div>
+          <Label htmlFor="name">Branch Name *</Label>
+          <Input
+            id="name"
+            value={formData.name}
+            onChange={(e) => setFormData({...formData, name: e.target.value})}
+            required
+          />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            value={formData.description}
-            onChange={(e) => setFormData({...formData, description: e.target.value})}
-            rows={4}
-            placeholder="Provide a detailed description of the branch..."
+          <Label htmlFor="status">Status *</Label>
+          <Select
+            value={formData.status}
+            onValueChange={(value: BranchStatus) => setFormData({...formData, status: value})}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select branch status" />
+            </SelectTrigger>
+            <SelectContent>
+              {branchStatuses.map((status) => (
+                <SelectItem key={status.value} value={status.value}>
+                  {status.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="address">Address *</Label>
+          <Input
+            id="address"
+            value={formData.address}
+            onChange={(e) => setFormData({...formData, address: e.target.value})}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="location">Location *</Label>
+          <Input
+            id="location"
+            value={formData.location}
+            onChange={(e) => setFormData({...formData, location: e.target.value})}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="email">Email *</Label>
+          <Input
+            id="email"
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData({...formData, email: e.target.value})}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="phone">Phone *</Label>
+          <Input
+            id="phone"
+            value={formData.phone}
+            onChange={(e) => setFormData({...formData, phone: e.target.value})}
+            required
           />
         </div>
       </div>

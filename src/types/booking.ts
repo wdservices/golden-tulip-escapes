@@ -1,23 +1,27 @@
+import { Timestamp } from "firebase/firestore";
+
 export type BookingStatus = 'confirmed' | 'completed' | 'cancelled';
 export type PaymentStatus = 'paid' | 'pending' | 'refunded';
 
 export interface Booking {
   id: string;
   userId: string;
+  guestId?: string;
   branchId: string;
   branchName: string;
   roomType: string;
-  checkInDate: string;
-  checkOutDate: string;
+  checkInDate: Timestamp;
+  checkOutDate: Timestamp;
   status: BookingStatus;
   totalAmount: number;
   paymentStatus: PaymentStatus;
-  bookingDate: string;
+  bookingDate?: Timestamp;
   guests: number;
+  nights?: number;
   specialRequests?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  actualCheckOutDate?: string; // For tracking actual check-out time
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+  actualCheckOutDate?: Timestamp; // For tracking actual check-out time
   
   // Additional fields for reporting
   roomCharge?: number; // Base room rate
@@ -42,7 +46,7 @@ export interface Booking {
   
   // Payment information
   paymentMethod?: string;
-  paymentDate?: string;
+  paymentDate?: Timestamp;
   lastPaymentAmount?: number;
   
   // Housekeeping

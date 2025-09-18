@@ -12,7 +12,9 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children, requiredRole, redirectTo }: ProtectedRouteProps) => {
+  console.log('ProtectedRoute rendering');
   const { isAuthenticated, isLoading, currentUser } = useAuth();
+  console.log('Auth state:', { isAuthenticated, isLoading, currentUser });
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -21,7 +23,8 @@ export const ProtectedRoute = ({ children, requiredRole, redirectTo }: Protected
   const isAuthorized = useMemo(() => {
     if (!requiredRole) return true;
     if (requiredRole === 'admin') return isUserAdmin;
-    return true; // Regular users are always authorized for user routes
+    if (requiredRole === 'user') return !isUserAdmin; // Only non-admin users can access user routes
+    return true;
   }, [requiredRole, isUserAdmin]);
 
   // Handle redirections based on auth state
@@ -46,6 +49,11 @@ export const ProtectedRoute = ({ children, requiredRole, redirectTo }: Protected
       const targetPath = redirectTo || '/dashboard';
       console.warn(`Unauthorized access attempt to ${location.pathname} by ${currentUser?.email}`);
       toast.warning('You do not have permission to access this page');
+      navigate(targetPath, { replace: true });
+    } else if (requiredRole === 'user' && isUserAdmin) {
+      const targetPath = redirectTo || '/admin';
+      console.warn(`Admin user ${currentUser?.email} redirected from user route ${location.pathname}`);
+      toast.info('Redirecting to admin dashboard');
       navigate(targetPath, { replace: true });
     }
   }, [isLoading, isAuthenticated, isUserAdmin, requiredRole, redirectTo, location, navigate, currentUser]);

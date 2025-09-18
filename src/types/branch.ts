@@ -9,12 +9,35 @@ export interface Branch {
   phone?: string;
   email?: string;
   amenities?: string[];
+  diningOptions?: {
+    name: string;
+    type: string;
+    cuisine: string;
+    hours: string;
+    features: string[];
+  }[];
   roomTypes?: {
     name: string;
     description: string;
     priceRange: string;
     capacity: number;
+    features?: string[];
   }[];
+  events?: {
+    type: string;
+    capacity: string;
+    priceRange: string;
+    features: string[];
+  }[];
+  operatingHours?: {
+    checkIn: string;
+    checkOut: string;
+    frontDesk: string;
+    restaurant: string;
+    bar: string;
+  };
+  paymentMethods?: string[];
+  policies?: string[];
   gallery?: string[];
   checkInTime?: string;
   checkOutTime?: string;
