@@ -1,65 +1,89 @@
 import { Branch } from "@/types/branch";
-import { Bed, Users, DollarSign, Check } from "lucide-react";
+import { Bed, Users, DollarSign, Check, Star, ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 interface BranchRoomsProps {
   roomTypes?: Branch["roomTypes"];
+  branchId?: string;
 }
 
-export const BranchRooms = ({ roomTypes }: BranchRoomsProps) => {
+export const BranchRooms = ({ roomTypes = [], branchId }: BranchRoomsProps) => {
   if (!roomTypes || roomTypes.length === 0) return null;
+  
+  // Import room images from assets
+  const roomImages = [
+    "/src/assets/luxury-suite.jpg",
+    "/src/assets/hotel-exterior.jpg",
+    "/src/assets/hotel-lobby.jpg"
+  ];
+  
+  // Function to get a room image based on index
+  const getRoomImage = (index: number) => {
+    return roomImages[index % roomImages.length];
+  };
 
   return (
-    <section className="py-20 bg-gradient-to-b from-background to-muted/20" id="rooms">
+    <section className="py-16" id="rooms">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold mb-4 text-gradient-gold">
-            Rooms & Suites
-          </h2>
+          <div className="inline-block mb-4">
+            <div className="flex items-center justify-center space-x-2 mb-2">
+              <Star className="h-5 w-5 text-primary" />
+              <Star className="h-5 w-5 text-primary" />
+              <Star className="h-5 w-5 text-primary" />
+              <Star className="h-5 w-5 text-primary" />
+              <Star className="h-5 w-5 text-primary" />
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Rooms & Suites
+            </h2>
+          </div>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Luxurious accommodations designed for your comfort
           </p>
         </div>
 
-        <div className="space-y-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {roomTypes.map((room, index) => (
             <div 
               key={index}
-              className="card-luxury border-l-4 border-l-amber-500 bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm rounded-3xl overflow-hidden hover:shadow-glow transition-all duration-300"
+              className="bg-card rounded-xl shadow-lg h-full flex flex-col"
             >
-              <div className="p-8 md:p-10">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-                  <div className="mb-4 md:mb-0">
-                    <h3 className="text-2xl font-serif font-semibold mb-2 text-gradient-gold">{room.name}</h3>
-                    <p className="text-muted-foreground">{room.description}</p>
-                  </div>
-                  <div className="bg-amber-500/10 text-amber-600 font-semibold px-5 py-2.5 rounded-full">
-                    {room.priceRange}
-                  </div>
+              {/* Room Image */}
+              <div className="relative overflow-hidden rounded-t-xl flex-grow">
+                <img 
+                  src={getRoomImage(index)} 
+                  alt={room.name}
+                  className="w-full h-48 object-cover"
+                />
+              </div>
+              
+              <div className="p-6 flex flex-col flex-grow">
+                <div className="text-2xl font-bold text-primary mb-2">{room.priceRange}<span className="text-sm font-normal text-muted-foreground">/night</span></div>
+                <h3 className="text-xl font-semibold mb-3">
+                  {room.name}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">{room.description}</p>
+                <ul className="space-y-2 mb-6 flex-grow">
+                  {room.features && room.features.slice(0, 4).map((feature, idx) => (
+                    <li key={idx} className="text-sm text-muted-foreground flex items-start">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary mt-2 mr-2 flex-shrink-0"></span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex items-center mt-auto">
+                  <Users className="h-5 w-5 text-primary mr-2" />
+                  <span className="text-sm text-muted-foreground">{room.capacity} {room.capacity === 1 ? 'adult' : 'adults'}</span>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                  <div className="flex items-center">
-                    <Users className="h-5 w-5 text-amber-500 mr-3" />
-                    <div>
-                      <p className="text-sm text-muted-foreground/80">Capacity</p>
-                      <p className="text-foreground font-medium">{room.capacity} {room.capacity === 1 ? 'adult' : 'adults'}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {room.features && room.features.length > 0 && (
-                  <div className="mt-8 bg-gradient-to-br from-amber-50/30 to-amber-100/20 p-6 rounded-2xl">
-                    <h4 className="text-lg font-serif font-semibold text-gradient-gold mb-4">Room Features</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {room.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-start group">
-                          <Check className="h-5 w-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0 group-hover:text-amber-600 transition-colors" />
-                          <span className="text-muted-foreground group-hover:text-foreground transition-colors">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <Button asChild className="w-full mt-4">
+                  <Link to={`/branch/${branchId}/room/${room.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                    View Details
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
               </div>
             </div>
           ))}

@@ -59,8 +59,8 @@ const branches: Branch[] = [
     location: "Stadium Road, Port Harcourt",
     description: "Experience luxury with stunning views and premium amenities in the heart of Port Harcourt.",
     image: hotelLobby,
-    address: "31 Ken Saro Wiwa, Stadium Road, Port Harcourt, Rivers State",
-    phone: "+234 704 338 3142",
+    address: "31 Stadium Road, Port Harcourt, Rivers State, Nigeria",
+    phone: "+234 704-338-3141, +234 704-338-3142, +234 916-994-8558",
     email: "reservationsgt@rivotels.com",
     checkInTime: "2:00 PM",
     checkOutTime: "12:00 PM",
@@ -76,23 +76,226 @@ const branches: Branch[] = [
     ],
     roomTypes: [
       {
-        name: "Superior Room",
-        description: "Comfortable room with modern amenities and city view",
-        priceRange: "₦40,000 - ₦60,000",
-        capacity: 2
+        name: "Deluxe Room",
+        description: "Our Deluxe Rooms are complemented with modern and luxurious amenities for a wonderful stay.",
+        priceRange: "₦120,500 (₦86,250 discounted)",
+        capacity: 2,
+        features: [
+          "Car hire",
+          "Flat Tv",
+          "Laundry and dry cleaning",
+          "Internet – Wifi",
+          "Coffee and tea",
+          "Air Condition",
+          "Work Desk"
+        ]
       },
       {
-        name: "Deluxe Room with River View",
-        description: "Spacious room with stunning views",
-        priceRange: "₦55,000 - ₦75,000",
-        capacity: 2
+        name: "Executive Deluxe Room",
+        description: "Our Executive Rooms are spacious, nice and comfortable. The rooms gives access to our gym or swimming pool. The rooms are spacious with a read area.",
+        priceRange: "₦135,500 (₦97,750 discounted)",
+        capacity: 2,
+        features: [
+          "Car hire",
+          "Refrigerator",
+          "Safe",
+          "Flat Tv",
+          "Laundry and dry cleaning",
+          "Internet – Wifi",
+          "Coffee and tea",
+          "Swimming Pool",
+          "Air Condition",
+          "Work Desk"
+        ]
       },
       {
-        name: "Executive Suite",
-        description: "Luxurious suite with separate living area and premium amenities",
-        priceRange: "₦90,000 - ₦120,000",
-        capacity: 2
+        name: "Executive Twin Room",
+        description: "Need more fun, our Executive Twin Rooms give comfort and space to suite your relaxation need. Enjoy complimentary Breakfast with access to pool and gym facilities.",
+        priceRange: "₦154,700 (₦115,000 discounted)",
+        capacity: 2,
+        features: [
+          "Car hire",
+          "Refrigerator",
+          "Safe",
+          "Flat Tv",
+          "Laundry and dry cleaning",
+          "Internet – Wifi",
+          "Coffee and tea",
+          "Air Condition",
+          "Work Desk",
+          "Swimming Pool"
+        ]
+      },
+      {
+        name: "Super Executive Room",
+        description: "The Super Executive Suites are always welcoming with nice furniture, either for business or pleasure the suites are always there to make you feel at home.",
+        priceRange: "₦197,200 (₦138,000 discounted)",
+        capacity: 2,
+        features: [
+          "Car hire",
+          "Refrigerator",
+          "Safe",
+          "Flat Tv",
+          "Laundry and dry cleaning",
+          "Internet – Wifi",
+          "Coffee and tea",
+          "Air Condition",
+          "Work Desk",
+          "Swimming Pool"
+        ]
+      },
+      {
+        name: "Royal Suites Room",
+        description: "Pamper yourself in our well sized Royal Suite. Your nights will be enjoyable with inour nice laid king Beds. Have your meetings or leisure with family and friends in a cossy and relaxed atmosphere. Nice furniture access to pool and gym, Free Wifi, Breakfast, etc",
+        priceRange: "₦272,300 (₦161,000 discounted)",
+        capacity: 3,
+        features: [
+          "Car hire",
+          "Refrigerator",
+          "Safe",
+          "Flat Tv",
+          "Laundry and dry cleaning",
+          "Internet – Wifi",
+          "Coffee and tea",
+          "Air Condition",
+          "Work Desk",
+          "Swimming Pool"
+        ]
       }
+    ],
+    diningOptions: [
+      {
+        name: "Restaurant",
+        type: "Restaurant",
+        cuisine: "INTERNATIONAL & NIGERIAN CUISINE",
+        hours: "6:00 AM - 11:00 PM",
+        features: [
+          "Breakfast buffet",
+          "À la carte lunch and dinner",
+          "Themed dinner nights",
+          "Private dining available",
+          "Private Birthday Parties"
+        ]
+      },
+      {
+        name: "Bar",
+        type: "Bar",
+        cuisine: "Beverages",
+        hours: "6:00 AM - 11:00 PM",
+        features: [
+          "Juice",
+          "Soft Drinks & Energy Drinks",
+          "Mock tails & Cocktails",
+          "Brandy & Vodka",
+          "Champagne & Sparkling Wines",
+          "Outdoor Seating",
+          "Karaoke Session",
+          "Swimming"
+        ]
+      }
+    ],
+    events: [
+      {
+        type: "CONFERENCE HALL",
+        capacity: "10 - 50 guests",
+        priceRange: "₦300,000",
+        features: [
+          "Conference Meetings",
+          "Private Lunch & Dinner",
+          "Lecture hall",
+          "Corporate Meetings",
+          "Catering services",
+          "Audio/Visual equipment",
+          "Dedicated event coordinator",
+          "High-speed Wi-Fi",
+          "Projector & screen",
+          "Microphone & sound system",
+          "Flip charts",
+          "Convenience (Toilet)"
+        ]
+      },
+      {
+        type: "SHOLLY HALL",
+        capacity: "50 - 120 persons",
+        priceRange: "₦450,000",
+        features: [
+          "Conference Meetings",
+          "Private Lunch & Dinner",
+          "Lecture hall",
+          "Corporate Meetings",
+          "Birthdays & Weddings",
+          "Catering services",
+          "Audio/Visual equipment",
+          "Dedicated event coordinator",
+          "High-speed Wi-Fi",
+          "Projector & screen",
+          "Microphone & sound system",
+          "Flip charts",
+          "Convenience (Toilet)"
+        ]
+      },
+      {
+        type: "LOLLY HALL",
+        capacity: "50 - 150 persons",
+        priceRange: "₦550,000",
+        features: [
+          "Conference Meetings",
+          "Private Lunch & Dinner",
+          "Lecture hall",
+          "Corporate Meetings",
+          "Birthdays & Weddings",
+          "Church Services & Child Dedication",
+          "Catering services",
+          "Audio/Visual equipment",
+          "Dedicated event coordinator",
+          "High-speed Wi-Fi",
+          "Projector & screen",
+          "Microphone & sound system",
+          "Flip charts",
+          "Convenience (Toilet)"
+        ]
+      },
+      {
+        type: "DOME HALL",
+        capacity: "1000 persons",
+        priceRange: "₦2,500,000",
+        features: [
+          "Concert & Shows",
+          "Conference Meetings",
+          "Private Lunch & Dinner",
+          "Lecture hall",
+          "Corporate Meetings",
+          "Birthdays & Weddings",
+          "Church Services & Child Dedication",
+          "Catering services",
+          "Audio/Visual equipment",
+          "Dedicated event coordinator",
+          "High-speed Wi-Fi",
+          "Projector & screen",
+          "Microphone & sound system",
+          "Flip charts",
+          "Convenience (Toilet)"
+        ]
+      }
+    ],
+    operatingHours: {
+      checkIn: "2:00 PM",
+      checkOut: "12:00 PM",
+      frontDesk: "24/7",
+      restaurant: "6:30 AM – 9:30AM (Breakfast), 6:30 AM – 10:30AM (Breakfast at Weekends), 12PM - 3:30 PM (Lunch), 6PM – 10PM (Dinner)",
+      bar: "10:00 AM - 11:00 PM"
+    },
+    paymentMethods: [
+      "Cash (NGN, USD)",
+      "Credit/Debit Cards (Visa, MasterCard, Verve)",
+      "Bank Transfers"
+    ],
+    policies: [
+      "Cancellation: 48 hours prior to arrival",
+      "Children: Under 12 stay free with parents",
+      "Pets: Not allowed",
+      "Smoking: Not allowed in the room only at designated areas only",
+      "ID: Valid photo ID required at check-in"
     ],
     gallery: [hotelLobby, pool, luxurySuite, restaurant, spa, hotelExterior]
   },
