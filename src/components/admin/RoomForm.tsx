@@ -41,9 +41,14 @@ export const RoomForm = ({ branchId, room, onSuccess, onCancel }: RoomFormProps)
     { value: 'premium-standard-room', label: 'Premium Standard Room' },
     { value: 'premium-superior-room', label: 'Premium Superior Room' },
     { value: 'deluxe', label: 'Deluxe' },
+    { value: 'executive-suite', label: 'Executive Suite' },
+    { value: 'executive-deluxe-room', label: 'Executive Deluxe Room' },
+    { value: 'executive-twin-room', label: 'Executive Twin Room' },
+    { value: 'super-executive-room', label: 'Super Executive Room' },
     { value: 'premium-diplomatic-suite', label: 'Premium Diplomatic Suite' },
     { value: 'ambassadorial-suite', label: 'Ambassadorial Suite' },
     { value: 'presidential-suite', label: 'Presidential Suite' },
+    { value: 'royal-suites-room', label: 'Royal Suites Room' },
   ];
 
   const availableAmenities = [

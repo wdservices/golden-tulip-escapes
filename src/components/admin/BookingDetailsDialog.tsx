@@ -4,6 +4,7 @@ import { Booking } from "@/types/booking";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -11,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Calendar,
   CreditCard,
@@ -24,7 +27,13 @@ import {
   CalendarClock,
   ClipboardList,
   Home,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
+import { paymentService } from "@/services/paymentService";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface BookingDetailsDialogProps {
   booking: Booking | null;
@@ -37,7 +46,44 @@ export function BookingDetailsDialog({
   open,
   onOpenChange,
 }: BookingDetailsDialogProps) {
+  const [isUpdatingPayment, setIsUpdatingPayment] = React.useState(false);
+  const { currentUser } = useAuth();
+  const { toast } = useToast();
+
   if (!booking) return null;
+
+  const handlePaymentStatusUpdate = async (newStatus: 'successful' | 'failed' | 'refunded') => {
+    if (!currentUser || currentUser.role !== 'admin') {
+      toast({
+        variant: "destructive",
+        title: "Permission denied",
+        description: "Only administrators can update payment status.",
+      });
+      return;
+    }
+
+    setIsUpdatingPayment(true);
+    try {
+      await paymentService.updateBookingPaymentStatus(booking.id, newStatus);
+      
+      toast({
+        title: "Payment status updated",
+        description: `Payment status has been updated to ${newStatus}.`,
+      });
+      
+      // Close dialog to refresh the booking data
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+      toast({
+        variant: "destructive",
+        title: "Update failed",
+        description: "Failed to update payment status. Please try again.",
+      });
+    } finally {
+      setIsUpdatingPayment(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     try {
@@ -100,6 +146,9 @@ export function BookingDetailsDialog({
               {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
             </Badge>
           </DialogTitle>
+          <DialogDescription>
+            View and manage booking information, payment status, and guest details.
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="details" className="w-full">
@@ -389,6 +438,71 @@ export function BookingDetailsDialog({
                 </div>
               </CardContent>
             </Card>
+
+            {/* Payment Controls for Admins */}
+            {currentUser?.role === 'admin' && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-md flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    Payment Controls
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Update payment status for this booking. This action will be logged.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {booking.paymentStatus !== 'paid' && (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => handlePaymentStatusUpdate('successful')}
+                        disabled={isUpdatingPayment}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        {isUpdatingPayment ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                        )}
+                        Mark as Paid
+                      </Button>
+                    )}
+                    {booking.paymentStatus !== 'failed' && (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handlePaymentStatusUpdate('failed')}
+                        disabled={isUpdatingPayment}
+                      >
+                        {isUpdatingPayment ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <XCircle className="h-4 w-4 mr-2" />
+                        )}
+                        Mark as Failed
+                      </Button>
+                    )}
+                    {booking.paymentStatus === 'paid' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handlePaymentStatusUpdate('refunded')}
+                        disabled={isUpdatingPayment}
+                      >
+                        {isUpdatingPayment ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <CreditCard className="h-4 w-4 mr-2" />
+                        )}
+                        Process Refund
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </DialogContent>

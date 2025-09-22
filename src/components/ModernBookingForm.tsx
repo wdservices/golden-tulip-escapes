@@ -33,32 +33,67 @@ interface RoomType {
 
 const roomTypes: RoomType[] = [
   { 
+    id: "test", 
+    name: "Test room", 
+    price: 0,
+    priceDisplay: "",
+    description: "Test room for demonstration purposes"
+  },
+  { 
     id: "standard", 
     name: "Standard Room", 
-    price: 45000,
-    priceDisplay: "₦45,000",
+    price: 0,
+    priceDisplay: "",
     description: "Comfortable room with essential amenities"
   },
   { 
     id: "deluxe", 
     name: "Deluxe Room", 
-    price: 65000,
-    priceDisplay: "₦65,000",
+    price: 0,
+    priceDisplay: "",
     description: "Spacious room with premium amenities and city view"
   },
   { 
     id: "executive", 
     name: "Executive Suite", 
-    price: 95000,
-    priceDisplay: "₦95,000",
+    price: 0,
+    priceDisplay: "",
     description: "Luxurious suite with separate living area and premium services"
+  },
+  { 
+    id: "executive-deluxe", 
+    name: "Executive Deluxe Room", 
+    price: 0,
+    priceDisplay: "",
+    description: "Premium executive room with enhanced amenities and services"
+  },
+  { 
+    id: "executive-twin", 
+    name: "Executive Twin Room", 
+    price: 0,
+    priceDisplay: "",
+    description: "Executive room with twin beds and premium amenities"
+  },
+  { 
+    id: "super-executive", 
+    name: "Super Executive Room", 
+    price: 0,
+    priceDisplay: "",
+    description: "Superior executive accommodation with exclusive amenities"
   },
   { 
     id: "presidential", 
     name: "Presidential Suite", 
-    price: 150000,
-    priceDisplay: "₦150,000",
+    price: 0,
+    priceDisplay: "",
     description: "The ultimate in luxury with premium services and amenities"
+  },
+  { 
+    id: "royal-suites", 
+    name: "Royal Suites Room", 
+    price: 0,
+    priceDisplay: "",
+    description: "Royal luxury suite with exclusive services and premium amenities"
   },
 ];
 

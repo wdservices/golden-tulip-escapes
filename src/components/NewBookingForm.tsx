@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { collection, addDoc, Timestamp, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { FlutterwavePaymentModal } from "@/components/payment/FlutterwavePaymentModal";
 
 interface UserProfile {
   uid: string;
@@ -34,7 +35,7 @@ interface BookingFormProps {
 interface RoomType {
   id: string;
   name: string;
-  price: string;
+  price: number;
   description: string;
 }
 
@@ -60,6 +61,7 @@ export const NewBookingForm = ({
   const { currentUser, isAuthenticated } = useAuth();
   const { branches, isLoading: branchesLoading, error: branchesError } = useBranches();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const [formData, setFormData] = useState({
     location: selectedBranch || "",
@@ -140,8 +142,6 @@ export const NewBookingForm = ({
        return;
      }
 
-     setIsLoading(true);
-
      // Require authentication for booking to satisfy Firestore rules
      if (!isAuthenticated || !currentUser) {
        toast({
@@ -149,85 +149,22 @@ export const NewBookingForm = ({
          description: "Please sign in to complete your booking.",
          variant: "destructive",
        });
-       setIsLoading(false);
        navigate('/auth');
        return;
      }
 
-     try {
-      // Build booking payload matching admin BookingsPage expectations
-      const selectedBranchObj = branches.find(b => b.id === formData.location);
-      const totalGuests = formData.adults + formData.children;
-      const totalAmount = totalPrice;
-      const checkInDate = new Date(formData.checkIn);
-      const checkOutDate = new Date(formData.checkOut);
-      const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
-
-      const newBooking = {
-        userId: (currentUser as any).uid || (currentUser as any).id, // Fallback to id if uid is not available
-        branchId: formData.location,
-        branchName: selectedBranchObj?.name || '',
-        roomType: formData.roomType,
-        checkInDate: Timestamp.fromDate(checkInDate),
-        checkOutDate: Timestamp.fromDate(checkOutDate),
-        status: 'confirmed' as const,
-        totalAmount,
-        paymentStatus: 'pending' as const,
-        bookingDate: Timestamp.fromDate(new Date()),
-        guests: totalGuests,
-        nights: nights,
-        specialRequests: formData.specialRequests?.trim() || '',
-        guestName: `${formData.firstName} ${formData.lastName}`.trim(),
-        guestEmail: formData.email,
-        guestPhone: formData.phone,
-        createdAt: Timestamp.fromDate(new Date()),
-        serviceCharge: 0, // Add default service charge
-      };
-
-      // Add the booking document
-      const bookingRef = await addDoc(collection(db, 'bookings'), newBooking);
-      
-      // Update room count for the selected room type
-      // First, get all rooms of the selected type in the branch
-      const roomsRef = collection(db, `branches/${formData.location}/rooms`);
-      const q = query(roomsRef, where("type", "==", formData.roomType), where("availability", "==", true));
-      const roomsSnapshot = await getDocs(q);
-      
-      // If we found an available room of this type with roomCount > 0, update it
-      if (!roomsSnapshot.empty) {
-        const roomDoc = roomsSnapshot.docs[0];
-        const roomData = roomDoc.data();
-        
-        // Only decrement if roomCount is greater than 0
-        if (roomData.roomCount && roomData.roomCount > 0) {
-          await updateDoc(doc(db, `branches/${formData.location}/rooms`, roomDoc.id), {
-            roomCount: roomData.roomCount - 1,
-            // If this was the last room, mark it as unavailable
-            availability: roomData.roomCount > 1
-          });
-        }
-      }
-      
-      toast({
-        title: "Booking Successful!",
-        description: "Your reservation has been confirmed and saved.",
-      });
-       
-       // Call the success callback if provided
-       onBookingSuccess?.();
-       
-       // Redirect to dashboard or bookings page
-       navigate('/dashboard');
-     } catch (error) {
-       console.error('Booking failed:', error);
+     // Validate required fields
+     if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
        toast({
-         title: "Booking Failed",
-         description: "There was an error processing your booking. Please try again.",
+         title: "Missing Information",
+         description: "Please fill in all required fields.",
          variant: "destructive",
        });
-     } finally {
-       setIsLoading(false);
+       return;
      }
+
+     // Open payment modal instead of directly creating booking
+     setShowPaymentModal(true);
   };
 
   return (
@@ -546,12 +483,12 @@ export const NewBookingForm = ({
                     {isLoading ? (
                       <div className="flex items-center">
                         <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                        Creating Reservation...
+                        Processing...
                       </div>
                     ) : (
                       <div className="flex items-center">
                         <CreditCard className="w-5 h-5 mr-2" />
-                        Create Reservation
+                        Proceed to Payment
                       </div>
                     )}
                   </Button>
@@ -652,6 +589,43 @@ export const NewBookingForm = ({
           </div>
         </div>
       </div>
+
+      {/* Flutterwave Payment Modal */}
+      {showPaymentModal && (
+        <FlutterwavePaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          bookingData={{
+            roomType: formData.roomType,
+            checkInDate: formData.checkIn,
+            checkOutDate: formData.checkOut,
+            branchId: formData.location,
+            branchName: branches.find(b => b.id === formData.location)?.name || '',
+            guests: formData.adults + formData.children,
+            nights: Math.ceil((new Date(formData.checkOut).getTime() - new Date(formData.checkIn).getTime()) / (1000 * 60 * 60 * 24)),
+            specialRequests: formData.specialRequests?.trim() || '',
+            guestName: `${formData.firstName} ${formData.lastName}`.trim(),
+            guestEmail: formData.email,
+            guestPhone: formData.phone,
+            totalAmount: totalPrice
+          }}
+          onPaymentSuccess={(bookingId) => {
+            toast({
+              title: "Payment Successful!",
+              description: "Your booking has been confirmed and payment processed.",
+            });
+            onBookingSuccess?.();
+            navigate('/dashboard');
+          }}
+          onPaymentError={(error) => {
+            toast({
+              title: "Payment Failed",
+              description: error || "There was an error processing your payment. Please try again.",
+              variant: "destructive",
+            });
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -41,28 +41,58 @@ interface Branch {
 
 const roomTypes: RoomType[] = [
   { 
+    id: "test", 
+    name: "Test room", 
+    price: "",
+    description: "Test room for demonstration purposes"
+  },
+  { 
     id: "standard", 
     name: "Standard Room", 
-    price: "₦45,000",
+    price: "",
     description: "Comfortable room with essential amenities"
   },
   { 
     id: "deluxe", 
     name: "Deluxe Room", 
-    price: "₦65,000",
+    price: "",
     description: "Spacious room with premium amenities and city view"
   },
   { 
     id: "executive", 
     name: "Executive Suite", 
-    price: "₦95,000",
+    price: "",
     description: "Luxurious suite with separate living area and premium services"
+  },
+  { 
+    id: "executive-deluxe", 
+    name: "Executive Deluxe Room", 
+    price: "",
+    description: "Premium executive room with enhanced amenities and services"
+  },
+  { 
+    id: "executive-twin", 
+    name: "Executive Twin Room", 
+    price: "",
+    description: "Executive room with twin beds and premium amenities"
+  },
+  { 
+    id: "super-executive", 
+    name: "Super Executive Room", 
+    price: "",
+    description: "Superior executive accommodation with exclusive amenities"
   },
   { 
     id: "presidential", 
     name: "Presidential Suite", 
-    price: "₦150,000",
+    price: "",
     description: "The ultimate in luxury with premium services and amenities"
+  },
+  { 
+    id: "royal-suites", 
+    name: "Royal Suites Room", 
+    price: "",
+    description: "Royal luxury suite with exclusive services and premium amenities"
   },
 ];
 

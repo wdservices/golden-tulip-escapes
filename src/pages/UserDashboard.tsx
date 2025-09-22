@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/dashboard/StatCard";
 import type { Booking } from "@/types/booking";
 import type { User } from "@/types/auth";
@@ -68,6 +69,23 @@ export const UserDashboard = () => {
     } catch (error) {
       console.error('Error formatting date:', error);
       return 'Invalid date';
+    }
+  };
+
+  // Helper function to get payment status badge
+  const getPaymentStatusBadge = (paymentStatus: string) => {
+    switch (paymentStatus?.toLowerCase()) {
+      case 'paid':
+      case 'successful':
+        return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">Paid</Badge>;
+      case 'pending':
+        return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Pending</Badge>;
+      case 'failed':
+        return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">Failed</Badge>;
+      case 'refunded':
+        return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">Refunded</Badge>;
+      default:
+        return <Badge className="bg-gray-500/10 text-gray-500 border-gray-500/20">Unknown</Badge>;
     }
   };
 
@@ -686,11 +704,17 @@ export const UserDashboard = () => {
             <div className="grid gap-4 md:grid-cols-2">
               {upcomingBookings.map((booking) => (
                 <div key={booking.id} className="border rounded-lg p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-medium">{booking.branchName}</h3>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-medium">{booking.branchName}</h3>
+                        {getPaymentStatusBadge(booking.paymentStatus)}
+                      </div>
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(booking.checkInDate), 'MMM d, yyyy')} - {format(new Date(booking.checkOutDate), 'MMM d, yyyy')}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {booking.roomType} • ${booking.totalAmount}
                       </p>
                     </div>
                     <div className="flex space-x-2">
@@ -738,14 +762,17 @@ export const UserDashboard = () => {
             <div className="grid gap-4 md:grid-cols-2">
               {pastBookings.map((booking) => (
                 <div key={booking.id} className="border rounded-lg p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-medium">{booking.branchName}</h3>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-medium">{booking.branchName}</h3>
+                        {getPaymentStatusBadge(booking.paymentStatus)}
+                      </div>
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(booking.checkInDate), 'MMM d, yyyy')} - {format(new Date(booking.checkOutDate), 'MMM d, yyyy')}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {booking.roomType} • {booking.status}
+                        {booking.roomType} • {booking.status} • ${booking.totalAmount}
                       </p>
                     </div>
                     <Button 
