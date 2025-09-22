@@ -84,7 +84,7 @@ interface FlutterwavePaymentModalProps {
 }
 
 // Flutterwave configuration
-const FLUTTERWAVE_PUBLIC_KEY = "FLWPUBK_TEST-0940cf64603068206731635ed2ef2cc7-X";
+const FLUTTERWAVE_PUBLIC_KEY = "FLWPUBK-a8b7e524d918d3cfb55789b1969d35a1-X";
 
 // Declare Flutterwave global
 declare global {
