@@ -19,13 +19,13 @@ export default defineConfig(({ mode }) => ({
       'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), display-capture=(), clipboard-write=self',
       'Content-Security-Policy': [
         "default-src 'self';",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://webobook.com https://apis.google.com;",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://webobook.com https://apis.google.com https://checkout.flutterwave.com;",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;",
         "img-src 'self' data: https:;",
         "font-src 'self' data: https://fonts.gstatic.com;",
-        "frame-src 'self' https://webobook.com;",
+        "frame-src 'self' https://webobook.com https://checkout.flutterwave.com https://checkout-v3-ui-prod.f4b-flutterwave.com;",
         // Allow Firebase/Google endpoints for Firestore/Auth and dev sockets
-        "connect-src 'self' https://firestore.googleapis.com https://www.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://apis.google.com https://*.googleapis.com https://*.gstatic.com https://*.firebaseio.com https://*.firebase.com ws: wss:;"
+        "connect-src 'self' https://firestore.googleapis.com https://www.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://apis.google.com https://*.googleapis.com https://*.gstatic.com https://*.firebaseio.com https://*.firebase.com https://api.flutterwave.com https://checkout.flutterwave.com https://api.ravepay.co ws: wss:;"
       ].join(' '),
       'Feature-Policy': "camera 'none'; microphone 'none'; geolocation 'none'; display-capture 'none'; clipboard-write 'self'",
     },

@@ -116,24 +116,40 @@ export const FlutterwavePaymentModal: React.FC<FlutterwavePaymentModalProps> = (
   // Load Flutterwave script
   useEffect(() => {
     const loadFlutterwaveScript = () => {
+      // Check if script already exists
+      const existingScript = document.querySelector('script[src="https://checkout.flutterwave.com/v3.js"]');
+      
       if (window.FlutterwaveCheckout) {
+        console.log('Flutterwave already loaded');
         setFlutterwaveLoaded(true);
         return;
       }
 
+      if (existingScript) {
+        console.log('Flutterwave script exists, waiting for load...');
+        existingScript.addEventListener('load', () => {
+          console.log('Flutterwave script loaded successfully');
+          setFlutterwaveLoaded(true);
+        });
+        return;
+      }
+
+      console.log('Loading Flutterwave script...');
       const script = document.createElement('script');
       script.src = 'https://checkout.flutterwave.com/v3.js';
       script.async = true;
       script.onload = () => {
+        console.log('Flutterwave script loaded successfully');
         setFlutterwaveLoaded(true);
       };
-      script.onerror = () => {
-        console.error('Failed to load Flutterwave script');
+      script.onerror = (error) => {
+        console.error('Failed to load Flutterwave script:', error);
         toast({
-          title: "Payment Error",
-          description: "Failed to load payment system. Please try again.",
+          title: "Payment System Error",
+          description: "Failed to load payment system. Please check your internet connection and try again.",
           variant: "destructive"
         });
+        setFlutterwaveLoaded(false);
       };
       document.head.appendChild(script);
     };
@@ -212,6 +228,34 @@ export const FlutterwavePaymentModal: React.FC<FlutterwavePaymentModalProps> = (
       toast({
         title: "Authentication Required",
         description: "Please log in to complete payment.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate booking data
+    if (!bookingData.roomType || !bookingData.roomPrice || bookingData.roomPrice <= 0) {
+      toast({
+        title: "Invalid Room Selection",
+        description: "Please select a valid room type with pricing.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!bookingData.guestEmail || !bookingData.guestName || !bookingData.guestPhone) {
+      toast({
+        title: "Missing Guest Information",
+        description: "Please provide complete guest information.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (finalAmount <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Unable to calculate booking amount. Please check your selection.",
         variant: "destructive"
       });
       return;

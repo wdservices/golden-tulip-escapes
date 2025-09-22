@@ -597,17 +597,18 @@ export const NewBookingForm = ({
           onClose={() => setShowPaymentModal(false)}
           bookingData={{
             roomType: formData.roomType,
-            checkInDate: formData.checkIn,
-            checkOutDate: formData.checkOut,
+            roomPrice: roomTypes.find(room => room.id === formData.roomType)?.price || 0,
+            checkInDate: new Date(formData.checkIn),
+            checkOutDate: new Date(formData.checkOut),
             branchId: formData.location,
             branchName: branches.find(b => b.id === formData.location)?.name || '',
-            guests: formData.adults + formData.children,
+            adults: formData.adults,
+            children: formData.children,
             nights: Math.ceil((new Date(formData.checkOut).getTime() - new Date(formData.checkIn).getTime()) / (1000 * 60 * 60 * 24)),
             specialRequests: formData.specialRequests?.trim() || '',
             guestName: `${formData.firstName} ${formData.lastName}`.trim(),
             guestEmail: formData.email,
-            guestPhone: formData.phone,
-            totalAmount: totalPrice
+            guestPhone: formData.phone
           }}
           onPaymentSuccess={(bookingId) => {
             toast({
