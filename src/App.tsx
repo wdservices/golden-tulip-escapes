@@ -21,6 +21,7 @@ import { UserDashboard } from "./pages/UserDashboard";
 import { BranchPage } from "./pages/BranchPage";
 import RoomPage from "./pages/rooms/RoomPage";
 import { RoomDetailPage } from "./pages/branches/RoomDetailPage";
+import { HallDetailPage } from "./pages/branches/HallDetailPage";
 import PublicRoomsPage from "./pages/RoomsPage";
 import CorporateHallsPage from "./pages/CorporateHallsPage";
 import { Button } from "@/components/ui/button";
@@ -99,6 +100,7 @@ const App = () => (
             <Route path="/branch/:branchId" element={<BranchPage />} />
             <Route path="/branches/:branchId" element={<BranchPage />} />
             <Route path="/branch/:branchId/room/:roomId" element={<RoomDetailPage />} />
+            <Route path="/branch/:branchId/hall/:hallId" element={<HallDetailPage />} />
             <Route path="/rooms" element={<PublicRoomsPage />} />
             <Route path="/rooms/:id" element={<RoomPage />} />
             <Route path="/corporate-halls" element={<CorporateHallsPage />} />

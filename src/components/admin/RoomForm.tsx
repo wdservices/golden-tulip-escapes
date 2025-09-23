@@ -36,6 +36,8 @@ export const RoomForm = ({ branchId, room, onSuccess, onCancel }: RoomFormProps)
   });
 
   const roomTypes = [
+    { value: 'test-room', label: 'Test Room' },
+    { value: 'junior-suite', label: 'Junior Suite' },
     { value: 'standard-room', label: 'Standard Room' },
     { value: 'superior-room', label: 'Superior Room' },
     { value: 'premium-standard-room', label: 'Premium Standard Room' },

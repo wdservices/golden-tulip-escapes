@@ -6,6 +6,7 @@ import { BranchAmenities } from "@/components/branches/BranchAmenities";
 import { BranchContact } from "@/components/branches/BranchContact";
 import { BranchRooms } from "@/components/branches/BranchRooms";
 import { BranchDining } from "@/components/branches/BranchDining";
+import { BranchSpa } from "@/components/branches/BranchSpa";
 import { BranchEvents } from "@/components/branches/BranchEvents";
 import { BranchPolicies } from "@/components/branches/BranchPolicies";
 import { Button } from "@/components/ui/button";
@@ -94,6 +95,7 @@ export const BranchPage = () => {
 
       <BranchRooms roomTypes={branch.roomTypes} branchId={branchId} />
       <BranchDining diningOptions={branch.diningOptions} />
+      <BranchSpa spaServices={branch.spaServices} />
       <BranchAmenities amenities={branch.amenities || []} />
       <BranchEvents events={branch.events} />
       <BranchPolicies 

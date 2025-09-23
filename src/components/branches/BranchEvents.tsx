@@ -1,12 +1,20 @@
 import { Branch } from "@/types/branch";
-import { Calendar, Users, DollarSign, CheckCircle, Star } from "lucide-react";
+import { Calendar, Users, DollarSign, CheckCircle, Star, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link, useParams } from "react-router-dom";
 
 interface BranchEventsProps {
   events?: Branch["events"];
 }
 
 export const BranchEvents = ({ events }: BranchEventsProps) => {
+  const { branchId } = useParams<{ branchId: string }>();
+  
   if (!events || events.length === 0) return null;
+
+  const getHallSlug = (hallType: string) => {
+    return hallType.toLowerCase().replace(/\s+/g, '-');
+  };
 
   return (
     <section className="py-20 bg-gradient-to-b from-background to-muted/10" id="events">
@@ -61,7 +69,7 @@ export const BranchEvents = ({ events }: BranchEventsProps) => {
                   </div>
                 </div>
 
-                <div className="bg-muted/50 p-6 rounded-xl">
+                <div className="bg-muted/50 p-6 rounded-xl mb-6">
                   <h4 className="text-lg font-medium mb-4">Venue Features</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {event.features.map((feature, idx) => (
@@ -72,6 +80,13 @@ export const BranchEvents = ({ events }: BranchEventsProps) => {
                     ))}
                   </div>
                 </div>
+
+                <Button asChild className="w-full btn-luxury">
+                  <Link to={`/branch/${branchId}/hall/${getHallSlug(event.type)}`}>
+                    View Hall Details
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
               </div>
             </div>
           ))}

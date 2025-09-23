@@ -302,9 +302,9 @@ const branches: Branch[] = [
   {
     id: "garden-city",
     name: "Garden City",
-    fullName: "GOLDEN TULIP PORT HARCOURT, GARDEN CITY",
-    location: "Stadium Road, Port Harcourt",
-    description: "Premium business hotel with easy access to major business districts and attractions.",
+    fullName: "GOLDEN TULIP GARDEN CITY",
+    location: "Garden City, Port Harcourt",
+    description: "Premium business hotel with easy access to major business districts and attractions, featuring modern amenities and exceptional service.",
     image: luxurySuite,
     address: "63 Ken Saro Wiwa, Stadium Road, Port Harcourt, Rivers State",
     phone: "+234 704 215 6775",
@@ -312,34 +312,209 @@ const branches: Branch[] = [
     checkInTime: "2:00 PM",
     checkOutTime: "12:00 PM",
     amenities: [
-      "Free WiFi",
-      "Swimming Pool",
-      "Fitness Center",
-      "Restaurant & Bar",
-      "Conference Facilities",
-      "24/7 Room Service",
-      "Business Center",
-      "Free Parking"
+      "Free High-Speed Wi-Fi (Throughout the property)",
+      "Swimming Pool (Outdoor pool with poolside service)",
+      "Fitness Center (24/7 access with modern equipment)",
+      "Spa & Wellness Center (Massage, facials, and body treatments)",
+      "Restaurant & Bar (International and local cuisine)",
+      "Conference Rooms (Fully equipped for business meetings)",
+      "Business Center (Printing, copying, and secretarial services)",
+      "24/7 Front Desk (Multilingual staff)",
+      "Airport Shuttle (Available on request)",
+      "Valet Parking (Complimentary parking service)",
+      "Room Service (24-hour service)",
+      "Laundry & Dry Cleaning (Same-day service available)",
+      "24/7 Security (Professional security services)",
+      "Concierge Service (Tour arrangements and local recommendations)"
+    ],
+    diningOptions: [
+      {
+        name: "The Wazobia Restaurant",
+        type: "Fine Dining Restaurant",
+        cuisine: "International & Nigerian Cuisine",
+        hours: "6:00 AM - 11:00 PM",
+        features: [
+          "Breakfast buffet",
+          "À la carte lunch and dinner",
+          "Themed dinner nights",
+          "Private dining available"
+        ]
+      },
+      {
+        name: "The Tulip Lounge",
+        type: "Bar & Lounge",
+        cuisine: "Cocktails & Light Bites",
+        hours: "5:00 PM - 2:00 AM",
+        features: [
+          "Signature cocktails",
+          "Premium spirits",
+          "Live music (Friday & Saturday)",
+          "Outdoor seating"
+        ]
+      },
+      {
+        name: "Room Service",
+        type: "In-Room Dining",
+        cuisine: "International",
+        hours: "24/7",
+        features: [
+          "Full menu available",
+          "Quick delivery",
+          "Special dietary options",
+          "Late-night menu"
+        ]
+      }
+    ],
+    spaServices: [
+      {
+        name: "Relaxation Massage",
+        duration: "60 mins",
+        price: "₦25,000",
+        description: "A soothing full-body massage to help you unwind and relax after a long day."
+      },
+      {
+        name: "Deep Tissue Massage",
+        duration: "90 mins",
+        price: "₦35,000",
+        description: "Therapeutic massage for deep muscle relief, perfect for tension and stress relief."
+      }
     ],
     roomTypes: [
       {
         name: "Standard Room",
-        description: "Comfortable room with essential amenities",
-        priceRange: "₦35,000 - ₦50,000",
-        capacity: 2
+        description: "Comfortable and well-appointed rooms with modern amenities.",
+        priceRange: "₦91,831 per night",
+        capacity: 2,
+        features: [
+          "Size: 30 sqm",
+          "Queen-size bed",
+          "City view",
+          "Free Wi-Fi",
+          "Air conditioning",
+          "Flat-screen TV",
+          "Work desk",
+          "Coffee/tea maker"
+        ]
+      },
+      {
+        name: "Superior Room",
+        description: "Comfortable and well-appointed rooms with modern amenities.",
+        priceRange: "₦107,154 per night",
+        capacity: 2,
+        features: [
+          "Size: 30 sqm",
+          "Queen-size bed",
+          "City view",
+          "Free Wi-Fi",
+          "Air conditioning",
+          "Flat-screen TV",
+          "Work desk",
+          "Coffee/tea maker"
+        ]
       },
       {
         name: "Deluxe Room",
-        description: "Spacious room with modern amenities and work desk",
-        priceRange: "₦50,000 - ₦70,000",
-        capacity: 2
+        description: "Spacious rooms with premium furnishings and city views.",
+        priceRange: "₦127,832 per night",
+        capacity: 2,
+        features: [
+          "Size: 40 sqm",
+          "King-size bed",
+          "Premium view",
+          "Mini bar",
+          "Work desk",
+          "Free Wi-Fi",
+          "Air conditioning"
+        ]
       },
       {
-        name: "Executive Room",
-        description: "Premium room with additional workspace and amenities",
-        priceRange: "₦70,000 - ₦90,000",
-        capacity: 2
+        name: "Junior Suite",
+        description: "Luxurious suites with separate living area.",
+        priceRange: "₦147,850 per night",
+        capacity: 2,
+        features: [
+          "Size: 60 sqm",
+          "Separate living area",
+          "Premium amenities",
+          "Concierge service",
+          "Executive lounge access",
+          "Complimentary breakfast"
+        ]
+      },
+      {
+        name: "Executive Suite",
+        description: "Ultimate luxury with premium furnishings.",
+        priceRange: "₦168,909 per night",
+        capacity: 2,
+        features: [
+          "Size: 100 sqm",
+          "Luxury living space",
+          "Personal butler",
+          "Premium dining",
+          "Private balcony",
+          "Jacuzzi"
+        ]
       }
+    ],
+    events: [
+      {
+        type: "Lady Chinenye Hall",
+        capacity: "150 - 300 guests",
+        priceRange: "From ₦700,000 per day",
+        features: [
+          "Professional meeting rooms",
+          "Conference facilities",
+          "Catering services",
+          "Décor and Setup",
+          "Entertainment options",
+          "Accommodation Package",
+          "Audio/Visual equipment",
+          "Dedicated event coordinator",
+          "High-speed Wi-Fi",
+          "Projector & screen",
+          "Microphone & sound system",
+          "Whiteboard & flip charts",
+          "Presenter (Mouse Pointer)"
+        ]
+      },
+      {
+        type: "Delta Hall",
+        capacity: "10 - 20 guests",
+        priceRange: "From ₦250,000 per day",
+        features: [
+          "PA System",
+          "TV Screen",
+          "Catering services",
+          "Audio/Visual equipment",
+          "Tables and chairs",
+          "Dedicated event coordinator",
+          "High-speed Wi-Fi",
+          "Microphone & sound system",
+          "Whiteboard & flip charts",
+          "Presenter (Mouse Pointer)",
+          "Custom Menu Planning Service"
+        ]
+      }
+    ],
+    operatingHours: {
+      checkIn: "2:00 PM",
+      checkOut: "12:00 PM",
+      frontDesk: "24/7",
+      restaurant: "6:30 AM - 10:30 PM",
+      bar: "10:00 AM - 12:00 AM"
+    },
+    paymentMethods: [
+      "Cash (NGN, USD)",
+      "Credit/Debit Cards (Visa, Mastercard, Verve)",
+      "Bank Transfer",
+      "Hotel Vouchers"
+    ],
+    policies: [
+      "Cancellation: 48 hours prior to arrival",
+      "Children: Under 12 stay free with parents",
+      "Pets: Not allowed",
+      "Smoking: Designated areas only",
+      "ID: Valid photo ID required at check-in"
     ],
     gallery: [luxurySuite, hotelLobby, hotelExterior, restaurant, pool, spa]
   },

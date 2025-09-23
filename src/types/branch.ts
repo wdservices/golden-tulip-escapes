@@ -16,6 +16,12 @@ export interface Branch {
     hours: string;
     features: string[];
   }[];
+  spaServices?: {
+    name: string;
+    duration: string;
+    price: string;
+    description: string;
+  }[];
   roomTypes?: {
     name: string;
     description: string;
