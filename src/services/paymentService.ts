@@ -50,7 +50,7 @@ export interface PaymentRecord {
 }
 
 class PaymentService {
-  private readonly FLUTTERWAVE_SECRET_KEY = 'FLWSECK-43b08a6ed3ef3838b8058cf3ed06c67b-19971079b77vt-X';
+  private readonly FLUTTERWAVE_SECRET_KEY = import.meta.env.FLUTTERWAVE_SECRET_KEY || 'FLWSECK-43b08a6ed3ef3838b8058cf3ed06c67b-19971079b77vt-X';
   private readonly FLUTTERWAVE_BASE_URL = 'https://api.flutterwave.com/v3';
 
   /**

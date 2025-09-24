@@ -55,6 +55,11 @@ interface PaymentData {
     description: string;
     logo: string;
   };
+  meta?: {
+    consumer_id: string;
+    consumer_mac: string;
+  };
+  fingerprint?: boolean;
   callback: (response: FlutterwaveResponse) => void;
   onclose: () => void;
 }
@@ -84,7 +89,7 @@ interface FlutterwavePaymentModalProps {
 }
 
 // Flutterwave configuration
-const FLUTTERWAVE_PUBLIC_KEY = "FLWPUBK-a8b7e524d918d3cfb55789b1969d35a1-X";
+const FLUTTERWAVE_PUBLIC_KEY = import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY || "FLWPUBK-a8b7e524d918d3cfb55789b1969d35a1-X";
 
 // Declare Flutterwave global
 declare global {
@@ -283,6 +288,12 @@ export const FlutterwavePaymentModal: React.FC<FlutterwavePaymentModalProps> = (
         description: `${bookingData.roomType} for ${bookingData.nights} night(s) at ${bookingData.branchName}`,
         logo: "https://golden-tulip-hotels.com/logo.png",
       },
+      meta: {
+        consumer_id: bookingData.guestEmail,
+        consumer_mac: "92a3-912ba-1192a",
+      },
+      // Disable fingerprinting to prevent 400 errors and API key issues
+      fingerprint: false,
       callback: async (response: FlutterwaveResponse) => {
         console.log('Payment response:', response);
         

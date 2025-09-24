@@ -25,11 +25,8 @@ export const BranchHero = ({ branch }: BranchHeroProps) => {
               border: 'none', 
               maxWidth: '100%' 
             }}  
-            // @ts-ignore - allowvr is a valid attribute for iframes
-            allowvr="yes" 
-            allow="xr-spatial-tracking; vr; gyroscope; accelerometer; fullscreen" 
-            scrolling="no" 
-            allowFullScreen
+            allow="xr-spatial-tracking; gyroscope; accelerometer; fullscreen"
+            loading="lazy"
             frameBorder="0" 
             src="https://webobook.com/public/648aed3e38418a65e92441d2,en?ap=true&si=true&sm=false&sp=true&sfr=false&sl=false&sop=false&"
             title="360° Virtual Tour of Golden Tulip Hotel"

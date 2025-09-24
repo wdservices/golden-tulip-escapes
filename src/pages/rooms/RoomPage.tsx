@@ -102,9 +102,8 @@ export default function RoomPage() {
               <iframe 
                 id="evrFrame"
                 className="absolute top-0 left-0 w-full h-full border-none rounded-lg"
-                allow="xr-spatial-tracking; vr; gyroscope; accelerometer; fullscreen;"
-                scrolling="no"
-                allowFullScreen
+                allow="xr-spatial-tracking; gyroscope; accelerometer; fullscreen"
+            loading="lazy"
                 src={`https://webobook.com/public/648aed3e38418a65e92441d2,en?ap=true&si=false&sm=false&sp=false&sfr=false&sl=false&sop=false&`}
               ></iframe>
             </div>

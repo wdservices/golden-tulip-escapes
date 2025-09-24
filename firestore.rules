@@ -97,6 +97,22 @@ service cloud.firestore {
                      get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
     }
     
+    // Admin users collection rules
+    match /adminUsers/{adminId} {
+      // Allow users to read their own admin document to check admin status
+      allow read: if request.auth != null && request.auth.uid == adminId;
+      
+      // Allow admins to read all admin documents
+      allow read: if request.auth != null && 
+                  exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+                  get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true;
+      
+      // Allow admins to create, update, and delete admin users
+      allow create, update, delete: if request.auth != null && 
+                                   exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+                                   get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true;
+    }
+
     // Helper function to check if user is admin
     function isAdmin() {
       return request.auth != null && 
