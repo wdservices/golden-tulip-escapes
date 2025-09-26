@@ -48,3 +48,12 @@ export interface Branch {
   checkInTime?: string;
   checkOutTime?: string;
 }
+
+// Lightweight branch metadata for branch selector
+export interface BranchMeta {
+  id: string;
+  name: string;
+  fullName: string;
+  logo?: string;
+  color?: string;
+}

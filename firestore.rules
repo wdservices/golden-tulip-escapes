@@ -38,18 +38,26 @@ service cloud.firestore {
     
     // Users collection rules
     match /users/{userId} {
-      // Allow users to read their own profile and admins to read any profile
+      // Allow users to read their own profile
+      // Allow HQ admins to read any profile
+      // Allow branch admins to read profiles of users who have bookings in their branches
       allow read: if request.auth != null && 
                   (request.auth.uid == userId || 
-                   isAdmin());
+                   isHQAdmin() || 
+                   (isBranchAdmin() && userHasBookingInAdminBranch(userId)));
       
-      // Allow users to update their own profile and admins to update any profile
+      // Allow users to update their own profile with limited fields
+      // Allow HQ admins to update any profile
+      // Allow branch admins to update profiles of users who have bookings in their branches
       allow update: if request.auth != null && 
-                   (request.auth.uid == userId || isAdmin()) &&
-                   (isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'phone', 'preferences', 'lastLogin', 'email', 'displayName', 'photoURL']));
+                   (request.auth.uid == userId || 
+                    isHQAdmin() || 
+                    (isBranchAdmin() && userHasBookingInAdminBranch(userId))) &&
+                   (isHQAdmin() || request.auth.uid == userId || 
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'phone', 'preferences', 'lastLogin', 'email', 'displayName', 'photoURL']));
       
-      // Allow admins to create user documents (for user management)
-      allow create: if request.auth != null && isAdmin();
+      // Allow HQ admins to create user documents (for user management)
+      allow create: if request.auth != null && isHQAdmin();
     }
     
     // Branches collection rules
@@ -57,44 +65,50 @@ service cloud.firestore {
       // Allow read access to all authenticated users
       allow read: if request.auth != null;
       
-      // Only allow admins to create, update, or delete branches
-      allow create, update, delete: if isAdmin();
+      // Allow HQ admins to create, update, or delete any branch
+      // Allow branch admins to update only branches they have access to
+      allow create: if isHQAdmin();
+      allow update: if isHQAdmin() || (isBranchAdmin() && hasBranchAccess(branchId));
+      allow delete: if isHQAdmin();
       
       // Nested rooms collection
       match /rooms/{roomId} {
         // Allow read access to all authenticated users
         allow read: if request.auth != null;
         
-        // Only allow admins to manage rooms
-        allow create, update, delete: if isAdmin();
+        // Allow HQ admins to manage all rooms
+        // Allow branch admins to manage rooms in branches they have access to
+        allow create: if isHQAdmin() || (isBranchAdmin() && hasBranchAccess(branchId));
+        allow update: if isHQAdmin() || (isBranchAdmin() && hasBranchAccess(branchId));
+        allow delete: if isHQAdmin() || (isBranchAdmin() && hasBranchAccess(branchId));
       }
     }
     
     // Bookings collection rules
     match /bookings/{bookingId} {
-      // Allow users to read their own bookings and admins to read all bookings
+      // Allow users to read their own bookings, branch admins to read bookings for their branches, and HQ admins to read all bookings
       allow read: if request.auth != null && 
                  (request.auth.uid == resource.data.userId || 
-                  (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
-                   get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
+                  isHQAdmin() || 
+                  (isBranchAdmin() && hasBranchAccess(resource.data.branchId)));
       
-      // Allow authenticated users to create bookings and admins to manage all bookings
+      // Allow authenticated users to create bookings, branch admins for their branches, and HQ admins for any branch
       allow create: if request.auth != null && 
                    (request.auth.uid == request.resource.data.userId || 
-                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
-                     get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
+                    isHQAdmin() || 
+                    (isBranchAdmin() && hasBranchAccess(request.resource.data.branchId)));
       
-      // Allow users to update their own bookings and admins to update any booking
+      // Allow users to update their own bookings, branch admins for their branches, and HQ admins for any booking
       allow update: if request.auth != null && 
                    (request.auth.uid == resource.data.userId || 
-                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
-                     get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
+                    isHQAdmin() || 
+                    (isBranchAdmin() && hasBranchAccess(resource.data.branchId)));
       
-      // Allow users to delete their own bookings and admins to delete any booking
+      // Allow users to delete their own bookings, branch admins for their branches, and HQ admins for any booking
       allow delete: if request.auth != null && 
                    (request.auth.uid == resource.data.userId || 
-                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
-                     get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
+                    isHQAdmin() || 
+                    (isBranchAdmin() && hasBranchAccess(resource.data.branchId)))
     }
     
     // Admin users collection rules
@@ -102,22 +116,50 @@ service cloud.firestore {
       // Allow users to read their own admin document to check admin status
       allow read: if request.auth != null && request.auth.uid == adminId;
       
-      // Allow admins to read all admin documents
+      // Allow HQ admins to read all admin documents
+      // Allow branch admins to read only their own admin document
       allow read: if request.auth != null && 
-                  exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
-                  get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true;
+                  (isHQAdmin() || 
+                   (isBranchAdmin() && request.auth.uid == adminId));
       
-      // Allow admins to create, update, and delete admin users
-      allow create, update, delete: if request.auth != null && 
-                                   exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
-                                   get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true;
+      // Allow only HQ admins to create, update, and delete admin users
+      allow create, update, delete: if request.auth != null && isHQAdmin();
     }
 
-    // Helper function to check if user is admin
+    // Helper function to check if user is admin (legacy function for backward compatibility)
     function isAdmin() {
       return request.auth != null && 
              exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
              get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true;
+    }
+    
+    // Helper function to check if user is HQ admin
+    function isHQAdmin() {
+      return request.auth != null && 
+             request.auth.token.role == 'hq-admin';
+    }
+    
+    // Helper function to check if user is branch admin
+    function isBranchAdmin() {
+      return request.auth != null && 
+             request.auth.token.role == 'branch-admin';
+    }
+    
+    // Helper function to check if user has access to a specific branch
+    function hasBranchAccess(branchId) {
+      return request.auth != null && 
+             (request.auth.token.branchIds.hasAny([branchId, 'all']) || 
+              request.auth.token.role == 'hq-admin');
+    }
+    
+    // Helper function to check if a user has bookings in branches that the admin has access to
+    function userHasBookingInAdminBranch(userId) {
+      // For branch admins, check if the user has any bookings in their branches
+      // Simplified approach: if admin has 'all' access, allow access to all users
+      // Otherwise, we'll need to implement a more specific check in the application logic
+      return request.auth != null && 
+             request.auth.token.role == 'branch-admin' &&
+             (request.auth.token.branchIds.hasAny(['all']));
     }
   }
 }

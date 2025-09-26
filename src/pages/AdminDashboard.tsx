@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { getBranches } from "@/services/branchService";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -45,12 +48,14 @@ import {
 // Import components
 import DashboardStats from "@/components/admin/DashboardStats";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
+import NetworkStatus from "@/components/ui/NetworkStatus";
 import RevenueSnapshot from "@/components/admin/RevenueSnapshot";
 import ClientActivity from "@/components/admin/ClientActivity";
 
 // Import hooks for Firestore data
 import { useAuthUsers } from "@/hooks/useAuthUsers";
 import { useCollection } from "@/hooks/useCollection";
+import { useBookings } from "@/hooks/useBookings";
 
 
 // We'll fetch real bookings from Firestore
@@ -84,15 +89,8 @@ const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // Fetch real data from Firestore
-  const { mergedUsers, loading: usersLoading, error: usersError } = useAuthUsers();
-  const { documents: bookings, loading: bookingsLoading, error: bookingsError } = useCollection('bookings');
-  const { documents: rooms, loading: roomsLoading, error: roomsError } = useCollection('rooms');
-  const { documents: ads, loading: adsLoading, error: adsError } = useCollection('promotions');
-  
-  // Loading state for the dashboard
-  const isLoading = usersLoading || bookingsLoading || roomsLoading || adsLoading;
+  const { userMeta, activeBranchId } = useAuth();
+  const [currentBranchName, setCurrentBranchName] = useState<string>("");
   
   // Get current active tab from URL path
   const getActiveTab = () => {
@@ -103,6 +101,36 @@ const AdminDashboard = () => {
   };
   
   const activeTab = getActiveTab();
+  
+  // Load essential data immediately for dashboard
+  const { mergedUsers, loading: usersLoading, error: usersError } = useAuthUsers();
+  const { bookings, isLoading: bookingsLoading, error: bookingsError } = useBookings();
+  
+  // Always call hooks but optimize loading behavior
+  const { documents: rooms, loading: roomsLoading, error: roomsError } = useCollection('rooms');
+  const { documents: ads, loading: adsLoading, error: adsError } = useCollection('promotions');
+  
+  // Only show loading for essential data to speed up initial render
+  const isLoading = usersLoading || bookingsLoading;
+
+  // Fetch current branch name
+  useEffect(() => {
+    const fetchBranchName = async () => {
+      if (activeBranchId) {
+        try {
+          const branches = await getBranches();
+          const branch = branches.find(b => b.id === activeBranchId);
+          if (branch) {
+            setCurrentBranchName(branch.name);
+          }
+        } catch (error) {
+          console.error("Error fetching branch name:", error);
+        }
+      }
+    };
+    
+    fetchBranchName();
+  }, [activeBranchId]);
   
   // Handle navigation to admin routes
   const handleNavigation = (path: string) => {
@@ -254,7 +282,8 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between h-16 px-6">
             <div className="flex items-center">
               <h2 className="text-xl font-semibold">
-                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+                {currentBranchName ? `${currentBranchName} Admin Dashboard` : "Admin Dashboard"}
+                {activeTab !== 'dashboard' && ` - ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`}
               </h2>
             </div>
             <div className="flex items-center space-x-4">
@@ -276,10 +305,16 @@ const AdminDashboard = () => {
         <main className="flex-1 overflow-y-auto">
           {activeTab === 'dashboard' ? (
             <div className="p-6">
+              <NetworkStatus />
               <AnalyticsDashboard />
             </div>
           ) : (
-            <Outlet />
+            <div>
+              <div className="p-6 pb-0">
+                <NetworkStatus />
+              </div>
+              <Outlet />
+            </div>
           )}
         </main>
       </div>

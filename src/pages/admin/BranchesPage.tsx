@@ -12,6 +12,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { BranchForm } from "@/components/admin/BranchForm";
 import { RoomForm } from "@/components/admin/RoomForm";
+import { getBranches } from "@/services/branchService";
+
 
 export type BranchStatus = 'active' | 'inactive' | 'maintenance';
 
@@ -48,6 +50,29 @@ export const BranchesPage = () => {
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [currentBranchName, setCurrentBranchName] = useState<string>("");
+  
+  // Get auth context for branch filtering
+  const { activeBranchId } = useAuth();
+  
+  // Fetch current branch name
+  useEffect(() => {
+    const fetchBranchName = async () => {
+      if (activeBranchId) {
+        try {
+          const branches = await getBranches();
+          const branch = branches.find(b => b.id === activeBranchId);
+          if (branch) {
+            setCurrentBranchName(branch.name);
+          }
+        } catch (error) {
+          console.error("Error fetching branch name:", error);
+        }
+      }
+    };
+    
+    fetchBranchName();
+  }, [activeBranchId]);
   const [isAddRoomDialogOpen, setIsAddRoomDialogOpen] = useState(false);
   
   // Get auth context
@@ -233,7 +258,21 @@ export const BranchesPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Branches</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {currentBranchName && (
+              <span className="flex items-center">
+                <span className="mr-2">{currentBranchName}</span>
+                <span className="mx-2">-</span>
+              </span>
+            )}
+            Branches
+          </h1>
+          {currentBranchName && (
+            <div className="flex items-center text-sm text-muted-foreground mb-1">
+              <Building className="h-4 w-4 mr-1" />
+              <span>{currentBranchName}</span>
+            </div>
+          )}
           <p className="text-sm text-muted-foreground">Manage your hotel branches and their details</p>
         </div>
         <div className="flex items-center space-x-2 w-full md:w-auto">

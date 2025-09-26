@@ -1,22 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Calendar } from 'lucide-react';
+import { Calendar, Building } from 'lucide-react';
 import { format, subDays } from 'date-fns';
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
+import { useAuth } from "@/contexts/AuthContext";
+import { getBranches } from "@/services/branchService";
+
 
 const DashboardHome = () => {
   const [dateRange] = useState({
     from: subDays(new Date(), 30),
     to: new Date(),
   });
+  
+  const { activeBranchId } = useAuth();
+  const [currentBranchName, setCurrentBranchName] = useState<string>("");
+  
+  // Fetch current branch name
+  useEffect(() => {
+    const fetchBranchName = async () => {
+      if (activeBranchId) {
+        try {
+          const branches = await getBranches();
+          const branch = branches.find(b => b.id === activeBranchId);
+          if (branch) {
+            setCurrentBranchName(branch.name);
+          }
+        } catch (error) {
+          console.error("Error fetching branch name:", error);
+        }
+      }
+    };
+    
+    fetchBranchName();
+  }, [activeBranchId]);
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between space-y-2">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+            {currentBranchName ? `${currentBranchName} Dashboard` : "Dashboard"}
+          </h2>
+          <div className="flex items-center gap-2 mt-1">
+            {currentBranchName && (
+              <div className="flex items-center text-muted-foreground text-sm">
+                <Building className="h-3.5 w-3.5 mr-1" />
+                <span>{currentBranchName}</span>
+              </div>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
             Welcome back! Here's what's happening with your hotel today.
           </p>
         </div>

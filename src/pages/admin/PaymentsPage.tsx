@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Download, CreditCard, DollarSign } from "lucide-react";
+import { Search, Filter, Download, CreditCard, DollarSign, Building } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { getBranches } from "@/services/branchService";
+
 
 type PaymentStatus = 'completed' | 'pending' | 'failed' | 'refunded';
 type PaymentMethod = 'credit_card' | 'paypal' | 'bank_transfer' | 'cash';
@@ -22,6 +25,29 @@ interface Payment {
 
 export const PaymentsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentBranchName, setCurrentBranchName] = useState<string>("");
+  
+  // Get auth context for branch filtering
+  const { activeBranchId } = useAuth();
+  
+  // Fetch current branch name
+  useEffect(() => {
+    const fetchBranchName = async () => {
+      if (activeBranchId) {
+        try {
+          const branches = await getBranches();
+          const branch = branches.find(b => b.id === activeBranchId);
+          if (branch) {
+            setCurrentBranchName(branch.name);
+          }
+        } catch (error) {
+          console.error("Error fetching branch name:", error);
+        }
+      }
+    };
+    
+    fetchBranchName();
+  }, [activeBranchId]);
   
   // Mock data - replace with actual API call
   const [payments] = useState<Payment[]>([
@@ -78,7 +104,26 @@ export const PaymentsPage = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
-        <h2 className="text-2xl font-bold tracking-tight">Payments</h2>
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">
+            {currentBranchName && (
+              <span className="flex items-center">
+                <span className="mr-2">{currentBranchName}</span>
+                <span className="mx-2">-</span>
+              </span>
+            )}
+            Payments
+          </h2>
+          {currentBranchName && (
+            <div className="flex items-center text-sm text-muted-foreground mb-1">
+              <Building className="h-4 w-4 mr-1" />
+              <span>{currentBranchName}</span>
+            </div>
+          )}
+          <p className="text-muted-foreground">
+            Manage all payment transactions and financial records
+          </p>
+        </div>
         <div className="flex items-center space-x-2">
           <Button variant="outline" size="sm">
             <Download className="mr-2 h-4 w-4" />

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useDatabase } from '@/contexts/DatabaseContext';
+import { useAuth } from '@/contexts/AuthContext';
+
 
 interface Room {
   id?: string;
@@ -111,6 +113,7 @@ export const useAllRooms = () => {
   const [error, setError] = useState<string | null>(null);
   
   const { queryDocuments } = useDatabase();
+  const { userMeta, activeBranchId } = useAuth();
 
   useEffect(() => {
     const fetchAllRooms = async () => {
@@ -121,8 +124,16 @@ export const useAllRooms = () => {
         // First get all branches
         const branches = await queryDocuments('branches', []);
         
+        // Filter branches based on user role and active branch
+        let branchesToFetch = branches;
+        
+        // All users only see their specific branch
+        if (activeBranchId) {
+          branchesToFetch = branches.filter(branch => branch.id === activeBranchId);
+        }
+        
         // Then fetch rooms from each branch
-        const allRoomsPromises = branches.map(async (branch) => {
+        const allRoomsPromises = branchesToFetch.map(async (branch) => {
           try {
             const branchRooms = await queryDocuments<Room>(`branches/${branch.id}/rooms`, []);
             return branchRooms.map(room => ({ ...room, branchId: branch.id }));
@@ -146,11 +157,15 @@ export const useAllRooms = () => {
     };
 
     fetchAllRooms();
-  }, [queryDocuments]);
+  }, [queryDocuments, userMeta, activeBranchId]);
 
   return {
     rooms: allRooms,
     isLoading,
-    error
+    error,
+    refetch: () => {
+      setIsLoading(true);
+      // This will trigger the useEffect to run again
+    }
   };
 };

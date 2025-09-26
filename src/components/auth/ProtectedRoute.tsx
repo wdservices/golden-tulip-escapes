@@ -11,15 +11,18 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
-export const ProtectedRoute = ({ children, requiredRole, redirectTo }: ProtectedRouteProps) => {
-  console.log('ProtectedRoute rendering');
+export const ProtectedRoute = ({ 
+  children, 
+  requiredRole, 
+  redirectTo
+}: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading, currentUser } = useAuth();
-  console.log('Auth state:', { isAuthenticated, isLoading, currentUser });
   const location = useLocation();
   const navigate = useNavigate();
 
   // Memoize the computed values to prevent unnecessary re-renders
   const isUserAdmin = useMemo(() => isAdmin(currentUser), [currentUser]);
+  
   const isAuthorized = useMemo(() => {
     if (!requiredRole) return true;
     if (requiredRole === 'admin') return isUserAdmin;
@@ -34,6 +37,13 @@ export const ProtectedRoute = ({ children, requiredRole, redirectTo }: Protected
     // Redirect to login if not authenticated
     if (!isAuthenticated) {
       const redirectPath = location.pathname !== '/auth' ? location.pathname : '/';
+      console.log('ProtectedRoute redirect to auth:', {
+        isAuthenticated,
+        currentPath: location.pathname,
+        redirectPath,
+        requiredRole,
+        currentUser: currentUser?.email
+      });
       navigate('/auth', { 
         state: { 
           from: redirectPath,
@@ -47,16 +57,39 @@ export const ProtectedRoute = ({ children, requiredRole, redirectTo }: Protected
     // Check role-based access
     if (requiredRole === 'admin' && !isUserAdmin) {
       const targetPath = redirectTo || '/dashboard';
+      console.log('ProtectedRoute role redirect (non-admin to dashboard):', {
+        requiredRole,
+        isUserAdmin,
+        currentPath: location.pathname,
+        targetPath,
+        userEmail: currentUser?.email
+      });
       console.warn(`Unauthorized access attempt to ${location.pathname} by ${currentUser?.email}`);
       toast.warning('You do not have permission to access this page');
       navigate(targetPath, { replace: true });
     } else if (requiredRole === 'user' && isUserAdmin) {
       const targetPath = redirectTo || '/admin';
+      console.log('ProtectedRoute role redirect (admin to admin dashboard):', {
+        requiredRole,
+        isUserAdmin,
+        currentPath: location.pathname,
+        targetPath,
+        userEmail: currentUser?.email
+      });
       console.warn(`Admin user ${currentUser?.email} redirected from user route ${location.pathname}`);
       toast.info('Redirecting to admin dashboard');
       navigate(targetPath, { replace: true });
     }
-  }, [isLoading, isAuthenticated, isUserAdmin, requiredRole, redirectTo, location, navigate, currentUser]);
+  }, [
+    isLoading, 
+    isAuthenticated, 
+    isUserAdmin, 
+    requiredRole, 
+    redirectTo, 
+    location, 
+    navigate, 
+    currentUser
+  ]);
 
   // Show loading state
   if (isLoading) {
@@ -80,5 +113,5 @@ export const ProtectedRoute = ({ children, requiredRole, redirectTo }: Protected
     return null; // Navigation is handled by the effect
   }
 
-  return <>{children}</>;
+  return children;
 };

@@ -4,7 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, UserPlus, Mail, Phone, Loader2, ArrowUpDown, Download, Filter, X } from "lucide-react";
+import { Search, UserPlus, Mail, Phone, Loader2, ArrowUpDown, Download, Filter, X, Building } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { getBranches } from "@/services/branchService";
+
 import { useCollection } from "@/hooks/useCollection";
 import { useAuthUsers } from "@/hooks/useAuthUsers";
 import { User, ClientStatus } from "@/types";
@@ -35,65 +38,37 @@ export const ClientsPage = () => {
     lastActive: 'all',
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [currentBranchName, setCurrentBranchName] = useState<string>("");
   
-  // Fetch users from Firestore and Auth
-  const { data: firestoreUsers, loading: firestoreLoading, error: firestoreError, updateDocument } = useCollection<User>('users');
-  const { authUsers, loading: authLoading, error: authError, mergeWithFirestoreUsers } = useAuthUsers();
-  const [mergedUsers, setMergedUsers] = useState<User[]>([]);
-  // Initialize loading state based on the initial loading state of the data sources
-  const [loading, setLoading] = useState(firestoreLoading || authLoading);
-  const [error, setError] = useState<Error | null>(null);
-
-  // Merge auth users with Firestore users when data is available
+  // Get auth context for branch filtering
+  const { activeBranchId } = useAuth();
+  
+  // Fetch current branch name
   useEffect(() => {
-    // Update loading state whenever the source loading states change
-    setLoading(firestoreLoading || authLoading);
-    
-    // Skip the effect if we're still loading data
-    if (firestoreLoading || authLoading) return;
-    
-    const mergeUsers = async () => {
-      try {
-        // Check if we have a Firebase connection issue
-        if ((firestoreError && firestoreError.message && firestoreError.message.includes('permission')) ||
-            (authError && authError.message && authError.message.includes('permission'))) {
-          console.warn('Permission error detected in ClientsPage, attempting to reconnect...');
-          
-          // Import and use the reconnectFirebase function
-          const { reconnectFirebase } = await import('@/lib/firebase');
-          const reconnected = await reconnectFirebase();
-          
-          if (!reconnected) {
-            throw new Error('Failed to reconnect to Firebase. Please refresh the page and try again.');
+    const fetchBranchName = async () => {
+      if (activeBranchId) {
+        try {
+          const branches = await getBranches();
+          const branch = branches.find(b => b.id === activeBranchId);
+          if (branch) {
+            setCurrentBranchName(branch.name);
           }
-          
-          console.log('Successfully reconnected to Firebase in ClientsPage');
+        } catch (error) {
+          console.error("Error fetching branch name:", error);
         }
-        
-        // Merge users from Firestore with any authenticated user data
-        // This will now include all users from the Firestore 'users' collection
-        const users = await mergeWithFirestoreUsers(firestoreUsers || []);
-        
-        if (users && users.length > 0) {
-          console.log(`Loaded ${users.length} users from Firestore and Auth`);
-          setMergedUsers(users);
-          setError(null);
-        } else {
-          console.warn('No users found in Firestore or Auth');
-          setMergedUsers([]);
-        }
-      } catch (err) {
-        console.error('Error merging users:', err);
-        setError(err as Error);
-        // Fallback to just Firestore users if there's an error
-        setMergedUsers(firestoreUsers || []);
-      } finally {
-        setLoading(false);
       }
     };
+    
+    fetchBranchName();
+  }, [activeBranchId]);
+  
+  // Get users data from the hook
+  const { mergedUsers, loading, error } = useAuthUsers();
+  
+  // Keep the updateDocument function for client updates
+  const { updateDocument } = useCollection<User>('users');
 
-    mergeUsers();
-  }, [firestoreUsers, authUsers, firestoreLoading, authLoading, firestoreError, authError, mergeWithFirestoreUsers]);
+
   
   // Transform and sort clients
   const { sortedClients, filteredClients } = useMemo(() => {
@@ -251,38 +226,28 @@ export const ClientsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="text-muted-foreground">Loading client data...</span>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-2 text-sm text-gray-600">Loading client data from Firebase...</p>
+        </div>
       </div>
     );
   }
-  
+
   if (error) {
-    const isPermissionError = error.message && (
-      error.message.includes('permission') || 
-      error.message.includes('unauthorized') ||
-      error.message.includes('400')
-    );
-    
     return (
-      <div className="rounded-md border border-red-200 bg-red-50 p-4">
-        <h3 className="text-sm font-medium text-red-800">
-          {isPermissionError ? 'Firebase Permission Error' : 'Error loading clients'}
-        </h3>
-        <p className="mt-1 text-sm text-red-700">
-          {isPermissionError 
-            ? 'You may not have the required access rights. The system is attempting to reconnect automatically.'
-            : error.message}
-        </p>
-        {isPermissionError && (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center max-w-md">
+          <p className="text-red-600 mb-2">Error loading client data:</p>
+          <p className="text-sm text-gray-600 mb-4">{error.message}</p>
           <Button 
-            className="mt-4" 
-            onClick={() => window.location.reload()}
+            onClick={() => window.location.reload()} 
+            variant="default"
           >
-            Refresh Page
+            Retry
           </Button>
-        )}
+        </div>
       </div>
     );
   }
@@ -302,7 +267,21 @@ export const ClientsPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Client Management</h2>
+          <h2 className="text-2xl font-bold tracking-tight">
+            {currentBranchName && (
+              <span className="flex items-center">
+                <span className="mr-2">{currentBranchName}</span>
+                <span className="mx-2">-</span>
+              </span>
+            )}
+            Client Management
+          </h2>
+          {currentBranchName && (
+            <div className="flex items-center text-sm text-muted-foreground mb-1">
+              <Building className="h-4 w-4 mr-1" />
+              <span>{currentBranchName}</span>
+            </div>
+          )}
           <p className="text-sm text-muted-foreground">
             {filteredClients.length} {filteredClients.length === 1 ? 'client' : 'clients'} found
             {filteredClients.length !== mergedUsers.length && ` (of ${mergedUsers.length} total)`}
@@ -574,62 +553,106 @@ export const ClientsPage = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredClients.map((client) => (
-                <TableRow key={client.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex flex-col">
-                      <span>{client.displayName || 'No name'}</span>
-                      {client.isAdmin && (
-                        <Badge variant="outline" className="mt-1 w-fit">
-                          Admin
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col space-y-1">
-                      <div className="flex items-center">
-                        <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
-                        <span>{client.email || 'No email'}</span>
-                      </div>
-                      {client.phoneNumber && (
-                        <div className="flex items-center">
-                          <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span>{client.phoneNumber}</span>
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {client.createdAt ? 
-                      formatDate(client.createdAt instanceof Date ? client.createdAt : 
-                        typeof client.createdAt === 'object' && client.createdAt.toDate ? 
-                        client.createdAt.toDate() : new Date(client.createdAt)) : 'N/A'}
-                    {client.lastSignInAt && (
-                      <p className="text-xs text-muted-foreground">
-                        Last active: {formatDate(client.lastSignInAt instanceof Date ? client.lastSignInAt :
-                          typeof client.lastSignInAt === 'object' && client.lastSignInAt.toDate ?
-                          client.lastSignInAt.toDate() : new Date(client.lastSignInAt))}
+              {filteredClients.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8">
+                    <div className="flex flex-col items-center space-y-2">
+                      <Users className="h-8 w-8 text-muted-foreground" />
+                      <p className="text-muted-foreground">
+                        {searchTerm || filters.status !== 'all' || filters.bookingCount !== 'all' || filters.lastActive !== 'all'
+                          ? 'No clients match your current filters'
+                          : 'No clients found. Client data will appear here once users register.'}
                       </p>
-                    )}
-                  </TableCell>
-                  <TableCell>{client.bookingIds?.length || 0}</TableCell>
-                  <TableCell>
-                    <Badge className={getStatusVariant(client.status)}>
-                      {client.status === 'active' ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => setSelectedClient(client)}
-                    >
-                      View Details
-                    </Button>
+                      {(searchTerm || filters.status !== 'all' || filters.bookingCount !== 'all' || filters.lastActive !== 'all') && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setSearchTerm('');
+                            setFilters({
+                              status: 'all',
+                              bookingCount: 'all',
+                              lastActive: 'all'
+                            });
+                          }}
+                        >
+                          Clear Filters
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                filteredClients.map((client) => (
+                  <TableRow key={client.id}>
+                    <TableCell className="font-medium">
+                      <div className="flex flex-col">
+                        <span>{client.displayName || 'No name provided'}</span>
+                        {client.role === 'admin' && (
+                          <Badge variant="outline" className="mt-1 w-fit">
+                            Admin
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col space-y-1">
+                        <div className="flex items-center">
+                          <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">{client.email || 'No email provided'}</span>
+                          {client.emailVerified && (
+                            <Badge variant="secondary" className="ml-2 text-xs">
+                              Verified
+                            </Badge>
+                          )}
+                        </div>
+                        {client.phoneNumber && (
+                          <div className="flex items-center">
+                            <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{client.phoneNumber}</span>
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-sm">
+                          {client.createdAt ? 
+                            formatDate(client.createdAt instanceof Date ? client.createdAt : 
+                              typeof client.createdAt === 'object' && client.createdAt.toDate ? 
+                              client.createdAt.toDate() : new Date(client.createdAt)) : 'N/A'}
+                        </span>
+                        {client.lastSignInAt && (
+                          <p className="text-xs text-muted-foreground">
+                            Last active: {formatDate(client.lastSignInAt instanceof Date ? client.lastSignInAt :
+                              typeof client.lastSignInAt === 'object' && client.lastSignInAt.toDate ?
+                              client.lastSignInAt.toDate() : new Date(client.lastSignInAt))}
+                          </p>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">
+                        {client.bookingIds?.length || 0}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getStatusVariant(client.status)}>
+                        {client.status === 'active' ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setSelectedClient(client)}
+                      >
+                        View Details
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>

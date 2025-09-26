@@ -1,4 +1,6 @@
-import { Branch } from "@/types/branch";
+import { Branch, BranchMeta } from "@/types/branch";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 import hotelExterior from "@/assets/hotel-exterior.jpg";
 import hotelLobby from "@/assets/hotel-lobby.jpg";
 import luxurySuite from "@/assets/luxury-suite.jpg";
@@ -6,6 +8,47 @@ import restaurant from "@/assets/restaurant.jpg";
 // Using existing images for pool and spa as placeholders
 const pool = hotelExterior;
 const spa = luxurySuite;
+
+// Function to get branch metadata for branch selector
+export async function getBranches(): Promise<BranchMeta[]> {
+  try {
+    // Try to fetch from Firestore first
+    const branchesCollection = collection(db, 'branches');
+    const branchSnapshot = await getDocs(branchesCollection);
+    
+    if (!branchSnapshot.empty) {
+      const branchData = branchSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.name || '',
+          fullName: data.fullName || data.name || '',
+          logo: data.logo || '',
+          color: data.color || ''
+        } as BranchMeta;
+      });
+      return branchData;
+    }
+    
+    // Fallback to static data if Firestore is empty
+    return branches.map(branch => ({
+      id: branch.id,
+      name: branch.name,
+      fullName: branch.fullName,
+      // Use image as logo fallback
+      logo: branch.image
+    }));
+  } catch (error) {
+    console.error("Error fetching branches:", error);
+    // Fallback to static data on error
+    return branches.map(branch => ({
+      id: branch.id,
+      name: branch.name,
+      fullName: branch.fullName,
+      logo: branch.image
+    }));
+  }
+}
 
 const branches: Branch[] = [
   {

@@ -5,9 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DatabaseProvider } from "@/contexts/DatabaseContext";
-// Remove ChatbotFloatingButton import
-// import { ChatbotFloatingButton } from "@/components/chat/ChatbotFloatingButton";
-import { lazy, Suspense } from 'react';
+import { ConditionalChatbot } from "@/components/chat/ConditionalChatbot";
+import { lazy, Suspense, useEffect } from 'react';
 import Index from "./pages/Index";
 import { BookPage } from "./pages/BookPage";
 import BookingPage from "./pages/BookingPage";
@@ -26,6 +25,7 @@ import PublicRoomsPage from "./pages/RoomsPage";
 import CorporateHallsPage from "./pages/CorporateHallsPage";
 import { Button } from "@/components/ui/button";
 import { AdminPanel } from "./components/admin/AdminPanel";
+import FirebaseTest from "./pages/FirebaseTest";
 
 
 // Lazy load admin components
@@ -73,28 +73,54 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
   );
 };
 
-const App = () => (
-  <ErrorBoundary
-    FallbackComponent={ErrorFallback}
-    onReset={() => window.location.reload()}
-  >
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
-        >
-          <AuthProvider>
-            <DatabaseProvider>
-              {/* Remove ChatbotFloatingButton component */}
-              {/* <ChatbotFloatingButton /> */}
+const App = () => {
+  useEffect(() => {
+    // Set up global chatbot trigger function
+    (window as any).triggerZapierChatbot = () => {
+      const chatbotElement = document.querySelector('zapier-interfaces-chatbot-embed[is-popup="true"]') as any;
+      if (chatbotElement) {
+        // Try different methods to trigger the popup
+        if (chatbotElement.open) {
+          chatbotElement.open();
+        } else if (chatbotElement.show) {
+          chatbotElement.show();
+        } else {
+          // Simulate a click event
+          const clickEvent = new Event('click', { bubbles: true });
+          chatbotElement.dispatchEvent(clickEvent);
+        }
+      }
+    };
+  }, []);
+
+  return (
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onReset={() => window.location.reload()}
+    >
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          {/* Zapier Chatbot - Always present in DOM */}
+          <zapier-interfaces-chatbot-embed 
+            is-popup='true' 
+            chatbot-id='cmfxud1f70034pj83m904ssvf'
+            style={{ display: 'none' }}
+          />
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <AuthProvider>
+              <DatabaseProvider>
+                <ConditionalChatbot />
               <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/firebase-test" element={<FirebaseTest />} />
             <Route path="/book" element={<BookPage />} />
             <Route path="/booking/:id" element={<BookingPage />} />
             <Route path="/branch/:branchId" element={<BranchPage />} />
@@ -117,13 +143,13 @@ const App = () => (
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute requiredRole="user" redirectTo="/auth">
+                <ProtectedRoute requiredRole="user" redirectTo="/admin">
                   <UserDashboard />
                 </ProtectedRoute>
               }
             />
             <Route path="/new-booking" element={<Navigate to="/booking" replace />} />
-            {/* Admin Routes - Only accessible to admin users */}
+            {/* Admin Routes - Only accessible to admin users with branch selection */}
             <Route path="/admin" element={
               <ProtectedRoute requiredRole="admin" redirectTo="/dashboard">
                 <AdminDashboard />
@@ -185,6 +211,7 @@ const App = () => (
       </TooltipProvider>
     </QueryClientProvider>
   </ErrorBoundary>
-);
+  );
+};
 
 export default App;

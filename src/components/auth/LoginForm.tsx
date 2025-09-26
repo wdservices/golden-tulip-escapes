@@ -114,6 +114,13 @@ export default function LoginForm() {
         const redirectPath = await login(data.email, data.password);
         // Always use the redirect path from login for admin, otherwise use the 'from' location or dashboard
         const targetPath = redirectPath || from || '/dashboard';
+        console.log('LoginForm redirect after login:', {
+          email: data.email,
+          redirectPath,
+          from,
+          targetPath,
+          currentPath: window.location.pathname
+        });
         navigate(targetPath, { replace: true });
       } else {
         // Handle registration

@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useDatabase } from '@/contexts/DatabaseContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { initializeSampleData } from '@/utils/initializeData';
+
 
 export interface Branch {
   id?: string;
@@ -19,6 +22,7 @@ export const useBranches = () => {
   const [error, setError] = useState<string | null>(null);
   
   const { queryDocuments } = useDatabase();
+  const { userMeta, activeBranchId } = useAuth();
 
   const fetchBranches = async () => {
     try {
@@ -29,11 +33,32 @@ export const useBranches = () => {
       const allBranches = await queryDocuments<Branch>('branches', []);
       
       // Filter for active branches or branches without status field
-      const branchesData = allBranches.filter(branch => 
+      let branchesData = allBranches.filter(branch => 
         !branch.status || branch.status === 'active'
       );
       
-      setBranches(branchesData);
+      // For dropdown purposes, show all active branches
+      // Users can still be restricted by activeBranchId in other contexts
+      // but for filtering/selection, they should see all available branches
+      
+      // If no branches exist, initialize sample data
+      if (branchesData.length === 0) {
+        console.log('No branches found, initializing sample data...');
+        try {
+          await initializeSampleData();
+          // Refetch branches after initialization
+          const newBranches = await queryDocuments<Branch>('branches', []);
+          const activeBranches = newBranches.filter(branch => 
+            !branch.status || branch.status === 'active'
+          );
+          setBranches(activeBranches);
+          console.log('Sample data initialized successfully');
+        } catch (initError) {
+          console.error('Failed to initialize sample data:', initError);
+        }
+      } else {
+        setBranches(branchesData);
+      }
     } catch (err) {
       console.error('Error fetching branches:', err);
       setError('Failed to load branches');
@@ -60,7 +85,7 @@ export const useBranches = () => {
     return () => {
       window.removeEventListener('database-update', handleDatabaseUpdate as EventListener);
     };
-  }, []);
+  }, [userMeta, activeBranchId]);
 
   return {
     branches,

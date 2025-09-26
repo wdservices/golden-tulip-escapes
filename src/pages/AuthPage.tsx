@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import NetworkStatus from "@/components/ui/NetworkStatus";
 
 export const AuthPage = () => {
   const { setupNavigation } = useAuth();
@@ -27,6 +28,7 @@ export const AuthPage = () => {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
+        <NetworkStatus />
         <LoginForm />
       </motion.div>
     </div>

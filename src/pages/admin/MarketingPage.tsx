@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { getBranches } from "@/services/branchService";
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, Mail, MessageSquare, Bell, Calendar, Plus } from "lucide-react";
+import { Search, Mail, MessageSquare, Bell, Calendar, Plus, Building } from "lucide-react";
 
 type CampaignStatus = 'draft' | 'scheduled' | 'sent' | 'failed';
 
@@ -24,6 +27,27 @@ interface Campaign {
 export const MarketingPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("campaigns");
+  const { activeBranchId } = useAuth();
+  const [currentBranchName, setCurrentBranchName] = useState<string>("");
+  
+  // Fetch current branch name
+  useEffect(() => {
+    const fetchBranchName = async () => {
+      if (activeBranchId) {
+        try {
+          const branches = await getBranches();
+          const branch = branches.find(b => b.id === activeBranchId);
+          if (branch) {
+            setCurrentBranchName(branch.name);
+          }
+        } catch (error) {
+          console.error("Error fetching branch name:", error);
+        }
+      }
+    };
+    
+    fetchBranchName();
+  }, [activeBranchId]);
   
   // Mock data - replace with actual API call
   const [campaigns] = useState<Campaign[]>([
@@ -73,7 +97,23 @@ export const MarketingPage = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
-        <h2 className="text-2xl font-bold tracking-tight">Marketing Center</h2>
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">
+            {currentBranchName && (
+              <span className="flex items-center">
+                <span className="mr-2">{currentBranchName}</span>
+                <span className="mx-2">-</span>
+              </span>
+            )}
+            Marketing Center
+          </h2>
+          {currentBranchName && (
+            <div className="flex items-center text-sm text-muted-foreground mb-1">
+              <Building className="h-4 w-4 mr-1" />
+              <span>{currentBranchName}</span>
+            </div>
+          )}
+        </div>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
           Create Campaign

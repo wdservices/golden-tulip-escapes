@@ -16,10 +16,40 @@ import {
 } from 'firebase/auth';
 import { isAdmin } from '@/utils/auth';
 import { toast } from '@/hooks/use-toast';
+import { handleFirebaseError, retryWithBackoff, checkNetworkConnectivity } from '@/utils/firebaseErrorHandler';
+
+// User metadata interface for role and branch access
+interface UserMeta {
+  role?: 'branch-admin' | 'hq-admin' | 'user';
+  branchIds?: string[];
+}
+
+// Function to determine branch assignment based on email
+const getBranchFromEmail = (email: string): { branchId: string; role: 'branch-admin' | 'hq-admin' | 'user' } => {
+  const emailLower = email.toLowerCase();
+  
+  // Branch-specific admin emails
+  const BRANCH_ADMIN_EMAILS = {
+    'gardencity@gmail.com': { branchId: 'garden-city', role: 'branch-admin' as const },
+    'stadiumrd@gmail.com': { branchId: 'stadium-31', role: 'branch-admin' as const },
+    'evergreen@gmail.com': { branchId: 'evergreen', role: 'branch-admin' as const }
+  };
+  
+  // Check for exact email matches for branch admins
+  if (BRANCH_ADMIN_EMAILS[emailLower]) {
+    return BRANCH_ADMIN_EMAILS[emailLower];
+  }
+  
+  // Default to user role with no specific branch
+  return { branchId: '', role: 'user' };
+};
 
 interface AuthContextType {
   currentUser: UserProfile | null;
   firebaseUser: FirebaseAuthUser | null;
+  userMeta: UserMeta;
+  activeBranchId: string | null;
+  setActiveBranchId: (id: string | null) => void;
   login: (email: string, password: string) => Promise<string>; // Returns the redirect path
   register: (name: string, email: string, phone: string, password: string, isAdmin?: boolean) => Promise<UserProfile>;
   logout: () => Promise<boolean>; // Returns success status
@@ -38,15 +68,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   console.log('AuthProvider initialized');
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseAuthUser | null>(null);
+  const [userMeta, setUserMeta] = useState<UserMeta>({});
+  const [activeBranchId, setActiveBranchId] = useState<string | null>(() => {
+    // Try to load from localStorage on initialization
+    const savedBranchId = localStorage.getItem('activeBranchId');
+    return savedBranchId ? savedBranchId : null;
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [navigateFn, setNavigateFn] = useState<((to: string) => void) | null>(null);
 
-  // Map Firebase user to our UserProfile type
-  const mapFirebaseUser = async (user: FirebaseAuthUser | null): Promise<UserProfile | null> => {
+  // Map Firebase user to our UserProfile type and extract branch-related claims
+  const mapFirebaseUser = async (user: FirebaseAuthUser | null): Promise<[UserProfile | null, UserMeta, string | null]> => {
     if (!user) {
       console.log('No Firebase user found');
-      return null;
+      return [null, {}, null];
     }
     
     console.log('Firebase user found:', user.uid, user.email);
@@ -54,31 +90,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // In development, check for mock user first
     if (process.env.NODE_ENV === 'development' && window.mockUser) {
       console.log('Using mock user in development');
-      return window.mockUser as UserProfile;
+      return [window.mockUser as UserProfile, { role: 'hq-admin', branchIds: ['all'] }, 'all'];
     }
     
-    // Get user claims to check role
+    // Determine branch assignment based on email
+    const emailBranchInfo = getBranchFromEmail(user.email || '');
+    
+    // Get user claims to check role and branch access (fallback)
     const idTokenResult = await user.getIdTokenResult();
-    const hasAdminClaim = idTokenResult.claims.role === 'admin';
+    const claims = idTokenResult.claims;
     
-    // Check if user is admin by email (fallback if claims not set)
-    const ADMIN_EMAILS = ['hello.goldentulip@gmail.com'];
-    const isAdminByEmail = user.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
+    // Use email-based assignment as primary, claims as fallback
+    const adminRole = emailBranchInfo.role;
+    const assignedBranchId = emailBranchInfo.branchId;
     
-    const isAdminUser = hasAdminClaim || isAdminByEmail;
+    // Create branch IDs array based on role and assignment
+    let branchIds: string[] = [];
+    if (adminRole === 'hq-admin') {
+      branchIds = ['all'];
+    } else if (adminRole === 'branch-admin' && assignedBranchId) {
+      branchIds = [assignedBranchId];
+    }
     
-    console.log('Role detection for', user.email, ':', {
-      hasAdminClaim,
-      isAdminByEmail,
-      isAdminUser,
-      claims: idTokenResult.claims
+    // Create user metadata object
+    const userMeta: UserMeta = {
+      role: adminRole,
+      branchIds: branchIds
+    };
+    
+    console.log('Email-based role detection for', user.email, ':', {
+      adminRole,
+      assignedBranchId,
+      branchIds,
+      emailBranchInfo
     });
     
     // Get creation and last sign-in times
     const creationTime = user.metadata.creationTime;
     const lastSignInTime = user.metadata.lastSignInTime || new Date().toISOString();
     
-    return {
+    // Create user profile
+    const userProfile: UserProfile = {
       id: user.uid,
       name: user.displayName || 'Guest',
       email: user.email || '',
@@ -86,9 +138,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       photoURL: user.photoURL || undefined,
       joinDate: creationTime || new Date().toISOString(),
       lastLogin: lastSignInTime,
-      role: isAdminUser ? 'admin' : 'user',
+      role: adminRole !== 'user' ? 'admin' : 'user', // Keep backward compatibility
       preferences: {}
     };
+    
+    return [userProfile, userMeta, assignedBranchId || null];
   };
 
   // Handle auth state changes
@@ -108,6 +162,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           displayName: mockProfile.name,
           // Add other required Firebase User properties
         } as FirebaseAuthUser);
+        setUserMeta({ role: 'hq-admin', branchIds: ['all'] });
+        
+        // Set active branch for mock user
+        handleSetActiveBranchId('all');
+        
         setIsLoading(false);
         return true;
       }
@@ -145,9 +204,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!checkForMockUser()) {
       unsubscribe = onAuthStateChanged(auth, async (user) => {
         try {
-          const userProfile = await mapFirebaseUser(user);
+          const [userProfile, meta, assignedBranchId] = await mapFirebaseUser(user);
           setFirebaseUser(user);
           setCurrentUser(userProfile);
+          setUserMeta(meta);
+          
+          // Automatically set active branch based on email assignment
+          if (assignedBranchId) {
+            handleSetActiveBranchId(assignedBranchId);
+            console.log('Auto-assigned branch:', assignedBranchId, 'for user:', user?.email);
+          }
           
           // Handle user data operations in Firebase Auth
           if (user) {
@@ -156,29 +222,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             });
           }
           
-          // Auto-redirect based on user role
+          // Disable auto-redirect to prevent conflicts with login form navigation
+          // The login form will handle navigation after successful authentication
           if (userProfile && navigateFn && window.location.pathname === '/auth') {
-            const targetPath = userProfile.role === 'admin' ? '/admin' : '/dashboard';
-            navigateFn(targetPath);
+            console.log('AuthContext: User authenticated on auth page, letting login form handle navigation:', {
+              userEmail: userProfile.email,
+              userRole: userProfile.role,
+              currentPath: window.location.pathname,
+              isAuthenticated: !!userProfile
+            });
           }
         } catch (error: any) {
-          console.error('Error in auth state change:', error);
-          toast({
-            title: "Authentication Error",
-            description: `Authentication error: ${error.message || 'Unknown error occurred'}`,
-            variant: "destructive"
-          });
+          const errorInfo = handleFirebaseError(error, 'Authentication');
+          setError(errorInfo.userFriendlyMessage);
         } finally {
           setIsLoading(false);
         }
       }, (error) => {
-        console.error('Auth state change error:', error);
-        setError(error.message);
-        toast({
-          title: "Authentication Error",
-          description: `Authentication error: ${error.message}`,
-          variant: "destructive"
-        });
+        const errorInfo = handleFirebaseError(error, 'Authentication');
+        setError(errorInfo.userFriendlyMessage);
         setIsLoading(false);
       });
     }
@@ -199,21 +261,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
       setIsLoading(true);
       
-      // Authenticate user
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // Authenticate user with retry logic for network errors
+      const userCredential = await retryWithBackoff(
+        () => signInWithEmailAndPassword(auth, email, password),
+        2, // max retries
+        1000 // base delay
+      );
       const user = userCredential.user;
       
-      // Force token refresh to get latest claims
-      await user.getIdToken(true);
-      
-      // Get fresh token result with updated claims
-      const idTokenResult = await user.getIdTokenResult(true);
+      // Get token result to check role (no force refresh needed on login)
+      const idTokenResult = await user.getIdTokenResult();
       const isAdminUser = idTokenResult.claims.role === 'admin';
       
-      // Create session
-      await createSession(user.uid);
+      // Create session asynchronously (don't wait for it)
+      createSession(user.uid).catch(error => {
+        console.warn('Session creation failed:', error);
+      });
       
-      // Update local user state
+      // Update local user state immediately
       const userProfile: UserProfile = {
         id: user.uid,
         email: user.email || '',
@@ -224,42 +289,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         lastLogin: new Date().toISOString()
       };
       
-      // Ensure user document exists in appropriate Firestore collection (required for security rules)
-      try {
-        if (isAdminUser) {
-          // Ensure admin user document exists in adminUsers collection
-          const adminUserDocRef = doc(db, 'adminUsers', user.uid);
-          await setDoc(adminUserDocRef, {
-            email: userProfile.email,
-            name: userProfile.name,
-            phone: user.phoneNumber || '',
-            branchId: 'main', // Default branch
-            isActive: true,
-            createdAt: user.metadata.creationTime || new Date().toISOString(),
-            lastLogin: new Date().toISOString()
-          }, { merge: true }); // Use merge to avoid overwriting existing data
-          console.log('Admin user document ensured in adminUsers collection for:', userProfile.email);
-        } else {
-          // Ensure regular user document exists in users collection
-          const userDocRef = doc(db, 'users', user.uid);
-          await setDoc(userDocRef, {
-            ...userProfile,
-            joinDate: user.metadata.creationTime || new Date().toISOString(),
-            preferences: {}
-          }, { merge: true }); // Use merge to avoid overwriting existing data
-          console.log('User document ensured in users collection for:', userProfile.email);
-        }
-      } catch (firestoreError) {
-        console.error('Failed to ensure user document in Firestore:', firestoreError);
-        // Continue with login even if Firestore save fails
-      }
-      
       setCurrentUser(userProfile);
+      
+      // Update Firestore document asynchronously (don't block login)
+      const updateFirestoreDoc = async () => {
+        try {
+          if (isAdminUser) {
+            const adminUserDocRef = doc(db, 'adminUsers', user.uid);
+            await setDoc(adminUserDocRef, {
+              email: userProfile.email,
+              name: userProfile.name,
+              phone: user.phoneNumber || '',
+              branchId: 'main',
+              isActive: true,
+              lastLogin: new Date().toISOString()
+            }, { merge: true });
+          } else {
+            const userDocRef = doc(db, 'users', user.uid);
+            await setDoc(userDocRef, {
+              ...userProfile,
+              joinDate: user.metadata.creationTime || new Date().toISOString(),
+              preferences: {}
+            }, { merge: true });
+          }
+        } catch (firestoreError) {
+          console.warn('Background Firestore update failed:', firestoreError);
+        }
+      };
+      
+      // Run Firestore update in background
+      updateFirestoreDoc();
       
       return isAdminUser ? '/admin' : '/dashboard';
     } catch (error: any) {
-      console.error('Login error:', error);
-      setError(error.message || 'Failed to log in');
+      const errorInfo = handleFirebaseError(error, 'Login');
+      setError(errorInfo.userFriendlyMessage);
       throw error;
     } finally {
       setIsLoading(false);
@@ -489,9 +553,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Implement setActiveBranchId function
+  const handleSetActiveBranchId = (id: string | null) => {
+    if (id) {
+      localStorage.setItem('activeBranchId', id);
+    } else {
+      localStorage.removeItem('activeBranchId');
+    }
+    setActiveBranchId(id);
+  };
+
   const value: AuthContextType = {
     currentUser,
     firebaseUser,
+    userMeta,
+    activeBranchId,
+    setActiveBranchId: handleSetActiveBranchId,
     login,
     register,
     logout,

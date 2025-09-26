@@ -1,6 +1,6 @@
 import { Line, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, TrendingUp, Users, DollarSign, Home, Bed } from 'lucide-react';
+import { Calendar, TrendingUp, Users, DollarSign, Home, Bed, Building } from 'lucide-react';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import {
   Chart as ChartJS,
@@ -17,6 +17,9 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from 'react';
 import { useAllRooms, useRooms } from '@/hooks/useRooms';
 import { useBookings } from '@/hooks/useBookings';
+import { useAuth } from '@/contexts/AuthContext';
+import { getBranches } from '@/services/branchService';
+
 
 // Register ChartJS components
 ChartJS.register(
@@ -41,9 +44,31 @@ export const AnalyticsDashboard = () => {
     from: subDays(new Date(), 30),
     to: new Date(),
   };
+  
+  const [currentBranchName, setCurrentBranchName] = useState<string>("");
+  const { activeBranchId } = useAuth();
+  
+  // Fetch current branch name
+  useEffect(() => {
+    const fetchBranchName = async () => {
+      if (activeBranchId) {
+        try {
+          const branches = await getBranches();
+          const branch = branches.find(b => b.id === activeBranchId);
+          if (branch) {
+            setCurrentBranchName(branch.name);
+          }
+        } catch (error) {
+          console.error("Error fetching branch name:", error);
+        }
+      }
+    };
+    
+    fetchBranchName();
+  }, [activeBranchId]);
 
-  // Get room data from Firestore for GRA branch only (main branch)
-  const { rooms, isLoading: roomsLoading, error: roomsError } = useRooms('main');
+  // Get room data from Firestore for current active branch
+  const { rooms, isLoading: roomsLoading, error: roomsError } = useAllRooms();
   
   // Get real booking data from Firestore
   const { bookings, isLoading: bookingsLoading, error: bookingsError } = useBookings();
@@ -255,22 +280,18 @@ export const AnalyticsDashboard = () => {
     );
   }
 
-  // No data state
-  if ((!rooms || rooms.length === 0) && (!bookings || bookings.length === 0)) {
-    return (
-      <div className="flex items-center justify-center h-[400px]">
-        <div className="text-center space-y-4 max-w-md">
-          <div className="bg-blue-100 text-blue-800 p-4 rounded-lg">
-            <h3 className="text-lg font-bold mb-2">No Data Available</h3>
-            <p>There are no rooms or bookings data available to display. Add some rooms and bookings to see analytics.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Note: Removed no data state - cards should always display with zero values when no data is available
 
   return (
     <div className="space-y-4">
+      {/* Branch Header */}
+      {currentBranchName && (
+        <div className="flex items-center text-muted-foreground mb-2">
+          <Building className="h-4 w-4 mr-2" />
+          <span>{currentBranchName} Analytics</span>
+        </div>
+      )}
+      
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>

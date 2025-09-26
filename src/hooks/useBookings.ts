@@ -1,12 +1,18 @@
 import { useState, useEffect } from 'react';
-import { collection, query, getDocs, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, query, getDocs, orderBy, Timestamp, where, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Booking } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { handleFirebaseError, retryWithBackoff } from '@/utils/firebaseErrorHandler';
 
-export const useBookings = () => {
+export const useBookings = (branchId?: string) => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { userMeta, activeBranchId } = useAuth();
+
+  // Use provided branchId or fall back to activeBranchId from context
+  const effectiveBranchId = branchId || activeBranchId;
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -14,13 +20,53 @@ export const useBookings = () => {
         setIsLoading(true);
         setError(null);
         
-        // Create a query to get all bookings, ordered by check-in date
-        const q = query(
-          collection(db, "bookings"),
-          orderBy("checkInDate", "desc")
-        );
+        // Create a query to get bookings, filtered by branch if needed
+        let q;
+        
+        // Query bookings for the specific branch
+        if (effectiveBranchId) {
+          q = query(
+            collection(db, "bookings"),
+            where("branchId", "==", effectiveBranchId),
+            limit(100) // Limit to 100 most recent bookings for performance
+          );
+        } else {
+          // Query recent bookings if no branch ID
+          q = query(
+            collection(db, "bookings"),
+            limit(50) // Limit to 50 most recent for dashboard overview
+          );
+        }
 
-        const querySnapshot = await getDocs(q);
+        let querySnapshot;
+        try {
+          querySnapshot = await retryWithBackoff(() => getDocs(q), 2, 1000);
+        } catch (indexError: any) {
+          // If the query fails due to missing index, try a simpler query
+          if (indexError?.code === 'failed-precondition' && indexError?.message?.includes('index')) {
+            console.warn('Composite index not available, falling back to simple query');
+            
+            // Fallback to a simpler query without orderBy to avoid index requirement
+            if (effectiveBranchId) {
+              q = query(
+                collection(db, "bookings"),
+                where("branchId", "==", effectiveBranchId),
+                limit(150) // Limit fallback query for performance
+              );
+            } else {
+              // Fallback query if no branch ID
+              q = query(
+                collection(db, "bookings"),
+                limit(100) // Limit fallback query for performance
+              );
+            }
+            
+            querySnapshot = await retryWithBackoff(() => getDocs(q), 2, 1000);
+          } else {
+            throw indexError;
+          }
+        }
+        
         const bookingsData = querySnapshot.docs.map(doc => {
           const data = doc.data();
           
@@ -35,21 +81,32 @@ export const useBookings = () => {
           } as Booking;
         });
 
+        // Sort bookings by checkInDate in descending order (client-side)
+        bookingsData.sort((a, b) => {
+          const dateA = new Date(a.checkInDate);
+          const dateB = new Date(b.checkInDate);
+          return dateB.getTime() - dateA.getTime();
+        });
+
         setBookings(bookingsData);
       } catch (err: any) {
-        console.error("Error fetching bookings:", err);
-        setError(err.message || "Failed to load bookings");
+        const errorInfo = handleFirebaseError(err, 'Loading dashboard data');
+        setError(errorInfo.userFriendlyMessage);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchBookings();
-  }, []);
+  }, [effectiveBranchId, userMeta]);
 
   return {
     bookings,
     isLoading,
-    error
+    error,
+    refetch: () => {
+      setIsLoading(true);
+      // This will trigger the useEffect to run again
+    }
   };
 };

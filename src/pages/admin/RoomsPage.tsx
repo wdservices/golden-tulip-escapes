@@ -4,13 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Filter, Edit, Trash2, AlertCircle } from "lucide-react";
+import { Search, Plus, Filter, Edit, Trash2, AlertCircle, Building } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { useBranches } from "@/hooks/useBranches";
 import { toast } from "sonner";
 import { RoomForm } from "@/components/admin/RoomForm";
+import { useAuth } from "@/contexts/AuthContext";
+import { getBranches } from "@/services/branchService";
+
 
 type RoomStatus = 'available' | 'occupied' | 'maintenance';
 
@@ -35,9 +38,30 @@ export const RoomsPage = () => {
   const [isEditRoomDialogOpen, setIsEditRoomDialogOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [selectedBranchId, setSelectedBranchId] = useState<string>("");
+  const [currentBranchName, setCurrentBranchName] = useState<string>("");
   
   const { queryDocuments, deleteDocument } = useDatabase();
-  const { branches, branchesLoading, branchesError } = useBranches();
+  const { branches, isLoading: branchesLoading, error: branchesError } = useBranches();
+  const { activeBranchId } = useAuth();
+  
+  // Fetch current branch name
+  useEffect(() => {
+    const fetchBranchName = async () => {
+      if (activeBranchId) {
+        try {
+          const branches = await getBranches();
+          const branch = branches.find(b => b.id === activeBranchId);
+          if (branch) {
+            setCurrentBranchName(branch.name);
+          }
+        } catch (error) {
+          console.error("Error fetching branch name:", error);
+        }
+      }
+    };
+    
+    fetchBranchName();
+  }, [activeBranchId]);
 
   // Auto-select first branch when branches are loaded
   useEffect(() => {
@@ -114,7 +138,15 @@ export const RoomsPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold tracking-tight">Rooms Management</h2>
+          <h2 className="text-2xl font-bold tracking-tight">
+            {currentBranchName ? `${currentBranchName} - Rooms Management` : "Rooms Management"}
+          </h2>
+          {currentBranchName && (
+            <div className="flex items-center text-muted-foreground mb-2">
+              <Building className="h-4 w-4 mr-2" />
+              <span>{currentBranchName}</span>
+            </div>
+          )}
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <label htmlFor="branch-select" className="text-sm font-medium">

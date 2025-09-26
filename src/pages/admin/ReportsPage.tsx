@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Download, BarChart, LineChart, PieChart, Filter } from "lucide-react";
+import { Calendar, Download, BarChart, LineChart, PieChart, Filter, Building, Users } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { getBranches } from "@/services/branchService";
+
 import { DateRange } from "react-day-picker";
 import { addDays, format } from "date-fns";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -23,6 +26,29 @@ export const ReportsPage = () => {
     from: addDays(new Date(), -30),
     to: new Date(),
   });
+  const [currentBranchName, setCurrentBranchName] = useState<string>("");
+  
+  // Get auth context for branch filtering
+  const { activeBranchId } = useAuth();
+  
+  // Fetch current branch name
+  useEffect(() => {
+    const fetchBranchName = async () => {
+      if (activeBranchId) {
+        try {
+          const branches = await getBranches();
+          const branch = branches.find(b => b.id === activeBranchId);
+          if (branch) {
+            setCurrentBranchName(branch.name);
+          }
+        } catch (error) {
+          console.error("Error fetching branch name:", error);
+        }
+      }
+    };
+    
+    fetchBranchName();
+  }, [activeBranchId]);
 
   // Mock data for charts - replace with actual API calls
   const revenueData: ReportData[] = [
@@ -68,9 +94,28 @@ export const ReportsPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col items-center space-y-4">
-        <h2 className="text-2xl font-bold tracking-tight">Reports & Analytics</h2>
-        <div className="flex items-center justify-center w-full">
+      <div className="flex flex-col space-y-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">
+            {currentBranchName && (
+              <span className="flex items-center">
+                <span className="mr-2">{currentBranchName}</span>
+                <span className="mx-2">-</span>
+              </span>
+            )}
+            Reports & Analytics
+          </h2>
+          {currentBranchName && (
+            <div className="flex items-center text-sm text-muted-foreground mb-1">
+              <Building className="h-4 w-4 mr-1" />
+              <span>{currentBranchName}</span>
+            </div>
+          )}
+          <p className="text-muted-foreground">
+            View detailed reports and analytics for your hotel operations
+          </p>
+        </div>
+        <div className="flex items-center w-full">
           <div className="relative">
             <Popover>
             <PopoverTrigger asChild>

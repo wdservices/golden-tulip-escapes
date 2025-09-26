@@ -36,7 +36,8 @@ import {
   Edit,
   BedDouble,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Building
 } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { exportBookingsToCSV, downloadFile } from "@/lib/export-utils";
@@ -48,6 +49,9 @@ import { DateRangePresets } from "@/components/ui/date-range-presets";
 import { BookingDetailsDialog } from "@/components/admin/BookingDetailsDialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useCollection } from "@/hooks/useCollection";
+import { getBranches } from "@/services/branchService";
+import { useBranches } from "@/hooks/useBranches";
+
 import { BookingsTable } from "@/components/bookings/BookingsTable";
 
 export const BookingsPage = () => {
@@ -64,9 +68,32 @@ export const BookingsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [showCreateBooking, setShowCreateBooking] = useState(false);
-  const { currentUser } = useAuth();
+  const [currentBranchName, setCurrentBranchName] = useState<string>("");
+  const { currentUser, activeBranchId } = useAuth();
   const { toast } = useToast();
   const bookingsCollection = useCollection<Booking>("bookings");
+  
+  // Get branches data using the useBranches hook for proper branch dropdown
+  const { branches: branchesData, isLoading: branchesLoading, error: branchesError } = useBranches();
+  
+  // Fetch current branch name
+  useEffect(() => {
+    const fetchBranchName = async () => {
+      if (activeBranchId) {
+        try {
+          const branches = await getBranches();
+          const branch = branches.find(b => b.id === activeBranchId);
+          if (branch) {
+            setCurrentBranchName(branch.name);
+          }
+        } catch (error) {
+          console.error("Error fetching branch name:", error);
+        }
+      }
+    };
+    
+    fetchBranchName();
+  }, [activeBranchId]);
 
   // Fetch bookings from Firestore
   useEffect(() => {
@@ -254,8 +281,8 @@ export const BookingsPage = () => {
     isToday(booking.checkOutDate.toDate())
   );
 
-  // Get unique branches for filter
-  const branches = Array.from(new Set(bookings.map(b => b.branchName).filter(Boolean)));
+  // Get unique branches for filter - use proper branch data from useBranches hook
+  const branches = branchesData || [];
 
   const getStatusIcon = (status: BookingStatus) => {
     switch (status) {
@@ -395,7 +422,15 @@ export const BookingsPage = () => {
       {/* Header Section */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gradient-gold">Bookings Management</h1>
+          <h1 className="text-3xl font-bold text-gradient-gold">
+            {currentBranchName ? `${currentBranchName} - Bookings Management` : "Bookings Management"}
+          </h1>
+          {currentBranchName && (
+            <div className="flex items-center text-muted-foreground">
+              <Building className="h-4 w-4 mr-2" />
+              <span>{currentBranchName}</span>
+            </div>
+          )}
           <p className="text-muted-foreground">
             Manage all hotel bookings, reservations, and guest services
           </p>
@@ -538,8 +573,8 @@ export const BookingsPage = () => {
                     </SelectContent>
                   </Select>
 
-                  {branches.length > 1 && (
-                    <Select value={branchFilter} onValueChange={setBranchFilter}>
+                  {branches.length > 0 && (
+                    <Select value={branchFilter} onValueChange={setBranchFilter} disabled={branchesLoading}>
                       <SelectTrigger className="w-[180px] booking-select">
                         <MapPin className="mr-2 h-4 w-4" />
                         <SelectValue placeholder="Branch" />
@@ -547,7 +582,7 @@ export const BookingsPage = () => {
                       <SelectContent className="booking-dropdown">
                         <SelectItem value="all">All Branches</SelectItem>
                         {branches.map((branch) => (
-                          <SelectItem key={branch} value={branch}>{branch}</SelectItem>
+                          <SelectItem key={branch.id} value={branch.id || ''}>{branch.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

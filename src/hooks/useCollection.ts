@@ -14,7 +14,7 @@ export const useCollection = <T extends { id: string }>(collectionPath: string) 
   } = useDatabase();
   
   const [data, setData] = useState<T[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
   // Fetch all documents in the collection
@@ -60,6 +60,11 @@ export const useCollection = <T extends { id: string }>(collectionPath: string) 
       setLoading(false);
     }
   }, [collectionPath, queryDocuments]);
+
+  // Automatically fetch data when the hook is initialized
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   // Query documents with conditions
   const query = useCallback(async (conditions: QueryCondition[] = []): Promise<void> => {
@@ -174,6 +179,7 @@ export const useCollection = <T extends { id: string }>(collectionPath: string) 
 
   return {
     data,
+    documents: data, // Alias for backward compatibility
     loading,
     error,
     fetchAll,
@@ -182,5 +188,6 @@ export const useCollection = <T extends { id: string }>(collectionPath: string) 
     add,
     update,
     remove,
+    addDocument: add, // Alias for backward compatibility
   };
 };
