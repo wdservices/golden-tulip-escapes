@@ -56,7 +56,7 @@ const DashboardHome = () => {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm" className="h-8 gap-1">
+          <Button variant="outline" size="sm" className="h-8 gap-1 bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30">
             <Calendar className="h-3.5 w-3.5" />
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
               {format(dateRange.from, 'MMM dd, yyyy')} - {format(dateRange.to, 'MMM dd, yyyy')}
@@ -66,9 +66,9 @@ const DashboardHome = () => {
       </div>
 
       <Tabs defaultValue="analytics" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="reports" disabled>
+        <TabsList className="bg-white/10 border-white/20">
+          <TabsTrigger value="analytics" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Analytics</TabsTrigger>
+          <TabsTrigger value="reports" disabled className="text-white/50">
             Reports
           </TabsTrigger>
         </TabsList>

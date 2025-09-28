@@ -58,7 +58,7 @@ export const BranchHero = ({ branch }: BranchHeroProps) => {
               size="lg" 
               className="bg-primary hover:bg-primary/90 text-white text-lg px-10 py-7 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-300"
             >
-              <Link to="/booking">
+              <Link to="/book">
                 <Calendar className="mr-3 h-5 w-5" />
                 Book Now
               </Link>
@@ -67,7 +67,7 @@ export const BranchHero = ({ branch }: BranchHeroProps) => {
               asChild 
               variant="outline" 
               size="lg"
-              className="border-white text-white hover:bg-white/10 text-lg px-10 py-7 rounded-xl font-medium transition-all duration-300"
+              className="border-white text-white bg-white/10 hover:bg-yellow-400/20 hover:text-yellow-300 hover:border-yellow-400/30 text-lg px-10 py-7 rounded-xl font-medium transition-all duration-300"
             >
               <Link to={`/branches/${branch.id}#rooms`}>
                 View Rooms & Suites

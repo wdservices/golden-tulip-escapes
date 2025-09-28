@@ -128,35 +128,35 @@ export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: B
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Booking ID</TableHead>
-              <TableHead>Branch</TableHead>
-              <TableHead>Room Type</TableHead>
-              <TableHead>Check-in</TableHead>
-              <TableHead>Check-out</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Payment</TableHead>
-              <TableHead>Total</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-yellow-400">Booking ID</TableHead>
+              <TableHead className="text-yellow-400">Branch</TableHead>
+              <TableHead className="text-yellow-400">Room Type</TableHead>
+              <TableHead className="text-yellow-400">Check-in</TableHead>
+              <TableHead className="text-yellow-400">Check-out</TableHead>
+              <TableHead className="text-yellow-400">Status</TableHead>
+              <TableHead className="text-yellow-400">Payment</TableHead>
+              <TableHead className="text-yellow-400">Total</TableHead>
+              <TableHead className="text-right text-yellow-400">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredBookings.length > 0 ? (
               filteredBookings.map((booking) => (
                 <TableRow key={booking.id}>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium text-white">
                     <div className="text-sm">
                       {booking.id.substring(0, 8)}...
                     </div>
                   </TableCell>
-                  <TableCell>{booking.branchName}</TableCell>
-                  <TableCell className="capitalize">{booking.roomType}</TableCell>
-                  <TableCell>
+                  <TableCell className="text-white">{booking.branchName}</TableCell>
+                  <TableCell className="capitalize text-white">{booking.roomType}</TableCell>
+                  <TableCell className="text-white">
                     {booking.checkInDate instanceof Timestamp 
                       ? format(booking.checkInDate.toDate(), "MMM dd, yyyy")
                       : format(new Date(booking.checkInDate), "MMM dd, yyyy")
                     }
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-white">
                     {booking.checkOutDate instanceof Timestamp 
                       ? format(booking.checkOutDate.toDate(), "MMM dd, yyyy")
                       : format(new Date(booking.checkOutDate), "MMM dd, yyyy")
@@ -188,7 +188,7 @@ export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: B
                       {booking.paymentStatus}
                     </Badge>
                   </TableCell>
-                  <TableCell>${booking.totalAmount.toFixed(2)}</TableCell>
+                  <TableCell className="text-white">${booking.totalAmount.toFixed(2)}</TableCell>
                   <TableCell className="text-right">
                     <Popover>
                       <PopoverTrigger asChild>

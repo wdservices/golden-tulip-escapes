@@ -92,7 +92,7 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
     } else if (onBookNowClick) {
       onBookNowClick();
     } else {
-      navigate('/booking');
+      navigate('/book');
     }
   };
   
@@ -180,14 +180,14 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
         <div className="container mx-auto px-4 text-center text-white">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-serif font-bold mb-6 leading-tight">
-              <span className="text-gradient-gold">{currentBranch.title}</span>
+              <span className="golden-yellow drop-shadow-lg">{currentBranch.title}</span>
             </h1>
 
-            <p className="text-xl md:text-2xl mb-4 font-light text-primary-glow">
+            <p className="text-xl md:text-2xl mb-4 font-light text-white/90">
               {currentBranch.subtitle}
             </p>
 
-            <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto leading-relaxed opacity-90">
+            <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto leading-relaxed text-white/80">
               {currentBranch.description}
             </p>
 
@@ -195,17 +195,24 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
                 onClick={handleBookNowClick}
-                className="btn-luxury text-lg px-8 py-4 min-w-[200px]"
+                className="brand-button text-lg px-8 py-4 min-w-[200px] font-semibold"
                 size="lg"
               >
                 Book Your Stay
+              </Button>
+              <Button
+                variant="outline"
+                className="brand-button-outline text-lg px-8 py-4 min-w-[200px] font-semibold bg-white/10 backdrop-blur-sm"
+                size="lg"
+              >
+                Virtual Tour
               </Button>
             </div>
 
             {/* Scroll Indicator */}
             <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 animate-bounce">
-              <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
-                <div className="w-1 h-3 bg-white/75 rounded-full mt-2 animate-pulse"></div>
+              <div className="w-6 h-10 border-2 border-golden-yellow/70 rounded-full flex justify-center">
+                <div className="w-1 h-3 bg-golden-yellow rounded-full mt-2 animate-pulse"></div>
               </div>
             </div>
           </div>

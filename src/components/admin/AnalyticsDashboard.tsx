@@ -286,85 +286,85 @@ export const AnalyticsDashboard = () => {
     <div className="space-y-4">
       {/* Branch Header */}
       {currentBranchName && (
-        <div className="flex items-center text-muted-foreground mb-2">
-          <Building className="h-4 w-4 mr-2" />
+        <div className="flex items-center text-white/80 mb-2">
+          <Building className="h-4 w-4 mr-2 text-yellow-400" />
           <span>{currentBranchName} Analytics</span>
         </div>
       )}
       
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-yellow-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white">
               {new Intl.NumberFormat('en-NG', {
                 style: 'currency',
                 currency: 'NGN',
                 maximumFractionDigits: 0
               }).format(totalRevenue)}
             </div>
-            <p className="text-xs text-muted-foreground">Last 30 days</p>
+            <p className="text-xs text-white/70">Last 30 days</p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-            <Home className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white">Total Bookings</CardTitle>
+            <Home className="h-4 w-4 text-yellow-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{bookings.length}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-white">{bookings.length}</div>
+            <p className="text-xs text-white/70">
               {bookings.length > 0 ? `${bookings.length} total bookings` : 'No bookings yet'}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Guests</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white">Avg. Guests</CardTitle>
+            <Users className="h-4 w-4 text-yellow-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{averageGuests}</div>
-            <p className="text-xs text-muted-foreground">per booking</p>
+            <div className="text-2xl font-bold text-white">{averageGuests}</div>
+            <p className="text-xs text-white/70">per booking</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Room Availability</CardTitle>
-            <Bed className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white">Room Availability</CardTitle>
+            <Bed className="h-4 w-4 text-yellow-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{availableRooms}/{totalRooms}</div>
-            <p className="text-xs text-muted-foreground">rooms available</p>
+            <div className="text-2xl font-bold text-white">{availableRooms}/{totalRooms}</div>
+            <p className="text-xs text-white/70">rooms available</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Room Status Cards */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white">
           <CardHeader>
-            <CardTitle>Available Rooms by Type</CardTitle>
-            <CardDescription>Number of rooms available for each type</CardDescription>
+            <CardTitle className="text-white">Available Rooms by Type</CardTitle>
+            <CardDescription className="text-white/70">Number of rooms available for each type</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {Object.entries(roomAvailability).map(([type, data]) => (
                 <div key={type} className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium leading-none">{type}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm font-medium leading-none text-white">{type}</p>
+                    <p className="text-sm text-white/70">
                       {data.available} of {data.total} available
                     </p>
                   </div>
-                  <div className="font-bold">
+                  <div className="font-bold text-yellow-400">
                     {Math.round((data.available / data.total) * 100)}%
                   </div>
                 </div>
@@ -373,22 +373,22 @@ export const AnalyticsDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white">
           <CardHeader>
-            <CardTitle>Occupied Rooms by Type</CardTitle>
-            <CardDescription>Number of rooms occupied for each type</CardDescription>
+            <CardTitle className="text-white">Occupied Rooms by Type</CardTitle>
+            <CardDescription className="text-white/70">Number of rooms occupied for each type</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {Object.entries(roomAvailability).map(([type, data]) => (
                 <div key={type} className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium leading-none">{type}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm font-medium leading-none text-white">{type}</p>
+                    <p className="text-sm text-white/70">
                       {data.occupied} of {data.total} occupied
                     </p>
                   </div>
-                  <div className="font-bold">
+                  <div className="font-bold text-yellow-400">
                     {Math.round((data.occupied / data.total) * 100)}%
                   </div>
                 </div>
@@ -400,10 +400,10 @@ export const AnalyticsDashboard = () => {
 
       {/* Charts */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+        <Card className="col-span-4 bg-white/10 backdrop-blur-md border-white/20 text-white">
           <CardHeader>
-            <CardTitle>Revenue Overview</CardTitle>
-            <CardDescription>Daily revenue for the selected period</CardDescription>
+            <CardTitle className="text-white">Revenue Overview</CardTitle>
+            <CardDescription className="text-white/70">Daily revenue for the selected period</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
             <div className="h-[300px]">
@@ -411,17 +411,17 @@ export const AnalyticsDashboard = () => {
                 <Line data={revenueData} options={chartOptions} />
               ) : (
                 <div className="flex items-center justify-center h-full">
-                  <p className="text-muted-foreground">No revenue data available for the selected period</p>
+                  <p className="text-white/70">No revenue data available for the selected period</p>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
         
-        <Card className="col-span-3">
+        <Card className="col-span-3 bg-white/10 backdrop-blur-md border-white/20 text-white">
           <CardHeader>
-            <CardTitle>Room Type Distribution</CardTitle>
-            <CardDescription>Breakdown by room category</CardDescription>
+            <CardTitle className="text-white">Room Type Distribution</CardTitle>
+            <CardDescription className="text-white/70">Breakdown by room category</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
@@ -439,7 +439,8 @@ export const AnalyticsDashboard = () => {
                         },
                         padding: 15,
                         usePointStyle: true,
-                        pointStyle: 'circle'
+                        pointStyle: 'circle',
+                        color: 'rgba(255, 255, 255, 0.9)'
                       }
                     },
                     tooltip: {
@@ -465,7 +466,7 @@ export const AnalyticsDashboard = () => {
                 }} />
               ) : (
                 <div className="flex items-center justify-center h-full">
-                  <p className="text-muted-foreground">No room type data available</p>
+                  <p className="text-white/70">No room type data available</p>
                 </div>
               )}
             </div>

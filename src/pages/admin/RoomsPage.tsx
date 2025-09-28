@@ -138,18 +138,18 @@ export const RoomsPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold tracking-tight">
+          <h2 className="text-2xl font-bold tracking-tight text-yellow-400">
             {currentBranchName ? `${currentBranchName} - Rooms Management` : "Rooms Management"}
           </h2>
           {currentBranchName && (
-            <div className="flex items-center text-muted-foreground mb-2">
+            <div className="flex items-center text-white/70 mb-2">
               <Building className="h-4 w-4 mr-2" />
               <span>{currentBranchName}</span>
             </div>
           )}
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <label htmlFor="branch-select" className="text-sm font-medium">
+              <label htmlFor="branch-select" className="text-sm font-medium text-white">
                 Branch:
               </label>
               <Select
@@ -157,12 +157,12 @@ export const RoomsPage = () => {
                 onValueChange={setSelectedBranchId}
                 disabled={branchesLoading || !branches || branches.length === 0}
               >
-                <SelectTrigger id="branch-select" className="w-[200px]">
+                <SelectTrigger id="branch-select" className="w-[200px] bg-white/5 border-white/20 text-white">
                   <SelectValue placeholder="Select a branch" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white/10 backdrop-blur-md border-white/20">
                   {branches?.map((branch) => (
-                    <SelectItem key={branch.id} value={branch.id}>
+                    <SelectItem key={branch.id} value={branch.id} className="text-white hover:bg-yellow-400/20">
                       {branch.name}
                     </SelectItem>
                   ))}
@@ -170,35 +170,35 @@ export const RoomsPage = () => {
               </Select>
             </div>
             {branchesError && (
-              <div className="flex items-center text-red-500 text-sm">
+              <div className="flex items-center text-red-400 text-sm">
                 <AlertCircle className="h-4 w-4 mr-1" />
                 Error loading branches
               </div>
             )}
           </div>
         </div>
-        <Button onClick={handleAddRoom} disabled={!selectedBranchId}>
+        <Button onClick={handleAddRoom} disabled={!selectedBranchId} className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
           <Plus className="mr-2 h-4 w-4" />
           Add Room
         </Button>
       </div>
       
-      <Card>
+      <Card className="bg-white/10 backdrop-blur-md border-white/20">
         <CardHeader className="pb-3">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
-            <CardTitle className="text-lg">All Rooms</CardTitle>
+            <CardTitle className="text-lg text-yellow-400">All Rooms</CardTitle>
             <div className="flex items-center space-x-2">
               <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-yellow-400" />
                 <Input
                   type="search"
                   placeholder="Search rooms..."
-                  className="w-full pl-8 sm:w-[250px]"
+                  className="w-full pl-8 sm:w-[250px] bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-yellow-400"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="bg-white/5 border-white/20 text-white hover:bg-yellow-400 hover:text-blue-900">
                 <Filter className="mr-2 h-4 w-4" />
                 Filter
               </Button>
@@ -208,59 +208,59 @@ export const RoomsPage = () => {
         <CardContent>
           {branchesLoading ? (
             <div className="flex justify-center items-center py-8">
-              <p>Loading branches...</p>
+              <p className="text-white/70">Loading branches...</p>
             </div>
           ) : !branches || branches.length === 0 ? (
             <div className="text-center py-8">
               <div className="flex items-center justify-center mb-2">
-                <AlertCircle className="h-5 w-5 text-yellow-500 mr-2" />
-                <p className="text-muted-foreground">No branches found.</p>
+                <AlertCircle className="h-5 w-5 text-yellow-400 mr-2" />
+                <p className="text-white/70">No branches found.</p>
               </div>
-              <p className="text-sm text-muted-foreground">You need to create a branch first before adding rooms.</p>
+              <p className="text-sm text-white/50">You need to create a branch first before adding rooms.</p>
             </div>
           ) : !selectedBranchId ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">Please select a branch to view rooms.</p>
+              <p className="text-white/70">Please select a branch to view rooms.</p>
             </div>
           ) : isLoading ? (
             <div className="flex justify-center items-center py-8">
-              <p>Loading rooms...</p>
+              <p className="text-white/70">Loading rooms...</p>
             </div>
           ) : rooms.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No rooms found for this branch. Add a room to get started.</p>
+              <p className="text-white/70">No rooms found for this branch. Add a room to get started.</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Room Number</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Price/Night</TableHead>
-                  <TableHead>Availability</TableHead>
-                  <TableHead>Room Count</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                <TableRow className="border-white/20">
+                  <TableHead className="text-yellow-400">Room Number</TableHead>
+                  <TableHead className="text-yellow-400">Type</TableHead>
+                  <TableHead className="text-yellow-400">Price/Night</TableHead>
+                  <TableHead className="text-yellow-400">Availability</TableHead>
+                  <TableHead className="text-yellow-400">Room Count</TableHead>
+                  <TableHead className="text-right text-yellow-400">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredRooms.map((room) => {
                   return (
-                    <TableRow key={room.id}>
-                      <TableCell className="font-medium">{room.roomNumber}</TableCell>
-                      <TableCell>{room.type}</TableCell>
-                      <TableCell>₦{room.pricePerNight}</TableCell>
+                    <TableRow key={room.id} className="border-white/20 hover:bg-white/5">
+                      <TableCell className="font-medium text-white">{room.roomNumber}</TableCell>
+                      <TableCell className="text-white/70">{room.type}</TableCell>
+                      <TableCell className="text-white/70">₦{room.pricePerNight}</TableCell>
                       <TableCell>
-                        <Badge className={room.availability ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"}>
+                        <Badge className={room.availability ? "bg-green-500/20 text-green-400 border-green-400/30" : "bg-red-500/20 text-red-400 border-red-400/30"}>
                           {room.availability ? "Available" : "Not Available"}
                         </Badge>
                       </TableCell>
-                      <TableCell>{room.roomCount || 1}</TableCell>
+                      <TableCell className="text-white/70">{room.roomCount || 1}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="mr-2" onClick={() => handleEditRoom(room)}>
+                        <Button variant="ghost" size="sm" className="mr-2 text-white hover:bg-yellow-400 hover:text-blue-900" onClick={() => handleEditRoom(room)}>
                           <Edit className="h-4 w-4" />
                           <span className="sr-only">Edit</span>
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteRoom(room.id!)}>
+                        <Button variant="ghost" size="sm" className="text-white hover:bg-red-400 hover:text-white" onClick={() => handleDeleteRoom(room.id!)}>
                           <Trash2 className="h-4 w-4" />
                           <span className="sr-only">Delete</span>
                         </Button>
@@ -276,10 +276,10 @@ export const RoomsPage = () => {
 
       {/* Add Room Dialog */}
       <Dialog open={isAddRoomDialogOpen} onOpenChange={setIsAddRoomDialogOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl bg-white/10 backdrop-blur-md border-white/20">
           <DialogHeader>
-            <DialogTitle>Add New Room</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-yellow-400">Add New Room</DialogTitle>
+            <DialogDescription className="text-white/70">
               Add a new room to the selected branch.
             </DialogDescription>
           </DialogHeader>
@@ -292,10 +292,10 @@ export const RoomsPage = () => {
 
       {/* Edit Room Dialog */}
       <Dialog open={isEditRoomDialogOpen} onOpenChange={setIsEditRoomDialogOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl bg-white/10 backdrop-blur-md border-white/20">
           <DialogHeader>
-            <DialogTitle>Edit Room</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-yellow-400">Edit Room</DialogTitle>
+            <DialogDescription className="text-white/70">
               Update room details.
             </DialogDescription>
           </DialogHeader>

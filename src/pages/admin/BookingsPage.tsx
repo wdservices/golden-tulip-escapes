@@ -295,7 +295,7 @@ export const BookingsPage = () => {
       case 'completed':
         return <CheckCircle className="h-4 w-4 text-blue-500" />;
       default:
-        return <AlertCircle className="h-4 w-4 text-gray-500" />;
+        return <AlertCircle className="h-4 w-4 text-white/70" />;
     }
   };
 
@@ -310,7 +310,7 @@ export const BookingsPage = () => {
       case 'completed':
         return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
       default:
-        return 'bg-gray-500/10 text-gray-600 border-gray-500/20';
+        return 'bg-gray-500/10 text-white border-gray-500/20';
     }
   };
 
@@ -391,7 +391,7 @@ export const BookingsPage = () => {
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center space-y-4">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading bookings...</p>
+          <p className="text-white/70">Loading bookings...</p>
         </div>
       </div>
     );
@@ -404,7 +404,7 @@ export const BookingsPage = () => {
           <XCircle className="h-5 w-5" />
           <div>
             <h3 className="font-semibold">Error Loading Bookings</h3>
-            <p className="text-sm text-muted-foreground">{error}</p>
+            <p className="text-sm text-white/70">{error}</p>
           </div>
         </div>
       </div>
@@ -412,41 +412,25 @@ export const BookingsPage = () => {
   }
 
   return (
-    <div className="space-y-8 p-6">
-      {/* Booking Details Dialog */}
-      <BookingDetailsDialog
-        booking={selectedBooking}
-        open={showBookingDetails}
-        onOpenChange={setShowBookingDetails}
-      />
-      {/* Header Section */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gradient-gold">
-            {currentBranchName ? `${currentBranchName} - Bookings Management` : "Bookings Management"}
-          </h1>
-          {currentBranchName && (
-            <div className="flex items-center text-muted-foreground">
-              <Building className="h-4 w-4 mr-2" />
-              <span>{currentBranchName}</span>
-            </div>
-          )}
-          <p className="text-muted-foreground">
-            Manage all hotel bookings, reservations, and guest services
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-yellow-400">Bookings Management</h1>
+          <p className="text-white/70 mt-1">
+            Manage and track all hotel bookings across branches
           </p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex gap-3">
           <Button 
             variant="outline" 
-            size="sm" 
-            className="admin-card"
+            className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300 hover:text-blue-900 font-semibold"
             onClick={() => {
                const csvData = exportBookingsToCSV(filteredBookings);
-               const timestamp = new Date().toISOString().split('T')[0];
-               downloadFile(csvData, `bookings-export-${timestamp}.csv`, 'text/csv');
+               downloadFile(csvData, 'bookings-export.csv', 'text/csv');
                toast({
                  title: "Export successful",
-                 description: `${filteredBookings.length} bookings exported to CSV`,
+                 description: "Bookings data has been exported to CSV.",
                });
              }}
           >
@@ -455,14 +439,14 @@ export const BookingsPage = () => {
           </Button>
           <Dialog open={showCreateBooking} onOpenChange={setShowCreateBooking}>
             <DialogTrigger asChild>
-              <Button className="btn-luxury-nav">
+              <Button className="bg-yellow-400 text-blue-900 hover:bg-yellow-300 hover:text-blue-900 font-semibold">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Booking
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-md border-white/20">
               <DialogHeader>
-                <DialogTitle>Create New Booking</DialogTitle>
+                <DialogTitle className="text-yellow-400">Create New Booking</DialogTitle>
               </DialogHeader>
               <div className="p-0">
                 <iframe 
@@ -478,149 +462,153 @@ export const BookingsPage = () => {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="admin-stat-card">
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Bookings</p>
-                <p className="text-2xl font-bold">{bookings.length}</p>
+                <p className="text-sm font-medium text-white/70">Total Bookings</p>
+                <p className="text-2xl font-bold text-yellow-400">{bookings.length}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <CalendarDays className="h-6 w-6 text-primary" />
+              <div className="h-12 w-12 rounded-full bg-yellow-400/20 flex items-center justify-center">
+                <CalendarDays className="h-6 w-6 text-yellow-400" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="admin-stat-card">
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Today's Check-ins</p>
-                <p className="text-2xl font-bold text-green-600">{todayCheckIns.length}</p>
+                <p className="text-sm font-medium text-white/70">Today's Check-ins</p>
+                <p className="text-2xl font-bold text-yellow-400">{todayCheckIns.length}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                <Users className="h-6 w-6 text-green-600" />
+              <div className="h-12 w-12 rounded-full bg-green-400/20 flex items-center justify-center">
+                <Users className="h-6 w-6 text-green-400" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="admin-stat-card">
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Today's Check-outs</p>
-                <p className="text-2xl font-bold text-blue-600">{todayCheckOuts.length}</p>
+                <p className="text-sm font-medium text-white/70">Today's Check-outs</p>
+                <p className="text-2xl font-bold text-yellow-400">{todayCheckOuts.length}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <Clock className="h-6 w-6 text-blue-600" />
+              <div className="h-12 w-12 rounded-full bg-blue-400/20 flex items-center justify-center">
+                <Clock className="h-6 w-6 text-blue-400" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="admin-stat-card">
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Recent Bookings</p>
-                <p className="text-2xl font-bold text-luxury">{recentBookings.length}</p>
+                <p className="text-sm font-medium text-white/70">Recent Bookings</p>
+                <p className="text-2xl font-bold text-yellow-400">{recentBookings.length}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-luxury/10 flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-luxury" />
+              <div className="h-12 w-12 rounded-full bg-yellow-400/20 flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-yellow-400" />
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Content */}
-      <Tabs defaultValue="all-bookings" className="space-y-6">
-        <TabsList className="admin-card">
-          <TabsTrigger value="all-bookings">All Bookings</TabsTrigger>
-          <TabsTrigger value="recent">Recent Bookings</TabsTrigger>
-          <TabsTrigger value="today">Today's Activity</TabsTrigger>
-        </TabsList>
+      {/* Filters and Search */}
+      <Card className="bg-white/10 backdrop-blur-md border-white/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-yellow-400">Filter & Search</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-yellow-400" />
+                <Input
+                  type="search"
+                  placeholder="Search by guest name, email, booking ID, or branch..."
+                  className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-yellow-400"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-3">
+                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as BookingStatus | "all")}>
+                  <SelectTrigger className="w-[180px] bg-white/5 border-white/20 text-white">
+                    <Filter className="mr-2 h-4 w-4 text-yellow-400" />
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white/10 backdrop-blur-md border-white/20">
+                    <SelectItem value="all" className="text-white hover:bg-yellow-400/20">All Statuses</SelectItem>
+                    <SelectItem value="pending" className="text-white hover:bg-yellow-400/20">Pending</SelectItem>
+                    <SelectItem value="confirmed" className="text-white hover:bg-yellow-400/20">Confirmed</SelectItem>
+                    <SelectItem value="completed" className="text-white hover:bg-yellow-400/20">Completed</SelectItem>
+                    <SelectItem value="cancelled" className="text-white hover:bg-yellow-400/20">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
 
-        <TabsContent value="all-bookings" className="space-y-6">
-          {/* Filters */}
-          <Card className="admin-card">
-            <CardContent className="p-6">
-              <div className="flex flex-col lg:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Search by guest name, email, booking ID, or branch..."
-                    className="pl-10 booking-select"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                {branches.length > 0 && (
+                  <Select value={branchFilter} onValueChange={setBranchFilter} disabled={branchesLoading}>
+                    <SelectTrigger className="w-[180px] bg-white/5 border-white/20 text-white">
+                      <MapPin className="mr-2 h-4 w-4 text-yellow-400" />
+                      <SelectValue placeholder="Branch" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white/10 backdrop-blur-md border-white/20">
+                      <SelectItem value="all" className="text-white hover:bg-yellow-400/20">All Branches</SelectItem>
+                      {branches.map((branch) => (
+                        <SelectItem key={branch.id} value={branch.id || ''} className="text-white hover:bg-yellow-400/20">{branch.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                
+                <Select value={roomTypeFilter} onValueChange={setRoomTypeFilter}>
+                  <SelectTrigger className="w-[180px] bg-white/5 border-white/20 text-white">
+                    <BedDouble className="mr-2 h-4 w-4 text-yellow-400" />
+                    <SelectValue placeholder="Room Type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white/10 backdrop-blur-md border-white/20">
+                    <SelectItem value="all" className="text-white hover:bg-yellow-400/20">All Room Types</SelectItem>
+                    <SelectItem value="standard-room" className="text-white hover:bg-yellow-400/20">Standard Room</SelectItem>
+                    <SelectItem value="superior-room" className="text-white hover:bg-yellow-400/20">Superior Room</SelectItem>
+                    <SelectItem value="deluxe-room" className="text-white hover:bg-yellow-400/20">Deluxe Room</SelectItem>
+
+                    <SelectItem value="junior-suite" className="text-white hover:bg-yellow-400/20">Junior Suite</SelectItem>
+                    <SelectItem value="executive-suite" className="text-white hover:bg-yellow-400/20">Executive Suite</SelectItem>
+                    <SelectItem value="presidential-suite" className="text-white hover:bg-yellow-400/20">Presidential Suite</SelectItem>
+                    <SelectItem value="penthouse" className="text-white hover:bg-yellow-400/20">Penthouse</SelectItem>
+                    <SelectItem value="villa" className="text-white hover:bg-yellow-400/20">Villa</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <div className="flex items-center gap-2">
+                  <DateRangePicker
+                    dateRange={dateRange || { from: undefined, to: undefined }}
+                    onDateRangeChange={setDateRange}
+                    className="w-[250px]"
                   />
-                </div>
-                <div className="flex gap-3">
-                  <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as BookingStatus | "all")}>
-                    <SelectTrigger className="w-[180px] booking-select">
-                      <Filter className="mr-2 h-4 w-4" />
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent className="booking-dropdown">
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="confirmed">Confirmed</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  {branches.length > 0 && (
-                    <Select value={branchFilter} onValueChange={setBranchFilter} disabled={branchesLoading}>
-                      <SelectTrigger className="w-[180px] booking-select">
-                        <MapPin className="mr-2 h-4 w-4" />
-                        <SelectValue placeholder="Branch" />
-                      </SelectTrigger>
-                      <SelectContent className="booking-dropdown">
-                        <SelectItem value="all">All Branches</SelectItem>
-                        {branches.map((branch) => (
-                          <SelectItem key={branch.id} value={branch.id || ''}>{branch.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                  
-                  <Select value={roomTypeFilter} onValueChange={setRoomTypeFilter}>
-                    <SelectTrigger className="w-[180px] booking-select">
-                      <BedDouble className="mr-2 h-4 w-4" />
-                      <SelectValue placeholder="Room Type" />
-                    </SelectTrigger>
-                    <SelectContent className="booking-dropdown">
-                      <SelectItem value="all">All Room Types</SelectItem>
-                      <SelectItem value="standard-room">Standard Room</SelectItem>
-                      <SelectItem value="superior-room">Superior Room</SelectItem>
-                      <SelectItem value="deluxe-room">Deluxe Room</SelectItem>
-                      <SelectItem value="junior-suite">Junior Suite</SelectItem>
-                      <SelectItem value="executive-suite">Executive Suite</SelectItem>
-                      <SelectItem value="presidential-suite">Presidential Suite</SelectItem>
-                      <SelectItem value="penthouse">Penthouse</SelectItem>
-                      <SelectItem value="villa">Villa</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <div className="flex items-center gap-2">
-                    <DateRangePicker
-                      dateRange={dateRange || { from: undefined, to: undefined }}
-                      onDateRangeChange={setDateRange}
-                      className="w-[250px]"
-                    />
-                    <DateRangePresets onSelect={setDateRange} />
-                  </div>
+                  <DateRangePresets onSelect={setDateRange} />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-          {/* Bookings Table */}
-          <Card className="admin-card">
+      <Tabs defaultValue="all" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3 bg-white/10 backdrop-blur-md border-white/20">
+          <TabsTrigger value="all" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">All Bookings</TabsTrigger>
+          <TabsTrigger value="recent" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Recent</TabsTrigger>
+          <TabsTrigger value="today" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Today</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all" className="space-y-6">
+          <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardContent className="p-0">
               <BookingsTable 
                 bookings={filteredBookings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)} 
@@ -632,7 +620,7 @@ export const BookingsPage = () => {
                 onStatusChange={handleStatusChange} 
               />
               {filteredBookings.length > 0 && (
-                <div className="flex items-center justify-between p-4 border-t border-border/30">
+                <div className="flex items-center justify-between p-4 border-t border-white/20">
                   <div className="flex items-center gap-2">
                     <Select
                       value={itemsPerPage.toString()}
@@ -641,17 +629,17 @@ export const BookingsPage = () => {
                         setCurrentPage(1); // Reset to first page when changing items per page
                       }}
                     >
-                      <SelectTrigger className="w-[120px]">
+                      <SelectTrigger className="w-[120px] bg-white/5 border-white/20 text-white">
                         <SelectValue placeholder="Per page" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="5">5 per page</SelectItem>
-                        <SelectItem value="10">10 per page</SelectItem>
-                        <SelectItem value="20">20 per page</SelectItem>
-                        <SelectItem value="50">50 per page</SelectItem>
+                      <SelectContent className="bg-white/10 backdrop-blur-md border-white/20">
+                        <SelectItem value="5" className="text-white hover:bg-yellow-400/20">5 per page</SelectItem>
+                        <SelectItem value="10" className="text-white hover:bg-yellow-400/20">10 per page</SelectItem>
+                        <SelectItem value="20" className="text-white hover:bg-yellow-400/20">20 per page</SelectItem>
+                        <SelectItem value="50" className="text-white hover:bg-yellow-400/20">50 per page</SelectItem>
                       </SelectContent>
                     </Select>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-white/70">
                       Showing {Math.min((currentPage - 1) * itemsPerPage + 1, filteredBookings.length)} to {Math.min(currentPage * itemsPerPage, filteredBookings.length)} of {filteredBookings.length} bookings
                     </p>
                   </div>
@@ -660,6 +648,7 @@ export const BookingsPage = () => {
                     <Button
                       variant="outline"
                       size="icon"
+                      className="bg-white/5 border-white/20 text-white hover:bg-yellow-400 hover:text-blue-900"
                       onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                       disabled={currentPage === 1}
                     >
@@ -672,21 +661,26 @@ export const BookingsPage = () => {
                           <Button
                             key={pageNumber}
                             variant={currentPage === pageNumber ? "default" : "outline"}
-                            size="sm"
+                            size="icon"
                             onClick={() => setCurrentPage(pageNumber)}
-                            className="w-8 h-8 p-0"
+                            className={`w-8 h-8 ${
+                              currentPage === pageNumber 
+                                ? "bg-yellow-400 text-blue-900 hover:bg-yellow-300" 
+                                : "bg-white/5 border-white/20 text-white hover:bg-yellow-400 hover:text-blue-900"
+                            }`}
                           >
                             {pageNumber}
                           </Button>
                         );
                       })}
                       {Math.ceil(filteredBookings.length / itemsPerPage) > 5 && (
-                        <span className="text-muted-foreground mx-1">...</span>
+                        <span className="text-white/70 mx-1">...</span>
                       )}
                     </div>
                     <Button
                       variant="outline"
                       size="icon"
+                      className="bg-white/5 border-white/20 text-white hover:bg-yellow-400 hover:text-blue-900"
                       onClick={() => setCurrentPage((prev) => Math.min(prev + 1, Math.ceil(filteredBookings.length / itemsPerPage)))}
                       disabled={currentPage === Math.ceil(filteredBookings.length / itemsPerPage)}
                     >
@@ -700,43 +694,43 @@ export const BookingsPage = () => {
         </TabsContent>
 
         <TabsContent value="recent" className="space-y-6">
-          <Card className="admin-card">
+          <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Clock className="h-5 w-5 text-luxury" />
+              <CardTitle className="flex items-center space-x-2 text-yellow-400">
+                <Clock className="h-5 w-5" />
                 <span>Recent Bookings (Last 7 Days)</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               {recentBookings.length === 0 ? (
                 <div className="text-center py-8">
-                  <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                  <p className="text-muted-foreground">No recent bookings found</p>
+                  <Clock className="h-12 w-12 mx-auto mb-4 text-white/50 opacity-50" />
+                  <p className="text-white/70">No recent bookings found</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {recentBookings.slice(0, 10).map((booking) => (
                     <div 
                       key={booking.id} 
-                      className="flex items-center justify-between p-4 rounded-lg border border-border/30 hover:bg-muted/20 transition-colors cursor-pointer"
+                      className="flex items-center justify-between p-4 rounded-lg border border-white/20 hover:bg-white/5 transition-colors cursor-pointer bg-white/5"
                       onClick={() => {
                         setSelectedBooking(booking);
                         setShowBookingDetails(true);
                       }}
                     >
                       <div className="flex items-center space-x-4">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <User className="h-5 w-5 text-primary" />
+                        <div className="h-10 w-10 rounded-full bg-yellow-400/20 flex items-center justify-center">
+                          <User className="h-5 w-5 text-yellow-400" />
                         </div>
                         <div>
-                          <p className="font-medium">{booking.guestName || 'Guest'}</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="font-medium text-white">{booking.guestName || 'Guest'}</p>
+                          <p className="text-sm text-white/70">
                             {booking.roomType} • {booking.branchName}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-primary">{formatCurrency(booking.totalAmount)}</p>
+                        <p className="font-semibold text-yellow-400">{formatCurrency(booking.totalAmount)}</p>
                         <Badge className={`${getStatusVariant(booking.status)} border text-xs`}>
                           {booking.status}
                         </Badge>
@@ -751,33 +745,33 @@ export const BookingsPage = () => {
 
         <TabsContent value="today" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="admin-card">
+            <Card className="bg-white/10 backdrop-blur-md border-white/20">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Users className="h-5 w-5 text-green-600" />
+                <CardTitle className="flex items-center space-x-2 text-yellow-400">
+                  <Users className="h-5 w-5 text-green-400" />
                   <span>Today's Check-ins</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {todayCheckIns.length === 0 ? (
                   <div className="text-center py-8">
-                    <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                    <p className="text-muted-foreground">No check-ins scheduled for today</p>
+                    <Users className="h-12 w-12 mx-auto mb-4 text-white/50 opacity-50" />
+                    <p className="text-white/70">No check-ins scheduled for today</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {todayCheckIns.map((booking) => (
                       <div 
                         key={booking.id} 
-                        className="flex items-center justify-between p-3 rounded-lg border border-border/30 cursor-pointer hover:bg-muted/20 transition-colors"
+                        className="flex items-center justify-between p-3 rounded-lg border border-white/20 cursor-pointer hover:bg-white/5 transition-colors bg-white/5"
                         onClick={() => {
                           setSelectedBooking(booking);
                           setShowBookingDetails(true);
                         }}
                       >
                         <div>
-                          <p className="font-medium">{booking.guestName || 'Guest'}</p>
-                          <p className="text-sm text-muted-foreground">{booking.roomType}</p>
+                          <p className="font-medium text-white">{booking.guestName || 'Guest'}</p>
+                          <p className="text-sm text-white/70">{booking.roomType}</p>
                         </div>
                         <Badge className={`${getStatusVariant(booking.status)} border`}>
                           {booking.status}
@@ -789,33 +783,33 @@ export const BookingsPage = () => {
               </CardContent>
             </Card>
 
-            <Card className="admin-card">
+            <Card className="bg-white/10 backdrop-blur-md border-white/20">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Clock className="h-5 w-5 text-blue-600" />
+                <CardTitle className="flex items-center space-x-2 text-yellow-400">
+                  <Clock className="h-5 w-5 text-blue-400" />
                   <span>Today's Check-outs</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {todayCheckOuts.length === 0 ? (
                   <div className="text-center py-8">
-                    <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                    <p className="text-muted-foreground">No check-outs scheduled for today</p>
+                    <Clock className="h-12 w-12 mx-auto mb-4 text-white/50 opacity-50" />
+                    <p className="text-white/70">No check-outs scheduled for today</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {todayCheckOuts.map((booking) => (
                       <div 
                         key={booking.id} 
-                        className="flex items-center justify-between p-3 rounded-lg border border-border/30 cursor-pointer hover:bg-muted/20 transition-colors"
+                        className="flex items-center justify-between p-3 rounded-lg border border-white/20 cursor-pointer hover:bg-white/5 transition-colors bg-white/5"
                         onClick={() => {
                           setSelectedBooking(booking);
                           setShowBookingDetails(true);
                         }}
                       >
                         <div>
-                          <p className="font-medium">{booking.guestName || 'Guest'}</p>
-                          <p className="text-sm text-muted-foreground">{booking.roomType}</p>
+                          <p className="font-medium text-white">{booking.guestName || 'Guest'}</p>
+                          <p className="text-sm text-white/70">{booking.roomType}</p>
                         </div>
                         <Badge className={`${getStatusVariant(booking.status)} border`}>
                           {booking.status}

@@ -24,22 +24,22 @@ export const BookPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <Button 
             variant="ghost" 
             onClick={handleBack}
-            className="inline-flex items-center text-amber-800 hover:bg-amber-50 mb-4"
+            className="inline-flex items-center bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             {location.key !== 'default' ? 'Go Back' : 'Back to Home'}
           </Button>
-          <h1 className="text-3xl font-bold text-amber-800 mb-2">Book Your Stay</h1>
-          <p className="text-gray-600">Fill in the details below to reserve your room</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Book Your Stay</h1>
+          <p className="text-blue-100">Fill in the details below to reserve your room</p>
         </div>
         
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="bg-white/10 backdrop-blur-md border-white/20 border rounded-lg shadow-xl overflow-hidden">
           <NewBookingForm onBookingSuccess={handleBookingSuccess} />
         </div>
       </div>

@@ -47,23 +47,23 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
     e.preventDefault();
     if (!currentUser) {
       toast.info('Please log in to book a stay');
-      navigate('/auth', { state: { from: '/booking' } });
+      navigate('/auth', { state: { from: '/book' } });
     } else {
-      navigate('/booking');
+      navigate('/book');
     }
   };
 
   return (
-    <header className="sticky top-0 z-50 glass-nav">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-border shadow-sm">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center py-6">
+        <div className="flex justify-between items-center py-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center group">
-            <img 
-              src="/golden tulip logo.svg" 
-              alt="Golden Tulip Logo" 
-              className="h-8 transition-all duration-300 group-hover:scale-105"
-            />
+          <Link to="/" className="flex items-center space-x-3">
+            <img src="/golden tulip logo.svg" alt="Golden Tulip Logo" className="h-8 w-8" />
+            <div className="flex flex-col">
+              <span className="text-xl font-bold text-foreground">Golden Tulip</span>
+              <span className="text-sm text-golden-yellow font-medium -mt-1">Port Harcourt</span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
@@ -73,14 +73,14 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
                 {item.isRoute ? (
                   <Link
                     to={item.href}
-                    className="nav-link-animated px-4 py-2 rounded-lg flex items-center gap-1"
+                    className="px-4 py-2 rounded-lg text-foreground hover-golden-text transition-all duration-300 font-medium"
                   >
                     {item.name}
                   </Link>
                 ) : (
                   <button
                     onClick={() => scrollToSection(item.href)}
-                    className="nav-link-animated px-4 py-2 rounded-lg"
+                    className="px-4 py-2 rounded-lg text-foreground hover-golden-text transition-all duration-300 font-medium"
                   >
                     {item.name}
                   </button>
@@ -89,10 +89,10 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
             ))}
             
             <div className="flex items-center gap-2 ml-4">
-              <Link to="/booking">
+              <Link to="/book">
                 <Button 
                   onClick={handleBookNow}
-                  className="btn-luxury-nav group"
+                  className="brand-button group"
                 >
                   <Calendar className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:rotate-12" />
                   Book Now
@@ -108,7 +108,7 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
             <Button
               variant="ghost"
               size="sm"
-              className="hover:bg-primary/10 transition-colors duration-300"
+              className="hover-golden text-foreground"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
             <div className="relative">
@@ -123,28 +123,14 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
         <div className={`md:hidden overflow-hidden transition-all duration-500 ease-in-out ${
           isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
         }`}>
-          <div className="py-4 border-t border-border/20">
+          <div className="py-4 border-t border-border/20 bg-white/95">
             <nav className="space-y-1">
-              <div className="md:hidden">
-              {/* Mobile menu button */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="hover:bg-primary/10 transition-colors duration-300"
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                >
-                  <div className="relative">
-                    <Menu className={`h-6 w-6 transition-all duration-300 ${isMenuOpen ? 'rotate-180 opacity-0' : 'rotate-0 opacity-100'}`} />
-                    <X className={`h-6 w-6 absolute inset-0 transition-all duration-300 ${isMenuOpen ? 'rotate-0 opacity-100' : 'rotate-180 opacity-0'}`} />
-                  </div>
-                </Button>
-              </div>
               {navigation.map((item, index) => (
                 item.isRoute ? (
                   <Link
                     key={item.name}
                     to={item.href}
-                    className={`mobile-nav-link block transition-all duration-300 delay-${index * 50}`}
+                    className="block px-4 py-3 text-foreground hover-golden-text transition-all duration-300 font-medium rounded-lg mx-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.name}
@@ -156,26 +142,28 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
                       scrollToSection(item.href);
                       setIsMenuOpen(false);
                     }}
-                    className={`mobile-nav-link w-full text-left transition-all duration-300 delay-${index * 50}`}
+                    className="block w-full text-left px-4 py-3 text-foreground hover-golden-text transition-all duration-300 font-medium rounded-lg mx-2"
                   >
                     {item.name}
                   </button>
                 )
               ))}
               
-              <Link 
-                to="/booking" 
-                className="block pt-4"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Button 
-                  onClick={handleBookNow}
-                  className="btn-luxury w-full"
+              <div className="px-2 pt-4">
+                <Link 
+                  to="/book" 
+                  className="block"
+                  onClick={() => setIsMenuOpen(false)}
                 >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Book Now
-                </Button>
-              </Link>
+                  <Button 
+                    onClick={handleBookNow}
+                    className="brand-button w-full"
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Book Now
+                  </Button>
+                </Link>
+              </div>
             </nav>
           </div>
         </div>

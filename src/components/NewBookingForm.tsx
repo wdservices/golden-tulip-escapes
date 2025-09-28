@@ -168,19 +168,18 @@ export const NewBookingForm = ({
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <div className="relative bg-gradient-hero py-16 px-4">
-        <div className="absolute inset-0 bg-black/20"></div>
+      <div className="relative py-16 px-4">
         <div className="relative max-w-4xl mx-auto text-center">
           <div className="flex items-center justify-center mb-6">
-            <Sparkles className="w-8 h-8 text-primary mr-3" />
-            <h1 className="text-4xl md:text-5xl font-bold text-gradient-gold">
+            <Sparkles className="w-8 h-8 text-yellow-400 mr-3" />
+            <h1 className="text-4xl md:text-5xl font-bold text-white">
               Reserve Your Room
             </h1>
-            <Sparkles className="w-8 h-8 text-primary ml-3" />
+            <Sparkles className="w-8 h-8 text-yellow-400 ml-3" />
           </div>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-blue-100 max-w-2xl mx-auto">
             Create your perfect stay at Golden Tulip Hotels. Experience luxury redefined.
           </p>
         </div>
@@ -190,22 +189,22 @@ export const NewBookingForm = ({
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Booking Form */}
           <div className="lg:col-span-2">
-            <div className="card-luxury">
+            <div className="bg-white/10 backdrop-blur-md border-white/20 border rounded-lg shadow-xl p-8">
               <div className="flex items-center mb-8">
-                <Calendar className="w-6 h-6 text-primary mr-3" />
-                <h2 className="text-2xl font-bold text-foreground">New Reservation</h2>
+                <Calendar className="w-6 h-6 text-yellow-400 mr-3" />
+                <h2 className="text-2xl font-bold text-white">New Reservation</h2>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-8">
                 {/* Guest Information */}
                 <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-foreground flex items-center">
-                    <User className="w-5 h-5 text-primary mr-2" />
+                  <h3 className="text-lg font-semibold text-white flex items-center">
+                    <User className="w-5 h-5 text-yellow-400 mr-2" />
                     Guest Information
                   </h3>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName" className="text-sm font-medium text-foreground">
+                      <Label htmlFor="firstName" className="text-sm font-medium text-blue-200">
                         First Name *
                       </Label>
                       <Input
@@ -214,12 +213,12 @@ export const NewBookingForm = ({
                         value={formData.firstName}
                         onChange={handleInputChange}
                         required
-                        className="h-12 bg-input border-border text-foreground placeholder:text-muted-foreground focus:ring-primary focus:border-primary"
+                        className="h-12 bg-white/90 border-white/30 text-white placeholder:text-white/50 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
                         placeholder="Enter your first name"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName" className="text-sm font-medium text-foreground">
+                      <Label htmlFor="lastName" className="text-sm font-medium text-blue-200">
                         Last Name *
                       </Label>
                       <Input
@@ -228,14 +227,14 @@ export const NewBookingForm = ({
                         value={formData.lastName}
                         onChange={handleInputChange}
                         required
-                        className="h-12 bg-input border-border text-foreground placeholder:text-muted-foreground focus:ring-primary focus:border-primary"
+                        className="h-12 bg-white/90 border-white/30 text-white placeholder:text-white/50 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
                         placeholder="Enter your last name"
                       />
                     </div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="email" className="text-sm font-medium text-foreground">
+                      <Label htmlFor="email" className="text-sm font-medium text-blue-200">
                         Email Address *
                       </Label>
                       <Input
@@ -245,12 +244,12 @@ export const NewBookingForm = ({
                         value={formData.email}
                         onChange={handleInputChange}
                         required
-                        className="h-12 bg-input border-border text-foreground placeholder:text-muted-foreground focus:ring-primary focus:border-primary"
+                        className="h-12 bg-white/90 border-white/30 text-white placeholder:text-white/50 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
                         placeholder="your.email@example.com"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-sm font-medium text-foreground">
+                      <Label htmlFor="phone" className="text-sm font-medium text-blue-200">
                         Phone Number *
                       </Label>
                       <Input
@@ -260,7 +259,7 @@ export const NewBookingForm = ({
                         value={formData.phone}
                         onChange={handleInputChange}
                         required
-                        className="h-12 bg-input border-border text-foreground placeholder:text-muted-foreground focus:ring-primary focus:border-primary"
+                        className="h-12 bg-white/90 border-white/30 text-white placeholder:text-white/50 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
                         placeholder="+1 (555) 123-4567"
                       />
                     </div>
@@ -269,35 +268,35 @@ export const NewBookingForm = ({
 
                 {/* Hotel Selection */}
                 <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-foreground flex items-center">
-                    <MapPin className="w-5 h-5 text-primary mr-2" />
+                  <h3 className="text-lg font-semibold text-white flex items-center">
+                    <MapPin className="w-5 h-5 text-yellow-400 mr-2" />
                     Hotel Selection
                   </h3>
                   <div className="space-y-2">
-                    <Label htmlFor="branch" className="text-sm font-medium text-foreground">
+                    <Label htmlFor="branch" className="text-sm font-medium text-blue-200">
                       Select Branch *
                     </Label>
                     <Select value={formData.location} onValueChange={(value) => setFormData(prev => ({ ...prev, location: value }))}>
-                      <SelectTrigger className="h-12 bg-input border-border text-foreground">
+                      <SelectTrigger className="h-12 bg-white/90 border-white/30 text-white focus:ring-yellow-400 focus:border-yellow-400">
                         <SelectValue placeholder="Choose your preferred location" />
                       </SelectTrigger>
-                      <SelectContent className="bg-popover border-border">
+                      <SelectContent className="bg-white/95 backdrop-blur-md border-white/30 shadow-xl">
                         {branchesLoading ? (
-                          <SelectItem value="loading" disabled>
+                          <SelectItem value="loading" disabled className="text-white/70">
                             <div className="flex items-center">
                               <Loader2 className="w-4 h-4 animate-spin mr-2" />
                               Loading branches...
                             </div>
                           </SelectItem>
                         ) : branches.length === 0 ? (
-                          <SelectItem value="no-locations" disabled>
+                          <SelectItem value="no-locations" disabled className="text-white/70">
                             No locations available
                           </SelectItem>
                         ) : (
                           branches.map((branch) => (
-                            <SelectItem key={branch.id} value={branch.id} className="text-foreground hover:bg-accent">
+                            <SelectItem key={branch.id} value={branch.id} className="text-white hover:bg-yellow-400/20 focus:bg-yellow-400/30">
                               <div className="flex items-center">
-                                <MapPin className="w-4 h-4 text-primary mr-2" />
+                                <MapPin className="w-4 h-4 text-blue-600 mr-2" />
                                 {branch.name} - {branch.location}
                               </div>
                             </SelectItem>
@@ -310,12 +309,12 @@ export const NewBookingForm = ({
 
                 {/* Room Selection */}
                 <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-foreground flex items-center">
-                    <Bed className="w-5 h-5 text-primary mr-2" />
+                  <h3 className="text-lg font-semibold text-white flex items-center">
+                    <Bed className="w-5 h-5 text-yellow-400 mr-2" />
                     Room Preferences
                   </h3>
                   <div className="space-y-2">
-                    <Label htmlFor="roomType" className="text-sm font-medium text-foreground">
+                    <Label htmlFor="roomType" className="text-sm font-medium text-blue-200">
                       Room Type *
                     </Label>
                     <Select 
@@ -323,7 +322,7 @@ export const NewBookingForm = ({
                       onValueChange={(value) => setFormData(prev => ({ ...prev, roomType: value }))}
                       disabled={!formData.location || roomsLoading}
                     >
-                      <SelectTrigger className="h-12 bg-input border-border text-foreground">
+                      <SelectTrigger className="h-12 bg-white/90 border-white/30 text-white focus:ring-yellow-400 focus:border-yellow-400">
                         <SelectValue placeholder={
                           !formData.location 
                             ? "Please select a branch first" 
@@ -332,33 +331,33 @@ export const NewBookingForm = ({
                               : "Select your room type"
                         } />
                       </SelectTrigger>
-                      <SelectContent className="bg-popover border-border">
+                      <SelectContent className="bg-white/95 backdrop-blur-md border-white/30 shadow-xl">
                         {roomsLoading ? (
-                          <SelectItem value="loading" disabled>
+                          <SelectItem value="loading" disabled className="text-white/70">
                             <div className="flex items-center">
                               <Loader2 className="w-4 h-4 animate-spin mr-2" />
                               Loading room types...
                             </div>
                           </SelectItem>
                         ) : roomsError ? (
-                          <SelectItem value="error" disabled>
-                            <div className="flex items-center text-destructive">
+                          <SelectItem value="error" disabled className="text-red-600">
+                            <div className="flex items-center">
                               <span>Error loading room types</span>
                             </div>
                           </SelectItem>
                         ) : roomTypes.length === 0 ? (
-                          <SelectItem value="no-rooms" disabled>
+                          <SelectItem value="no-rooms" disabled className="text-white/70">
                             No room types available for this branch
                           </SelectItem>
                         ) : (
                           roomTypes.map((room) => (
-                            <SelectItem key={room.id} value={room.id} className="text-foreground hover:bg-accent">
+                            <SelectItem key={room.id} value={room.id} className="text-white hover:bg-yellow-400/20 focus:bg-yellow-400/30">
                               <div className="flex items-center justify-between w-full">
                                 <div className="flex items-center">
-                                  <Bed className="w-4 h-4 text-primary mr-2" />
+                                  <Bed className="w-4 h-4 text-blue-600 mr-2" />
                                   <span>{room.name}</span>
                                 </div>
-                                <span className="text-primary font-semibold ml-4">
+                                <span className="text-yellow-600 font-semibold ml-4">
                                   ₦{room.price.toLocaleString()}/night
                                 </span>
                               </div>
@@ -372,13 +371,13 @@ export const NewBookingForm = ({
 
                 {/* Date Selection */}
                 <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-foreground flex items-center">
-                    <Calendar className="w-5 h-5 text-primary mr-2" />
+                  <h3 className="text-lg font-semibold text-white flex items-center">
+                    <Calendar className="w-5 h-5 text-yellow-400 mr-2" />
                     Stay Duration
                   </h3>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="checkIn" className="text-sm font-medium text-foreground">
+                      <Label htmlFor="checkIn" className="text-sm font-medium text-blue-200">
                         Check-in Date *
                       </Label>
                       <Input
@@ -389,11 +388,11 @@ export const NewBookingForm = ({
                         onChange={handleInputChange}
                         min={new Date().toISOString().split('T')[0]}
                         required
-                        className="h-12 bg-input border-border text-foreground focus:ring-primary focus:border-primary"
+                        className="h-12 bg-white/90 border-white/30 text-white focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="checkOut" className="text-sm font-medium text-foreground">
+                      <Label htmlFor="checkOut" className="text-sm font-medium text-blue-200">
                         Check-out Date *
                       </Label>
                       <Input
@@ -404,7 +403,7 @@ export const NewBookingForm = ({
                         onChange={handleInputChange}
                         min={formData.checkIn || new Date().toISOString().split('T')[0]}
                         required
-                        className="h-12 bg-input border-border text-foreground focus:ring-primary focus:border-primary"
+                        className="h-12 bg-white/90 border-white/30 text-white focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
                       />
                     </div>
                   </div>
@@ -412,13 +411,13 @@ export const NewBookingForm = ({
 
                 {/* Guests */}
                 <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-foreground flex items-center">
-                    <Users className="w-5 h-5 text-primary mr-2" />
+                  <h3 className="text-lg font-semibold text-white flex items-center">
+                    <Users className="w-5 h-5 text-yellow-400 mr-2" />
                     Guest Count
                   </h3>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="adults" className="text-sm font-medium text-foreground">
+                      <Label htmlFor="adults" className="text-sm font-medium text-blue-200">
                         Adults *
                       </Label>
                       <Input
@@ -430,11 +429,11 @@ export const NewBookingForm = ({
                         value={formData.adults}
                         onChange={handleInputChange}
                         required
-                        className="h-12 bg-input border-border text-foreground focus:ring-primary focus:border-primary"
+                        className="h-12 bg-white/90 border-white/30 text-white focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="children" className="text-sm font-medium text-foreground">
+                      <Label htmlFor="children" className="text-sm font-medium text-blue-200">
                         Children
                       </Label>
                       <Input
@@ -445,7 +444,7 @@ export const NewBookingForm = ({
                         max="10"
                         value={formData.children}
                         onChange={handleInputChange}
-                        className="h-12 bg-input border-border text-foreground focus:ring-primary focus:border-primary"
+                        className="h-12 bg-white/90 border-white/30 text-white focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
                       />
                     </div>
                   </div>
@@ -453,12 +452,12 @@ export const NewBookingForm = ({
 
                 {/* Special Requests */}
                 <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-foreground flex items-center">
-                    <MessageSquare className="w-5 h-5 text-primary mr-2" />
+                  <h3 className="text-lg font-semibold text-white flex items-center">
+                    <MessageSquare className="w-5 h-5 text-yellow-400 mr-2" />
                     Special Requests
                   </h3>
                   <div className="space-y-2">
-                    <Label htmlFor="specialRequests" className="text-sm font-medium text-foreground">
+                    <Label htmlFor="specialRequests" className="text-sm font-medium text-blue-200">
                       Additional Notes (Optional)
                     </Label>
                     <Textarea
@@ -467,7 +466,7 @@ export const NewBookingForm = ({
                       value={formData.specialRequests}
                       onChange={handleInputChange}
                       rows={4}
-                      className="bg-input border-border text-foreground placeholder:text-muted-foreground focus:ring-primary focus:border-primary resize-none"
+                      className="bg-white/90 border-white/30 text-white placeholder:text-white/50 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white resize-none"
                       placeholder="Any special requests or preferences for your stay..."
                     />
                   </div>
@@ -478,7 +477,7 @@ export const NewBookingForm = ({
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="btn-luxury w-full h-14 text-lg font-semibold"
+                    className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-blue-900 border-0 shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     {isLoading ? (
                       <div className="flex items-center">
@@ -500,26 +499,26 @@ export const NewBookingForm = ({
           {/* Booking Summary Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
-              <div className="card-luxury">
+              <div className="bg-white/10 backdrop-blur-md border-white/20 border rounded-lg shadow-xl p-6">
                 <div className="flex items-center mb-6">
-                  <Star className="w-6 h-6 text-primary mr-3" />
-                  <h3 className="text-xl font-bold text-foreground">Reservation Summary</h3>
+                  <Star className="w-6 h-6 text-yellow-400 mr-3" />
+                  <h3 className="text-xl font-bold text-white">Reservation Summary</h3>
                 </div>
 
                 <div className="space-y-4">
                   {formData.branch && (
-                    <div className="flex justify-between items-center py-2 border-b border-border">
-                      <span className="text-muted-foreground">Location:</span>
-                      <span className="text-foreground font-medium">
+                    <div className="flex justify-between items-center py-2 border-b border-white/20">
+                      <span className="text-blue-200">Location:</span>
+                      <span className="text-white font-medium">
                         {branches.find(b => b.id === formData.branch)?.name || 'Selected Branch'}
                       </span>
                     </div>
                   )}
 
                   {formData.roomType && (
-                    <div className="flex justify-between items-center py-2 border-b border-border">
-                      <span className="text-muted-foreground">Room Type:</span>
-                      <span className="text-foreground font-medium">
+                    <div className="flex justify-between items-center py-2 border-b border-white/20">
+                      <span className="text-blue-200">Room Type:</span>
+                      <span className="text-white font-medium">
                         {roomTypes.find(r => r.id === formData.roomType)?.name || 'Selected Room'}
                       </span>
                     </div>
@@ -527,39 +526,39 @@ export const NewBookingForm = ({
 
                   {formData.checkIn && formData.checkOut && (
                     <>
-                      <div className="flex justify-between items-center py-2 border-b border-border">
-                        <span className="text-muted-foreground">Check-in:</span>
-                        <span className="text-foreground font-medium">
+                      <div className="flex justify-between items-center py-2 border-b border-white/20">
+                        <span className="text-blue-200">Check-in:</span>
+                        <span className="text-white font-medium">
                           {new Date(formData.checkIn).toLocaleDateString()}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center py-2 border-b border-border">
-                        <span className="text-muted-foreground">Check-out:</span>
-                        <span className="text-foreground font-medium">
+                      <div className="flex justify-between items-center py-2 border-b border-white/20">
+                        <span className="text-blue-200">Check-out:</span>
+                        <span className="text-white font-medium">
                           {new Date(formData.checkOut).toLocaleDateString()}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center py-2 border-b border-border">
-                        <span className="text-muted-foreground">Duration:</span>
-                        <span className="text-foreground font-medium">
+                      <div className="flex justify-between items-center py-2 border-b border-white/20">
+                        <span className="text-blue-200">Duration:</span>
+                        <span className="text-white font-medium">
                           {Math.ceil((new Date(formData.checkOut).getTime() - new Date(formData.checkIn).getTime()) / (1000 * 60 * 60 * 24))} nights
                         </span>
                       </div>
                     </>
                   )}
 
-                  <div className="flex justify-between items-center py-2 border-b border-border">
-                    <span className="text-muted-foreground">Guests:</span>
-                    <span className="text-foreground font-medium">
+                  <div className="flex justify-between items-center py-2 border-b border-white/20">
+                    <span className="text-blue-200">Guests:</span>
+                    <span className="text-white font-medium">
                       {formData.adults} Adults{formData.children > 0 && `, ${formData.children} Children`}
                     </span>
                   </div>
 
                   {totalPrice > 0 && (
                     <div className="pt-4">
-                      <div className="flex justify-between items-center py-3 bg-gradient-primary rounded-lg px-4">
-                        <span className="text-primary-foreground font-semibold text-lg">Total Price:</span>
-                        <span className="text-primary-foreground font-bold text-2xl">
+                      <div className="flex justify-between items-center py-3 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-lg px-4">
+                        <span className="text-blue-900 font-semibold text-lg">Total Price:</span>
+                        <span className="text-blue-900 font-bold text-2xl">
                           ₦{totalPrice.toLocaleString()}
                         </span>
                       </div>
@@ -568,18 +567,18 @@ export const NewBookingForm = ({
                 </div>
 
                 {/* Trust Indicators */}
-                <div className="mt-8 pt-6 border-t border-border">
+                <div className="mt-8 pt-6 border-t border-white/20">
                   <div className="space-y-3">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Shield className="w-4 h-4 text-primary mr-2" />
+                    <div className="flex items-center text-sm text-blue-200">
+                      <Shield className="w-4 h-4 text-yellow-400 mr-2" />
                       Secure booking with SSL encryption
                     </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4 text-primary mr-2" />
+                    <div className="flex items-center text-sm text-blue-200">
+                      <Clock className="w-4 h-4 text-yellow-400 mr-2" />
                       Free cancellation up to 24 hours
                     </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Star className="w-4 h-4 text-primary mr-2" />
+                    <div className="flex items-center text-sm text-blue-200">
+                      <Star className="w-4 h-4 text-yellow-400 mr-2" />
                       Best price guarantee
                     </div>
                   </div>

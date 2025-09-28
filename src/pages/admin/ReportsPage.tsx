@@ -96,7 +96,7 @@ export const ReportsPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col space-y-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">
+          <h2 className="text-2xl font-bold tracking-tight text-yellow-400">
             {currentBranchName && (
               <span className="flex items-center">
                 <span className="mr-2">{currentBranchName}</span>
@@ -106,12 +106,12 @@ export const ReportsPage = () => {
             Reports & Analytics
           </h2>
           {currentBranchName && (
-            <div className="flex items-center text-sm text-muted-foreground mb-1">
-              <Building className="h-4 w-4 mr-1" />
+            <div className="flex items-center text-sm text-white/70 mb-1">
+              <Building className="h-4 w-4 mr-1 text-yellow-400" />
               <span>{currentBranchName}</span>
             </div>
           )}
-          <p className="text-muted-foreground">
+          <p className="text-white/70">
             View detailed reports and analytics for your hotel operations
           </p>
         </div>
@@ -123,15 +123,15 @@ export const ReportsPage = () => {
                 id="date"
                 variant="outline"
                 className={cn(
-                  "w-[260px] justify-start text-left font-normal",
-                  !date && "text-muted-foreground"
+                  "w-[260px] justify-start text-left font-normal bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30",
+                  !date && "text-white/50"
                 )}
               >
-                <CalendarIcon className="mr-2 h-4 w-4" />
+                <CalendarIcon className="mr-2 h-4 w-4 text-yellow-400" />
                 {dateRangeString}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 z-[100]" align="start" side="bottom" sideOffset={5} style={{ position: 'absolute' }}>
+            <PopoverContent className="w-auto p-0 z-[100] bg-white/10 backdrop-blur-md border-white/20" align="start" side="bottom" sideOffset={5} style={{ position: 'absolute' }}>
               <CalendarComponent
                 initialFocus
                 mode="range"
@@ -143,10 +143,10 @@ export const ReportsPage = () => {
             </PopoverContent>
             </Popover>
           </div>
-          <Button variant="outline" size="icon" className="ml-2">
+          <Button variant="outline" size="icon" className="ml-2 bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30">
             <Filter className="h-4 w-4" />
           </Button>
-          <Button className="ml-2">
+          <Button className="ml-2 bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
@@ -154,76 +154,76 @@ export const ReportsPage = () => {
       </div>
 
       <Tabs defaultValue="revenue" onValueChange={(value) => setActiveTab(value as ReportType)}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="revenue">
+        <TabsList className="grid w-full grid-cols-4 bg-white/10 border-white/20">
+          <TabsTrigger value="revenue" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">
             <DollarSign className="h-4 w-4 mr-2" />
             Revenue
           </TabsTrigger>
-          <TabsTrigger value="occupancy">
+          <TabsTrigger value="occupancy" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">
             <BarChart className="h-4 w-4 mr-2" />
             Occupancy
           </TabsTrigger>
-          <TabsTrigger value="bookings">
+          <TabsTrigger value="bookings" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">
             <Calendar className="h-4 w-4 mr-2" />
             Bookings
           </TabsTrigger>
-          <TabsTrigger value="guests">
+          <TabsTrigger value="guests" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">
             <Users className="h-4 w-4 mr-2" />
             Guests
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="revenue" className="mt-6">
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardHeader>
-              <CardTitle>Revenue Report</CardTitle>
+              <CardTitle className="text-yellow-400">Revenue Report</CardTitle>
             </CardHeader>
             <CardContent className="h-[400px]">
               <div className="h-full flex items-center justify-center">
-                <LineChart className="h-32 w-32 text-muted-foreground" />
-                <p className="text-muted-foreground">Revenue chart will be displayed here</p>
+                <LineChart className="h-32 w-32 text-yellow-400" />
+                <p className="text-white/70">Revenue chart will be displayed here</p>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="occupancy" className="mt-6">
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardHeader>
-              <CardTitle>Occupancy Report</CardTitle>
+              <CardTitle className="text-yellow-400">Occupancy Report</CardTitle>
             </CardHeader>
             <CardContent className="h-[400px]">
               <div className="h-full flex items-center justify-center">
-                <PieChart className="h-32 w-32 text-muted-foreground" />
-                <p className="text-muted-foreground">Occupancy chart will be displayed here</p>
+                <PieChart className="h-32 w-32 text-yellow-400" />
+                <p className="text-white/70">Occupancy chart will be displayed here</p>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="bookings" className="mt-6">
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardHeader>
-              <CardTitle>Bookings Report</CardTitle>
+              <CardTitle className="text-yellow-400">Bookings Report</CardTitle>
             </CardHeader>
             <CardContent className="h-[400px]">
               <div className="h-full flex items-center justify-center">
-                <BarChart className="h-32 w-32 text-muted-foreground" />
-                <p className="text-muted-foreground">Bookings chart will be displayed here</p>
+                <BarChart className="h-32 w-32 text-yellow-400" />
+                <p className="text-white/70">Bookings chart will be displayed here</p>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="guests" className="mt-6">
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardHeader>
-              <CardTitle>Guests Report</CardTitle>
+              <CardTitle className="text-yellow-400">Guests Report</CardTitle>
             </CardHeader>
             <CardContent className="h-[400px]">
               <div className="h-full flex items-center justify-center">
-                <Users className="h-32 w-32 text-muted-foreground" />
-                <p className="text-muted-foreground">Guests chart will be displayed here</p>
+                <Users className="h-32 w-32 text-yellow-400" />
+                <p className="text-white/70">Guests chart will be displayed here</p>
               </div>
             </CardContent>
           </Card>
@@ -231,44 +231,44 @@ export const ReportsPage = () => {
       </Tabs>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-yellow-400">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-yellow-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+            <div className="text-2xl font-bold text-white">$45,231.89</div>
+            <p className="text-xs text-white/70">+20.1% from last month</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Occupancy Rate</CardTitle>
-            <Home className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-yellow-400">Occupancy Rate</CardTitle>
+            <Home className="h-4 w-4 text-yellow-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">78.3%</div>
-            <p className="text-xs text-muted-foreground">+5.2% from last month</p>
+            <div className="text-2xl font-bold text-white">78.3%</div>
+            <p className="text-xs text-white/70">+5.2% from last month</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-yellow-400">Total Bookings</CardTitle>
+            <Calendar className="h-4 w-4 text-yellow-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+573</div>
-            <p className="text-xs text-muted-foreground">+201 since last hour</p>
+            <div className="text-2xl font-bold text-white">+573</div>
+            <p className="text-xs text-white/70">+201 since last hour</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Guests</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-yellow-400">Total Guests</CardTitle>
+            <Users className="h-4 w-4 text-yellow-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+2,347</div>
-            <p className="text-xs text-muted-foreground">+180.1% from last month</p>
+            <div className="text-2xl font-bold text-white">+2,347</div>
+            <p className="text-xs text-white/70">+180.1% from last month</p>
           </CardContent>
         </Card>
       </div>

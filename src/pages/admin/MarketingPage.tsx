@@ -67,15 +67,15 @@ export const MarketingPage = () => {
   const getStatusVariant = (status: CampaignStatus) => {
     switch (status) {
       case 'draft':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-500/20 text-gray-400 border-gray-400/30';
       case 'scheduled':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-500/20 text-blue-400 border-blue-400/30';
       case 'sent':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-500/20 text-green-400 border-green-400/30';
       case 'failed':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-500/20 text-red-400 border-red-400/30';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-500/20 text-gray-400 border-gray-400/30';
     }
   };
 
@@ -98,7 +98,7 @@ export const MarketingPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">
+          <h2 className="text-2xl font-bold tracking-tight text-yellow-400">
             {currentBranchName && (
               <span className="flex items-center">
                 <span className="mr-2">{currentBranchName}</span>
@@ -108,13 +108,13 @@ export const MarketingPage = () => {
             Marketing Center
           </h2>
           {currentBranchName && (
-            <div className="flex items-center text-sm text-muted-foreground mb-1">
-              <Building className="h-4 w-4 mr-1" />
+            <div className="flex items-center text-sm text-white/70 mb-1">
+              <Building className="h-4 w-4 mr-1 text-yellow-400" />
               <span>{currentBranchName}</span>
             </div>
           )}
         </div>
-        <Button>
+        <Button className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
           <Plus className="mr-2 h-4 w-4" />
           Create Campaign
         </Button>
@@ -122,11 +122,11 @@ export const MarketingPage = () => {
       
       <Tabs defaultValue="campaigns" onValueChange={setActiveTab}>
         <div className="flex items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-            <TabsTrigger value="templates">Templates</TabsTrigger>
-            <TabsTrigger value="audience">Audience</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsList className="bg-white/10 border-white/20">
+            <TabsTrigger value="campaigns" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Campaigns</TabsTrigger>
+            <TabsTrigger value="templates" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Templates</TabsTrigger>
+            <TabsTrigger value="audience" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Audience</TabsTrigger>
+            <TabsTrigger value="analytics" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Analytics</TabsTrigger>
           </TabsList>
           
           {activeTab === "campaigns" && (

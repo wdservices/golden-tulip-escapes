@@ -63,14 +63,14 @@ export const NetworkStatus: React.FC = () => {
   }
 
   return (
-    <Alert className="mb-4 border-orange-200 bg-orange-50">
+    <Alert className="mb-4 border-orange-300/30 bg-orange-500/10 backdrop-blur-md text-white">
       <div className="flex items-center gap-2">
         {isOnline ? (
-          <Wifi className="h-4 w-4 text-orange-600" />
+          <Wifi className="h-4 w-4 text-yellow-400" />
         ) : (
-          <WifiOff className="h-4 w-4 text-red-600" />
+          <WifiOff className="h-4 w-4 text-red-400" />
         )}
-        <AlertDescription className="flex-1">
+        <AlertDescription className="flex-1 text-white">
           {!isOnline ? (
             'No internet connection. Please check your network settings.'
           ) : !isFirebaseReachable ? (
@@ -79,7 +79,7 @@ export const NetworkStatus: React.FC = () => {
             'Connection issues detected.'
           )}
           {lastChecked && (
-            <span className="text-xs text-muted-foreground ml-2">
+            <span className="text-xs text-white/70 ml-2">
               Last checked: {lastChecked.toLocaleTimeString()}
             </span>
           )}
@@ -89,7 +89,7 @@ export const NetworkStatus: React.FC = () => {
           size="sm"
           onClick={checkConnectivity}
           disabled={isChecking}
-          className="ml-2"
+          className="ml-2 border-white/30 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30"
         >
           {isChecking ? (
             <RefreshCw className="h-3 w-3 animate-spin" />

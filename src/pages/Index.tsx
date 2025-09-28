@@ -28,9 +28,9 @@ const Index = () => {
 
   const handleBookNowClick = () => {
     if (isAuthenticated) {
-      navigate('/booking');
+      navigate('/book');
     } else {
-      navigate('/auth', { state: { from: '/booking' } });
+      navigate('/auth', { state: { from: '/book' } });
     }
   };
 

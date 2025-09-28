@@ -129,17 +129,17 @@ export const BranchesPage = () => {
   }, []);
 
   const getStatusVariant = (status: BranchStatus | undefined) => {
-    if (!status) return 'bg-gray-100 text-gray-800';
+    if (!status) return 'bg-gray-500/20 text-gray-400 border-gray-400/30';
     
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-500/20 text-green-400 border-green-400/30';
       case 'inactive':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-500/20 text-red-400 border-red-400/30';
       case 'maintenance':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-500/20 text-yellow-400 border-yellow-400/30';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-500/20 text-gray-400 border-gray-400/30';
     }
   };
 
@@ -258,7 +258,7 @@ export const BranchesPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight text-yellow-400">
             {currentBranchName && (
               <span className="flex items-center">
                 <span className="mr-2">{currentBranchName}</span>
@@ -268,35 +268,35 @@ export const BranchesPage = () => {
             Branches
           </h1>
           {currentBranchName && (
-            <div className="flex items-center text-sm text-muted-foreground mb-1">
+            <div className="flex items-center text-sm text-white/70 mb-1">
               <Building className="h-4 w-4 mr-1" />
               <span>{currentBranchName}</span>
             </div>
           )}
-          <p className="text-sm text-muted-foreground">Manage your hotel branches and their details</p>
+          <p className="text-sm text-white/70">Manage your hotel branches and their details</p>
         </div>
         <div className="flex items-center space-x-2 w-full md:w-auto">
           <div className="relative w-full md:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-yellow-400" />
             <Input
               type="search"
               placeholder="Search branches..."
-              className="w-full pl-8"
+              className="w-full pl-8 bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-yellow-400"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)}>
+              <Button onClick={() => setIsDialogOpen(true)} className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Branch
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl bg-white/10 backdrop-blur-md border-white/20">
               <DialogHeader>
-                <DialogTitle>Add New Branch</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-yellow-400">Add New Branch</DialogTitle>
+                <DialogDescription className="text-white/70">
                   Fill in the details below to add a new branch to your hotel chain.
                 </DialogDescription>
               </DialogHeader>
@@ -312,65 +312,65 @@ export const BranchesPage = () => {
           </Dialog>
         </div>
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border border-white/20 bg-white/10 backdrop-blur-md">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <span className="ml-2">Loading branches...</span>
+            <Loader2 className="h-8 w-8 animate-spin text-yellow-400" />
+            <span className="ml-2 text-white/70">Loading branches...</span>
           </div>
         ) : filteredBranches.length === 0 ? (
           <div className="text-center py-12">
-            <Building className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-2 text-sm font-medium">No branches found</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <Building className="mx-auto h-12 w-12 text-yellow-400" />
+            <h3 className="mt-2 text-sm font-medium text-white">No branches found</h3>
+            <p className="mt-1 text-sm text-white/70">
               {searchTerm ? 'Try a different search term' : 'Get started by adding a new branch'}
             </p>
           </div>
         ) : (
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Branch</TableHead>
-              <TableHead>Address</TableHead>
-              <TableHead>Contact</TableHead>
-              <TableHead>Rooms</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableRow className="border-white/20">
+                <TableHead className="text-yellow-400">Branch</TableHead>
+              <TableHead className="text-yellow-400">Address</TableHead>
+              <TableHead className="text-yellow-400">Contact</TableHead>
+              <TableHead className="text-yellow-400">Rooms</TableHead>
+              <TableHead className="text-yellow-400">Status</TableHead>
+              <TableHead className="w-[100px] text-yellow-400">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredBranches.map((branch) => (
-                <TableRow key={branch.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleViewBranch(branch)}>
+                <TableRow key={branch.id} className="hover:bg-white/5 cursor-pointer border-white/20" onClick={() => handleViewBranch(branch)}>
                   <TableCell className="font-medium">
                     <div className="flex items-center">
-                      <Building className="h-5 w-5 mr-2 text-primary" />
+                      <Building className="h-5 w-5 mr-2 text-yellow-400" />
                       <div>
-                        <div className="font-medium">{branch.name}</div>
-                        <div className="text-sm text-muted-foreground">{branch.email}</div>
+                        <div className="font-medium text-white">{branch.name}</div>
+                        <div className="text-sm text-white/70">{branch.email}</div>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center text-sm">
-                      <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
-                      <span>{branch.location}</span>
+                      <MapPin className="h-4 w-4 mr-1 text-yellow-400" />
+                      <span className="text-white/70">{branch.location}</span>
                     </div>
-                    <div className="text-sm text-muted-foreground">{branch.address}</div>
+                    <div className="text-sm text-white/50">{branch.address}</div>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
                       <div className="flex items-center">
-                        <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className="text-sm">{branch.phone}</span>
+                        <Phone className="h-4 w-4 mr-2 text-yellow-400" />
+                        <span className="text-sm text-white/70">{branch.phone}</span>
                       </div>
                       <div className="flex items-center">
-                        <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className="text-sm">{branch.email}</span>
+                        <Mail className="h-4 w-4 mr-2 text-yellow-400" />
+                        <span className="text-sm text-white/70">{branch.email}</span>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs bg-blue-500/20 text-blue-400 border-blue-400/30">
                       {branch.amenities?.length || 0} amenities
                     </Badge>
                   </TableCell>
@@ -384,6 +384,7 @@ export const BranchesPage = () => {
                       <Button 
                         variant="ghost" 
                         size="icon" 
+                        className="text-white hover:bg-yellow-400 hover:text-blue-900"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleEditBranch(branch);
@@ -395,7 +396,7 @@ export const BranchesPage = () => {
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="text-red-500 hover:text-red-600"
+                        className="text-white hover:bg-red-400 hover:text-white"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDeleteBranch(branch.id!);
@@ -415,46 +416,46 @@ export const BranchesPage = () => {
       
       {/* View/Edit Branch Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-md border-white/20">
           {selectedBranch && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-2xl">{selectedBranch.name}</DialogTitle>
+                <DialogTitle className="text-2xl text-yellow-400">{selectedBranch.name}</DialogTitle>
                 <DialogDescription>
                   <div className="flex items-center text-sm mt-1">
-                    <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
-                    <span>{selectedBranch.address}, {selectedBranch.location}</span>
+                    <MapPin className="h-4 w-4 mr-1 text-yellow-400" />
+                    <span className="text-white/70">{selectedBranch.address}, {selectedBranch.location}</span>
                   </div>
                 </DialogDescription>
               </DialogHeader>
               
               <Tabs defaultValue="details">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="details">Branch Details</TabsTrigger>
-                  <TabsTrigger value="rooms">Rooms</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 bg-white/10 border-white/20">
+                  <TabsTrigger value="details" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Branch Details</TabsTrigger>
+                  <TabsTrigger value="rooms" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Rooms</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="details" className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card>
+                    <Card className="bg-white/10 backdrop-blur-md border-white/20">
                       <CardHeader>
-                        <CardTitle className="text-lg">Contact Information</CardTitle>
+                        <CardTitle className="text-lg text-yellow-400">Contact Information</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-2">
                         <div className="flex items-center">
-                          <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span>{selectedBranch.email}</span>
+                          <Mail className="h-4 w-4 mr-2 text-yellow-400" />
+                          <span className="text-white/70">{selectedBranch.email}</span>
                         </div>
                         <div className="flex items-center">
-                          <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span>{selectedBranch.phone}</span>
+                          <Phone className="h-4 w-4 mr-2 text-yellow-400" />
+                          <span className="text-white/70">{selectedBranch.phone}</span>
                         </div>
                       </CardContent>
                     </Card>
                     
-                    <Card>
+                    <Card className="bg-white/10 backdrop-blur-md border-white/20">
                       <CardHeader>
-                        <CardTitle className="text-lg">Status</CardTitle>
+                        <CardTitle className="text-lg text-yellow-400">Status</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <Badge className={getStatusVariant(selectedBranch.status)}>
@@ -467,19 +468,19 @@ export const BranchesPage = () => {
                 
                 <TabsContent value="rooms" className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-medium">Rooms ({branchRooms.length})</h3>
-                    <Button onClick={() => handleAddRoom(selectedBranch)}>
+                    <h3 className="text-lg font-medium text-yellow-400">Rooms ({branchRooms.length})</h3>
+                    <Button onClick={() => handleAddRoom(selectedBranch)} className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
                       <Plus className="mr-2 h-4 w-4" />
                       Add Room
                     </Button>
                   </div>
                   
                   {branchRooms.length === 0 ? (
-                    <Card>
+                    <Card className="bg-white/10 backdrop-blur-md border-white/20">
                       <CardContent className="flex flex-col items-center justify-center py-10">
-                        <Home className="h-8 w-8 text-muted-foreground" />
-                        <p className="mt-2 text-sm text-muted-foreground">No rooms added yet</p>
-                        <Button variant="outline" className="mt-4" onClick={() => handleAddRoom(selectedBranch)}>
+                        <Home className="h-8 w-8 text-yellow-400" />
+                        <p className="mt-2 text-sm text-white/70">No rooms added yet</p>
+                        <Button variant="outline" className="mt-4 bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30" onClick={() => handleAddRoom(selectedBranch)}>
                           <Plus className="mr-2 h-4 w-4" />
                           Add your first room
                         </Button>
@@ -488,15 +489,15 @@ export const BranchesPage = () => {
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {branchRooms.map((room) => (
-                        <Card key={room.id}>
+                        <Card key={room.id} className="bg-white/10 backdrop-blur-md border-white/20">
                           <CardHeader className="pb-2">
                             <div className="flex justify-between items-start">
                               <div>
-                                <CardTitle className="text-base">{room.type}</CardTitle>
-                                <CardDescription>Room {room.roomNumber}</CardDescription>
+                                <CardTitle className="text-base text-yellow-400">{room.type}</CardTitle>
+                                <CardDescription className="text-white/70">Room {room.roomNumber}</CardDescription>
                               </div>
                               <Badge variant="outline" className={
-                                room.availability === true ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                room.availability === true ? 'bg-green-500/20 text-green-400 border-green-400/30' : 'bg-red-500/20 text-red-400 border-red-400/30'
                               }>
                                 {room.availability === true ? 'Available' : 'Unavailable'}
                               </Badge>
@@ -504,17 +505,17 @@ export const BranchesPage = () => {
                           </CardHeader>
                           <CardContent className="space-y-2 pt-0">
                             <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">Price:</span>
-                              <span className="font-medium">₦{room.pricePerNight}/night</span>
+                              <span className="text-white/70">Price:</span>
+                              <span className="font-medium text-white">₦{room.pricePerNight}/night</span>
                             </div>
                             <div className="flex flex-wrap gap-1 mt-2">
                               {room.amenities.slice(0, 3).map((amenity, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
+                                <Badge key={index} variant="secondary" className="text-xs bg-blue-500/20 text-blue-400 border-blue-400/30">
                                   {amenity}
                                 </Badge>
                               ))}
                               {room.amenities.length > 3 && (
-                                <Badge variant="secondary" className="text-xs">
+                                <Badge variant="secondary" className="text-xs bg-blue-500/20 text-blue-400 border-blue-400/30">
                                   +{room.amenities.length - 3} more
                                 </Badge>
                               )}
@@ -529,16 +530,16 @@ export const BranchesPage = () => {
               
               <DialogFooter className="flex justify-between">
                 <div className="flex space-x-2">
-                  <Button variant="outline" onClick={() => handleEditBranch(selectedBranch)}>
+                  <Button variant="outline" className="bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30" onClick={() => handleEditBranch(selectedBranch)}>
                     <Edit className="mr-2 h-4 w-4" />
                     Edit Branch
                   </Button>
-                  <Button variant="outline" onClick={() => handleAddRoom(selectedBranch)}>
+                  <Button variant="outline" className="bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30" onClick={() => handleAddRoom(selectedBranch)}>
                     <Plus className="mr-2 h-4 w-4" />
                     Add Room
                   </Button>
                 </div>
-                <Button variant="ghost" onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+                <Button variant="ghost" className="text-white hover:bg-yellow-400/10 hover:text-yellow-300" onClick={() => setIsViewDialogOpen(false)}>Close</Button>
               </DialogFooter>
             </>
           )}
@@ -547,10 +548,10 @@ export const BranchesPage = () => {
       
       {/* Edit Branch Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl bg-white/10 backdrop-blur-md border-white/20">
           <DialogHeader>
-            <DialogTitle>Edit Branch</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-yellow-400">Edit Branch</DialogTitle>
+            <DialogDescription className="text-white/70">
               Make changes to the branch information below.
             </DialogDescription>
           </DialogHeader>
@@ -570,10 +571,10 @@ export const BranchesPage = () => {
       
       {/* Add Room Dialog */}
       <Dialog open={isAddRoomDialogOpen} onOpenChange={setIsAddRoomDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl bg-white/10 backdrop-blur-md border-white/20">
           <DialogHeader>
-            <DialogTitle>Add New Room</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-yellow-400">Add New Room</DialogTitle>
+            <DialogDescription className="text-white/70">
               Add a new room to {selectedBranch?.name}.
             </DialogDescription>
           </DialogHeader>

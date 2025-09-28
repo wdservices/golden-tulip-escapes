@@ -88,7 +88,7 @@ export const SettingsPage = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">
+        <h2 className="text-2xl font-bold tracking-tight text-yellow-400">
           {currentBranchName && (
             <span className="flex items-center">
               <span className="mr-2">{currentBranchName}</span>
@@ -98,23 +98,23 @@ export const SettingsPage = () => {
           Settings
         </h2>
         {currentBranchName && (
-          <div className="flex items-center text-sm text-muted-foreground mb-1">
-            <Building className="h-4 w-4 mr-1" />
+          <div className="flex items-center text-sm text-white/70 mb-1">
+            <Building className="h-4 w-4 mr-1 text-yellow-400" />
             <span>{currentBranchName}</span>
           </div>
         )}
-        <p className="text-muted-foreground">
+        <p className="text-white/70">
           Manage your hotel's configuration
         </p>
       </div>
 
       <form onSubmit={handleSubmit}>
         <Tabs defaultValue="general" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            <TabsTrigger value="payment">Payment</TabsTrigger>
-            <TabsTrigger value="data">Data Management</TabsTrigger>
+          <TabsList className="bg-white/10 border-white/20">
+            <TabsTrigger value="general" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">General</TabsTrigger>
+            <TabsTrigger value="notifications" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Notifications</TabsTrigger>
+            <TabsTrigger value="payment" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Payment</TabsTrigger>
+            <TabsTrigger value="data" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Data Management</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general">

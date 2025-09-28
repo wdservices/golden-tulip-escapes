@@ -9,7 +9,6 @@ import { ConditionalChatbot } from "@/components/chat/ConditionalChatbot";
 import { lazy, Suspense, useEffect } from 'react';
 import Index from "./pages/Index";
 import { BookPage } from "./pages/BookPage";
-import BookingPage from "./pages/BookingPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import { AdminLoading } from "./components/admin/AdminLoading";
 import { AuthPage } from "./pages/AuthPage";
@@ -122,7 +121,6 @@ const App = () => {
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/firebase-test" element={<FirebaseTest />} />
             <Route path="/book" element={<BookPage />} />
-            <Route path="/booking/:id" element={<BookingPage />} />
             <Route path="/branch/:branchId" element={<BranchPage />} />
             <Route path="/branches/:branchId" element={<BranchPage />} />
             <Route path="/branch/:branchId/room/:roomId" element={<RoomDetailPage />} />
@@ -130,14 +128,6 @@ const App = () => {
             <Route path="/rooms" element={<PublicRoomsPage />} />
             <Route path="/rooms/:id" element={<RoomPage />} />
             <Route path="/corporate-halls" element={<CorporateHallsPage />} />
-            <Route
-              path="/booking"
-              element={
-                <ProtectedRoute>
-                  <BookingPage />
-                </ProtectedRoute>
-              }
-            />
 
             {/* User Dashboard - Only accessible to non-admin users */}
             <Route
@@ -148,7 +138,7 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route path="/new-booking" element={<Navigate to="/booking" replace />} />
+            <Route path="/new-booking" element={<Navigate to="/book" replace />} />
             {/* Admin Routes - Only accessible to admin users with branch selection */}
             <Route path="/admin" element={
               <ProtectedRoute requiredRole="admin" redirectTo="/dashboard">

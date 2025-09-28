@@ -136,18 +136,18 @@ export const RoomForm = ({ branchId, room, onSuccess, onCancel }: RoomFormProps)
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="branch">Branch *</Label>
+          <Label htmlFor="branch" className="text-white">Branch *</Label>
           <Select
             value={selectedBranchId}
             onValueChange={setSelectedBranchId}
             disabled={branchesLoading || !!branchId}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-white/5 border-white/20 text-white">
               <SelectValue placeholder={branchesLoading ? "Loading branches..." : "Select branch"} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white/10 backdrop-blur-md border-white/20">
               {branches?.map((branch) => (
-                <SelectItem key={branch.id} value={branch.id!}>
+                <SelectItem key={branch.id} value={branch.id!} className="text-white hover:bg-yellow-400/20">
                   {branch.name}
                 </SelectItem>
               ))}
@@ -156,27 +156,28 @@ export const RoomForm = ({ branchId, room, onSuccess, onCancel }: RoomFormProps)
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="roomNumber">Room Number *</Label>
+          <Label htmlFor="roomNumber" className="text-white">Room Number *</Label>
           <Input
             id="roomNumber"
             value={formData.roomNumber}
             onChange={(e) => setFormData({...formData, roomNumber: e.target.value})}
             required
+            className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-yellow-400"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="type">Room Type *</Label>
+          <Label htmlFor="type" className="text-white">Room Type *</Label>
           <Select
             value={formData.type}
             onValueChange={(value) => setFormData({...formData, type: value})}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-white/5 border-white/20 text-white">
               <SelectValue placeholder="Select room type" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white/10 backdrop-blur-md border-white/20">
               {roomTypes.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
+                <SelectItem key={type.value} value={type.value} className="text-white hover:bg-yellow-400/20">
                   {type.label}
                 </SelectItem>
               ))}
@@ -185,7 +186,7 @@ export const RoomForm = ({ branchId, room, onSuccess, onCancel }: RoomFormProps)
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="pricePerNight">Price per Night (₦) *</Label>
+          <Label htmlFor="pricePerNight" className="text-white">Price per Night (₦) *</Label>
           <Input
             id="pricePerNight"
             type="number"
@@ -193,27 +194,28 @@ export const RoomForm = ({ branchId, room, onSuccess, onCancel }: RoomFormProps)
             onChange={(e) => setFormData({...formData, pricePerNight: e.target.value})}
             required
             min="0"
+            className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-yellow-400"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="availability">Availability</Label>
+          <Label htmlFor="availability" className="text-white">Availability</Label>
           <Select
             value={formData.availability ? "true" : "false"}
             onValueChange={(value) => setFormData({...formData, availability: value === "true"})}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-white/5 border-white/20 text-white">
               <SelectValue placeholder="Select availability" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="true">Available</SelectItem>
-              <SelectItem value="false">Not Available</SelectItem>
+            <SelectContent className="bg-white/10 backdrop-blur-md border-white/20">
+              <SelectItem value="true" className="text-white hover:bg-yellow-400/20">Available</SelectItem>
+              <SelectItem value="false" className="text-white hover:bg-yellow-400/20">Not Available</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="roomCount">Number of Rooms *</Label>
+          <Label htmlFor="roomCount" className="text-white">Number of Rooms *</Label>
           <Input
             id="roomCount"
             type="number"
@@ -221,12 +223,13 @@ export const RoomForm = ({ branchId, room, onSuccess, onCancel }: RoomFormProps)
             onChange={(e) => setFormData({...formData, roomCount: e.target.value})}
             required
             min="1"
+            className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-yellow-400"
           />
         </div>
       </div>
 
       <div className="space-y-3">
-        <Label>Amenities</Label>
+        <Label className="text-white">Amenities</Label>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {availableAmenities.map((amenity) => (
             <div key={amenity.id} className="flex items-center space-x-2">
@@ -234,18 +237,19 @@ export const RoomForm = ({ branchId, room, onSuccess, onCancel }: RoomFormProps)
                 id={amenity.id}
                 checked={formData.amenities.includes(amenity.id)}
                 onCheckedChange={(checked) => handleAmenityChange(amenity.id, checked === true)}
+                className="border-white/20 data-[state=checked]:bg-yellow-400 data-[state=checked]:border-yellow-400"
               />
-              <Label htmlFor={amenity.id} className="cursor-pointer">{amenity.label}</Label>
+              <Label htmlFor={amenity.id} className="cursor-pointer text-white">{amenity.label}</Label>
             </div>
           ))}
         </div>
       </div>
 
       <div className="flex justify-end space-x-4">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading} className="bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30">
           Cancel
         </Button>
-        <Button type="submit" disabled={isLoading || !selectedBranchId}>
+        <Button type="submit" disabled={isLoading || !selectedBranchId} className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {room ? 'Update Room' : 'Add Room'}
         </Button>

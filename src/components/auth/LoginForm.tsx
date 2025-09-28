@@ -149,13 +149,13 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-6 space-y-6 bg-card rounded-lg shadow-lg">
+    <div className="w-full max-w-md mx-auto p-8 space-y-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20">
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold">
-          {isLogin ? "Login" : "Create Account"}
+        <h1 className="text-3xl font-bold text-gray-800">
+          {isLogin ? "Welcome Back" : "Create Account"}
         </h1>
-        <p className="text-muted-foreground">
-          {isLogin ? "Enter your credentials to sign in" : "Create a new account"}
+        <p className="text-gray-600">
+          {isLogin ? "Enter your credentials to sign in" : "Create a new account to get started"}
         </p>
       </div>
 
@@ -270,7 +270,7 @@ export default function LoginForm() {
 
         <Button
           type="submit"
-          className="w-full bg-primary hover:bg-primary/90"
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
           disabled={isLoading}
         >
           {isLoading ? (
@@ -286,12 +286,12 @@ export default function LoginForm() {
         </Button>
       </form>
 
-      <div className="mt-6 text-center text-sm">
+      <div className="mt-6 text-center text-sm text-gray-600">
         {isLogin ? "Don't have an account? " : "Already have an account? "}
         <button
           type="button"
           onClick={toggleAuthMode}
-          className="font-medium text-primary hover:underline"
+          className="font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors duration-200"
           disabled={isLoading}
         >
           {isLogin ? "Sign up" : "Sign in"}

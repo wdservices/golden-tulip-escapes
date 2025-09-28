@@ -222,16 +222,16 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
       {/* Sidebar */}
-      <div className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-card border-r transition-all duration-300 ease-in-out`}>
+      <div className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-white/10 backdrop-blur-md border-r border-white/20 transition-all duration-300 ease-in-out`}>
         <div className="p-4 flex items-center justify-between">
-          {isSidebarOpen && <h1 className="text-xl font-bold">Golden Tulip</h1>}
+          {isSidebarOpen && <h1 className="text-xl font-bold text-white">Golden Tulip</h1>}
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="ml-auto"
+            className="ml-auto text-yellow-400 hover:text-yellow-300 hover:bg-yellow-400/20"
           >
             {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
@@ -251,8 +251,12 @@ const AdminDashboard = () => {
             ].map((item) => (
               <Button
                 key={item.id}
-                variant={activeTab === item.id ? 'secondary' : 'ghost'}
-                className={`w-full justify-start ${!isSidebarOpen ? 'justify-center' : ''}`}
+                variant="ghost"
+                className={`w-full justify-start ${!isSidebarOpen ? 'justify-center' : ''} ${
+                  activeTab === item.id 
+                    ? 'bg-yellow-400/20 text-yellow-300 border border-yellow-400/30' 
+                    : 'text-white/80 hover:text-yellow-300 hover:bg-yellow-400/10'
+                }`}
                 onClick={() => handleNavigation(item.id === 'dashboard' ? '/admin' : `/admin/${item.id}`)}
               >
                 <item.icon className="h-5 w-5" />
@@ -262,10 +266,10 @@ const AdminDashboard = () => {
           </div>
           
           {/* Exit Button */}
-          <div className="mt-auto p-4 border-t">
+          <div className="mt-auto p-4 border-t border-white/20">
             <Button 
               variant="ghost" 
-              className="w-full justify-start text-destructive hover:bg-destructive/10 hover:text-destructive"
+              className="w-full justify-start text-red-300 hover:bg-yellow-400/10 hover:text-yellow-300"
               onClick={() => window.location.href = '/'}
             >
               <ArrowLeft className="h-5 w-5 mr-2" />
@@ -278,22 +282,22 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="bg-background border-b">
+        <header className="bg-white/10 backdrop-blur-md border-b border-white/20">
           <div className="flex items-center justify-between h-16 px-6">
             <div className="flex items-center">
-              <h2 className="text-xl font-semibold">
+              <h2 className="text-xl font-semibold text-white">
                 {currentBranchName ? `${currentBranchName} Admin Dashboard` : "Admin Dashboard"}
                 {activeTab !== 'dashboard' && ` - ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`}
               </h2>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative text-yellow-400 hover:text-yellow-300 hover:bg-yellow-400/20">
                 <Bell className="h-5 w-5" />
-                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500"></span>
+                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-400"></span>
               </Button>
-              <Button variant="outline" className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-sm font-medium text-primary">AD</span>
+              <Button variant="outline" className="flex items-center space-x-2 border-white/30 text-white hover:bg-white/10">
+                <div className="h-8 w-8 rounded-full bg-yellow-400/20 flex items-center justify-center">
+                  <span className="text-sm font-medium text-yellow-300">AD</span>
                 </div>
                 {isSidebarOpen && <span>Admin User</span>}
               </Button>
@@ -302,7 +306,7 @@ const AdminDashboard = () => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto bg-white/5 backdrop-blur-sm">
           {activeTab === 'dashboard' ? (
             <div className="p-6">
               <NetworkStatus />

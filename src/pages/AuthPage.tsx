@@ -14,13 +14,14 @@ export const AuthPage = () => {
   }, [navigate, setupNavigation]);
   
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-background to-muted/20">
-      <div className="mb-6 flex flex-col items-center">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
+      <div className="mb-8 flex flex-col items-center">
         <img 
           src="/golden tulip logo.svg" 
           alt="Golden Tulip Logo" 
-          className="h-16 w-auto mb-2"
+          className="h-14 w-auto mb-2"
         />
+        <h1 className="text-xl font-bold text-white">Port Harcourt</h1>
       </div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}

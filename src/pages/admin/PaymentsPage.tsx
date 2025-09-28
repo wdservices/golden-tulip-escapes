@@ -67,15 +67,15 @@ export const PaymentsPage = () => {
   const getStatusVariant = (status: PaymentStatus) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-500/10 text-green-400 border-green-500/20';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
       case 'failed':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-500/10 text-red-400 border-red-500/20';
       case 'refunded':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-500/10 text-white border-gray-500/20';
     }
   };
 
@@ -105,7 +105,7 @@ export const PaymentsPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">
+          <h2 className="text-2xl font-bold tracking-tight text-yellow-400">
             {currentBranchName && (
               <span className="flex items-center">
                 <span className="mr-2">{currentBranchName}</span>
@@ -115,43 +115,43 @@ export const PaymentsPage = () => {
             Payments
           </h2>
           {currentBranchName && (
-            <div className="flex items-center text-sm text-muted-foreground mb-1">
-              <Building className="h-4 w-4 mr-1" />
+            <div className="flex items-center text-sm text-white/70 mb-1">
+              <Building className="h-4 w-4 mr-1 text-yellow-400" />
               <span>{currentBranchName}</span>
             </div>
           )}
-          <p className="text-muted-foreground">
+          <p className="text-white/70">
             Manage all payment transactions and financial records
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30">
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button>
+          <Button className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
             <Plus className="mr-2 h-4 w-4" />
             Record Payment
           </Button>
         </div>
       </div>
       
-      <Card>
+      <Card className="bg-white/10 backdrop-blur-md border-white/20">
         <CardHeader className="pb-3">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
-            <CardTitle className="text-lg">Payment History</CardTitle>
+            <CardTitle className="text-lg text-yellow-400">Payment History</CardTitle>
             <div className="flex items-center space-x-2">
               <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-white/50" />
                 <Input
                   type="search"
                   placeholder="Search payments..."
-                  className="w-full pl-8 sm:w-[250px]"
+                  className="w-full pl-8 sm:w-[250px] bg-white/5 border-white/20 text-white placeholder:text-white/50"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30">
                 <Filter className="mr-2 h-4 w-4" />
                 Filter
               </Button>
@@ -162,39 +162,39 @@ export const PaymentsPage = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Payment ID</TableHead>
-                <TableHead>Booking</TableHead>
-                <TableHead>Guest</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Method</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-white">Payment ID</TableHead>
+                <TableHead className="text-white">Booking</TableHead>
+                <TableHead className="text-white">Guest</TableHead>
+                <TableHead className="text-white">Date</TableHead>
+                <TableHead className="text-white">Method</TableHead>
+                <TableHead className="text-white">Amount</TableHead>
+                <TableHead className="text-white">Status</TableHead>
+                <TableHead className="text-right text-white">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {payments.map((payment) => (
                 <TableRow key={payment.id}>
-                  <TableCell className="font-medium">{payment.id}</TableCell>
-                  <TableCell>{payment.bookingId}</TableCell>
-                  <TableCell>{payment.guestName}</TableCell>
-                  <TableCell>{new Date(payment.date).toLocaleDateString()}</TableCell>
-                  <TableCell>
+                  <TableCell className="font-medium text-white">{payment.id}</TableCell>
+                  <TableCell className="text-white">{payment.bookingId}</TableCell>
+                  <TableCell className="text-white">{payment.guestName}</TableCell>
+                  <TableCell className="text-white">{new Date(payment.date).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-white">
                     <div className="flex items-center">
                       {getMethodIcon(payment.method)}
                       <span>{formatMethod(payment.method)}</span>
                     </div>
                   </TableCell>
-                  <TableCell>${payment.amount.toFixed(2)}</TableCell>
+                  <TableCell className="text-white">${payment.amount.toFixed(2)}</TableCell>
                   <TableCell>
                     <Badge className={getStatusVariant(payment.status)}>
                       {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" className="mr-2">View</Button>
+                    <Button variant="ghost" size="sm" className="mr-2 text-white hover:text-yellow-400">View</Button>
                     {payment.receiptUrl && (
-                      <Button variant="ghost" size="sm" asChild>
+                      <Button variant="ghost" size="sm" asChild className="text-white hover:text-yellow-400">
                         <a href={payment.receiptUrl} target="_blank" rel="noopener noreferrer">
                           Receipt
                         </a>
@@ -209,44 +209,56 @@ export const PaymentsPage = () => {
       </Card>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white/70">Total Revenue</p>
+                <p className="text-2xl font-bold text-yellow-400">$45,231.89</p>
+              </div>
+              <div className="h-12 w-12 rounded-full bg-yellow-400/20 flex items-center justify-center">
+                <DollarSign className="h-6 w-6 text-yellow-400" />
+              </div>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">+19% from last month</p>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white/70">Pending Payments</p>
+                <p className="text-2xl font-bold text-yellow-400">12</p>
+              </div>
+              <div className="h-12 w-12 rounded-full bg-orange-400/20 flex items-center justify-center">
+                <CreditCard className="h-6 w-6 text-orange-400" />
+              </div>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Successful Transactions</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">573</div>
-            <p className="text-xs text-muted-foreground">+201 since last hour</p>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white/70">Successful Transactions</p>
+                <p className="text-2xl font-bold text-yellow-400">573</p>
+              </div>
+              <div className="h-12 w-12 rounded-full bg-green-400/20 flex items-center justify-center">
+                <CheckCircle className="h-6 w-6 text-green-400" />
+              </div>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Failed Transactions</CardTitle>
-            <XCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">-2 from last month</p>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white/70">Failed Transactions</p>
+                <p className="text-2xl font-bold text-yellow-400">12</p>
+              </div>
+              <div className="h-12 w-12 rounded-full bg-red-400/20 flex items-center justify-center">
+                <XCircle className="h-6 w-6 text-red-400" />
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

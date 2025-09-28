@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import AddSampleUsers from "@/components/admin/AddSampleUsers";
 
 type SortField = 'displayName' | 'email' | 'createdAt' | 'lastSignInAt' | 'bookingCount';
 
@@ -215,8 +216,8 @@ export const ClientsPage = () => {
 
   const getStatusVariant = (status: 'active' | 'inactive') => {
     return status === 'active' 
-      ? 'bg-green-100 text-green-800 hover:bg-green-100' 
-      : 'bg-gray-100 text-gray-800 hover:bg-gray-100';
+      ? 'bg-green-500/20 text-green-400 border-green-400/30' 
+      : 'bg-gray-500/20 text-gray-400 border-gray-400/30';
   };
 
   const handleClientUpdate = () => {
@@ -228,8 +229,8 @@ export const ClientsPage = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-sm text-gray-600">Loading client data from Firebase...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400 mx-auto"></div>
+          <p className="mt-2 text-sm text-white/70">Loading client data from Firebase...</p>
         </div>
       </div>
     );
@@ -239,11 +240,12 @@ export const ClientsPage = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center max-w-md">
-          <p className="text-red-600 mb-2">Error loading client data:</p>
-          <p className="text-sm text-gray-600 mb-4">{error.message}</p>
+          <p className="text-red-400 mb-2">Error loading client data:</p>
+          <p className="text-sm text-white/70 mb-4">{error.message}</p>
           <Button 
             onClick={() => window.location.reload()} 
             variant="default"
+            className="bg-yellow-400 text-blue-900 hover:bg-yellow-300"
           >
             Retry
           </Button>
@@ -265,9 +267,14 @@ export const ClientsPage = () => {
 
   return (
     <div className="space-y-6">
+      {/* Temporary component to add sample users for testing */}
+      <div className="mb-4">
+        <AddSampleUsers />
+      </div>
+      
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">
+          <h2 className="text-2xl font-bold tracking-tight text-yellow-400">
             {currentBranchName && (
               <span className="flex items-center">
                 <span className="mr-2">{currentBranchName}</span>
@@ -277,22 +284,22 @@ export const ClientsPage = () => {
             Client Management
           </h2>
           {currentBranchName && (
-            <div className="flex items-center text-sm text-muted-foreground mb-1">
+            <div className="flex items-center text-sm text-white/70 mb-1">
               <Building className="h-4 w-4 mr-1" />
               <span>{currentBranchName}</span>
             </div>
           )}
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-white/70">
             {filteredClients.length} {filteredClients.length === 1 ? 'client' : 'clients'} found
             {filteredClients.length !== mergedUsers.length && ` (of ${mergedUsers.length} total)`}
           </p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={handleExport}>
+          <Button variant="outline" onClick={handleExport} className="bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30">
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button>
+          <Button className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
             <UserPlus className="mr-2 h-4 w-4" />
             Add Client
           </Button>
@@ -301,20 +308,20 @@ export const ClientsPage = () => {
       
       {/* Client Statistics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Registered Clients</CardTitle>
-            <UserPlus className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-yellow-400">Total Registered Clients</CardTitle>
+            <UserPlus className="h-4 w-4 text-yellow-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mergedUsers.length}</div>
-            <p className="text-xs text-muted-foreground">Clients registered in the system</p>
+            <div className="text-2xl font-bold text-white">{mergedUsers.length}</div>
+            <p className="text-xs text-white/70">Clients registered in the system</p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Clients</CardTitle>
+            <CardTitle className="text-sm font-medium text-yellow-400">Active Clients</CardTitle>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -323,7 +330,7 @@ export const ClientsPage = () => {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
+              className="h-4 w-4 text-yellow-400"
             >
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
               <circle cx="9" cy="7" r="4" />
@@ -332,7 +339,7 @@ export const ClientsPage = () => {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white">
               {mergedUsers.filter(user => {
                 if (!user.lastSignInAt) return false;
                 
@@ -345,13 +352,13 @@ export const ClientsPage = () => {
                 return new Date().getTime() - lastSignInDate.getTime() < 30 * 24 * 60 * 60 * 1000;
               }).length}
             </div>
-            <p className="text-xs text-muted-foreground">Active in the last 30 days</p>
+            <p className="text-xs text-white/70">Active in the last 30 days</p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Clients with Bookings</CardTitle>
+            <CardTitle className="text-sm font-medium text-yellow-400">Clients with Bookings</CardTitle>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -360,7 +367,7 @@ export const ClientsPage = () => {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
+              className="h-4 w-4 text-yellow-400"
             >
               <rect width="18" height="18" x="3" y="3" rx="2" />
               <path d="M8 12h8" />
@@ -368,16 +375,16 @@ export const ClientsPage = () => {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white">
               {mergedUsers.filter(user => user.bookingIds && user.bookingIds.length > 0).length}
             </div>
-            <p className="text-xs text-muted-foreground">Clients with at least one booking</p>
+            <p className="text-xs text-white/70">Clients with at least one booking</p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New Clients</CardTitle>
+            <CardTitle className="text-sm font-medium text-yellow-400">New Clients</CardTitle>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -386,13 +393,13 @@ export const ClientsPage = () => {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
+              className="h-4 w-4 text-yellow-400"
             >
               <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white">
               {mergedUsers.filter(user => {
                 if (!user.createdAt) return false;
                 
@@ -408,17 +415,17 @@ export const ClientsPage = () => {
                 return new Date().getTime() - createdDate.getTime() < 7 * 24 * 60 * 60 * 1000;
               }).length}
             </div>
-            <p className="text-xs text-muted-foreground">Registered in the last 7 days</p>
+            <p className="text-xs text-white/70">Registered in the last 7 days</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="bg-white/10 backdrop-blur-md border-white/20">
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
-            <CardTitle className="text-lg">Filters</CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => setShowFilters(!showFilters)}>
+            <CardTitle className="text-lg text-yellow-400">Filters</CardTitle>
+            <Button variant="ghost" size="sm" onClick={() => setShowFilters(!showFilters)} className="text-white hover:bg-yellow-400/10 hover:text-yellow-300">
               {showFilters ? (
                 <>
                   <X className="mr-2 h-4 w-4" />
@@ -437,9 +444,9 @@ export const ClientsPage = () => {
           <CardContent className="space-y-4 pt-0">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label>Status</Label>
+                <Label className="text-white">Status</Label>
                 <select
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-10 w-full rounded-md border border-white/20 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   value={filters.status}
                   onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                 >
@@ -450,9 +457,9 @@ export const ClientsPage = () => {
               </div>
               
               <div>
-                <Label>Bookings</Label>
+                <Label className="text-white">Bookings</Label>
                 <select
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-10 w-full rounded-md border border-white/20 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   value={filters.bookingCount}
                   onChange={(e) => setFilters({ ...filters, bookingCount: e.target.value })}
                 >
@@ -464,9 +471,9 @@ export const ClientsPage = () => {
               </div>
               
               <div>
-                <Label>Last Active</Label>
+                <Label className="text-white">Last Active</Label>
                 <select
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-10 w-full rounded-md border border-white/20 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   value={filters.lastActive}
                   onChange={(e) => setFilters({ ...filters, lastActive: e.target.value })}
                 >
@@ -487,6 +494,7 @@ export const ClientsPage = () => {
                   bookingCount: 'all',
                   lastActive: 'all'
                 })}
+                className="text-white hover:bg-yellow-400/10 hover:text-yellow-300"
               >
                 Clear All Filters
               </Button>
@@ -495,44 +503,44 @@ export const ClientsPage = () => {
         )}
       </Card>
       
-      <Card>
+      <Card className="bg-white/10 backdrop-blur-md border-white/20">
         <CardHeader className="pb-3">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
-            <CardTitle className="text-lg">All Clients</CardTitle>
+            <CardTitle className="text-lg text-yellow-400">All Clients</CardTitle>
             <div className="flex items-center space-x-2">
               <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-yellow-400" />
                 <Input
                   type="search"
                   placeholder="Search clients..."
-                  className="w-full pl-8 sm:w-[250px]"
+                  className="w-full pl-8 sm:w-[250px] bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-yellow-400"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="ml-auto">
+                  <Button variant="outline" className="ml-auto bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30">
                     <ArrowUpDown className="mr-2 h-4 w-4" />
                     Sort
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleSort('displayName')}>
+                <DropdownMenuContent align="end" className="bg-white/10 backdrop-blur-md border-white/20">
+                  <DropdownMenuLabel className="text-yellow-400">Sort by</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-white/20" />
+                  <DropdownMenuItem onClick={() => handleSort('displayName')} className="text-white hover:bg-yellow-400/20">
                     Name {sortField === 'displayName' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSort('email')}>
+                  <DropdownMenuItem onClick={() => handleSort('email')} className="text-white hover:bg-yellow-400/20">
                     Email {sortField === 'email' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSort('createdAt')}>
+                  <DropdownMenuItem onClick={() => handleSort('createdAt')} className="text-white hover:bg-yellow-400/20">
                     Join Date {sortField === 'createdAt' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSort('lastSignInAt')}>
+                  <DropdownMenuItem onClick={() => handleSort('lastSignInAt')} className="text-white hover:bg-yellow-400/20">
                     Last Active {sortField === 'lastSignInAt' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSort('bookingCount')}>
+                  <DropdownMenuItem onClick={() => handleSort('bookingCount')} className="text-white hover:bg-yellow-400/20">
                     Booking Count {sortField === 'bookingCount' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -543,22 +551,22 @@ export const ClientsPage = () => {
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Member Since</TableHead>
-                <TableHead>Total Bookings</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+              <TableRow className="border-white/20">
+                <TableHead className="text-yellow-400">Name</TableHead>
+                <TableHead className="text-yellow-400">Contact</TableHead>
+                <TableHead className="text-yellow-400">Member Since</TableHead>
+                <TableHead className="text-yellow-400">Total Bookings</TableHead>
+                <TableHead className="text-yellow-400">Status</TableHead>
+                <TableHead className="text-right text-yellow-400">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredClients.length === 0 ? (
-                <TableRow>
+                <TableRow className="border-white/20">
                   <TableCell colSpan={6} className="text-center py-8">
                     <div className="flex flex-col items-center space-y-2">
-                      <Users className="h-8 w-8 text-muted-foreground" />
-                      <p className="text-muted-foreground">
+                      <Users className="h-8 w-8 text-yellow-400" />
+                      <p className="text-white/70">
                         {searchTerm || filters.status !== 'all' || filters.bookingCount !== 'all' || filters.lastActive !== 'all'
                           ? 'No clients match your current filters'
                           : 'No clients found. Client data will appear here once users register.'}
@@ -567,6 +575,7 @@ export const ClientsPage = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
+                          className="bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30"
                           onClick={() => {
                             setSearchTerm('');
                             setFilters({
@@ -584,12 +593,12 @@ export const ClientsPage = () => {
                 </TableRow>
               ) : (
                 filteredClients.map((client) => (
-                  <TableRow key={client.id}>
+                  <TableRow key={client.id} className="border-white/20 hover:bg-white/5">
                     <TableCell className="font-medium">
                       <div className="flex flex-col">
-                        <span>{client.displayName || 'No name provided'}</span>
+                        <span className="text-white">{client.displayName || 'No name provided'}</span>
                         {client.role === 'admin' && (
-                          <Badge variant="outline" className="mt-1 w-fit">
+                          <Badge variant="outline" className="mt-1 w-fit bg-yellow-400/20 text-yellow-400 border-yellow-400/30">
                             Admin
                           </Badge>
                         )}
@@ -598,32 +607,32 @@ export const ClientsPage = () => {
                     <TableCell>
                       <div className="flex flex-col space-y-1">
                         <div className="flex items-center">
-                          <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{client.email || 'No email provided'}</span>
+                          <Mail className="mr-2 h-4 w-4 text-yellow-400" />
+                          <span className="text-sm text-white/70">{client.email || 'No email provided'}</span>
                           {client.emailVerified && (
-                            <Badge variant="secondary" className="ml-2 text-xs">
+                            <Badge variant="secondary" className="ml-2 text-xs bg-green-500/20 text-green-400 border-green-400/30">
                               Verified
                             </Badge>
                           )}
                         </div>
                         {client.phoneNumber && (
                           <div className="flex items-center">
-                            <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm">{client.phoneNumber}</span>
+                            <Phone className="mr-2 h-4 w-4 text-yellow-400" />
+                            <span className="text-sm text-white/70">{client.phoneNumber}</span>
                           </div>
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col space-y-1">
-                        <span className="text-sm">
+                        <span className="text-sm text-white/70">
                           {client.createdAt ? 
                             formatDate(client.createdAt instanceof Date ? client.createdAt : 
                               typeof client.createdAt === 'object' && client.createdAt.toDate ? 
                               client.createdAt.toDate() : new Date(client.createdAt)) : 'N/A'}
                         </span>
                         {client.lastSignInAt && (
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-white/50">
                             Last active: {formatDate(client.lastSignInAt instanceof Date ? client.lastSignInAt :
                               typeof client.lastSignInAt === 'object' && client.lastSignInAt.toDate ?
                               client.lastSignInAt.toDate() : new Date(client.lastSignInAt))}
@@ -632,7 +641,7 @@ export const ClientsPage = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">
+                      <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-400/30">
                         {client.bookingIds?.length || 0}
                       </Badge>
                     </TableCell>
@@ -645,6 +654,7 @@ export const ClientsPage = () => {
                       <Button 
                         variant="ghost" 
                         size="sm"
+                        className="text-white hover:bg-yellow-400 hover:text-blue-900"
                         onClick={() => setSelectedClient(client)}
                       >
                         View Details

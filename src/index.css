@@ -7,33 +7,43 @@
 @layer base {
   :root {
     /* Base Colors */
-    --background: 25 25% 5%;
-    --foreground: 45 100% 95%;
+    --background: 0 0% 100%;       /* Pure White */
+    --foreground: 220 15% 25%;     /* Dark Blue-Gray */
 
     /* Card & Surfaces */
-    --card: 25 25% 8%;
-    --card-foreground: 45 100% 95%;
+    --card: 0 0% 100%;             /* Pure White */
+    --card-foreground: 220 15% 25%;
 
-    --popover: 25 25% 8%;
-    --popover-foreground: 45 100% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 25%;
 
-    /* Luxury Gold Theme */
-    --primary: 45 100% 60%;        /* Rich Gold */
-    --primary-foreground: 25 25% 15%;
-    --primary-glow: 45 100% 75%;   /* Lighter gold for effects */
+    /* Golden Tulip Brand Colors */
+    --primary: 45 100% 50%;        /* Golden Yellow */
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 45 100% 65%;   /* Lighter gold for effects */
 
-    --secondary: 25 15% 8%;        /* Deep Black */
-    --secondary-foreground: 45 100% 95%;
+    --secondary: 220 100% 45%;     /* Royal Blue */
+    --secondary-foreground: 0 0% 100%;
 
-    --luxury: 42 87% 55%;          /* Amber Gold */
-    --luxury-foreground: 25 25% 15%;
+    --luxury: 45 100% 50%;         /* Golden Yellow */
+    --luxury-foreground: 0 0% 100%;
+
+    /* Golden Tulip Specific Colors */
+    --golden-yellow: 45 100% 50%;
+    --golden-yellow-light: 45 100% 65%;
+    --golden-yellow-dark: 45 100% 40%;
+    --royal-blue: 220 100% 45%;
+    --royal-blue-light: 220 100% 60%;
+    --royal-blue-dark: 220 100% 35%;
+    --pure-white: 0 0% 100%;
+    --off-white: 45 20% 98%;
 
     /* Elegant Neutrals */
-    --muted: 25 15% 12%;
-    --muted-foreground: 45 15% 65%;
+    --muted: 220 10% 95%;          /* Light Gray */
+    --muted-foreground: 220 15% 45%;
 
-    --accent: 25 15% 10%;         /* Dark Accent */
-    --accent-foreground: 45 100% 95%;
+    --accent: 45 20% 98%;          /* Off-white accent */
+    --accent-foreground: 220 15% 25%;
 
     /* Semantic Colors */
     --destructive: 0 84% 60%;
@@ -43,15 +53,15 @@
     --success-foreground: 0 0% 98%;
 
     /* Borders & Inputs */
-    --border: 25 15% 20%;
-    --input: 25 15% 15%;
-    --ring: 45 100% 60%;
+    --border: 220 15% 85%;         /* Light border */
+    --input: 0 0% 100%;            /* White input background */
+    --ring: 45 100% 50%;           /* Golden focus ring */
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(45 100% 65%), hsl(42 87% 60%));
-    --gradient-luxury: linear-gradient(135deg, hsl(45 100% 65%), hsl(38 90% 55%));
-    --gradient-hero: linear-gradient(135deg, hsl(25 25% 5% / 0.9), hsl(45 100% 65% / 0.2));
-    --gradient-card: linear-gradient(135deg, hsl(25 25% 8%), hsl(25 20% 10%));
+    /* Golden Tulip Brand Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(45 100% 50%), hsl(45 100% 65%));
+    --gradient-luxury: linear-gradient(135deg, hsl(45 100% 50%), hsl(220 100% 45%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 100% 45% / 0.9), hsl(45 100% 50% / 0.1));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(45 20% 98%));
 
     /* Shadows */
     --shadow-luxury: 0 20px 40px -12px hsl(45 100% 60% / 0.25);
@@ -152,7 +162,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply text-foreground font-sans;
   }
 }
 
@@ -248,6 +258,8 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+
 
   /* Dining Experience Cards */
   .dining-experience-card {
@@ -507,5 +519,83 @@
   /* Smooth Scroll */
   html {
     scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Golden Tulip Brand Utilities */
+  .golden-yellow {
+    color: hsl(var(--golden-yellow));
+  }
+  
+  .bg-golden-yellow {
+    background-color: hsl(var(--golden-yellow));
+  }
+  
+  .royal-blue {
+    color: hsl(var(--royal-blue));
+  }
+  
+  .bg-royal-blue {
+    background-color: hsl(var(--royal-blue));
+  }
+  
+  .hover-golden {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hover-golden:hover {
+    background-color: hsl(var(--golden-yellow) / 0.1);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+      0 20px 40px hsl(var(--golden-yellow) / 0.3),
+      0 10px 20px hsl(var(--royal-blue) / 0.1),
+      0 0 0 1px hsl(var(--golden-yellow) / 0.1);
+  }
+  
+  .hover-golden-text:hover {
+    color: hsl(var(--golden-yellow));
+  }
+  
+  .brand-gradient {
+    background: var(--gradient-luxury);
+  }
+  
+  .brand-card {
+    background: var(--gradient-card);
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 4px 20px hsl(var(--golden-yellow) / 0.1);
+  }
+  
+  .brand-button {
+    background: hsl(var(--golden-yellow));
+    color: hsl(var(--pure-white));
+    border: 2px solid hsl(var(--golden-yellow));
+    transition: all 0.3s ease;
+  }
+  
+  .brand-button:hover {
+    background: hsl(var(--pure-white));
+    color: hsl(var(--golden-yellow));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px hsl(var(--golden-yellow) / 0.3);
+  }
+  
+  .brand-button-outline {
+    background: transparent;
+    color: hsl(var(--golden-yellow));
+    border: 2px solid hsl(var(--golden-yellow));
+    transition: all 0.3s ease;
+  }
+  
+  .brand-button-outline:hover {
+    background: hsl(var(--golden-yellow));
+    color: hsl(var(--pure-white));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px hsl(var(--golden-yellow) / 0.3);
   }
 }
