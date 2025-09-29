@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CalendarDays, Search, Filter, MoreHorizontal } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { formatCurrency } from "@/utils/currencyUtils";
 
 interface BookingsTableProps {
   bookings: Booking[];
@@ -188,7 +189,7 @@ export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: B
                       {booking.paymentStatus}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-white">${booking.totalAmount.toFixed(2)}</TableCell>
+                  <TableCell className="text-white">{formatCurrency(booking.totalAmount, 'NGN', 'en-NG')}</TableCell>
                   <TableCell className="text-right">
                     <Popover>
                       <PopoverTrigger asChild>

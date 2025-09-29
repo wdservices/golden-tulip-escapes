@@ -5,14 +5,14 @@
 /**
  * Format a number as currency
  * @param amount - The amount to format
- * @param currency - Currency code (e.g., 'USD', 'EUR')
- * @param locale - Locale string (e.g., 'en-US')
+ * @param currency - Currency code (e.g., 'NGN', 'USD', 'EUR')
+ * @param locale - Locale string (e.g., 'en-NG', 'en-US')
  * @returns Formatted currency string
  */
 export const formatCurrency = (
   amount: number,
-  currency: string = 'USD',
-  locale: string = 'en-US'
+  currency: string = 'NGN',
+  locale: string = 'en-NG'
 ): string => {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
@@ -96,16 +96,16 @@ export const parseCurrency = (currencyString: string, locale: string = 'en-US'):
 /**
  * Calculate the number of loyalty points earned for a booking
  * @param amount - The total amount spent
- * @param pointsPerDollar - Number of points earned per dollar spent
+ * @param pointsPerNaira - Number of points earned per naira spent
  * @param roundToNearest - Round points to the nearest multiple of this number
  * @returns Number of loyalty points earned
  */
 export const calculateLoyaltyPoints = (
   amount: number,
-  pointsPerDollar: number = 1,
+  pointsPerNaira: number = 1,
   roundToNearest: number = 1
 ): number => {
-  const points = amount * pointsPerDollar;
+  const points = amount * pointsPerNaira;
   return Math.round(points / roundToNearest) * roundToNearest;
 };
 

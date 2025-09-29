@@ -3,6 +3,7 @@
  */
 
 import { Booking } from "@/types/booking";
+import { formatCurrency } from "@/utils/currencyUtils";
 
 /**
  * Convert bookings data to CSV format
@@ -39,7 +40,7 @@ export function exportBookingsToCSV(bookings: Booking[]): string {
     booking.checkInDate,
     booking.checkOutDate,
     booking.status,
-    booking.totalAmount.toString(),
+    formatCurrency(booking.totalAmount, 'NGN', 'en-NG'),
     booking.paymentStatus,
     booking.bookingDate,
     booking.guests.toString(),

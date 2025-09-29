@@ -313,11 +313,13 @@ const AdminDashboard = () => {
               <AnalyticsDashboard />
             </div>
           ) : (
-            <div>
-              <div className="p-6 pb-0">
+            <div className="p-6">
+              <div className="pb-0">
                 <NetworkStatus />
               </div>
-              <Outlet />
+              <div className="pt-6">
+                <Outlet />
+              </div>
             </div>
           )}
         </main>

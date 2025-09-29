@@ -450,9 +450,20 @@ export const BookingsPage = () => {
               </DialogHeader>
               <div className="p-0">
                 <iframe 
-                  src="/booking" 
+                  src="/book" 
                   className="w-full h-[80vh] border-0 rounded-lg"
                   title="Create Booking"
+                  onLoad={() => {
+                    console.log('Booking iframe loaded successfully');
+                  }}
+                  onError={() => {
+                    console.error('Failed to load booking iframe');
+                    toast({
+                      variant: "destructive",
+                      title: "Error",
+                      description: "Failed to load booking form. Please try again.",
+                    });
+                  }}
                 />
               </div>
             </DialogContent>

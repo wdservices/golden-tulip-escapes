@@ -5,6 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Download, BarChart, LineChart, PieChart, Filter, Building, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getBranches } from "@/services/branchService";
+import { useBookings } from "@/hooks/useBookings";
+import { useAuthUsers } from "@/hooks/useAuthUsers";
+import { formatCurrency } from "@/utils/currencyUtils";
 
 import { DateRange } from "react-day-picker";
 import { addDays, format } from "date-fns";
@@ -14,11 +17,6 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ReportType = 'revenue' | 'occupancy' | 'bookings' | 'guests';
-
-interface ReportData {
-  date: string;
-  value: number;
-}
 
 export const ReportsPage = () => {
   const [activeTab, setActiveTab] = useState<ReportType>('revenue');
@@ -30,6 +28,10 @@ export const ReportsPage = () => {
   
   // Get auth context for branch filtering
   const { activeBranchId } = useAuth();
+  
+  // Get real data from hooks
+  const { bookings, loading: bookingsLoading } = useBookings();
+  const { mergedUsers, loading: usersLoading } = useAuthUsers();
   
   // Fetch current branch name
   useEffect(() => {
@@ -50,34 +52,63 @@ export const ReportsPage = () => {
     fetchBranchName();
   }, [activeBranchId]);
 
-  // Mock data for charts - replace with actual API calls
-  const revenueData: ReportData[] = [
-    { date: '2024-01-01', value: 4000 },
-    { date: '2024-01-02', value: 3000 },
-    { date: '2024-01-03', value: 5000 },
-    { date: '2024-01-04', value: 2780 },
-    { date: '2024-01-05', value: 1890 },
-    { date: '2024-01-06', value: 2390 },
-    { date: '2024-01-07', value: 3490 },
-  ];
+  // Calculate real statistics from data
+  const calculateStats = () => {
+    if (!bookings || !mergedUsers) {
+      return {
+        totalRevenue: 0,
+        occupancyRate: 0,
+        totalBookings: 0,
+        totalGuests: 0,
+        confirmedBookings: 0,
+        pendingBookings: 0,
+        cancelledBookings: 0,
+        newGuests: 0,
+        returningGuests: 0
+      };
+    }
 
-  const occupancyData = [
-    { name: 'Occupied', value: 400 },
-    { name: 'Available', value: 300 },
-    { name: 'Maintenance', value: 200 },
-  ];
+    // Filter bookings by date range if selected
+    const filteredBookings = bookings.filter(booking => {
+      if (!date?.from || !booking.createdAt) return true;
+      const bookingDate = new Date(booking.createdAt);
+      const fromDate = date.from;
+      const toDate = date.to || new Date();
+      return bookingDate >= fromDate && bookingDate <= toDate;
+    });
 
-  const bookingsData = [
-    { name: 'Confirmed', value: 12 },
-    { name: 'Pending', value: 5 },
-    { name: 'Cancelled', value: 3 },
-  ];
+    const totalRevenue = filteredBookings.reduce((sum, booking) => sum + (booking.amount || 0), 0);
+    const totalBookings = filteredBookings.length;
+    const confirmedBookings = filteredBookings.filter(b => b.status === 'confirmed').length;
+    const pendingBookings = filteredBookings.filter(b => b.status === 'pending').length;
+    const cancelledBookings = filteredBookings.filter(b => b.status === 'cancelled').length;
+    
+    // Calculate occupancy rate (simplified - you may need to adjust based on your room data)
+    const occupancyRate = totalBookings > 0 ? Math.min(100, (confirmedBookings / totalBookings) * 100) : 0;
+    
+    const totalGuests = mergedUsers.length;
+    const newGuests = mergedUsers.filter(user => {
+      if (!date?.from || !user.createdAt) return false;
+      const userDate = new Date(user.createdAt);
+      return userDate >= date.from && userDate <= (date.to || new Date());
+    }).length;
+    const returningGuests = totalGuests - newGuests;
 
-  const guestsData = [
-    { name: 'New', value: 24 },
-    { name: 'Returning', value: 15 },
-    { name: 'VIP', value: 8 },
-  ];
+    return {
+      totalRevenue,
+      occupancyRate,
+      totalBookings,
+      totalGuests,
+      confirmedBookings,
+      pendingBookings,
+      cancelledBookings,
+      newGuests,
+      returningGuests
+    };
+  };
+
+  const stats = calculateStats();
+  const isLoading = bookingsLoading || usersLoading;
 
   // Format date range for display
   const dateRangeString = date?.from ? (
@@ -156,7 +187,7 @@ export const ReportsPage = () => {
       <Tabs defaultValue="revenue" onValueChange={(value) => setActiveTab(value as ReportType)}>
         <TabsList className="grid w-full grid-cols-4 bg-white/10 border-white/20">
           <TabsTrigger value="revenue" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">
-            <DollarSign className="h-4 w-4 mr-2" />
+            <NairaSign className="h-4 w-4 mr-2" />
             Revenue
           </TabsTrigger>
           <TabsTrigger value="occupancy" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">
@@ -179,10 +210,21 @@ export const ReportsPage = () => {
               <CardTitle className="text-yellow-400">Revenue Report</CardTitle>
             </CardHeader>
             <CardContent className="h-[400px]">
-              <div className="h-full flex items-center justify-center">
-                <LineChart className="h-32 w-32 text-yellow-400" />
-                <p className="text-white/70">Revenue chart will be displayed here</p>
-              </div>
+              {isLoading ? (
+                <div className="h-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400"></div>
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <LineChart className="h-32 w-32 text-yellow-400 mx-auto mb-4" />
+                    <p className="text-white/70">Revenue chart will be displayed here</p>
+                    <p className="text-sm text-white/50 mt-2">
+                      Total Revenue: {formatCurrency(stats.totalRevenue, 'NGN', 'en-NG')}
+                    </p>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -193,10 +235,21 @@ export const ReportsPage = () => {
               <CardTitle className="text-yellow-400">Occupancy Report</CardTitle>
             </CardHeader>
             <CardContent className="h-[400px]">
-              <div className="h-full flex items-center justify-center">
-                <PieChart className="h-32 w-32 text-yellow-400" />
-                <p className="text-white/70">Occupancy chart will be displayed here</p>
-              </div>
+              {isLoading ? (
+                <div className="h-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400"></div>
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <PieChart className="h-32 w-32 text-yellow-400 mx-auto mb-4" />
+                    <p className="text-white/70">Occupancy chart will be displayed here</p>
+                    <p className="text-sm text-white/50 mt-2">
+                      Current Occupancy Rate: {stats.occupancyRate.toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -207,10 +260,23 @@ export const ReportsPage = () => {
               <CardTitle className="text-yellow-400">Bookings Report</CardTitle>
             </CardHeader>
             <CardContent className="h-[400px]">
-              <div className="h-full flex items-center justify-center">
-                <BarChart className="h-32 w-32 text-yellow-400" />
-                <p className="text-white/70">Bookings chart will be displayed here</p>
-              </div>
+              {isLoading ? (
+                <div className="h-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400"></div>
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <BarChart className="h-32 w-32 text-yellow-400 mx-auto mb-4" />
+                    <p className="text-white/70">Bookings chart will be displayed here</p>
+                    <div className="text-sm text-white/50 mt-2 space-y-1">
+                      <p>Confirmed: {stats.confirmedBookings}</p>
+                      <p>Pending: {stats.pendingBookings}</p>
+                      <p>Cancelled: {stats.cancelledBookings}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -221,10 +287,23 @@ export const ReportsPage = () => {
               <CardTitle className="text-yellow-400">Guests Report</CardTitle>
             </CardHeader>
             <CardContent className="h-[400px]">
-              <div className="h-full flex items-center justify-center">
-                <Users className="h-32 w-32 text-yellow-400" />
-                <p className="text-white/70">Guests chart will be displayed here</p>
-              </div>
+              {isLoading ? (
+                <div className="h-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400"></div>
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <Users className="h-32 w-32 text-yellow-400 mx-auto mb-4" />
+                    <p className="text-white/70">Guests chart will be displayed here</p>
+                    <div className="text-sm text-white/50 mt-2 space-y-1">
+                      <p>New Guests: {stats.newGuests}</p>
+                      <p>Returning Guests: {stats.returningGuests}</p>
+                      <p>Total Guests: {stats.totalGuests}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -234,11 +313,24 @@ export const ReportsPage = () => {
         <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-yellow-400">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-yellow-400" />
+            <NairaSign className="h-4 w-4 text-yellow-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">$45,231.89</div>
-            <p className="text-xs text-white/70">+20.1% from last month</p>
+            {isLoading ? (
+              <div className="animate-pulse">
+                <div className="h-8 bg-white/20 rounded mb-2"></div>
+                <div className="h-4 bg-white/10 rounded"></div>
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-white">
+                  {formatCurrency(stats.totalRevenue, 'NGN', 'en-NG')}
+                </div>
+                <p className="text-xs text-white/70">
+                  {stats.totalRevenue > 0 ? 'From selected period' : 'No revenue data'}
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
         <Card className="bg-white/10 backdrop-blur-md border-white/20">
@@ -247,8 +339,19 @@ export const ReportsPage = () => {
             <Home className="h-4 w-4 text-yellow-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">78.3%</div>
-            <p className="text-xs text-white/70">+5.2% from last month</p>
+            {isLoading ? (
+              <div className="animate-pulse">
+                <div className="h-8 bg-white/20 rounded mb-2"></div>
+                <div className="h-4 bg-white/10 rounded"></div>
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-white">{stats.occupancyRate.toFixed(1)}%</div>
+                <p className="text-xs text-white/70">
+                  {stats.totalBookings > 0 ? 'Based on current bookings' : 'No booking data'}
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
         <Card className="bg-white/10 backdrop-blur-md border-white/20">
@@ -257,8 +360,19 @@ export const ReportsPage = () => {
             <Calendar className="h-4 w-4 text-yellow-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">+573</div>
-            <p className="text-xs text-white/70">+201 since last hour</p>
+            {isLoading ? (
+              <div className="animate-pulse">
+                <div className="h-8 bg-white/20 rounded mb-2"></div>
+                <div className="h-4 bg-white/10 rounded"></div>
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-white">{stats.totalBookings}</div>
+                <p className="text-xs text-white/70">
+                  {stats.confirmedBookings} confirmed, {stats.pendingBookings} pending
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
         <Card className="bg-white/10 backdrop-blur-md border-white/20">
@@ -267,8 +381,19 @@ export const ReportsPage = () => {
             <Users className="h-4 w-4 text-yellow-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">+2,347</div>
-            <p className="text-xs text-white/70">+180.1% from last month</p>
+            {isLoading ? (
+              <div className="animate-pulse">
+                <div className="h-8 bg-white/20 rounded mb-2"></div>
+                <div className="h-4 bg-white/10 rounded"></div>
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-white">{stats.totalGuests}</div>
+                <p className="text-xs text-white/70">
+                  {stats.newGuests} new in selected period
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -276,8 +401,8 @@ export const ReportsPage = () => {
   );
 };
 
-// Add missing icon components
-function DollarSign(props: React.SVGProps<SVGSVGElement>) {
+// Naira Sign Icon Component
+function NairaSign(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -291,8 +416,11 @@ function DollarSign(props: React.SVGProps<SVGSVGElement>) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <line x1="12" x2="12" y1="2" y2="22" />
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+      <path d="M6 3v18" />
+      <path d="M18 3v18" />
+      <path d="M6 9h12" />
+      <path d="M6 15h12" />
+      <path d="M6 3l12 18" />
     </svg>
   )
 }

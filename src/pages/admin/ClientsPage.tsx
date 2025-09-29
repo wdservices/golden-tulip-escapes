@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import AddSampleUsers from "@/components/admin/AddSampleUsers";
 
 type SortField = 'displayName' | 'email' | 'createdAt' | 'lastSignInAt' | 'bookingCount';
 
@@ -267,11 +266,6 @@ export const ClientsPage = () => {
 
   return (
     <div className="space-y-6">
-      {/* Temporary component to add sample users for testing */}
-      <div className="mb-4">
-        <AddSampleUsers />
-      </div>
-      
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-yellow-400">

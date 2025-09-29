@@ -8,6 +8,7 @@ import { CalendarDays, User, Home, CreditCard, Info, X } from "lucide-react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Booking, BookingStatus, PaymentStatus } from "@/types/booking";
+import { formatCurrency } from "@/utils/currencyUtils";
 
 interface BookingDetailsProps {
   booking: Booking | null;
@@ -203,7 +204,7 @@ export function BookingDetails({
                 <div>
                   <Label>Total Amount</Label>
                   <Input
-                    value={`$${booking.totalAmount.toFixed(2)}`}
+                    value={formatCurrency(booking.totalAmount, 'NGN', 'en-NG')}
                     disabled={!isEditing}
                     className="mt-1 font-medium"
                   />
