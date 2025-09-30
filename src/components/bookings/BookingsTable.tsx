@@ -108,7 +108,7 @@ export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: B
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0 booking-popover" align="start">
               <Calendar
                 initialFocus
                 mode="range"
@@ -119,6 +119,7 @@ export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: B
                   to: range?.to
                 })}
                 numberOfMonths={2}
+                className="booking-calendar"
               />
             </PopoverContent>
           </Popover>

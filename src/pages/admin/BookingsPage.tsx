@@ -53,6 +53,7 @@ import { getBranches } from "@/services/branchService";
 import { useBranches } from "@/hooks/useBranches";
 
 import { BookingsTable } from "@/components/bookings/BookingsTable";
+import { clearBookingData } from "@/utils/clearDatabase";
 
 export const BookingsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");

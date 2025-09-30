@@ -259,7 +259,7 @@ export const BookingForm = ({ selectedBranch, showLocationDropdown = true, onBoo
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0 booking-popover" align="start">
                   <CalendarComponent
                     initialFocus
                     mode="range"
@@ -277,6 +277,7 @@ export const BookingForm = ({ selectedBranch, showLocationDropdown = true, onBoo
                     disabled={(date) =>
                       date < new Date() || date > new Date(new Date().setFullYear(new Date().getFullYear() + 1))
                     }
+                    className="booking-calendar"
                   />
                 </PopoverContent>
               </Popover>

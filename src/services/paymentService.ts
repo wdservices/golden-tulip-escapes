@@ -1,33 +1,24 @@
 import { doc, updateDoc, collection, addDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-export interface FlutterwaveVerificationResponse {
-  status: string;
+export interface PaystackVerificationResponse {
+  status: boolean;
   message: string;
   data: {
     id: number;
-    tx_ref: string;
-    flw_ref: string;
-    device_fingerprint: string;
+    status: string;
+    reference: string;
     amount: number;
     currency: string;
-    charged_amount: number;
-    app_fee: number;
-    merchant_fee: number;
-    processor_response: string;
-    auth_model: string;
-    ip: string;
-    narration: string;
-    status: string;
-    payment_type: string;
+    paid_at: string;
     created_at: string;
-    account_id: number;
+    channel: string;
+    gateway_response: string;
     customer: {
-      id: number;
-      name: string;
-      phone_number: string;
       email: string;
-      created_at: string;
+      first_name?: string;
+      last_name?: string;
+      phone?: string;
     };
   };
 }
@@ -36,7 +27,7 @@ export interface PaymentRecord {
   id?: string;
   bookingId: string;
   transactionId: string;
-  flutterwaveRef: string;
+  paystackRef?: string;
   amount: number;
   currency: string;
   status: 'pending' | 'successful' | 'failed' | 'cancelled';
@@ -46,22 +37,22 @@ export interface PaymentRecord {
   customerPhone: string;
   createdAt: Timestamp;
   verifiedAt?: Timestamp;
+  notes?: string;
   verificationData?: any;
 }
 
 class PaymentService {
-  private readonly FLUTTERWAVE_SECRET_KEY = import.meta.env.FLUTTERWAVE_SECRET_KEY || 'FLWSECK-43b08a6ed3ef3838b8058cf3ed06c67b-19971079b77vt-X';
-  private readonly FLUTTERWAVE_BASE_URL = 'https://api.flutterwave.com/v3';
+  private readonly PAYSTACK_SECRET_KEY = import.meta.env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_SECRET_KEY;
 
   /**
-   * Verify payment with Flutterwave
+   * Verify payment with Paystack
    */
-  async verifyPayment(transactionId: string): Promise<FlutterwaveVerificationResponse> {
+  async verifyPaystackPayment(reference: string): Promise<PaystackVerificationResponse> {
     try {
-      const response = await fetch(`${this.FLUTTERWAVE_BASE_URL}/transactions/${transactionId}/verify`, {
+      const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.FLUTTERWAVE_SECRET_KEY}`,
+          'Authorization': `Bearer ${this.PAYSTACK_SECRET_KEY}`,
           'Content-Type': 'application/json',
         },
       });
@@ -73,8 +64,81 @@ class PaymentService {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Payment verification failed:', error);
-      throw new Error('Failed to verify payment with Flutterwave');
+      console.error('Paystack payment verification failed:', error);
+      throw new Error('Failed to verify payment with Paystack');
+    }
+  }
+
+  /**
+   * Process Paystack payment verification and update records
+   */
+  async processPaystackVerification(
+    reference: string,
+    bookingId: string,
+    expectedAmount: number
+  ): Promise<{ success: boolean; message: string; verificationData?: PaystackVerificationResponse }> {
+    try {
+      // Verify payment with Paystack
+      const verificationData = await this.verifyPaystackPayment(reference);
+
+      if (!verificationData.status) {
+        return {
+          success: false,
+          message: verificationData.message || 'Payment verification failed',
+          verificationData,
+        };
+      }
+
+      const { data } = verificationData;
+
+      // Check if payment was successful
+      if (data.status !== 'success') {
+        return {
+          success: false,
+          message: `Payment status: ${data.status}`,
+          verificationData,
+        };
+      }
+
+      // Verify amount matches (convert from kobo to naira)
+      const paidAmount = data.amount / 100;
+      if (paidAmount !== expectedAmount) {
+        return {
+          success: false,
+          message: `Amount mismatch. Expected: ₦${expectedAmount}, Received: ₦${paidAmount}`,
+          verificationData,
+        };
+      }
+
+      // Update booking payment status to paid
+      await this.updateBookingPaymentStatus(bookingId, 'paid', data.reference);
+
+      // Create payment record
+      await this.createPaymentRecord({
+        bookingId,
+        transactionId: data.reference,
+        paystackRef: data.reference,
+        amount: paidAmount,
+        currency: data.currency,
+        status: 'successful',
+        paymentMethod: 'paystack',
+        customerEmail: data.customer.email,
+        customerName: `${data.customer.first_name || ''} ${data.customer.last_name || ''}`.trim(),
+        customerPhone: data.customer.phone || '',
+        verificationData: data
+      });
+
+      return {
+        success: true,
+        message: 'Payment verified successfully',
+        verificationData,
+      };
+    } catch (error) {
+      console.error('Paystack payment verification process failed:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Payment verification failed',
+      };
     }
   }
 
@@ -97,19 +161,24 @@ class PaymentService {
   }
 
   /**
-   * Update payment record with verification data
+   * Update payment record status
    */
   async updatePaymentRecord(
     paymentId: string, 
-    verificationData: FlutterwaveVerificationResponse,
-    status: PaymentRecord['status']
+    status: PaymentRecord['status'],
+    notes?: string
   ): Promise<void> {
     try {
-      await updateDoc(doc(db, 'payments', paymentId), {
+      const updateData: any = {
         status,
         verifiedAt: Timestamp.fromDate(new Date()),
-        verificationData: verificationData.data,
-      });
+      };
+
+      if (notes) {
+        updateData.notes = notes;
+      }
+
+      await updateDoc(doc(db, 'payments', paymentId), updateData);
     } catch (error) {
       console.error('Failed to update payment record:', error);
       throw new Error('Failed to update payment record');
@@ -146,82 +215,34 @@ class PaymentService {
   }
 
   /**
-   * Process payment verification and update records
+   * Mark payment as completed manually (for cash/bank transfer payments)
    */
-  async processPaymentVerification(
-    transactionId: string,
+  async markPaymentAsCompleted(
     bookingId: string,
-    expectedAmount: number
-  ): Promise<{ success: boolean; message: string; verificationData?: FlutterwaveVerificationResponse }> {
+    paymentMethod: string = 'manual',
+    notes?: string
+  ): Promise<void> {
     try {
-      // Verify payment with Flutterwave
-      const verificationData = await this.verifyPayment(transactionId);
+      // Update booking payment status
+      await this.updateBookingPaymentStatus(bookingId, 'paid');
 
-      if (verificationData.status !== 'success') {
-        return {
-          success: false,
-          message: 'Payment verification failed',
-          verificationData,
-        };
-      }
+      // Create payment record
+      await this.createPaymentRecord({
+        bookingId,
+        transactionId: `manual_${Date.now()}`,
+        amount: 0, // Amount should be provided by the caller
+        currency: 'NGN',
+        status: 'successful',
+        paymentMethod,
+        customerEmail: '',
+        customerName: '',
+        customerPhone: '',
+        notes: notes || 'Payment marked as completed manually'
+      });
 
-      const { data } = verificationData;
-
-      // Check if payment was successful
-      if (data.status !== 'successful') {
-        return {
-          success: false,
-          message: `Payment status: ${data.status}`,
-          verificationData,
-        };
-      }
-
-      // Verify amount matches
-      if (data.amount !== expectedAmount) {
-        return {
-          success: false,
-          message: `Amount mismatch. Expected: ${expectedAmount}, Received: ${data.amount}`,
-          verificationData,
-        };
-      }
-
-      // Update booking payment status to paid
-      await this.updateBookingPaymentStatus(bookingId, 'paid', data.flw_ref);
-
-      return {
-        success: true,
-        message: 'Payment verified successfully',
-        verificationData,
-      };
     } catch (error) {
-      console.error('Payment verification process failed:', error);
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : 'Payment verification failed',
-      };
-    }
-  }
-
-  /**
-   * Handle payment webhook (for server-side verification)
-   */
-  async handlePaymentWebhook(webhookData: any): Promise<void> {
-    try {
-      const { event, data } = webhookData;
-
-      if (event === 'charge.completed') {
-        const { tx_ref, status, amount, flw_ref } = data;
-        
-        // Extract booking ID from transaction reference
-        const bookingId = tx_ref.replace('hoteleasy_', '').split('_')[1];
-
-        if (status === 'successful') {
-          await this.updateBookingPaymentStatus(bookingId, 'paid', flw_ref);
-        }
-      }
-    } catch (error) {
-      console.error('Webhook processing failed:', error);
-      throw new Error('Failed to process payment webhook');
+      console.error('Failed to mark payment as completed:', error);
+      throw new Error('Failed to mark payment as completed');
     }
   }
 }

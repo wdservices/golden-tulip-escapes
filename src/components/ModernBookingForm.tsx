@@ -345,13 +345,14 @@ export const ModernBookingForm = ({ selectedBranch, showLocationDropdown = true,
                             {checkInDate ? format(checkInDate, "PPP") : "Select date"}
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
+                        <PopoverContent className="w-auto p-0 booking-popover" align="start">
                           <CalendarComponent
                             mode="single"
                             selected={checkInDate}
                             onSelect={setCheckInDate}
                             disabled={(date) => date < new Date()}
                             initialFocus
+                            className="booking-calendar"
                           />
                         </PopoverContent>
                       </Popover>
@@ -374,13 +375,14 @@ export const ModernBookingForm = ({ selectedBranch, showLocationDropdown = true,
                             {checkOutDate ? format(checkOutDate, "PPP") : "Select date"}
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
+                        <PopoverContent className="w-auto p-0 booking-popover" align="start">
                           <CalendarComponent
                             mode="single"
                             selected={checkOutDate}
                             onSelect={setCheckOutDate}
                             disabled={(date) => date <= (checkInDate || new Date())}
                             initialFocus
+                            className="booking-calendar"
                           />
                         </PopoverContent>
                       </Popover>

@@ -76,7 +76,7 @@ const sampleBookings = [
     specialRequests: "Late checkout requested",
     createdAt: Timestamp.fromDate(new Date()),
     updatedAt: Timestamp.fromDate(new Date()),
-    paymentMethod: 'flutterwave',
+    paymentMethod: 'pending',
     paymentDate: Timestamp.fromDate(new Date('2024-01-10')),
     transactionId: 'tx_sample_001'
   },
@@ -99,7 +99,7 @@ const sampleBookings = [
     specialRequests: "High floor preferred",
     createdAt: Timestamp.fromDate(new Date()),
     updatedAt: Timestamp.fromDate(new Date()),
-    paymentMethod: 'flutterwave',
+    paymentMethod: 'pending',
     paymentDate: Timestamp.fromDate(new Date('2024-01-20')),
     transactionId: 'tx_sample_002'
   },

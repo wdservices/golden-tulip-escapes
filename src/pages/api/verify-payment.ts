@@ -1,74 +1,119 @@
-import express from 'express';
-import { getAuth } from 'firebase-admin/auth';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import { createRequire } from 'module';
-import crypto from 'crypto';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { doc, updateDoc, addDoc, collection, Timestamp } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
+import { PaymentLogger } from '../../utils/paymentLogger';
 
-const require = createRequire(import.meta.url);
-dotenv.config();
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// Initialize Firebase Admin if not already initialized
-if (getApps().length === 0) {
-  const serviceAccount = require('./service-account.json');
-
-  initializeApp({
-    credential: cert(serviceAccount)
-  });
+interface PaystackVerificationResponse {
+  status: boolean;
+  message: string;
+  data: {
+    id: number;
+    domain: string;
+    status: string;
+    reference: string;
+    amount: number;
+    message: string | null;
+    gateway_response: string;
+    paid_at: string;
+    created_at: string;
+    channel: string;
+    currency: string;
+    ip_address: string;
+    metadata: any;
+    log: any;
+    fees: number;
+    fees_split: any;
+    authorization: {
+      authorization_code: string;
+      bin: string;
+      last4: string;
+      exp_month: string;
+      exp_year: string;
+      channel: string;
+      card_type: string;
+      bank: string;
+      country_code: string;
+      brand: string;
+      reusable: boolean;
+      signature: string;
+      account_name: string | null;
+    };
+    customer: {
+      id: number;
+      first_name: string | null;
+      last_name: string | null;
+      email: string;
+      customer_code: string;
+      phone: string | null;
+      metadata: any;
+      risk_action: string;
+      international_format_phone: string | null;
+    };
+    plan: any;
+    split: any;
+    order_id: any;
+    paidAt: string;
+    createdAt: string;
+    requested_amount: number;
+    pos_transaction_data: any;
+    source: any;
+    fees_breakdown: any;
+  };
 }
 
-// Initialize Firestore
-const db = getFirestore();
+interface BookingData {
+  userId: string;
+  guestName: string;
+  guestEmail: string;
+  guestPhone: string;
+  branchId: string;
+  branchName: string;
+  roomType: string;
+  roomId: string;
+  checkInDate: Date;
+  checkOutDate: Date;
+  adults: number;
+  children: number;
+  nights: number;
+  amount: number;
+  totalAmount: number;
+  specialRequests: string;
+  paystackRef: string;
+  transactionId: string;
+  paymentMethod: string;
+}
 
-app.post('/api/init-admin', async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
-
-    // Get user by email
-    const userRecord = await getAuth().getUserByEmail(email);
-
-    // Set admin role claim
-    await getAuth().setCustomUserClaims(userRecord.uid, { role: 'admin' });
-
-    return res.status(200).json({ message: 'Admin role assigned successfully' });
-  } catch (error) {
-    console.error('Error initializing admin:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ 
+      status: 'error', 
+      message: 'Method not allowed' 
+    });
   }
-});
 
-// Payment verification endpoint
-app.post('/api/verify-payment', async (req, res) => {
+  const { reference, bookingData } = req.body;
+
+  if (!reference) {
+    return res.status(400).json({ 
+      status: 'error', 
+      message: 'Payment reference is required' 
+    });
+  }
+
+  const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
+
+  if (!PAYSTACK_SECRET_KEY) {
+    console.error('Paystack secret key not configured');
+    return res.status(500).json({ 
+      status: 'error', 
+      message: 'Payment system not configured' 
+    });
+  }
+
   try {
-    const { reference, bookingData } = req.body;
-
-    if (!reference) {
-      return res.status(400).json({ 
-        status: 'error', 
-        message: 'Payment reference is required' 
-      });
-    }
-
-    const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
-
-    if (!PAYSTACK_SECRET_KEY) {
-      console.error('Paystack secret key not configured');
-      return res.status(500).json({ 
-        status: 'error', 
-        message: 'Payment system not configured' 
-      });
-    }
-
     console.log(`Verifying payment with reference: ${reference}`);
     
     // Verify payment with Paystack using the secret key
@@ -86,10 +131,18 @@ app.post('/api/verify-payment', async (req, res) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Paystack API error: ${response.status} - ${errorText}`);
+      
+      // Log the API error
+      await PaymentLogger.logVerificationFailed(
+        reference, 
+        `Paystack API error: ${response.status} - ${errorText}`,
+        { status: response.status, errorText }
+      );
+      
       throw new Error(`Paystack API error: ${response.status}`);
     }
 
-    const verificationData = await response.json();
+    const verificationData: PaystackVerificationResponse = await response.json();
     console.log('Paystack verification response:', verificationData);
 
     if (verificationData.status && verificationData.data.status === 'success') {
@@ -140,8 +193,12 @@ app.post('/api/verify-payment', async (req, res) => {
           paystackResponse: verificationData.data
         };
 
-        const docRef = await db.collection('bookings').add(bookingRecord);
+        const docRef = await addDoc(collection(db, 'bookings'), bookingRecord);
         console.log('Booking created successfully with ID:', docRef.id);
+
+        // Log successful verification and booking creation
+        await PaymentLogger.logVerificationSuccess(reference, verificationData.data, 'backend', docRef.id);
+        await PaymentLogger.logBookingCreated(reference, docRef.id, 'backend');
 
         // Also create a payment record for audit
         const paymentRecord = {
@@ -164,7 +221,7 @@ app.post('/api/verify-payment', async (req, res) => {
           verificationData: verificationData.data
         };
 
-        await db.collection('payments').add(paymentRecord);
+        await addDoc(collection(db, 'payments'), paymentRecord);
         console.log('Payment record created successfully');
 
         return res.status(200).json({ 
@@ -181,8 +238,15 @@ app.post('/api/verify-payment', async (req, res) => {
           }
         });
 
-      } catch (dbError) {
+      } catch (dbError: any) {
         console.error('Database error while creating booking:', dbError);
+        
+        // Log database error
+        await PaymentLogger.logBookingFailed(reference, dbError.message, { 
+          bookingData, 
+          verificationData: verificationData.data 
+        });
+        
         return res.status(500).json({ 
           status: 'error', 
           message: 'Payment verified but failed to create booking record',
@@ -194,6 +258,13 @@ app.post('/api/verify-payment', async (req, res) => {
       // Payment failed or not successful
       console.log('Payment verification failed:', verificationData);
       
+      // Log verification failure
+      await PaymentLogger.logVerificationFailed(
+        reference, 
+        verificationData.message || 'Payment verification failed',
+        verificationData.data
+      );
+      
       return res.status(400).json({ 
         status: 'failed', 
         message: verificationData.message || 'Payment verification failed',
@@ -201,8 +272,11 @@ app.post('/api/verify-payment', async (req, res) => {
       });
     }
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Payment verification error:', error);
+    
+    // Log common errors with context
+    await PaymentLogger.logCommonErrors(reference, error, 'Payment verification');
     
     return res.status(500).json({ 
       status: 'error', 
@@ -210,69 +284,4 @@ app.post('/api/verify-payment', async (req, res) => {
       error: error.toString()
     });
   }
-});
-
-// Paystack webhook endpoint
-app.post('/api/paystack/webhook', async (req, res) => {
-  try {
-    // Get the raw body for signature verification
-    const payload = JSON.stringify(req.body);
-    const signature = req.headers['x-paystack-signature'];
-
-    if (!signature) {
-      console.error('No Paystack signature found in webhook');
-      return res.status(400).json({ 
-        status: 'error', 
-        message: 'No signature found' 
-      });
-    }
-
-    // Verify the webhook signature
-    const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
-    const hash = crypto
-      .createHmac('sha512', PAYSTACK_SECRET_KEY)
-      .update(payload, 'utf8')
-      .digest('hex');
-
-    if (hash !== signature) {
-      console.error('Invalid Paystack webhook signature');
-      return res.status(400).json({ 
-        status: 'error', 
-        message: 'Invalid signature' 
-      });
-    }
-
-    const webhookEvent = req.body;
-    console.log('Received Paystack webhook:', webhookEvent.event, webhookEvent.data.reference);
-
-    // Handle different webhook events
-    if (webhookEvent.event === 'charge.success' && webhookEvent.data.status === 'success') {
-      // Process successful payment
-      console.log('Processing successful payment webhook:', webhookEvent.data.reference);
-      
-      return res.status(200).json({ 
-        status: 'success', 
-        message: 'Webhook processed successfully' 
-      });
-    }
-
-    return res.status(200).json({ 
-      status: 'success', 
-      message: 'Webhook received' 
-    });
-
-  } catch (error) {
-    console.error('Webhook processing error:', error);
-    
-    return res.status(500).json({ 
-      status: 'error', 
-      message: 'Webhook processing failed',
-      error: error.message 
-    });
-  }
-});
-
-const PORT = process.env.API_PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`API server running on port ${PORT}`);
-});
+}

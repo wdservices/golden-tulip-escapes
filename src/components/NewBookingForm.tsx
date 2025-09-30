@@ -17,7 +17,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { collection, addDoc, Timestamp, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { FlutterwavePaymentModal } from "@/components/payment/FlutterwavePaymentModal";
+import { PaystackPaymentModal } from "@/components/payment/PaystackPaymentModal";
+
 
 interface UserProfile {
   uid: string;
@@ -163,7 +164,7 @@ export const NewBookingForm = ({
        return;
      }
 
-     // Open payment modal instead of directly creating booking
+     // Open Paystack payment modal
      setShowPaymentModal(true);
   };
 
@@ -213,7 +214,7 @@ export const NewBookingForm = ({
                         value={formData.firstName}
                         onChange={handleInputChange}
                         required
-                        className="h-12 bg-white/90 border-white/30 text-white placeholder:text-white/50 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
+                        className="h-12 bg-white/90 border-white/30 text-black placeholder:text-gray-500 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
                         placeholder="Enter your first name"
                       />
                     </div>
@@ -227,7 +228,7 @@ export const NewBookingForm = ({
                         value={formData.lastName}
                         onChange={handleInputChange}
                         required
-                        className="h-12 bg-white/90 border-white/30 text-white placeholder:text-white/50 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
+                        className="h-12 bg-white/90 border-white/30 text-black placeholder:text-gray-500 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
                         placeholder="Enter your last name"
                       />
                     </div>
@@ -244,7 +245,7 @@ export const NewBookingForm = ({
                         value={formData.email}
                         onChange={handleInputChange}
                         required
-                        className="h-12 bg-white/90 border-white/30 text-white placeholder:text-white/50 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
+                        className="h-12 bg-white/90 border-white/30 text-black placeholder:text-gray-500 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
                         placeholder="your.email@example.com"
                       />
                     </div>
@@ -259,8 +260,8 @@ export const NewBookingForm = ({
                         value={formData.phone}
                         onChange={handleInputChange}
                         required
-                        className="h-12 bg-white/90 border-white/30 text-white placeholder:text-white/50 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
-                        placeholder="+1 (555) 123-4567"
+                        className="h-12 bg-white/90 border-white/30 text-black placeholder:text-gray-500 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
+                        placeholder="+234 (xxx) xxx-xxxx"
                       />
                     </div>
                   </div>
@@ -277,24 +278,24 @@ export const NewBookingForm = ({
                       Select Branch *
                     </Label>
                     <Select value={formData.location} onValueChange={(value) => setFormData(prev => ({ ...prev, location: value }))}>
-                      <SelectTrigger className="h-12 bg-white/90 border-white/30 text-white focus:ring-yellow-400 focus:border-yellow-400">
+                      <SelectTrigger className="h-12 bg-white/90 border-white/30 text-black focus:ring-yellow-400 focus:border-yellow-400">
                         <SelectValue placeholder="Choose your preferred location" />
                       </SelectTrigger>
                       <SelectContent className="bg-white/95 backdrop-blur-md border-white/30 shadow-xl">
                         {branchesLoading ? (
-                          <SelectItem value="loading" disabled className="text-white/70">
+                          <SelectItem value="loading" disabled className="text-gray-500">
                             <div className="flex items-center">
                               <Loader2 className="w-4 h-4 animate-spin mr-2" />
                               Loading branches...
                             </div>
                           </SelectItem>
                         ) : branches.length === 0 ? (
-                          <SelectItem value="no-locations" disabled className="text-white/70">
+                          <SelectItem value="no-locations" disabled className="text-gray-500">
                             No locations available
                           </SelectItem>
                         ) : (
                           branches.map((branch) => (
-                            <SelectItem key={branch.id} value={branch.id} className="text-white hover:bg-yellow-400/20 focus:bg-yellow-400/30">
+                            <SelectItem key={branch.id} value={branch.id} className="text-black hover:bg-yellow-400/20 focus:bg-yellow-400/30">
                               <div className="flex items-center">
                                 <MapPin className="w-4 h-4 text-blue-600 mr-2" />
                                 {branch.name} - {branch.location}
@@ -322,7 +323,7 @@ export const NewBookingForm = ({
                       onValueChange={(value) => setFormData(prev => ({ ...prev, roomType: value }))}
                       disabled={!formData.location || roomsLoading}
                     >
-                      <SelectTrigger className="h-12 bg-white/90 border-white/30 text-white focus:ring-yellow-400 focus:border-yellow-400">
+                      <SelectTrigger className="h-12 bg-white/90 border-white/30 text-black focus:ring-yellow-400 focus:border-yellow-400">
                         <SelectValue placeholder={
                           !formData.location 
                             ? "Please select a branch first" 
@@ -333,7 +334,7 @@ export const NewBookingForm = ({
                       </SelectTrigger>
                       <SelectContent className="bg-white/95 backdrop-blur-md border-white/30 shadow-xl">
                         {roomsLoading ? (
-                          <SelectItem value="loading" disabled className="text-white/70">
+                          <SelectItem value="loading" disabled className="text-gray-500">
                             <div className="flex items-center">
                               <Loader2 className="w-4 h-4 animate-spin mr-2" />
                               Loading room types...
@@ -346,12 +347,12 @@ export const NewBookingForm = ({
                             </div>
                           </SelectItem>
                         ) : roomTypes.length === 0 ? (
-                          <SelectItem value="no-rooms" disabled className="text-white/70">
+                          <SelectItem value="no-rooms" disabled className="text-gray-500">
                             No room types available for this branch
                           </SelectItem>
                         ) : (
                           roomTypes.map((room) => (
-                            <SelectItem key={room.id} value={room.id} className="text-white hover:bg-yellow-400/20 focus:bg-yellow-400/30">
+                            <SelectItem key={room.id} value={room.id} className="text-black hover:bg-yellow-400/20 focus:bg-yellow-400/30">
                               <div className="flex items-center justify-between w-full">
                                 <div className="flex items-center">
                                   <Bed className="w-4 h-4 text-blue-600 mr-2" />
@@ -388,7 +389,7 @@ export const NewBookingForm = ({
                         onChange={handleInputChange}
                         min={new Date().toISOString().split('T')[0]}
                         required
-                        className="h-12 bg-white/90 border-white/30 text-white focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
+                        className="h-12 bg-white/90 border-white/30 text-black focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
                       />
                     </div>
                     <div className="space-y-2">
@@ -403,7 +404,7 @@ export const NewBookingForm = ({
                         onChange={handleInputChange}
                         min={formData.checkIn || new Date().toISOString().split('T')[0]}
                         required
-                        className="h-12 bg-white/90 border-white/30 text-white focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
+                        className="h-12 bg-white/90 border-white/30 text-black focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
                       />
                     </div>
                   </div>
@@ -429,7 +430,7 @@ export const NewBookingForm = ({
                         value={formData.adults}
                         onChange={handleInputChange}
                         required
-                        className="h-12 bg-white/90 border-white/30 text-white focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
+                        className="h-12 bg-white/90 border-white/30 text-black focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
                       />
                     </div>
                     <div className="space-y-2">
@@ -444,7 +445,7 @@ export const NewBookingForm = ({
                         max="10"
                         value={formData.children}
                         onChange={handleInputChange}
-                        className="h-12 bg-white/90 border-white/30 text-white focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
+                        className="h-12 bg-white/90 border-white/30 text-black focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
                       />
                     </div>
                   </div>
@@ -466,7 +467,7 @@ export const NewBookingForm = ({
                       value={formData.specialRequests}
                       onChange={handleInputChange}
                       rows={4}
-                      className="bg-white/90 border-white/30 text-white placeholder:text-white/50 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white resize-none"
+                      className="bg-white/90 border-white/30 text-black placeholder:text-gray-500 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white resize-none"
                       placeholder="Any special requests or preferences for your stay..."
                     />
                   </div>
@@ -589,13 +590,13 @@ export const NewBookingForm = ({
         </div>
       </div>
 
-      {/* Flutterwave Payment Modal */}
+      {/* Paystack Payment Modal */}
       {showPaymentModal && (
-        <FlutterwavePaymentModal
+        <PaystackPaymentModal
           isOpen={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}
           bookingData={{
-            roomType: formData.roomType,
+            roomType: roomTypes.find(room => room.id === formData.roomType)?.name || '',
             roomPrice: roomTypes.find(room => room.id === formData.roomType)?.price || 0,
             checkInDate: new Date(formData.checkIn),
             checkOutDate: new Date(formData.checkOut),
@@ -626,6 +627,6 @@ export const NewBookingForm = ({
           }}
         />
       )}
-    </div>
-  );
+      </div>
+    );
 };

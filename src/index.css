@@ -199,6 +199,40 @@
     background-clip: text;
   }
 
+  /* Custom Calendar Styling for Booking Form */
+  .booking-calendar {
+    @apply bg-white/10 backdrop-blur-md border-white/20 text-white;
+  }
+
+  .booking-calendar .rdp-caption_label {
+    @apply text-yellow-400 font-semibold;
+  }
+
+  .booking-calendar .rdp-head_cell {
+    @apply text-blue-200;
+  }
+
+  .booking-calendar .rdp-day {
+    @apply text-white hover:bg-yellow-400/20 hover:text-yellow-400;
+  }
+
+  .booking-calendar .rdp-day_selected {
+    @apply bg-yellow-400 text-blue-900 hover:bg-yellow-300;
+  }
+
+  .booking-calendar .rdp-day_today {
+    @apply bg-blue-500/30 text-yellow-400;
+  }
+
+  .booking-calendar .rdp-nav_button {
+    @apply text-yellow-400 hover:bg-yellow-400/20;
+  }
+
+  /* Custom Popover Styling for Booking Form */
+  .booking-popover {
+    @apply bg-white/10 backdrop-blur-md border-white/20 text-white shadow-xl;
+  }
+
   /* Glass Navigation */
   .glass-nav {
     @apply bg-background/80 backdrop-blur-lg border-b border-border/20;
