@@ -210,9 +210,9 @@ export const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ 
-                  reference: response.reference,
-                  bookingData: {
-                    userId: currentUser?.uid || '',
+                    reference: response.reference,
+                    bookingData: {
+                      userId: currentUser?.id || currentUser?.uid || '',
                     guestName: bookingData.guestName,
                     guestEmail: bookingData.guestEmail,
                     guestPhone: bookingData.guestPhone,

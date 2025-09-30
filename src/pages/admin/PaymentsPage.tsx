@@ -4,28 +4,41 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Download, CreditCard, DollarSign, Building } from "lucide-react";
+import { Search, Filter, Download, CreditCard, DollarSign, Building, Loader2, CheckCircle, XCircle, Plus, Banknote } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getBranches } from "@/services/branchService";
+import { collection, query, orderBy, getDocs, Timestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { formatCurrency } from "@/utils/currencyUtils";
 
 
-type PaymentStatus = 'completed' | 'pending' | 'failed' | 'refunded';
-type PaymentMethod = 'credit_card' | 'paypal' | 'bank_transfer' | 'cash';
+type PaymentStatus = 'successful' | 'pending' | 'failed' | 'refunded';
+type PaymentMethod = 'paystack' | 'credit_card' | 'bank_transfer' | 'cash';
 
 interface Payment {
   id: string;
   bookingId: string;
   guestName: string;
+  customerEmail: string;
   amount: number;
+  currency: string;
   date: string;
   status: PaymentStatus;
   method: PaymentMethod;
+  channel: string;
+  paystackTransactionId?: number;
+  transactionId: string;
+  gatewayResponse?: string;
+  fees: number;
   receiptUrl?: string;
 }
 
 export const PaymentsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentBranchName, setCurrentBranchName] = useState<string>("");
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Get auth context for branch filtering
   const { activeBranchId } = useAuth();
@@ -49,24 +62,76 @@ export const PaymentsPage = () => {
     fetchBranchName();
   }, [activeBranchId]);
   
-  // Mock data - replace with actual API call
-  const [payments] = useState<Payment[]>([
-    {
-      id: "PAY-001",
-      bookingId: "BK-2024-001",
-      guestName: "John Doe",
-      amount: 1200,
-      date: "2024-01-15T14:30:00Z",
-      status: "completed",
-      method: "credit_card",
-      receiptUrl: "#"
-    },
-    // Add more mock data as needed
-  ]);
+  // Fetch real payment data from Firestore
+  useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const paymentsRef = collection(db, 'payments');
+        const q = query(paymentsRef, orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        
+        const paymentsData: Payment[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          
+          // Convert Firestore Timestamp to ISO string
+          const getDateString = (timestamp: any) => {
+            if (timestamp && typeof timestamp.toDate === 'function') {
+              return timestamp.toDate().toISOString();
+            }
+            return new Date().toISOString();
+          };
+          
+          const payment: Payment = {
+            id: doc.id,
+            bookingId: data.bookingId || '',
+            guestName: data.customerName || 'Unknown Guest',
+            customerEmail: data.customerEmail || '',
+            amount: data.amount || 0,
+            currency: data.currency || 'NGN',
+            date: getDateString(data.createdAt || data.paidAt),
+            status: data.status || 'pending',
+            method: data.paymentMethod || 'paystack',
+            channel: data.channel || 'card',
+            paystackTransactionId: data.paystackTransactionId,
+            transactionId: data.transactionId || '',
+            gatewayResponse: data.gatewayResponse || '',
+            fees: data.fees || 0,
+          };
+          
+          paymentsData.push(payment);
+        });
+        
+        setPayments(paymentsData);
+        console.log(`Loaded ${paymentsData.length} payments from Firestore`);
+        
+      } catch (error) {
+        console.error('Error fetching payments:', error);
+        setError('Failed to load payment data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchPayments();
+  }, []);
+
+  // Calculate payment statistics from real data
+  const paymentStats = {
+    totalRevenue: payments
+      .filter(p => p.status === 'successful')
+      .reduce((sum, p) => sum + p.amount, 0),
+    pendingPayments: payments.filter(p => p.status === 'pending').length,
+    successfulTransactions: payments.filter(p => p.status === 'successful').length,
+    failedTransactions: payments.filter(p => p.status === 'failed').length,
+  };
 
   const getStatusVariant = (status: PaymentStatus) => {
     switch (status) {
-      case 'completed':
+      case 'successful':
         return 'bg-green-500/10 text-green-400 border-green-500/20';
       case 'pending':
         return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
@@ -81,12 +146,12 @@ export const PaymentsPage = () => {
 
   const getMethodIcon = (method: PaymentMethod) => {
     switch (method) {
+      case 'paystack':
+        return <CreditCard className="h-4 w-4 mr-2" />;
       case 'credit_card':
         return <CreditCard className="h-4 w-4 mr-2" />;
-      case 'paypal':
-        return <DollarSign className="h-4 w-4 mr-2" />;
       case 'bank_transfer':
-        return <DollarSign className="h-4 w-4 mr-2" />;
+        return <Building className="h-4 w-4 mr-2" />;
       case 'cash':
         return <DollarSign className="h-4 w-4 mr-2" />;
       default:
@@ -159,40 +224,93 @@ export const PaymentsPage = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-white">Payment ID</TableHead>
-                <TableHead className="text-white">Booking</TableHead>
-                <TableHead className="text-white">Guest</TableHead>
-                <TableHead className="text-white">Date</TableHead>
-                <TableHead className="text-white">Method</TableHead>
-                <TableHead className="text-white">Amount</TableHead>
-                <TableHead className="text-white">Status</TableHead>
-                <TableHead className="text-right text-white">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {payments.map((payment) => (
-                <TableRow key={payment.id}>
-                  <TableCell className="font-medium text-white">{payment.id}</TableCell>
-                  <TableCell className="text-white">{payment.bookingId}</TableCell>
-                  <TableCell className="text-white">{payment.guestName}</TableCell>
-                  <TableCell className="text-white">{new Date(payment.date).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-white">
-                    <div className="flex items-center">
-                      {getMethodIcon(payment.method)}
-                      <span>{formatMethod(payment.method)}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-white">${payment.amount.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Badge className={getStatusVariant(payment.status)}>
-                      {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" className="mr-2 text-white hover:text-yellow-400">View</Button>
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="flex flex-col items-center space-y-4">
+                <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
+                <p className="text-white/70">Loading payments...</p>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <p className="text-red-400 mb-2">Error loading payments</p>
+                <p className="text-white/70">{error}</p>
+              </div>
+            </div>
+          ) : payments.length === 0 ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <CreditCard className="w-12 h-12 mx-auto mb-4 text-white/50" />
+                <p className="text-white/70">No payments found</p>
+                <p className="text-white/50 text-sm">Payments will appear here when customers complete transactions</p>
+              </div>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-white">Transaction ID</TableHead>
+                  <TableHead className="text-white">Booking</TableHead>
+                  <TableHead className="text-white">Guest</TableHead>
+                  <TableHead className="text-white">Date</TableHead>
+                  <TableHead className="text-white">Method</TableHead>
+                  <TableHead className="text-white">Channel</TableHead>
+                  <TableHead className="text-white">Amount</TableHead>
+                  <TableHead className="text-white">Fees</TableHead>
+                  <TableHead className="text-white">Status</TableHead>
+                  <TableHead className="text-right text-white">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {payments.filter(payment => 
+                  payment.guestName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  payment.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  payment.transactionId.toLowerCase().includes(searchTerm.toLowerCase())
+                ).map((payment) => (
+                  <TableRow key={payment.id}>
+                    <TableCell className="font-medium text-white">
+                      <div className="text-sm">
+                        {payment.transactionId.substring(0, 12)}...
+                      </div>
+                      {payment.paystackTransactionId && (
+                        <div className="text-xs text-white/50">
+                          ID: {payment.paystackTransactionId}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-white">
+                      <div className="text-sm">{payment.bookingId.substring(0, 12)}...</div>
+                    </TableCell>
+                    <TableCell className="text-white">
+                      <div className="text-sm">{payment.guestName}</div>
+                      <div className="text-xs text-white/50">{payment.customerEmail}</div>
+                    </TableCell>
+                    <TableCell className="text-white">
+                      {new Date(payment.date).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-white">
+                      <div className="flex items-center">
+                        {getMethodIcon(payment.method)}
+                        <span>{formatMethod(payment.method)}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-white capitalize">
+                      {payment.channel}
+                    </TableCell>
+                    <TableCell className="text-white">
+                      {formatCurrency(payment.amount, payment.currency)}
+                    </TableCell>
+                    <TableCell className="text-white">
+                      {formatCurrency(payment.fees, payment.currency)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getStatusVariant(payment.status)}>
+                        {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm" className="mr-2 text-white hover:text-yellow-400">View</Button>
                     {payment.receiptUrl && (
                       <Button variant="ghost" size="sm" asChild className="text-white hover:text-yellow-400">
                         <a href={payment.receiptUrl} target="_blank" rel="noopener noreferrer">
@@ -203,8 +321,9 @@ export const PaymentsPage = () => {
                   </TableCell>
                 </TableRow>
               ))}
-            </TableBody>
-          </Table>
+               </TableBody>
+             </Table>
+           )}
         </CardContent>
       </Card>
       
@@ -214,10 +333,12 @@ export const PaymentsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-white/70">Total Revenue</p>
-                <p className="text-2xl font-bold text-yellow-400">$45,231.89</p>
+                <p className="text-2xl font-bold text-yellow-400">
+                  {isLoading ? '...' : formatCurrency(paymentStats.totalRevenue, 'NGN')}
+                </p>
               </div>
               <div className="h-12 w-12 rounded-full bg-yellow-400/20 flex items-center justify-center">
-                <DollarSign className="h-6 w-6 text-yellow-400" />
+                <Banknote className="h-6 w-6 text-yellow-400" />
               </div>
             </div>
           </CardContent>
@@ -227,7 +348,9 @@ export const PaymentsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-white/70">Pending Payments</p>
-                <p className="text-2xl font-bold text-yellow-400">12</p>
+                <p className="text-2xl font-bold text-yellow-400">
+                  {isLoading ? '...' : paymentStats.pendingPayments}
+                </p>
               </div>
               <div className="h-12 w-12 rounded-full bg-orange-400/20 flex items-center justify-center">
                 <CreditCard className="h-6 w-6 text-orange-400" />
@@ -240,7 +363,9 @@ export const PaymentsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-white/70">Successful Transactions</p>
-                <p className="text-2xl font-bold text-yellow-400">573</p>
+                <p className="text-2xl font-bold text-yellow-400">
+                  {isLoading ? '...' : paymentStats.successfulTransactions}
+                </p>
               </div>
               <div className="h-12 w-12 rounded-full bg-green-400/20 flex items-center justify-center">
                 <CheckCircle className="h-6 w-6 text-green-400" />
@@ -253,7 +378,9 @@ export const PaymentsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-white/70">Failed Transactions</p>
-                <p className="text-2xl font-bold text-yellow-400">12</p>
+                <p className="text-2xl font-bold text-yellow-400">
+                  {isLoading ? '...' : paymentStats.failedTransactions}
+                </p>
               </div>
               <div className="h-12 w-12 rounded-full bg-red-400/20 flex items-center justify-center">
                 <XCircle className="h-6 w-6 text-red-400" />
@@ -265,67 +392,5 @@ export const PaymentsPage = () => {
     </div>
   );
 };
-
-// Add these missing icon components
-function CheckCircle(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-      <path d="m9 11 3 3L22 4" />
-    </svg>
-  )
-}
-
-function XCircle(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <path d="m15 9-6 6" />
-      <path d="m9 9 6 6" />
-    </svg>
-  )
-}
-
-function Plus(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 12h14" />
-      <path d="M12 5v14" />
-    </svg>
-  )
-}
 
 export default PaymentsPage;

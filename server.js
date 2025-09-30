@@ -101,8 +101,15 @@ app.post('/api/verify-payment', async (req, res) => {
         const paidAmount = verificationData.data.amount / 100;
         
         // Create booking record in Firestore
-        const bookingRecord = {
-          userId: bookingData?.userId || '',
+         // Ensure userId is never empty - use customer email as fallback identifier
+         const userId = bookingData?.userId || verificationData.data.customer.email || 'unknown';
+         
+         if (!bookingData?.userId) {
+           console.warn('Warning: No userId provided in booking data, using fallback:', userId);
+         }
+         
+          const bookingRecord = {
+            userId: userId,
           guestName: bookingData?.guestName || verificationData.data.customer.first_name + ' ' + verificationData.data.customer.last_name || '',
           guestEmail: bookingData?.guestEmail || verificationData.data.customer.email,
           guestPhone: bookingData?.guestPhone || verificationData.data.customer.phone || '',
