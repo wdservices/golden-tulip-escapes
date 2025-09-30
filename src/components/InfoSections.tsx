@@ -7,6 +7,7 @@ import luxurySuite from "@/assets/luxury-suite.jpg";
 import restaurant from "@/assets/restaurant.jpg";
 import spa from "@/assets/spa.jpg";
 import { EventDetailsDialog } from "@/components/events/EventDetailsDialog";
+import { roomTypes } from '@/data/rooms';
 
 // Event data
 const eventTypes = [
@@ -243,81 +244,7 @@ export const InfoSections = () => {
   const handleCloseDialog = () => {
     setSelectedEvent(null);
   };
-  // Import room types from the rooms data file
-  const roomTypes = [
-    {
-      id: 'standard-room',
-      name: 'Standard Room',
-      price: '₦108,450',
-      features: ['King-size bed', 'City view', 'Free Wi-Fi', 'Concierge services'],
-      image: luxurySuite,
-      description: 'Affordable comfort with modern amenities perfect for business and leisure travelers in Port Harcourt.',
-      longDescription: 'Our Standard Rooms offer a perfect blend of comfort and style. Featuring a king-size bed, modern furnishings, and city views, these rooms are designed for your ultimate relaxation. The en-suite bathroom includes premium toiletries and a rain shower.'
-    },
-    {
-      id: 'superior-room',
-      name: 'Superior Room',
-      price: '₦121,860',
-      features: ['King-size bed', 'City view', 'Free Wi-Fi', 'Concierge services'],
-      image: luxurySuite,
-      description: 'Spacious design with upgraded features, blending elegance and convenience for a relaxing stay.',
-      longDescription: 'The Superior Room offers a spacious design with upgraded features, perfect for both work and relaxation. Enjoy city views, a king-size bed with premium linens, and a luxurious bathroom with a rain shower. The room also features a work desk and a comfortable seating area.'
-    },
-    {
-      id: 'premium-standard-room',
-      name: 'Premium Standard Room',
-      price: '₦122,940',
-      features: ['King-size bed', 'City view', 'Free Wi-Fi', 'Concierge services'],
-      image: luxurySuite,
-      description: 'Enjoy premium comfort with enhanced amenities and stylish décor at an unbeatable value.',
-      longDescription: 'Enjoy premium comfort with enhanced amenities and stylish décor at an unbeatable value. Our Premium Standard Rooms feature a king-size bed, city views, and modern amenities to ensure a comfortable and productive stay.'
-    },
-    {
-      id: 'premium-superior-room',
-      name: 'Premium Superior Room',
-      price: '₦139,230',
-      features: ['King-size bed', 'City view', 'Free Wi-Fi', 'Concierge services'],
-      image: luxurySuite,
-      description: 'Refined interiors, extra space, and thoughtful touches designed for longer, more relaxing stays.',
-      longDescription: 'Refined interiors, extra space, and thoughtful touches designed for longer, more relaxing stays. Our Premium Superior Rooms offer a king-size bed, city views, and premium amenities to ensure a comfortable and enjoyable stay.'
-    },
-    {
-      id: 'deluxe-room',
-      name: 'Deluxe',
-      price: '₦177,480',
-      features: ['King-size bed', 'City view', 'Free Wi-Fi', 'Concierge services'],
-      image: luxurySuite,
-      description: 'Luxury accommodation with sophisticated details, ideal for travelers seeking comfort and class.',
-      longDescription: 'Luxury accommodation with sophisticated details, ideal for travelers seeking comfort and class. Our Deluxe Rooms feature a king-size bed, city views, and premium amenities to ensure a luxurious and comfortable stay.'
-    },
-    {
-      id: 'premium-diplomatic-suite',
-      name: 'Premium Diplomatic Suite',
-      price: '₦245,070',
-      features: ['King-size bed', 'City view', 'Free Wi-Fi', 'Concierge services'],
-      image: luxurySuite,
-      description: 'Exclusive setting with top-tier facilities, created for executives and distinguished guests.',
-      longDescription: 'Exclusive setting with top-tier facilities, created for executives and distinguished guests. Our Premium Diplomatic Suite features a king-size bed, city views, separate living room area, and office space to ensure a productive and comfortable stay.'
-    },
-    {
-      id: 'ambassadorial-suite',
-      name: 'Ambassadorial Suite',
-      price: '₦354,150',
-      features: ['King-size bed', 'City view', 'Free Wi-Fi', 'Concierge services'],
-      image: luxurySuite,
-      description: 'Expansive suite offering refined luxury, separate lounge, and premium hospitality for elite travelers.',
-      longDescription: 'Expansive suite offering refined luxury, separate lounge, and premium hospitality for elite travelers. Our Ambassadorial Suite features a king-size bed, city views, separate living area, and office space to ensure a luxurious and comfortable stay.'
-    },
-    {
-      id: 'presidential-suite',
-      name: 'Presidential Suite',
-      price: '₦520,650',
-      features: ['King-size bed', 'City view', 'Free Wi-Fi', 'Concierge services'],
-      image: luxurySuite,
-      description: 'The ultimate in Golden Tulip Port Harcourt hotel. Luxurious, spacious, elegant, and designed for unforgettable stays.',
-      longDescription: 'The ultimate in Golden Tulip Port Harcourt hotel. Luxurious, spacious, elegant, and designed for unforgettable stays. Our Presidential Suite features a king-size bed, city views, luxury living space, and office space to ensure an unforgettable and comfortable stay.'
-    }
-  ];
+
 
   const diningOptions = [
     {
@@ -418,21 +345,21 @@ export const InfoSections = () => {
                   <Card className="brand-card group hover-golden transition-all duration-500 h-full flex flex-col">
                     <div className="relative overflow-hidden rounded-t-2xl flex-grow">
                       <img
-                        src={room.image}
+                        src={luxurySuite}
                         alt={room.name}
                         className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
                     <div className="p-6 flex flex-col flex-grow">
-                      <div className="text-2xl font-bold text-golden-yellow mb-2">{room.price}<span className="text-sm font-normal text-foreground/60">/night</span></div>
+                      <div className="text-2xl font-bold text-golden-yellow mb-2">₦{room.price.toLocaleString()}<span className="text-sm font-normal text-foreground/60">/night</span></div>
                       <h3 className="text-xl font-semibold mb-3 text-foreground">
                         {room.name}
                       </h3>
                       <ul className="space-y-2 mb-6 flex-grow">
-                        {room.features.map((feature, idx) => (
+                        {room.amenities.slice(0, 4).map((amenity, idx) => (
                           <li key={idx} className="text-sm text-foreground/70 flex items-start">
                             <span className="inline-block w-1.5 h-1.5 rounded-full bg-golden-yellow mt-2 mr-2 flex-shrink-0"></span>
-                            <span>{feature}</span>
+                            <span>{amenity}</span>
                           </li>
                         ))}
                       </ul>
