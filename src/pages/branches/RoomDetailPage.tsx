@@ -5,16 +5,8 @@ import { Bed, Users, ArrowLeft, Check, Star, ArrowRight } from 'lucide-react';
 import { getBranchById } from '@/services/branchService';
 import { Branch } from '@/types/branch';
 import { Panorama360Viewer } from '@/components/ui/Panorama360Viewer';
-
-interface RoomType {
-  name: string;
-  description: string;
-  priceRange: string;
-  capacity: number;
-  features?: string[];
-  rating?: number;
-  image360?: string;
-}
+import { roomTypes as updatedRoomTypes } from '@/data/rooms';
+import { RoomType } from '@/types/room';
 
 export const RoomDetailPage = () => {
   const { branchId, roomId } = useParams<{ branchId: string; roomId: string }>();
@@ -41,9 +33,9 @@ export const RoomDetailPage = () => {
 
       setBranch(branchData);
 
-      // Find the room by its URL-friendly name
+      // Find the room by its URL-friendly name using updated room data
       const decodedRoomId = roomId.replace(/-/g, ' ');
-      const roomData = branchData.roomTypes?.find(
+      const roomData = updatedRoomTypes.find(
         (r) => r.name.toLowerCase() === decodedRoomId.toLowerCase()
       );
 
@@ -53,14 +45,14 @@ export const RoomDetailPage = () => {
         return;
       }
 
-      // Add placeholder 360 image for demo purposes
-      const roomWithImage = {
+      // Use the updated room data with VR tour URL and rating
+      const roomWithExtras = {
         ...roomData,
         rating: 4.8, // Sample rating
-        image360: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070', // Placeholder
+        image360: roomData.vrTourUrl || 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070', // Use VR tour URL or placeholder
       };
 
-      setRoom(roomWithImage);
+      setRoom(roomWithExtras);
     } catch (err) {
       console.error('Error fetching data:', err);
       setError('Failed to load room information');
@@ -113,7 +105,7 @@ export const RoomDetailPage = () => {
                 <span className="font-medium text-white">{room.rating}</span>
               </div>
             </div>
-            <p className="text-xl text-white/80 mt-2">{room.priceRange}</p>
+            <p className="text-xl text-white/80 mt-2">₦{room.price?.toLocaleString()}/night</p>
           </div>
         </div>
       </section>
@@ -131,12 +123,12 @@ export const RoomDetailPage = () => {
                 <span>Accommodates up to {room.capacity} guests</span>
               </div>
               
-              <h3 className="text-xl font-semibold mb-3">Room Features</h3>
+              <h3 className="text-xl font-semibold mb-3">Room Amenities</h3>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
-                {room.features?.map((feature, idx) => (
+                {room.amenities?.map((amenity, idx) => (
                   <li key={idx} className="flex items-center gap-2">
                     <Check className="h-5 w-5 text-primary" />
-                    <span>{feature}</span>
+                    <span>{amenity}</span>
                   </li>
                 ))}
               </ul>
