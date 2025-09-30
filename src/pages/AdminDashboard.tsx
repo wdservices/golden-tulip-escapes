@@ -72,7 +72,6 @@ const navItems = [
   { id: 'branches', label: 'Branches', icon: Building2 },
   { id: 'reports', label: 'Reports & Analytics', icon: BarChart2 },
   { id: 'payments', label: 'Payments & Finance', icon: CreditCard },
-  { id: 'marketing', label: 'Marketing', icon: Megaphone },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 

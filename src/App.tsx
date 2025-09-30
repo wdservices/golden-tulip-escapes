@@ -76,18 +76,34 @@ const App = () => {
   useEffect(() => {
     // Set up global chatbot trigger function
     (window as any).triggerZapierChatbot = () => {
+      console.log('Global chatbot trigger called');
       const chatbotElement = document.querySelector('zapier-interfaces-chatbot-embed[is-popup="true"]') as any;
+      
       if (chatbotElement) {
+        console.log('Chatbot element found, attempting to trigger');
+        
         // Try different methods to trigger the popup
-        if (chatbotElement.open) {
+        if (typeof chatbotElement.open === 'function') {
+          console.log('Using open() method');
           chatbotElement.open();
-        } else if (chatbotElement.show) {
+        } else if (typeof chatbotElement.show === 'function') {
+          console.log('Using show() method');
           chatbotElement.show();
+        } else if (typeof chatbotElement.trigger === 'function') {
+          console.log('Using trigger() method');
+          chatbotElement.trigger();
         } else {
+          console.log('Using click event simulation');
           // Simulate a click event
-          const clickEvent = new Event('click', { bubbles: true });
+          const clickEvent = new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: true
+          });
           chatbotElement.dispatchEvent(clickEvent);
         }
+      } else {
+        console.error('Zapier chatbot element not found in DOM');
       }
     };
   }, []);
@@ -105,7 +121,6 @@ const App = () => {
           <zapier-interfaces-chatbot-embed 
             is-popup='true' 
             chatbot-id='cmfxud1f70034pj83m904ssvf'
-            style={{ display: 'none' }}
           />
           <BrowserRouter
             future={{
