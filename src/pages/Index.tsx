@@ -211,7 +211,7 @@ const Index = () => {
                         </div>
                         <div>
                           <p className="font-semibold">Reservations Hotline</p>
-                          <p className="text-muted-foreground">+234 803 123 4567</p>
+                          <p className="text-muted-foreground">+234 905 777 7780</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4">
@@ -220,7 +220,7 @@ const Index = () => {
                         </div>
                         <div>
                           <p className="font-semibold">Email Address</p>
-                          <p className="text-muted-foreground">info@goldentuliphotels.ng</p>
+                          <p className="text-muted-foreground">reservations@goldentulipportharcourt.com</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4">
@@ -229,7 +229,7 @@ const Index = () => {
                         </div>
                         <div>
                           <p className="font-semibold">Head Office</p>
-                          <p className="text-muted-foreground">Plot 123, Government Reserved Area, Port Harcourt</p>
+                          <p className="text-muted-foreground">1c Evo Crescent Off Evo Road, GRA Phase II, Port Harcourt, Rivers State</p>
                         </div>
                       </div>
                     </div>

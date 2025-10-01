@@ -13,26 +13,26 @@ export const Footer = () => {
     {
       name: "GOLDEN TULIP EVO ROAD",
       address: "1c Evo Crescent Off Evo Road, GRA Phase II, Port Harcourt, Rivers State",
-      phone: "+234 905 777 7780",
-      email: "reservations@goldentulipportharcourt.com"
+      phones: ["+234 905 777 7780", "+234 905 777 7782"],
+      emails: ["reservations@goldentulipportharcourt.com", "fom@goldentulipportharcourt.com"],
     },
     {
       name: "GOLDEN TULIP STADIUM ROAD",
       address: "31 Ken Saro Wiwa, Stadium Road, Port Harcourt, Rivers State",
-      phone: "+234 704 338 3142",
-      email: "reservations@goldentulipportharcourt.com"
+      phones: ["+234 704 338 3142", "+234 704 338 3141"],
+      emails: ["reservationsgt@rivotels.com", "fomgt@rivotels.com"],
     },
     {
       name: "GOLDEN TULIP GARDEN CITY",
       address: "63 Ken Saro Wiwa, Stadium Road, Port Harcourt, Rivers State",
-      phone: "+234 704 215 6775",
-      email: "reservations@goldentulipportharcourt.com"
+      phones: ["+234 704 215 6775", "+234 906 243 5585"],
+      emails: ["reservations@rivotels.com", "fom@rivotels.com"],
     },
     {
       name: "GOLDEN TULIP EVERGREEN",
       address: "Plot F35 Woke Street, Off Sani Abacha Road, GRA Phase III, Port Harcourt, Rivers State",
-      phone: "+234 906 243 5584",
-      email: "reservations@goldentulipportharcourt.com"
+      phones: ["+234 906 243 5582", "+234 916 998 8444"],
+      emails: ["reservations@rivotelinternational.com", "sales@rivotelinternational.com"],
     }
   ];
 
@@ -178,8 +178,14 @@ export const Footer = () => {
               <div key={index} className="text-center p-4 bg-white/5 rounded-lg">
                 <h4 className="font-semibold mb-2 text-golden-yellow">{branch.name}</h4>
                 <p className="text-sm text-white/80 mb-2">{branch.address}</p>
-                <p className="text-sm font-medium text-white">{branch.phone}</p>
-                <p className="text-sm text-white/60">{branch.email}</p>
+                <div className="space-y-1">
+                  {branch.phones?.map((p: string, i: number) => (
+                    <p key={`phone-${i}`} className="text-sm font-medium text-white">{p}</p>
+                  ))}
+                  {branch.emails?.map((e: string, i: number) => (
+                    <p key={`email-${i}`} className="text-sm text-white/60">{e}</p>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
