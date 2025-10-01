@@ -27,7 +27,7 @@ export const RoomDetailPage = () => {
       const branchData = getBranchById(branchId);
       if (!branchData) {
         setError('Branch not found');
-        navigate('/not-found', { replace: true });
+        navigate('/404', { replace: true });
         return;
       }
 

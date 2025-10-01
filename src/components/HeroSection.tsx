@@ -108,22 +108,22 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
 
   const branchInfo = {
     main: {
-      title: "Golden Tulip GRA",
+      title: "GOLDEN TULIP EVO ROAD",
       subtitle: "Head Branch • Government Reserved Area",
-      description: "Experience unparalleled luxury at our flagship location in the heart of Port Harcourt's prestigious GRA district."
+      description: "A premium 4-star hotel in the heart of Port Harcourt, offering modern rooms, fine dining, meeting halls, gym, spa services, and world class hospitality for business and leisure travelers."
     },
     waterlines: {
-      title: "Golden Tulip Waterlines",
+      title: "GOLDEN TULIP WATERLINES",
       subtitle: "Waterfront Luxury • Port Harcourt",
       description: "Waterfront elegance meets modern luxury with stunning river views and premium amenities."
     },
     airforce: {
-      title: "Golden Tulip Airforce",
+      title: "GOLDEN TULIP AIRFORCE",
       subtitle: "Strategic Location • Port Harcourt",
       description: "Conveniently located near the airforce base with easy access to business and leisure destinations."
     },
     oyigbo: {
-      title: "Golden Tulip Oyigbo",
+      title: "GOLDEN TULIP OYIGBO",
       subtitle: "Serene Retreat • Rivers State",
       description: "A peaceful sanctuary offering luxury accommodations in the tranquil Oyigbo area."
     }
@@ -179,7 +179,7 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
       <div className="absolute inset-0 flex items-center justify-center z-10">
         <div className="container mx-auto px-4 text-center text-white">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-serif font-bold mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6 leading-tight">
               <span className="golden-yellow drop-shadow-lg">{currentBranch.title}</span>
             </h1>
 
@@ -195,17 +195,10 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
                 onClick={handleBookNowClick}
-                className="brand-button text-lg px-8 py-4 min-w-[200px] font-semibold"
+                className="brand-button text-xl px-12 py-6 min-w-[250px] font-bold shadow-2xl hover:shadow-golden-yellow/50 transform hover:scale-105 transition-all duration-300 border-2 border-golden-yellow/30 hover:text-black"
                 size="lg"
               >
                 Book Your Stay
-              </Button>
-              <Button
-                variant="outline"
-                className="brand-button-outline text-lg px-8 py-4 min-w-[200px] font-semibold bg-white/10 backdrop-blur-sm"
-                size="lg"
-              >
-                Virtual Tour
               </Button>
             </div>
 

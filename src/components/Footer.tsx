@@ -11,28 +11,28 @@ export const Footer = () => {
 
   const branches = [
     {
-      name: "GOLDEN TULIP PORT HARCOURT HOTEL",
+      name: "GOLDEN TULIP EVO ROAD",
       address: "1c Evo Crescent Off Evo Road, GRA Phase II, Port Harcourt, Rivers State",
       phone: "+234 905 777 7780",
       email: "reservations@goldentulipportharcourt.com"
     },
     {
-      name: "GOLDEN TULIP PORT HARCOURT, 31 STADIUM RD.",
+      name: "GOLDEN TULIP STADIUM ROAD",
       address: "31 Ken Saro Wiwa, Stadium Road, Port Harcourt, Rivers State",
       phone: "+234 704 338 3142",
-      email: "reservationsgt@rivotels.com"
+      email: "reservations@goldentulipportharcourt.com"
     },
     {
-      name: "GOLDEN TULIP PORT HARCOURT, GARDEN CITY",
+      name: "GOLDEN TULIP GARDEN CITY",
       address: "63 Ken Saro Wiwa, Stadium Road, Port Harcourt, Rivers State",
       phone: "+234 704 215 6775",
-      email: "reservations@rivotels.com"
+      email: "reservations@goldentulipportharcourt.com"
     },
     {
-      name: "GOLDEN TULIP PORT HARCOURT, EVERGREEN.",
+      name: "GOLDEN TULIP EVERGREEN",
       address: "Plot F35 Woke Street, Off Sani Abacha Road, GRA Phase III, Port Harcourt, Rivers State",
       phone: "+234 906 243 5584",
-      email: "reservations@rivotelinternational.com"
+      email: "reservations@goldentulipportharcourt.com"
     }
   ];
 
