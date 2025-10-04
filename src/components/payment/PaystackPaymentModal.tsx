@@ -204,7 +204,7 @@ export const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
           const handlePaymentVerification = async () => {
             try {
               // Verify payment with backend - backend will create booking
-              const verifyResponse = await fetch('http://localhost:3001/api/verify-payment', {
+              const verifyResponse = await fetch('/api/verify-payment', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',

@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building, Database, Plus, AlertTriangle } from "lucide-react";
+import { Building, Database, Plus, AlertTriangle, User, Mail, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getBranches } from "@/services/branchService";
 import { initializeSampleData } from "@/utils/initializeData";
 import { toast } from "sonner";
+import { updateEmail, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 
 
 type Settings = {
@@ -34,8 +35,13 @@ export const SettingsPage = () => {
   const [currentBranchName, setCurrentBranchName] = useState<string>("");
   const [isInitializingData, setIsInitializingData] = useState(false);
   
+  // Email change state
+  const [newEmail, setNewEmail] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [isChangingEmail, setIsChangingEmail] = useState(false);
+  
   // Get auth context for branch filtering
-  const { activeBranchId } = useAuth();
+  const { activeBranchId, currentUser } = useAuth();
   
   // Fetch current branch name
   useEffect(() => {
@@ -85,6 +91,53 @@ export const SettingsPage = () => {
     }
   };
 
+  const handleEmailChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!currentUser || !newEmail || !currentPassword) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    if (newEmail === currentUser.email) {
+      toast.error("New email must be different from current email.");
+      return;
+    }
+
+    setIsChangingEmail(true);
+    
+    try {
+      // Re-authenticate user before changing email
+      const credential = EmailAuthProvider.credential(currentUser.email!, currentPassword);
+      await reauthenticateWithCredential(currentUser, credential);
+      
+      // Update email in Firebase Auth
+      await updateEmail(currentUser, newEmail);
+      
+      // Clear form
+      setNewEmail("");
+      setCurrentPassword("");
+      
+      toast.success("Email updated successfully! Please verify your new email address.");
+    } catch (error: any) {
+      console.error("Error updating email:", error);
+      
+      if (error.code === 'auth/wrong-password') {
+        toast.error("Current password is incorrect.");
+      } else if (error.code === 'auth/email-already-in-use') {
+        toast.error("This email is already in use by another account.");
+      } else if (error.code === 'auth/invalid-email') {
+        toast.error("Please enter a valid email address.");
+      } else if (error.code === 'auth/requires-recent-login') {
+        toast.error("Please log out and log back in before changing your email.");
+      } else {
+        toast.error("Failed to update email. Please try again.");
+      }
+    } finally {
+      setIsChangingEmail(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -112,6 +165,7 @@ export const SettingsPage = () => {
         <Tabs defaultValue="general" className="space-y-4">
           <TabsList className="bg-white/10 border-white/20">
             <TabsTrigger value="general" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">General</TabsTrigger>
+            <TabsTrigger value="profile" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Profile</TabsTrigger>
             <TabsTrigger value="notifications" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Notifications</TabsTrigger>
             <TabsTrigger value="payment" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Payment</TabsTrigger>
             <TabsTrigger value="data" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Data Management</TabsTrigger>
@@ -182,6 +236,105 @@ export const SettingsPage = () => {
             </Card>
           </TabsContent>
 
+          <TabsContent value="profile">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Profile Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Current User Info */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-blue-800">Current Admin Account</h4>
+                      <p className="text-sm text-blue-700 mt-1">
+                        Email: <span className="font-mono">{currentUser?.email}</span>
+                      </p>
+                      <p className="text-sm text-blue-700">
+                        Branch: <span className="font-medium">{currentBranchName}</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Email Change Form */}
+                <form onSubmit={handleEmailChange} className="space-y-4">
+                  <div>
+                    <h4 className="font-medium mb-4 flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      Change Email Address
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="newEmail">New Email Address</Label>
+                        <Input
+                          id="newEmail"
+                          type="email"
+                          value={newEmail}
+                          onChange={(e) => setNewEmail(e.target.value)}
+                          placeholder="Enter new email address"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="currentPassword">Current Password</Label>
+                        <Input
+                          id="currentPassword"
+                          type="password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          placeholder="Enter current password to confirm"
+                          required
+                        />
+                        <p className="text-sm text-muted-foreground">
+                          Required for security verification
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                      <div>
+                        <h4 className="font-medium text-yellow-800">Important Notes</h4>
+                        <ul className="text-sm text-yellow-700 mt-1 space-y-1">
+                          <li>• You will need to verify your new email address</li>
+                          <li>• You may need to log in again after changing your email</li>
+                          <li>• Make sure you have access to the new email address</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button 
+                    type="submit" 
+                    disabled={isChangingEmail || !newEmail || !currentPassword}
+                    className="flex items-center gap-2"
+                  >
+                    {isChangingEmail ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Updating Email...
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="h-4 w-4" />
+                        Update Email Address
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="notifications">
             <Card>
               <CardHeader>
@@ -247,7 +400,7 @@ export const SettingsPage = () => {
                     <ul className="text-sm text-muted-foreground space-y-1 ml-4">
                       <li>• 5 sample rooms (Standard, Deluxe, Executive, Presidential)</li>
                       <li>• 3 sample bookings with different statuses</li>
-                      <li>• Branch information for "Golden Tulip GRA"</li>
+                      <li>• Branch information for "GOLDEN TULIP EVO ROAD"</li>
                     </ul>
                   </div>
 

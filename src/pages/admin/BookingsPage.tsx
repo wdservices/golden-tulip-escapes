@@ -110,16 +110,23 @@ export const BookingsPage = () => {
           return;
         }
         
-        // Start with base query
-        let q = query(
-          collection(db, "bookings"),
+        // Determine which branch to query
+        let targetBranchId = activeBranchId;
+        if (currentUser?.branch && currentUser.role !== 'admin') {
+          targetBranchId = currentUser.branch;
+        }
+
+        if (!targetBranchId) {
+          setError("No branch selected. Please select a branch to view bookings.");
+          setIsLoading(false);
+          return;
+        }
+
+        // Query branch subcollection
+        const q = query(
+          collection(db, "branches", targetBranchId, "bookings"),
           orderBy("checkInDate", "desc") // Most recent first
         );
-
-        // Apply branch filter if user is branch-specific
-        if (currentUser?.branch && currentUser.role !== 'admin') {
-          q = query(q, where("branchId", "==", currentUser.branch));
-        }
 
         const querySnapshot = await getDocs(q);
         const bookingsData = querySnapshot.docs.map(doc => ({
@@ -179,14 +186,23 @@ export const BookingsPage = () => {
         return;
       }
 
-      let q = query(
-        collection(db, "bookings"),
+      // Determine which branch to query
+      let targetBranchId = activeBranchId;
+      if (currentUser?.branch && currentUser.role !== 'admin') {
+        targetBranchId = currentUser.branch;
+      }
+
+      if (!targetBranchId) {
+        setError("No branch selected. Please select a branch to view bookings.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Query branch subcollection
+      const q = query(
+        collection(db, "branches", targetBranchId, "bookings"),
         orderBy("checkInDate", "desc")
       );
-
-      if (currentUser?.branch && currentUser.role !== 'admin') {
-        q = query(q, where("branchId", "==", currentUser.branch));
-      }
 
       let initialized = false;
       let previousIds = new Set<string>();

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, query, getDocs, orderBy, Timestamp, where, limit } from 'firebase/firestore';
+import { collection, query, getDocs, orderBy, Timestamp, where, limit, collectionGroup } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Booking } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,22 +20,27 @@ export const useBookings = (branchId?: string) => {
         setIsLoading(true);
         setError(null);
         
-        // Create a query to get bookings, filtered by branch if needed
+        // Create a query to get bookings from branch subcollections
         let q;
         
-        // Query bookings for the specific branch
-        if (effectiveBranchId) {
+        // Query bookings for the specific branch from subcollection
+        if (effectiveBranchId && effectiveBranchId !== 'all') {
           q = query(
-            collection(db, "bookings"),
-            where("branchId", "==", effectiveBranchId),
+            collection(db, "branches", effectiveBranchId, "bookings"),
+            limit(100) // Limit to 100 most recent bookings for performance
+          );
+        } else if (effectiveBranchId === 'all') {
+          // For HQ admins with 'all' access, use collection group to get bookings from all branches
+          q = query(
+            collectionGroup(db, "bookings"),
             limit(100) // Limit to 100 most recent bookings for performance
           );
         } else {
-          // Query recent bookings if no branch ID
-          q = query(
-            collection(db, "bookings"),
-            limit(50) // Limit to 50 most recent for dashboard overview
-          );
+          // If no branch ID, we can't query subcollections, so return empty
+          console.warn('No branch ID provided for bookings query');
+          setBookings([]);
+          setIsLoading(false);
+          return;
         }
 
         let querySnapshot;
@@ -47,18 +52,20 @@ export const useBookings = (branchId?: string) => {
             console.warn('Composite index not available, falling back to simple query');
             
             // Fallback to a simpler query without orderBy to avoid index requirement
-            if (effectiveBranchId) {
+            if (effectiveBranchId && effectiveBranchId !== 'all') {
               q = query(
-                collection(db, "bookings"),
-                where("branchId", "==", effectiveBranchId),
+                collection(db, "branches", effectiveBranchId, "bookings"),
+                limit(150) // Limit fallback query for performance
+              );
+            } else if (effectiveBranchId === 'all') {
+              // For HQ admins with 'all' access, use collection group fallback
+              q = query(
+                collectionGroup(db, "bookings"),
                 limit(150) // Limit fallback query for performance
               );
             } else {
-              // Fallback query if no branch ID
-              q = query(
-                collection(db, "bookings"),
-                limit(100) // Limit fallback query for performance
-              );
+              // No fallback for missing branch ID since we can't query subcollections
+              throw new Error('Branch ID is required for querying bookings');
             }
             
             querySnapshot = await retryWithBackoff(() => getDocs(q), 2, 1000);

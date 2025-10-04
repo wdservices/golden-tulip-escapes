@@ -64,7 +64,7 @@ export function BookingDetailsDialog({
 
     setIsUpdatingPayment(true);
     try {
-      await paymentService.updateBookingPaymentStatus(booking.id, newStatus);
+      await paymentService.updateBookingPaymentStatus(booking.id, booking.branchId, newStatus);
       
       toast({
         title: "Payment status updated",

@@ -88,8 +88,22 @@ const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
-  const { userMeta, activeBranchId } = useAuth();
+  const { userMeta, activeBranchId, currentUser, isAuthenticated, isLoading } = useAuth();
   const [currentBranchName, setCurrentBranchName] = useState<string>("");
+  
+  // Debug: Log all auth state
+  useEffect(() => {
+    console.log("🏢 AdminDashboard - Auth State:", {
+      isAuthenticated,
+      isLoading,
+      currentUser: currentUser?.email,
+      userRole: currentUser?.role,
+      userMeta,
+      activeBranchId,
+      currentBranchName,
+      currentPath: location.pathname
+    });
+  }, [isAuthenticated, isLoading, currentUser, userMeta, activeBranchId, currentBranchName, location.pathname]);
   
   // Get current active tab from URL path
   const getActiveTab = () => {
@@ -110,21 +124,34 @@ const AdminDashboard = () => {
   const { documents: ads, loading: adsLoading, error: adsError } = useCollection('promotions');
   
   // Only show loading for essential data to speed up initial render
-  const isLoading = usersLoading || bookingsLoading;
+  const dataLoading = usersLoading || bookingsLoading;
 
   // Fetch current branch name
   useEffect(() => {
     const fetchBranchName = async () => {
+      console.log("fetchBranchName called with activeBranchId:", activeBranchId);
       if (activeBranchId) {
         try {
+          console.log("Fetching branch name for activeBranchId:", activeBranchId);
           const branches = await getBranches();
+          console.log("Available branches:", branches);
+          console.log("Branch IDs:", branches.map(b => b.id));
           const branch = branches.find(b => b.id === activeBranchId);
+          console.log("Found branch:", branch);
           if (branch) {
+            console.log("Setting currentBranchName to:", branch.name);
             setCurrentBranchName(branch.name);
+          } else {
+            console.warn("No branch found for activeBranchId:", activeBranchId);
+            setCurrentBranchName("");
           }
         } catch (error) {
           console.error("Error fetching branch name:", error);
+          setCurrentBranchName("");
         }
+      } else {
+        console.log("No activeBranchId, clearing currentBranchName");
+        setCurrentBranchName("");
       }
     };
     
@@ -190,8 +217,32 @@ const AdminDashboard = () => {
     }
   };
 
-  // Show loading state if data is still loading
+  // Show loading state if auth is still loading
   if (isLoading) {
+    console.log("🏢 AdminDashboard: Auth still loading, showing spinner");
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Check if user is authenticated
+  if (!isAuthenticated || !currentUser) {
+    console.log("🏢 AdminDashboard: User not authenticated, should redirect");
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-destructive">Authentication Required</h2>
+          <p className="text-muted-foreground">Please sign in to access the admin dashboard.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state if data is still loading
+  if (dataLoading) {
+    console.log("🏢 AdminDashboard: Data still loading, showing spinner");
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -201,6 +252,12 @@ const AdminDashboard = () => {
 
   // Show error state if there was an error fetching data
   if (usersError || bookingsError || roomsError || adsError) {
+    console.log("🏢 AdminDashboard: Data loading error:", {
+      usersError: usersError?.message,
+      bookingsError: bookingsError?.message,
+      roomsError: roomsError?.message,
+      adsError: adsError?.message
+    });
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
@@ -219,6 +276,8 @@ const AdminDashboard = () => {
       </div>
     );
   }
+
+  console.log("🏢 AdminDashboard: Rendering main dashboard interface");
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
@@ -282,10 +341,19 @@ const AdminDashboard = () => {
         {/* Top Bar */}
         <header className="bg-white/10 backdrop-blur-md border-b border-white/20">
           <div className="flex items-center justify-between h-16 px-6">
-            <div className="flex items-center">
-              <h2 className="text-xl font-semibold text-white">
-                {currentBranchName ? `${currentBranchName} Admin Dashboard` : "Admin Dashboard"}
-                {activeTab !== 'dashboard' && ` - ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`}
+            <div className="flex-1 flex items-center justify-center">
+              <h2 className="text-2xl font-bold text-white text-center">
+                <span className="text-white">Admin Dashboard</span>
+                {currentBranchName && (
+                  <span className="text-yellow-300"> - {currentBranchName}</span>
+                )}
+                {activeTab !== 'dashboard' && (
+                  <span className="text-white/80"> - {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</span>
+                )}
+                {/* Debug info - remove after testing */}
+                <div className="text-xs text-gray-300 mt-1">
+                  Debug: activeBranchId={activeBranchId || 'null'}, branchName={currentBranchName || 'null'}
+                </div>
               </h2>
             </div>
             <div className="flex items-center space-x-4">

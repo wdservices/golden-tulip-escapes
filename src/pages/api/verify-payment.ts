@@ -193,14 +193,15 @@ export default async function handler(
           paystackResponse: verificationData.data
         };
 
-        const docRef = await addDoc(collection(db, 'bookings'), bookingRecord);
+        // Save booking to branch subcollection
+        const docRef = await addDoc(collection(db, 'branches', bookingData.branchId, 'bookings'), bookingRecord);
         console.log('Booking created successfully with ID:', docRef.id);
 
         // Log successful verification and booking creation
         await PaymentLogger.logVerificationSuccess(reference, verificationData.data, 'backend', docRef.id);
         await PaymentLogger.logBookingCreated(reference, docRef.id, 'backend');
 
-        // Also create a payment record for audit
+        // Also create a payment record for audit in branch subcollection
         const paymentRecord = {
           bookingId: docRef.id,
           transactionId: verificationData.data.reference,
@@ -218,11 +219,12 @@ export default async function handler(
           createdAt: Timestamp.now(),
           verifiedAt: Timestamp.now(),
           paidAt: Timestamp.fromDate(new Date(verificationData.data.paid_at)),
-          verificationData: verificationData.data
+          verificationData: verificationData.data,
+          branchId: bookingData.branchId // Add branchId for reference
         };
 
-        await addDoc(collection(db, 'payments'), paymentRecord);
-        console.log('Payment record created successfully');
+        await addDoc(collection(db, 'branches', bookingData.branchId, 'bookings', docRef.id, 'payments'), paymentRecord);
+        console.log('Payment record created successfully as subcollection under booking:', docRef.id);
 
         return res.status(200).json({ 
           status: 'success', 

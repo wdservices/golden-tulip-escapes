@@ -82,35 +82,105 @@ service cloud.firestore {
         allow update: if isHQAdmin() || (isBranchAdmin() && hasBranchAccess(branchId));
         allow delete: if isHQAdmin() || (isBranchAdmin() && hasBranchAccess(branchId));
       }
-    }
-    
-    // Bookings collection rules
-    match /bookings/{bookingId} {
-      // Allow users to read their own bookings, branch admins to read bookings for their branches, and HQ admins to read all bookings
-      allow read: if request.auth != null && 
-                 (request.auth.uid == resource.data.userId || 
-                  isHQAdmin() || 
-                  (isBranchAdmin() && hasBranchAccess(resource.data.branchId)));
       
-      // Allow authenticated users to create bookings, branch admins for their branches, and HQ admins for any branch
-      allow create: if request.auth != null && 
-                   (request.auth.uid == request.resource.data.userId || 
-                    isHQAdmin() || 
-                    (isBranchAdmin() && hasBranchAccess(request.resource.data.branchId)));
-      
-      // Allow users to update their own bookings, branch admins for their branches, and HQ admins for any booking
-      allow update: if request.auth != null && 
+      // Branch-specific bookings subcollection
+      match /bookings/{bookingId} {
+        // Allow users to read their own bookings
+        // Allow branch admins to read bookings for their branch
+        // Allow HQ admins to read all bookings
+        allow read: if request.auth != null && 
                    (request.auth.uid == resource.data.userId || 
                     isHQAdmin() || 
-                    (isBranchAdmin() && hasBranchAccess(resource.data.branchId)));
+                    (isBranchAdmin() && hasBranchAccess(branchId)));
+        
+        // Allow authenticated users to create bookings for themselves
+        // Allow branch admins to create bookings for their branch
+        // Allow HQ admins to create bookings for any branch
+        allow create: if request.auth != null && 
+                     (request.auth.uid == request.resource.data.userId || 
+                      isHQAdmin() || 
+                      (isBranchAdmin() && hasBranchAccess(branchId)));
+        
+        // Allow users to update their own bookings
+        // Allow branch admins to update bookings for their branch
+        // Allow HQ admins to update any booking
+        allow update: if request.auth != null && 
+                     (request.auth.uid == resource.data.userId || 
+                      isHQAdmin() || 
+                      (isBranchAdmin() && hasBranchAccess(branchId)));
+        
+        // Allow users to delete their own bookings
+        // Allow branch admins to delete bookings for their branch
+        // Allow HQ admins to delete any booking
+        allow delete: if request.auth != null && 
+                     (request.auth.uid == resource.data.userId || 
+                      isHQAdmin() || 
+                      (isBranchAdmin() && hasBranchAccess(branchId)));
+      }
       
-      // Allow users to delete their own bookings, branch admins for their branches, and HQ admins for any booking
-      allow delete: if request.auth != null && 
+      // Payments subcollection under bookings
+      match /bookings/{bookingId}/payments/{paymentId} {
+        // Allow users to read their own payments
+        // Allow branch admins to read payments for their branch
+        // Allow HQ admins to read all payments
+        allow read: if request.auth != null && 
                    (request.auth.uid == resource.data.userId || 
                     isHQAdmin() || 
-                    (isBranchAdmin() && hasBranchAccess(resource.data.branchId)))
+                    (isBranchAdmin() && hasBranchAccess(branchId)));
+        
+        // Allow authenticated users to create payments for their bookings
+        // Allow branch admins to create payments for their branch
+        // Allow HQ admins to create payments for any branch
+        allow create: if request.auth != null && 
+                     (request.auth.uid == request.resource.data.userId || 
+                      isHQAdmin() || 
+                      (isBranchAdmin() && hasBranchAccess(branchId)));
+        
+        // Allow branch admins to update payments for their branch
+        // Allow HQ admins to update any payment
+        allow update: if request.auth != null && 
+                     (isHQAdmin() || 
+                      (isBranchAdmin() && hasBranchAccess(branchId)));
+        
+        // Allow branch admins to delete payments for their branch
+        // Allow HQ admins to delete any payment
+        allow delete: if request.auth != null && 
+                     (isHQAdmin() || 
+                      (isBranchAdmin() && hasBranchAccess(branchId)));
+      }
+      
+      // Branch-specific reports subcollection
+      match /reports/{reportId} {
+        // Allow branch admins to read reports for their branch
+        // Allow HQ admins to read all reports
+        allow read: if request.auth != null && 
+                   (isHQAdmin() || 
+                    (isBranchAdmin() && hasBranchAccess(branchId)));
+        
+        // Allow branch admins to create reports for their branch
+        // Allow HQ admins to create reports for any branch
+        allow create: if request.auth != null && 
+                     (isHQAdmin() || 
+                      (isBranchAdmin() && hasBranchAccess(branchId)));
+        
+        // Allow branch admins to update reports for their branch
+        // Allow HQ admins to update any report
+        allow update: if request.auth != null && 
+                     (isHQAdmin() || 
+                      (isBranchAdmin() && hasBranchAccess(branchId)));
+        
+        // Allow branch admins to delete reports for their branch
+        // Allow HQ admins to delete any report
+        allow delete: if request.auth != null && 
+                     (isHQAdmin() || 
+                      (isBranchAdmin() && hasBranchAccess(branchId)));
+      }
     }
     
+    // Note: Global bookings and payments collections have been migrated to branch subcollections
+    // All booking operations now use /branches/{branchId}/bookings
+    // All payment operations now use /branches/{branchId}/bookings/{bookingId}/payments
+
     // Admin users collection rules
     match /adminUsers/{adminId} {
       // Allow users to read their own admin document to check admin status
@@ -142,14 +212,18 @@ service cloud.firestore {
     // Helper function to check if user is branch admin
     function isBranchAdmin() {
       return request.auth != null && 
-             request.auth.token.role == 'branch-admin';
+             exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true &&
+             get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.role == 'branch-admin';
     }
     
     // Helper function to check if user has access to a specific branch
     function hasBranchAccess(branchId) {
       return request.auth != null && 
-             (request.auth.token.branchIds.hasAny([branchId, 'all']) || 
-              request.auth.token.role == 'hq-admin');
+             (request.auth.token.role == 'hq-admin' ||
+              (request.auth.token.role == 'branch-admin' && 
+               (request.auth.token.branchIds == 'all' || 
+                (request.auth.token.branchIds is list && branchId in request.auth.token.branchIds))));
     }
     
     // Helper function to check if a user has bookings in branches that the admin has access to

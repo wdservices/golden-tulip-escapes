@@ -196,7 +196,7 @@ const Booking = () => {
         }
       }
 
-      const bookingRef = collection(db, 'bookings');
+      const bookingRef = collection(db, 'branches', bookingData.branch, 'bookings');
       const newBooking = {
         userId: userId || 'guest',
         branchId: bookingData.branch,

@@ -17,6 +17,7 @@ import {
 import { isAdmin } from '@/utils/auth';
 import { toast } from '@/hooks/use-toast';
 import { handleFirebaseError, retryWithBackoff, checkNetworkConnectivity } from '@/utils/firebaseErrorHandler';
+import { getBranchFromEmail } from '@/services/adminEmailService';
 
 // User metadata interface for role and branch access
 interface UserMeta {
@@ -24,25 +25,7 @@ interface UserMeta {
   branchIds?: string[];
 }
 
-// Function to determine branch assignment based on email
-const getBranchFromEmail = (email: string): { branchId: string; role: 'branch-admin' | 'hq-admin' | 'user' } => {
-  const emailLower = email.toLowerCase();
-  
-  // Branch-specific admin emails
-  const BRANCH_ADMIN_EMAILS = {
-    'gardencity@gmail.com': { branchId: 'garden-city', role: 'branch-admin' as const },
-    'stadiumrd@gmail.com': { branchId: 'stadium-31', role: 'branch-admin' as const },
-    'evergreen@gmail.com': { branchId: 'evergreen', role: 'branch-admin' as const }
-  };
-  
-  // Check for exact email matches for branch admins
-  if (BRANCH_ADMIN_EMAILS[emailLower]) {
-    return BRANCH_ADMIN_EMAILS[emailLower];
-  }
-  
-  // Default to user role with no specific branch
-  return { branchId: '', role: 'user' };
-};
+// Note: getBranchFromEmail function is now imported from adminEmailService
 
 interface AuthContextType {
   currentUser: UserProfile | null;
@@ -94,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
     
     // Determine branch assignment based on email
-    const emailBranchInfo = getBranchFromEmail(user.email || '');
+    const emailBranchInfo = await getBranchFromEmail(user.email || '');
     
     // Get user claims to check role and branch access (fallback)
     const idTokenResult = await user.getIdTokenResult();
@@ -103,6 +86,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Use email-based assignment as primary, claims as fallback
     const adminRole = emailBranchInfo.role;
     const assignedBranchId = emailBranchInfo.branchId;
+    
+    // Set custom claims if user is a branch admin but doesn't have claims yet
+    if (adminRole === 'branch-admin' && (!claims.role || claims.role !== 'branch-admin')) {
+      try {
+        // Call API to set custom claims
+        await fetch('/api/auth/set-branch-admin-claims', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${await user.getIdToken()}`
+          },
+          body: JSON.stringify({
+            userId: user.uid,
+            role: 'branch-admin',
+            branchId: assignedBranchId
+          })
+        });
+        
+        // Force token refresh to get new claims
+        await user.getIdToken(true);
+        console.log('Set branch admin claims for user:', user.email, 'branch:', assignedBranchId);
+      } catch (error) {
+        console.error('Error setting branch admin claims:', error);
+      }
+    }
     
     // Create branch IDs array based on role and assignment
     let branchIds: string[] = [];
@@ -203,16 +211,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Only check Firebase auth if we're not in a mock user session
     if (!checkForMockUser()) {
       unsubscribe = onAuthStateChanged(auth, async (user) => {
+        console.log('🔥 Auth state changed - user:', user?.email, 'uid:', user?.uid);
         try {
           const [userProfile, meta, assignedBranchId] = await mapFirebaseUser(user);
+          console.log('🔥 Mapped user profile:', {
+            email: userProfile?.email,
+            role: userProfile?.role,
+            meta,
+            assignedBranchId
+          });
+          
           setFirebaseUser(user);
           setCurrentUser(userProfile);
           setUserMeta(meta);
           
           // Automatically set active branch based on email assignment
+          // Always prioritize email-based assignment over localStorage
           if (assignedBranchId) {
+            // Clear any incorrect localStorage value and set the correct branch
+            const currentStoredBranch = localStorage.getItem('activeBranchId');
+            if (currentStoredBranch !== assignedBranchId) {
+              console.log('🔥 Correcting branch assignment from localStorage:', currentStoredBranch, 'to email-based:', assignedBranchId);
+            }
             handleSetActiveBranchId(assignedBranchId);
-            console.log('Auto-assigned branch:', assignedBranchId, 'for user:', user?.email);
+            console.log('🔥 Auto-assigned branch:', assignedBranchId, 'for user:', user?.email);
+          } else {
+            // If no branch assignment, clear any stored branch
+            console.log('🔥 No branch assignment, clearing stored branch');
+            handleSetActiveBranchId(null);
           }
           
           // Handle user data operations in Firebase Auth
@@ -271,7 +297,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // Get token result to check role (no force refresh needed on login)
       const idTokenResult = await user.getIdTokenResult();
-      const isAdminUser = idTokenResult.claims.role === 'admin';
+      const isAdminUser = idTokenResult.claims.role === 'admin' || 
+                         idTokenResult.claims.role === 'branch-admin' || 
+                         idTokenResult.claims.role === 'hq-admin';
       
       // Create session asynchronously (don't wait for it)
       createSession(user.uid).catch(error => {
@@ -335,6 +363,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
       setIsLoading(true);
       
+      // Check if email is in the branch admin list
+      const branchAssignment = await getBranchFromEmail(email);
+      const isDetectedAdmin = branchAssignment.role === 'branch-admin' || branchAssignment.role === 'hq-admin';
+      const finalIsAdmin = isAdmin || isDetectedAdmin;
+      
+      console.log('Registration email check:', {
+        email,
+        branchAssignment,
+        isDetectedAdmin,
+        finalIsAdmin
+      });
+      
       // Create user with email and password
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       
@@ -353,25 +393,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         photoURL: userCredential.user.photoURL || undefined,
         joinDate: userCredential.user.metadata.creationTime || new Date().toISOString(),
         lastLogin: userCredential.user.metadata.lastSignInTime || new Date().toISOString(),
-        role: isAdmin ? 'admin' : 'user',
+        role: finalIsAdmin ? 'admin' : 'user',
         preferences: {}
       };
       
       // Save user document to appropriate Firestore collection
       try {
-        if (isAdmin) {
-          // Save admin users to adminUsers collection
+        if (finalIsAdmin) {
+          // Save admin users to adminUsers collection with branch assignment
           const adminUserDoc = {
             email: user.email,
             name: user.name,
             phone: user.phone,
-            branchId: 'main', // Default branch for new admin users
+            branchId: branchAssignment.branchId || 'main', // Use detected branch or default
+            branchIds: branchAssignment.branchId ? [branchAssignment.branchId] : ['main'],
+            role: branchAssignment.role || 'branch-admin',
             isActive: true,
             createdAt: new Date().toISOString(),
             lastLogin: user.lastLogin
           };
           await setDoc(doc(db, 'adminUsers', userCredential.user.uid), adminUserDoc);
           console.log('Admin user document saved to adminUsers collection:', adminUserDoc);
+          
+          // Also save to users collection for compatibility
+          await setDoc(doc(db, 'users', userCredential.user.uid), user);
+          console.log('Admin user also saved to users collection for compatibility');
         } else {
           // Save regular users to users collection
           await setDoc(doc(db, 'users', userCredential.user.uid), user);
@@ -388,8 +434,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setCurrentUser(user);
       
       if (navigateFn) {
-        // Redirect based on user role
-        const targetPath = isAdmin ? '/admin' : '/dashboard';
+        // Redirect based on user role and branch assignment
+        let targetPath = '/dashboard';
+        if (finalIsAdmin) {
+          targetPath = '/admin';
+          // Set the active branch for the admin user
+          if (branchAssignment.branchId) {
+            handleSetActiveBranchId(branchAssignment.branchId);
+          }
+        }
+        console.log('Redirecting new user to:', targetPath, 'with branch:', branchAssignment.branchId);
         navigateFn(targetPath);
       }
       
@@ -421,6 +475,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Clear the current user state
       setCurrentUser(null);
       setFirebaseUser(null);
+      setUserMeta({});
+      
+      // Clear localStorage to prevent cross-contamination between admin sessions
+      localStorage.removeItem('activeBranchId');
+      setActiveBranchId(null);
       
       // End all active sessions in background
       if (firebaseUser) {

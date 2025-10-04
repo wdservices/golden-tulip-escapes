@@ -12,8 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/dashboard/StatCard";
 import type { Booking } from "@/types/booking";
 import type { User } from "@/types/auth";
-import { collection, query, where, getDocs, orderBy, limit, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+// Removed Firestore imports - now using API endpoint
 import { FeedbackForm } from "@/components/feedback/FeedbackForm";
 
 // Define the dashboard stats interface
@@ -113,7 +112,7 @@ export const UserDashboard = () => {
       setProfileData(user);
 
       // Initialize with default values
-      const bookings: Booking[] = [];
+      let bookings: Booking[] = [];
       const branchCount: Record<string, number> = {};
       let stats: DashboardStats = {
         totalBookings: 0,
@@ -137,79 +136,35 @@ export const UserDashboard = () => {
       };
 
       try {
-        // Fetch user's bookings from Firestore with limit for performance
-        const bookingsRef = collection(db, 'bookings');
-        const q = query(
-          bookingsRef,
-          where('userId', '==', user.id),
-          orderBy('checkInDate', 'desc'),
-          limit(50) // Limit to prevent performance issues
-        );
-
-        // Race between Firestore query and timeout
-        const queryPromise = getDocs(q);
-        const querySnapshot = await Promise.race([queryPromise, timeoutPromise]) as any;
+        // Fetch user bookings from API endpoint
+        const response = await fetch(`/api/user-bookings/${user.id}`);
         
-        querySnapshot.forEach((doc) => {
-          try {
-            const data = doc.data() as Booking;
-            const booking = {
-              ...data,
-              id: doc.id,
-              checkInDate: toIso((data as any).checkInDate),
-              checkOutDate: toIso((data as any).checkOutDate),
-              bookingDate: toIso((data as any).bookingDate),
-            };
-            
-            bookings.push(booking);
+        if (response.ok) {
+          const data = await response.json();
+          bookings = data.bookings || [];
+          
+          // Map API stats to dashboard stats format
+          stats = {
+            totalBookings: data.stats.totalBookings || 0,
+            totalNights: data.stats.totalNights || 0,
+            loyaltyPoints: data.stats.loyaltyPoints || 0,
+            upcomingTrips: data.stats.upcomingBookings || 0,
+            pastTrips: data.stats.pastBookings || 0
+          };
 
-            // Count branch usage
-            if ((data as any).branchName) {
-              branchCount[(data as any).branchName as string] = (branchCount[(data as any).branchName as string] || 0) + 1;
-            }
-          } catch (error) {
-            console.error('Error processing booking data:', error);
+          // Set favorite branch
+          if (data.stats.favoriteBranch && data.stats.favoriteBranch !== 'No bookings yet') {
+            branchCount[data.stats.favoriteBranch] = 1;
           }
-        });
-      } catch (firestoreError) {
-        console.warn("Could not load booking data:", firestoreError);
-        // Fallback if missing index: query without orderBy and sort locally
-        if (firestoreError?.code === 'failed-precondition' || `${firestoreError?.message || ''}`.includes('The query requires an index')) {
-          try {
-            const bookingsRef = collection(db, 'bookings');
-            const q2 = query(
-              bookingsRef,
-              where('userId', '==', user.id),
-              limit(50)
-            );
-            const qs2 = await Promise.race([getDocs(q2), timeoutPromise]) as any;
 
-            qs2.forEach((doc: any) => {
-              try {
-                const data = doc.data() as Booking;
-                const booking = {
-                  ...data,
-                  id: doc.id,
-                  checkInDate: toIso((data as any).checkInDate),
-                  checkOutDate: toIso((data as any).checkOutDate),
-                  bookingDate: toIso((data as any).bookingDate),
-                };
-                bookings.push(booking);
-                if ((data as any).branchName) {
-                  branchCount[(data as any).branchName as string] = (branchCount[(data as any).branchName as string] || 0) + 1;
-                }
-              } catch (e) {
-                console.error('Error processing booking data (fallback):', e);
-              }
-            });
 
-            // Sort by checkInDate DESC to mimic original orderBy
-            bookings.sort((a, b) => new Date(b.checkInDate).getTime() - new Date(a.checkInDate).getTime());
-          } catch (fallbackErr) {
-            console.warn('Fallback bookings query also failed:', fallbackErr);
-          }
+        } else {
+          console.error('Failed to fetch user bookings from API:', response.status);
         }
-        // Continue with empty bookings array if Firestore fails
+
+      } catch (error) {
+        console.error('Error fetching booking data from API:', error);
+        // Keep default values if there's an error
       }
       
       // Calculate favorite branch
@@ -508,9 +463,9 @@ export const UserDashboard = () => {
           <>
             <StatCard
               title="Total Stays"
-              value={bookingStats?.totalBookings?.toString() || '0'}
+              value={bookingStats?.totalNights?.toString() || '0'}
               icon={<Home className="h-4 w-4 text-muted-foreground" />}
-              description="All-time bookings"
+              description={`${bookingStats?.totalNights || 0} nights across ${bookingStats?.totalBookings || 0} bookings`}
             />
             <StatCard
               title="Upcoming Trips"
@@ -529,6 +484,7 @@ export const UserDashboard = () => {
               value={bookingStats?.favoriteBranch || "—"}
               icon={<MapPin className="h-4 w-4 text-rose-500" />}
               description={getLastStayInfo()}
+              valueClassName="text-lg"
             />
           </>
         )}

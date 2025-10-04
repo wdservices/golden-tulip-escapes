@@ -7,10 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Download, CreditCard, DollarSign, Building, Loader2, CheckCircle, XCircle, Plus, Banknote } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getBranches } from "@/services/branchService";
-import { collection, query, orderBy, getDocs, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { formatCurrency } from "@/utils/currencyUtils";
-
+import { usePayments } from "@/hooks/usePayments";
 
 type PaymentStatus = 'successful' | 'pending' | 'failed' | 'refunded';
 type PaymentMethod = 'paystack' | 'credit_card' | 'bank_transfer' | 'cash';
@@ -36,12 +34,12 @@ interface Payment {
 export const PaymentsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentBranchName, setCurrentBranchName] = useState<string>("");
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   
   // Get auth context for branch filtering
   const { activeBranchId } = useAuth();
+  
+  // Use the usePayments hook for branch-filtered payments
+  const { payments, isLoading, error } = usePayments();
   
   // Fetch current branch name
   useEffect(() => {
@@ -61,63 +59,6 @@ export const PaymentsPage = () => {
     
     fetchBranchName();
   }, [activeBranchId]);
-  
-  // Fetch real payment data from Firestore
-  useEffect(() => {
-    const fetchPayments = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        const paymentsRef = collection(db, 'payments');
-        const q = query(paymentsRef, orderBy('createdAt', 'desc'));
-        const querySnapshot = await getDocs(q);
-        
-        const paymentsData: Payment[] = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          
-          // Convert Firestore Timestamp to ISO string
-          const getDateString = (timestamp: any) => {
-            if (timestamp && typeof timestamp.toDate === 'function') {
-              return timestamp.toDate().toISOString();
-            }
-            return new Date().toISOString();
-          };
-          
-          const payment: Payment = {
-            id: doc.id,
-            bookingId: data.bookingId || '',
-            guestName: data.customerName || 'Unknown Guest',
-            customerEmail: data.customerEmail || '',
-            amount: data.amount || 0,
-            currency: data.currency || 'NGN',
-            date: getDateString(data.createdAt || data.paidAt),
-            status: data.status || 'pending',
-            method: data.paymentMethod || 'paystack',
-            channel: data.channel || 'card',
-            paystackTransactionId: data.paystackTransactionId,
-            transactionId: data.transactionId || '',
-            gatewayResponse: data.gatewayResponse || '',
-            fees: data.fees || 0,
-          };
-          
-          paymentsData.push(payment);
-        });
-        
-        setPayments(paymentsData);
-        console.log(`Loaded ${paymentsData.length} payments from Firestore`);
-        
-      } catch (error) {
-        console.error('Error fetching payments:', error);
-        setError('Failed to load payment data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchPayments();
-  }, []);
 
   // Calculate payment statistics from real data
   const paymentStats = {
@@ -166,6 +107,34 @@ export const PaymentsPage = () => {
       .join(' ');
   };
 
+  // Show loading state if data is still loading
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400"></div>
+      </div>
+    );
+  }
+
+  // Show error state if there was an error fetching data
+  if (error) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-red-400">Error loading payment data</h2>
+          <p className="text-white/70">{error.message}</p>
+          <Button 
+            variant="outline" 
+            className="mt-4" 
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
@@ -200,194 +169,110 @@ export const PaymentsPage = () => {
           </Button>
         </div>
       </div>
-      
-      <Card className="bg-white/10 backdrop-blur-md border-white/20">
-        <CardHeader className="pb-3">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
-            <CardTitle className="text-lg text-yellow-400">Payment History</CardTitle>
-            <div className="flex items-center space-x-2">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-white/50" />
-                <Input
-                  type="search"
-                  placeholder="Search payments..."
-                  className="w-full pl-8 sm:w-[250px] bg-white/5 border-white/20 text-white placeholder:text-white/50"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <Button variant="outline" size="sm" className="bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30">
-                <Filter className="mr-2 h-4 w-4" />
-                Filter
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="flex flex-col items-center space-y-4">
-                <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
-                <p className="text-white/70">Loading payments...</p>
-              </div>
-            </div>
-          ) : error ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <p className="text-red-400 mb-2">Error loading payments</p>
-                <p className="text-white/70">{error}</p>
-              </div>
-            </div>
-          ) : payments.length === 0 ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <CreditCard className="w-12 h-12 mx-auto mb-4 text-white/50" />
-                <p className="text-white/70">No payments found</p>
-                <p className="text-white/50 text-sm">Payments will appear here when customers complete transactions</p>
-              </div>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-white">Transaction ID</TableHead>
-                  <TableHead className="text-white">Booking</TableHead>
-                  <TableHead className="text-white">Guest</TableHead>
-                  <TableHead className="text-white">Date</TableHead>
-                  <TableHead className="text-white">Method</TableHead>
-                  <TableHead className="text-white">Channel</TableHead>
-                  <TableHead className="text-white">Amount</TableHead>
-                  <TableHead className="text-white">Fees</TableHead>
-                  <TableHead className="text-white">Status</TableHead>
-                  <TableHead className="text-right text-white">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {payments.filter(payment => 
-                  payment.guestName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  payment.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  payment.transactionId.toLowerCase().includes(searchTerm.toLowerCase())
-                ).map((payment) => (
-                  <TableRow key={payment.id}>
-                    <TableCell className="font-medium text-white">
-                      <div className="text-sm">
-                        {payment.transactionId.substring(0, 12)}...
-                      </div>
-                      {payment.paystackTransactionId && (
-                        <div className="text-xs text-white/50">
-                          ID: {payment.paystackTransactionId}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-white">
-                      <div className="text-sm">{payment.bookingId.substring(0, 12)}...</div>
-                    </TableCell>
-                    <TableCell className="text-white">
-                      <div className="text-sm">{payment.guestName}</div>
-                      <div className="text-xs text-white/50">{payment.customerEmail}</div>
-                    </TableCell>
-                    <TableCell className="text-white">
-                      {new Date(payment.date).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-white">
-                      <div className="flex items-center">
-                        {getMethodIcon(payment.method)}
-                        <span>{formatMethod(payment.method)}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-white capitalize">
-                      {payment.channel}
-                    </TableCell>
-                    <TableCell className="text-white">
-                      {formatCurrency(payment.amount, payment.currency)}
-                    </TableCell>
-                    <TableCell className="text-white">
-                      {formatCurrency(payment.fees, payment.currency)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusVariant(payment.status)}>
-                        {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" className="mr-2 text-white hover:text-yellow-400">View</Button>
-                    {payment.receiptUrl && (
-                      <Button variant="ghost" size="sm" asChild className="text-white hover:text-yellow-400">
-                        <a href={payment.receiptUrl} target="_blank" rel="noopener noreferrer">
-                          Receipt
-                        </a>
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-               </TableBody>
-             </Table>
-           )}
-        </CardContent>
-      </Card>
-      
+
+      {/* Payment Statistics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-white/10 backdrop-blur-md border-white/20">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-white/70">Total Revenue</p>
-                <p className="text-2xl font-bold text-yellow-400">
-                  {isLoading ? '...' : formatCurrency(paymentStats.totalRevenue, 'NGN')}
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-yellow-400/20 flex items-center justify-center">
-                <Banknote className="h-6 w-6 text-yellow-400" />
-              </div>
-            </div>
+        <Card className="bg-white/5 border-white/20">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-white">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-yellow-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-400">{formatCurrency(paymentStats.totalRevenue)}</div>
+            <p className="text-xs text-white/70">+20.1% from last month</p>
           </CardContent>
         </Card>
-        <Card className="bg-white/10 backdrop-blur-md border-white/20">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-white/70">Pending Payments</p>
-                <p className="text-2xl font-bold text-yellow-400">
-                  {isLoading ? '...' : paymentStats.pendingPayments}
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-orange-400/20 flex items-center justify-center">
-                <CreditCard className="h-6 w-6 text-orange-400" />
-              </div>
-            </div>
+        <Card className="bg-white/5 border-white/20">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-white">Pending Payments</CardTitle>
+            <Loader2 className="h-4 w-4 text-yellow-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-400">{paymentStats.pendingPayments}</div>
+            <p className="text-xs text-white/70">Awaiting confirmation</p>
           </CardContent>
         </Card>
-        <Card className="bg-white/10 backdrop-blur-md border-white/20">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-white/70">Successful Transactions</p>
-                <p className="text-2xl font-bold text-yellow-400">
-                  {isLoading ? '...' : paymentStats.successfulTransactions}
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-green-400/20 flex items-center justify-center">
-                <CheckCircle className="h-6 w-6 text-green-400" />
-              </div>
-            </div>
+        <Card className="bg-white/5 border-white/20">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-white">Successful Transactions</CardTitle>
+            <CheckCircle className="h-4 w-4 text-yellow-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-400">{paymentStats.successfulTransactions}</div>
+            <p className="text-xs text-white/70">In the last 30 days</p>
           </CardContent>
         </Card>
-        <Card className="bg-white/10 backdrop-blur-md border-white/20">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-white/70">Failed Transactions</p>
-                <p className="text-2xl font-bold text-yellow-400">
-                  {isLoading ? '...' : paymentStats.failedTransactions}
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-red-400/20 flex items-center justify-center">
-                <XCircle className="h-6 w-6 text-red-400" />
-              </div>
-            </div>
+        <Card className="bg-white/5 border-white/20">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-white">Failed Transactions</CardTitle>
+            <XCircle className="h-4 w-4 text-yellow-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-400">{paymentStats.failedTransactions}</div>
+            <p className="text-xs text-white/70">Requires attention</p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Search and Filter */}
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1">
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-white/50" />
+            <Input
+              placeholder="Search payments..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8 bg-white/5 border-white/20 text-white placeholder:text-white/50"
+            />
+          </div>
+        </div>
+        <Button variant="outline" className="bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30">
+          <Filter className="mr-2 h-4 w-4" />
+          Filter
+        </Button>
+      </div>
+
+      {/* Payments Table */}
+      <div className="rounded-md border border-white/20 bg-white/5">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-white/5 border-white/20">
+              <TableHead className="text-white">Transaction ID</TableHead>
+              <TableHead className="text-white">Guest</TableHead>
+              <TableHead className="text-white">Amount</TableHead>
+              <TableHead className="text-white">Date</TableHead>
+              <TableHead className="text-white">Status</TableHead>
+              <TableHead className="text-white">Method</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {payments.map((payment) => (
+              <TableRow key={payment.id} className="hover:bg-white/5 border-white/20">
+                <TableCell className="font-medium text-white">{payment.transactionId}</TableCell>
+                <TableCell>
+                  <div className="text-white">{payment.guestName}</div>
+                  <div className="text-sm text-white/70">{payment.customerEmail}</div>
+                </TableCell>
+                <TableCell className="text-white">{formatCurrency(payment.amount)}</TableCell>
+                <TableCell className="text-white">
+                  {new Date(payment.date).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  <Badge className={getStatusVariant(payment.status)}>
+                    {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center text-white">
+                    {getMethodIcon(payment.method)}
+                    {formatMethod(payment.method)}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

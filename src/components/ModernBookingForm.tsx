@@ -223,7 +223,7 @@ export const ModernBookingForm = ({ selectedBranch, showLocationDropdown = true,
 
       // Create booking data matching the Booking interface
       const newBooking = {
-      userId: (currentUser as any).id || currentUser.uid,
+      userId: currentUser.id,
          branchId: bookingData.branchId,
          roomType: bookingData.roomType,
          checkInDate: checkInDate!,
@@ -247,7 +247,7 @@ export const ModernBookingForm = ({ selectedBranch, showLocationDropdown = true,
        };
 
       // Write to Firestore
-      const docRef = await addDoc(collection(db, 'bookings'), {
+      const docRef = await addDoc(collection(db, 'branches', bookingData.branchId, 'bookings'), {
         ...newBooking,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()

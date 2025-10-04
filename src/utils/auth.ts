@@ -13,8 +13,8 @@ const ADMIN_EMAILS = [
 export function isAdmin(user: User | null): boolean {
   if (!user) return false;
   
-  // Check if user has admin role
-  if (user.role === 'admin') return true;
+  // Check if user has admin role (including branch-admin and hq-admin)
+  if (user.role === 'admin' || user.role === 'branch-admin' || user.role === 'hq-admin') return true;
   
   // Check if user's email is in the admin list (case insensitive)
   if (user.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {

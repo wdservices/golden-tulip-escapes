@@ -73,14 +73,22 @@ function verifyPaystackSignature(payload: string, signature: string): boolean {
 
 async function findBookingByReference(reference: string) {
   try {
-    const bookingsRef = collection(db, 'bookings');
-    const q = query(bookingsRef, where('paystackRef', '==', reference));
-    const querySnapshot = await getDocs(q);
+    // First, get all branches
+    const branchesRef = collection(db, 'branches');
+    const branchesSnapshot = await getDocs(branchesRef);
     
-    if (!querySnapshot.empty) {
-      const doc = querySnapshot.docs[0];
-      return { id: doc.id, data: doc.data() };
+    // Search across all branch subcollections
+    for (const branchDoc of branchesSnapshot.docs) {
+      const bookingsRef = collection(db, 'branches', branchDoc.id, 'bookings');
+      const q = query(bookingsRef, where('paystackRef', '==', reference));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        const doc = querySnapshot.docs[0];
+        return { id: doc.id, data: doc.data(), branchId: branchDoc.id };
+      }
     }
+    
     return null;
   } catch (error) {
     console.error('Error finding booking by reference:', error);
@@ -138,12 +146,20 @@ async function createBookingFromWebhook(webhookData: PaystackWebhookEvent['data'
       webhookData: webhookData
     };
 
-    const docRef = await addDoc(collection(db, 'bookings'), bookingRecord);
+    // Ensure we have a branchId to save to the correct subcollection
+    if (!bookingRecord.branchId) {
+      throw new Error('Branch ID is required for booking creation');
+    }
+    
+    const docRef = await addDoc(collection(db, 'branches', bookingRecord.branchId, 'bookings'), bookingRecord);
     console.log('Booking created from webhook with ID:', docRef.id);
 
-    // Create payment record
+    // Create payment record in branch subcollection
     const paymentRecord = {
       bookingId: docRef.id,
+      branchId: bookingRecord.branchId,
+      branchName: bookingRecord.branchName,
+      userId: bookingRecord.userId,
       transactionId: webhookData.reference,
       paystackTransactionId: webhookData.id,
       amount: paidAmount,
@@ -164,8 +180,8 @@ async function createBookingFromWebhook(webhookData: PaystackWebhookEvent['data'
       verificationData: webhookData
     };
 
-    await addDoc(collection(db, 'payments'), paymentRecord);
-    console.log('Payment record created from webhook');
+    await addDoc(collection(db, 'branches', bookingRecord.branchId, 'bookings', docRef.id, 'payments'), paymentRecord);
+    console.log('Payment record created from webhook as subcollection under booking:', docRef.id);
 
     return docRef.id;
   } catch (error) {

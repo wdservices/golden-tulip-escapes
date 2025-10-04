@@ -43,8 +43,13 @@ const fetchBookings = async (
   statuses?: BookingStatus[],
   branchId?: string
 ): Promise<Booking[]> => {
+  if (!branchId) {
+    throw new Error('Branch ID is required for fetching bookings from subcollections');
+  }
+
+  // Query bookings from branch subcollection
   let q = query(
-    collection(db, 'bookings'),
+    collection(db, 'branches', branchId, 'bookings'),
     where('checkInDate', '>=', startDate),
     where('checkInDate', '<=', endDate),
     orderBy('checkInDate')
@@ -52,10 +57,6 @@ const fetchBookings = async (
 
   if (statuses && statuses.length > 0) {
     q = query(q, where('status', 'in', statuses));
-  }
-
-  if (branchId) {
-    q = query(q, where('branchId', '==', branchId));
   }
 
   const querySnapshot = await getDocs(q);

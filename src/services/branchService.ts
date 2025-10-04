@@ -12,12 +12,21 @@ const spa = luxurySuite;
 // Function to get branch metadata for branch selector
 export async function getBranches(): Promise<BranchMeta[]> {
   try {
-    // Try to fetch from Firestore first
+    // Always start with static branch data to ensure all branches are available
+    const staticBranches = branches.map(branch => ({
+      id: branch.id,
+      name: branch.name,
+      fullName: branch.fullName,
+      // Use image as logo fallback
+      logo: branch.image
+    }));
+
+    // Try to fetch from Firestore and merge with static data
     const branchesCollection = collection(db, 'branches');
     const branchSnapshot = await getDocs(branchesCollection);
     
     if (!branchSnapshot.empty) {
-      const branchData = branchSnapshot.docs.map(doc => {
+      const firestoreBranches = branchSnapshot.docs.map(doc => {
         const data = doc.data();
         return {
           id: doc.id,
@@ -27,17 +36,23 @@ export async function getBranches(): Promise<BranchMeta[]> {
           color: data.color || ''
         } as BranchMeta;
       });
-      return branchData;
+
+      // Merge Firestore data with static data, preferring Firestore data when available
+      const mergedBranches = staticBranches.map(staticBranch => {
+        const firestoreBranch = firestoreBranches.find(fb => fb.id === staticBranch.id);
+        return firestoreBranch || staticBranch;
+      });
+
+      // Add any Firestore branches that don't exist in static data
+      const additionalBranches = firestoreBranches.filter(
+        fb => !staticBranches.find(sb => sb.id === fb.id)
+      );
+
+      return [...mergedBranches, ...additionalBranches];
     }
     
-    // Fallback to static data if Firestore is empty
-    return branches.map(branch => ({
-      id: branch.id,
-      name: branch.name,
-      fullName: branch.fullName,
-      // Use image as logo fallback
-      logo: branch.image
-    }));
+    // Return static data if Firestore is empty
+    return staticBranches;
   } catch (error) {
     console.error("Error fetching branches:", error);
     // Fallback to static data on error
@@ -52,8 +67,8 @@ export async function getBranches(): Promise<BranchMeta[]> {
 
 const branches: Branch[] = [
   {
-    id: "port-harcourt",
-    name: "Port Harcourt Hotel",
+    id: "evo-road",
+    name: "Evo Road",
     fullName: "GOLDEN TULIP PORT HARCOURT HOTEL",
     location: "GRA Phase II, Port Harcourt",
     description: "A premium 4-star hotel in the heart of Port Harcourt, offering modern rooms, fine dining, meeting halls, gym, spa services, and world class hospitality for business and leisure travelers.",

@@ -1,5 +1,6 @@
 import { collection, addDoc, doc, setDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { initializeDefaultAdminEmails } from '@/services/adminEmailService';
 
 // Sample room data
 const sampleRooms = [
@@ -59,8 +60,8 @@ const sampleRooms = [
 const sampleBookings = [
   {
     userId: "sample-user-1",
-    branchId: "main",
-    branchName: "Golden Tulip GRA",
+    branchId: "evo-road",
+    branchName: "GOLDEN TULIP EVO ROAD",
     roomType: "deluxe",
     checkInDate: Timestamp.fromDate(new Date('2024-01-15')),
     checkOutDate: Timestamp.fromDate(new Date('2024-01-20')),
@@ -82,8 +83,8 @@ const sampleBookings = [
   },
   {
     userId: "sample-user-2",
-    branchId: "main",
-    branchName: "Golden Tulip GRA",
+    branchId: "evo-road",
+    branchName: "GOLDEN TULIP EVO ROAD",
     roomType: "executive",
     checkInDate: Timestamp.fromDate(new Date('2024-01-25')),
     checkOutDate: Timestamp.fromDate(new Date('2024-01-28')),
@@ -105,8 +106,8 @@ const sampleBookings = [
   },
   {
     userId: "sample-user-3",
-    branchId: "main",
-    branchName: "Golden Tulip GRA",
+    branchId: "evo-road",
+    branchName: "GOLDEN TULIP EVO ROAD",
     roomType: "presidential",
     checkInDate: Timestamp.fromDate(new Date('2024-02-01')),
     checkOutDate: Timestamp.fromDate(new Date('2024-02-03')),
@@ -128,11 +129,11 @@ const sampleBookings = [
 ];
 
 // Sample branch data
-const sampleBranch = {
-  id: "main",
-  name: "Golden Tulip GRA",
-  address: "123 GRA Phase 2, Port Harcourt, Rivers State",
-  email: "gra@goldentulip.com",
+export const sampleBranch = {
+  id: "evo-road",
+  name: "GOLDEN TULIP EVO ROAD",
+  address: "1c Evo Crescent Off Evo Road, GRA Phase II, Port Harcourt, Rivers State",
+  email: "evoroad@goldentulip.com",
   phone: "+234 84 123 4567",
   location: "Port Harcourt GRA",
   status: "active",
@@ -142,29 +143,29 @@ const sampleBranch = {
 
 export const initializeSampleData = async () => {
   try {
-    console.log('Starting data initialization...');
-
-    // 1. Create branch first
-    await setDoc(doc(db, 'branches', 'main'), sampleBranch);
-    console.log('Branch created successfully');
-
-    // 2. Add rooms to the branch
-    for (const room of sampleRooms) {
-      await addDoc(collection(db, 'branches', 'main', 'rooms'), room);
-    }
-    console.log(`${sampleRooms.length} rooms added successfully`);
-
-    // 3. Add bookings
-    for (const booking of sampleBookings) {
-      await addDoc(collection(db, 'bookings'), booking);
-    }
-    console.log(`${sampleBookings.length} bookings added successfully`);
-
-    console.log('Sample data initialization completed!');
-    return { success: true, message: 'Sample data added successfully' };
+    console.log('Starting sample data initialization...');
+    
+    // Initialize admin emails first
+    await initializeDefaultAdminEmails();
+    console.log('✅ Admin emails initialized');
+    
+    // Initialize branch
+    await initializeBranch();
+    console.log('✅ Branch initialized');
+    
+    // Initialize rooms
+    await initializeRooms();
+    console.log('✅ Rooms initialized');
+    
+    // Initialize bookings
+    await initializeBookings();
+    console.log('✅ Bookings initialized');
+    
+    console.log('🎉 Sample data initialization completed successfully!');
+    return { success: true };
   } catch (error) {
-    console.error('Error initializing sample data:', error);
-    return { success: false, error: error };
+    console.error('❌ Error during sample data initialization:', error);
+    return { success: false, error };
   }
 };
 

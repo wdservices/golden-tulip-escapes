@@ -9,6 +9,7 @@ interface StatCardProps {
   icon: ReactNode;
   description?: string;
   className?: string;
+  valueClassName?: string;
   isLoading?: boolean;
 }
 
@@ -18,6 +19,7 @@ export const StatCard = ({
   icon,
   description,
   className,
+  valueClassName,
   isLoading = false,
 }: StatCardProps) => {
   return (
@@ -32,7 +34,7 @@ export const StatCard = ({
         {isLoading ? (
           <Skeleton className="h-8 w-24" />
         ) : (
-          <div className="text-2xl font-bold text-white">{value}</div>
+          <div className={cn("text-2xl font-bold text-white", valueClassName)}>{value}</div>
         )}
         {description && (
           <p className="text-xs text-blue-200 mt-1">{description}</p>

@@ -75,6 +75,7 @@ class PaymentService {
   async processPaystackVerification(
     reference: string,
     bookingId: string,
+    branchId: string,
     expectedAmount: number
   ): Promise<{ success: boolean; message: string; verificationData?: PaystackVerificationResponse }> {
     try {
@@ -111,11 +112,12 @@ class PaymentService {
       }
 
       // Update booking payment status to paid
-      await this.updateBookingPaymentStatus(bookingId, 'paid', data.reference);
+      await this.updateBookingPaymentStatus(bookingId, branchId, 'paid', data.reference);
 
       // Create payment record
       await this.createPaymentRecord({
         bookingId,
+        branchId,
         transactionId: data.reference,
         paystackRef: data.reference,
         amount: paidAmount,
@@ -145,14 +147,15 @@ class PaymentService {
   /**
    * Create payment record in database
    */
-  async createPaymentRecord(paymentData: Omit<PaymentRecord, 'id' | 'createdAt'>): Promise<string> {
+  async createPaymentRecord(paymentData: Omit<PaymentRecord, 'id' | 'createdAt'> & { branchId: string; bookingId: string }): Promise<string> {
     try {
+      const { branchId, bookingId, ...recordData } = paymentData;
       const paymentRecord: Omit<PaymentRecord, 'id'> = {
-        ...paymentData,
+        ...recordData,
         createdAt: Timestamp.fromDate(new Date()),
       };
 
-      const docRef = await addDoc(collection(db, 'payments'), paymentRecord);
+      const docRef = await addDoc(collection(db, 'branches', branchId, 'bookings', bookingId, 'payments'), paymentRecord);
       return docRef.id;
     } catch (error) {
       console.error('Failed to create payment record:', error);
@@ -164,7 +167,8 @@ class PaymentService {
    * Update payment record status
    */
   async updatePaymentRecord(
-    paymentId: string, 
+    paymentId: string,
+    branchId: string,
     status: PaymentRecord['status'],
     notes?: string
   ): Promise<void> {
@@ -178,7 +182,7 @@ class PaymentService {
         updateData.notes = notes;
       }
 
-      await updateDoc(doc(db, 'payments', paymentId), updateData);
+      await updateDoc(doc(db, 'branches', branchId, 'payments', paymentId), updateData);
     } catch (error) {
       console.error('Failed to update payment record:', error);
       throw new Error('Failed to update payment record');
@@ -190,6 +194,7 @@ class PaymentService {
    */
   async updateBookingPaymentStatus(
     bookingId: string, 
+    branchId: string,
     paymentStatus: 'paid' | 'pending' | 'refunded',
     transactionRef?: string
   ): Promise<void> {
@@ -207,7 +212,7 @@ class PaymentService {
         updateData.paidAt = Timestamp.fromDate(new Date());
       }
 
-      await updateDoc(doc(db, 'bookings', bookingId), updateData);
+      await updateDoc(doc(db, 'branches', branchId, 'bookings', bookingId), updateData);
     } catch (error) {
       console.error('Failed to update booking payment status:', error);
       throw new Error('Failed to update booking payment status');
@@ -219,16 +224,18 @@ class PaymentService {
    */
   async markPaymentAsCompleted(
     bookingId: string,
+    branchId: string,
     paymentMethod: string = 'manual',
     notes?: string
   ): Promise<void> {
     try {
       // Update booking payment status
-      await this.updateBookingPaymentStatus(bookingId, 'paid');
+      await this.updateBookingPaymentStatus(bookingId, branchId, 'paid');
 
       // Create payment record
       await this.createPaymentRecord({
         bookingId,
+        branchId,
         transactionId: `manual_${Date.now()}`,
         amount: 0, // Amount should be provided by the caller
         currency: 'NGN',

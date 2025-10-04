@@ -34,9 +34,9 @@ export async function clearBookingData() {
   
   // Collections to clear - only booking-related data
   const collectionsToClean = [
-    'bookings',
-    'payments', 
-    'payment_logs'
+    'bookings', // Legacy global bookings (if any remain)
+    'payment_logs' // Global payment logs for system debugging
+    // Note: payments are now stored as subcollections under bookings (branches/{branchId}/bookings/{bookingId}/payments)
   ];
 
   let totalDeleted = 0;

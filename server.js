@@ -147,7 +147,7 @@ app.post('/api/verify-payment', async (req, res) => {
           paystackResponse: verificationData.data
         };
 
-        const docRef = await db.collection('bookings').add(bookingRecord);
+        const docRef = await db.collection('branches').doc(bookingData.branchId).collection('bookings').add(bookingRecord);
         console.log('Booking created successfully with ID:', docRef.id);
 
         // Also create a payment record for audit
@@ -171,8 +171,8 @@ app.post('/api/verify-payment', async (req, res) => {
           verificationData: verificationData.data
         };
 
-        await db.collection('payments').add(paymentRecord);
-        console.log('Payment record created successfully');
+        await db.collection('branches').doc(bookingData.branchId).collection('bookings').doc(docRef.id).collection('payments').add(paymentRecord);
+        console.log('Payment record created successfully as subcollection under booking:', docRef.id);
 
         return res.status(200).json({ 
           status: 'success', 
@@ -276,6 +276,109 @@ app.post('/api/paystack/webhook', async (req, res) => {
       message: 'Webhook processing failed',
       error: error.message 
     });
+  }
+});
+
+// User bookings endpoint
+app.get('/api/user-bookings/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    console.log('Fetching bookings for user:', userId);
+
+    // Get all branches
+    const branchesSnapshot = await db.collection('branches').get();
+    const allBookings = [];
+    const branchCount = {};
+
+    // Query each branch's bookings subcollection
+    for (const branchDoc of branchesSnapshot.docs) {
+      const branchId = branchDoc.id;
+      const branchData = branchDoc.data();
+      
+      try {
+        const bookingsSnapshot = await db
+          .collection('branches')
+          .doc(branchId)
+          .collection('bookings')
+          .where('userId', '==', userId)
+          .limit(20)
+          .get();
+
+        bookingsSnapshot.forEach((doc) => {
+          const data = doc.data();
+          const booking = {
+            ...data,
+            id: doc.id,
+            branchName: branchData.name || 'Unknown Branch',
+            checkInDate: data.checkInDate?.toDate?.()?.toISOString() || data.checkInDate,
+            checkOutDate: data.checkOutDate?.toDate?.()?.toISOString() || data.checkOutDate,
+            bookingDate: data.bookingDate?.toDate?.()?.toISOString() || data.bookingDate,
+          };
+          
+          allBookings.push(booking);
+
+          // Count branch usage
+          if (branchData.name) {
+            branchCount[branchData.name] = (branchCount[branchData.name] || 0) + 1;
+          }
+        });
+      } catch (error) {
+        console.error(`Error fetching bookings for branch ${branchId}:`, error);
+      }
+    }
+
+    // Sort bookings by check-in date (most recent first)
+    allBookings.sort((a, b) => {
+      const dateA = new Date(a.checkInDate);
+      const dateB = new Date(b.checkInDate);
+      return dateB.getTime() - dateA.getTime();
+    });
+
+    // Calculate stats
+    const now = new Date();
+    const pastBookings = allBookings.filter(booking => new Date(booking.checkOutDate) < now);
+    const upcomingBookings = allBookings.filter(booking => new Date(booking.checkInDate) > now);
+    
+    // Calculate total nights
+    const totalNights = allBookings.reduce((total, booking) => {
+      const checkIn = new Date(booking.checkInDate);
+      const checkOut = new Date(booking.checkOutDate);
+      const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+      return total + nights;
+    }, 0);
+
+    // Calculate loyalty points (assuming 10 points per night)
+    const loyaltyPoints = totalNights * 10;
+
+    // Find favorite branch
+    const favoriteBranch = Object.keys(branchCount).length > 0 
+      ? Object.keys(branchCount).reduce((a, b) => branchCount[a] > branchCount[b] ? a : b)
+      : 'No bookings yet';
+
+    const stats = {
+      totalBookings: allBookings.length,
+      totalNights,
+      pastBookings: pastBookings.length,
+      upcomingBookings: upcomingBookings.length,
+      loyaltyPoints,
+      favoriteBranch,
+    };
+
+    console.log('User booking stats:', stats);
+
+    res.status(200).json({
+      bookings: allBookings.slice(0, 10), // Return latest 10 bookings
+      stats,
+    });
+
+  } catch (error) {
+    console.error('Error fetching user bookings:', error);
+    res.status(500).json({ error: 'Failed to fetch user bookings' });
   }
 });
 
