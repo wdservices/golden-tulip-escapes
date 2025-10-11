@@ -61,6 +61,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const [navigateFn, setNavigateFn] = useState<((to: string) => void) | null>(null);
 
+  // Define branch assignment type that matches getBranchFromEmail return type
+  type BranchAssignment = {
+    branchId: string;
+    role: 'branch-admin' | 'hq-admin' | 'user';
+  };
+
   // Map Firebase user to our UserProfile type and extract branch-related claims
   const mapFirebaseUser = async (user: FirebaseAuthUser | null): Promise<[UserProfile | null, UserMeta, string | null]> => {
     if (!user) {
@@ -76,55 +82,81 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return [window.mockUser as UserProfile, { role: 'hq-admin', branchIds: ['all'] }, 'all'];
     }
     
-    // Determine branch assignment based on email
-    const emailBranchInfo = await getBranchFromEmail(user.email || '');
+    // Initialize with default values
+    let emailBranchInfo: BranchAssignment = { branchId: '', role: 'user' };
     
-    // Get user claims to check role and branch access (fallback)
+    // Get ID token result for claims
     const idTokenResult = await user.getIdTokenResult();
-    const claims = idTokenResult.claims;
+    const claims = idTokenResult.claims as any;
+    
+    // Only check admin status if the email matches the admin domain or is a known admin
+    if (user.email) {
+      try {
+        const branchInfo = await getBranchFromEmail(user.email);
+        emailBranchInfo = branchInfo;
+        console.log('User email processed:', user.email, 'Role:', emailBranchInfo.role, 'Branch:', emailBranchInfo.branchId);
+      } catch (error) {
+        console.error('Error getting branch from email:', error);
+      }
+    }
     
     // Use email-based assignment as primary, claims as fallback
     const adminRole = emailBranchInfo.role;
     const assignedBranchId = emailBranchInfo.branchId;
-    
-    // Set custom claims if user is a branch admin but doesn't have claims yet
-    if (adminRole === 'branch-admin' && (!claims.role || claims.role !== 'branch-admin')) {
-      try {
-        // Call API to set custom claims
-        await fetch('/api/auth/set-branch-admin-claims', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${await user.getIdToken()}`
-          },
-          body: JSON.stringify({
-            userId: user.uid,
-            role: 'branch-admin',
-            branchId: assignedBranchId
-          })
-        });
-        
-        // Force token refresh to get new claims
-        await user.getIdToken(true);
-        console.log('Set branch admin claims for user:', user.email, 'branch:', assignedBranchId);
-      } catch (error) {
-        console.error('Error setting branch admin claims:', error);
-      }
+        // Set custom claims if user is a branch admin but doesn't have claims yet
+      if (adminRole === 'branch-admin' && (!claims?.role || claims?.role !== 'branch-admin')) {
+        try {
+          // Call API to set custom claims
+          await fetch('/api/auth/set-branch-admin-claims', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${await user.getIdToken()}`
+            },
+            body: JSON.stringify({
+              userId: user.uid,
+              role: 'branch-admin',
+              branchId: assignedBranchId
+            })
+          });
+          
+          // Force token refresh to get new claims
+          await user.getIdToken(true);
+          console.log('Set branch admin claims for user:', user.email, 'branch:', assignedBranchId);
+        } catch (error) {
+          console.error('Error setting branch admin claims:', error);
+        }
     }
     
     // Create branch IDs array based on role and assignment
-    let branchIds: string[] = [];
-    if (adminRole === 'hq-admin') {
-      branchIds = ['all'];
-    } else if (adminRole === 'branch-admin' && assignedBranchId) {
-      branchIds = [assignedBranchId];
+    const branchIds = [];
+    if (assignedBranchId) {
+      branchIds.push(assignedBranchId);
+    } else if (claims.branchIds?.length) {
+      branchIds.push(...claims.branchIds);
     }
     
-    // Create user metadata object
+    // Create user meta with role and branch IDs
     const userMeta: UserMeta = {
       role: adminRole,
       branchIds: branchIds
     };
+    
+    // For admins, set the first branch as active if none is set
+    let activeBranch = activeBranchId;
+    if (adminRole !== 'user' && branchIds.length > 0) {
+      // If no active branch is set, or if the current active branch is not in the user's allowed branches
+      if (!activeBranch || !branchIds.includes(activeBranch as string)) {
+        activeBranch = branchIds[0] as string;
+        setActiveBranchId(activeBranch);
+        console.log(`Automatically set active branch for ${adminRole} to: ${activeBranch}`);
+        
+        // Save to localStorage for persistence
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('activeBranchId', activeBranch);
+        }
+      }
+    }
     
     console.log('Email-based role detection for', user.email, ':', {
       adminRole,
@@ -364,8 +396,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(true);
       
       // Check if email is in the branch admin list
-      const branchAssignment = await getBranchFromEmail(email);
-      const isDetectedAdmin = branchAssignment.role === 'branch-admin' || branchAssignment.role === 'hq-admin';
+      let isDetectedAdmin = false;
+      
+      // Only check admin status if the email matches the admin domain or is a known admin
+      if (email && (email.endsWith('@goldentulip.com') || email.endsWith('@rivotels.com'))) {
+        const branchAssignment = await getBranchFromEmail(email);
+        isDetectedAdmin = branchAssignment.role === 'branch-admin' || branchAssignment.role === 'hq-admin';
+      }
+      
       const finalIsAdmin = isAdmin || isDetectedAdmin;
       
       console.log('Registration email check:', {
@@ -412,15 +450,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             createdAt: new Date().toISOString(),
             lastLogin: user.lastLogin
           };
-          await setDoc(doc(db, 'adminUsers', userCredential.user.uid), adminUserDoc);
+          await setDoc(doc(db, 'adminUsers', user.uid), adminUserDoc);
           console.log('Admin user document saved to adminUsers collection:', adminUserDoc);
           
           // Also save to users collection for compatibility
-          await setDoc(doc(db, 'users', userCredential.user.uid), user);
+          await setDoc(doc(db, 'users', user.uid), user);
           console.log('Admin user also saved to users collection for compatibility');
         } else {
           // Save regular users to users collection
-          await setDoc(doc(db, 'users', userCredential.user.uid), user);
+          await setDoc(doc(db, 'users', user.uid), user);
           console.log('User document saved to users collection:', user);
         }
       } catch (firestoreError) {
@@ -429,7 +467,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       
       // Create session
-      await createSession(userCredential.user.uid);
+      await createSession(user.uid);
       
       setCurrentUser(user);
       
@@ -448,107 +486,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       
       return user;
-    } catch (err: any) {
-      let errorMessage = 'Failed to register. Please try again.';
-      
-      if (err.code === 'auth/email-already-in-use') {
-        errorMessage = 'This email is already registered. Please use a different email or login.';
-      } else if (err.code === 'auth/weak-password') {
-        errorMessage = 'Password should be at least 6 characters long.';
-      } else if (err.code === 'auth/invalid-email') {
-        errorMessage = 'Please enter a valid email address.';
-      }
-      
-      setError(errorMessage);
-      console.error('Registration error:', err);
-      throw new Error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const logout = async () => {
-    try {
-      // Redirect immediately to avoid showing loading states
-      window.location.href = '/';
-      
-      // Clear the current user state
-      setCurrentUser(null);
-      setFirebaseUser(null);
-      setUserMeta({});
-      
-      // Clear localStorage to prevent cross-contamination between admin sessions
-      localStorage.removeItem('activeBranchId');
-      setActiveBranchId(null);
-      
-      // End all active sessions in background
-      if (firebaseUser) {
-        endUserSessions(firebaseUser.uid).catch(console.error);
-      }
-      
-      // Sign out from Firebase in background
-      firebaseSignOut(auth).catch(console.error);
-      
-      return true;
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Even if there's an error, redirect to landing page
-      window.location.href = '/';
-      return false;
-    }
-  };
-
-  const signInWithGoogle = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      
-      // Force token refresh to get latest claims
-      await user.getIdToken(true);
-      
-      // Get fresh token result with updated claims
-      const idTokenResult = await user.getIdTokenResult(true);
-      
-      // Create a session
-      await createSession(user.uid);
-      
-      // Navigate based on role from claims
-      if (navigateFn) {
-        navigateFn(idTokenResult.claims.role === 'admin' ? '/admin' : '/dashboard');
-      }
-    } catch (error: any) {
-      console.error('Google sign in error:', error);
-      setError(error.message);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const updateProfile = async (updates: Partial<UserProfile>) => {
-    if (!firebaseUser) return;
-    
-    try {
-      setError(null);
-      setIsLoading(true);
-      
-      // Update Firebase profile if display name or photo URL changed
-      const firebaseUpdates: { displayName?: string; photoURL?: string } = {};
-      
-      if (updates.name !== undefined) {
-        firebaseUpdates.displayName = updates.name;
-      }
-      
-      if (updates.photoURL !== undefined) {
-        firebaseUpdates.photoURL = updates.photoURL;
-      }
-      
-      if (Object.keys(firebaseUpdates).length > 0) {
-        await firebaseUpdateProfile(firebaseUser, firebaseUpdates);
-      }
       
       // Update local user state
       setCurrentUser(prev => ({
@@ -620,6 +557,102 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.removeItem('activeBranchId');
     }
     setActiveBranchId(id);
+  };
+
+  // Sign in with Google function
+  const signInWithGoogle = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      
+      // Check if user is an admin
+      const branchInfo = await getBranchFromEmail(user.email || '');
+      const isAdminUser = branchInfo.role !== 'user';
+      
+      // Create or update user in Firestore
+      const userDoc = {
+        id: user.uid,
+        email: user.email || '',
+        name: user.displayName || '',
+        photoURL: user.photoURL || '',
+        role: isAdminUser ? 'admin' : 'user',
+        branchId: branchInfo.branchId || '',
+        lastLogin: new Date().toISOString(),
+        joinDate: user.metadata.creationTime || new Date().toISOString()
+      };
+      
+      await setDoc(doc(db, 'users', user.uid), userDoc, { merge: true });
+      
+      // Set user state
+      setCurrentUser(userDoc);
+      setFirebaseUser(user);
+      
+      // Set active branch for admin users
+      if (isAdminUser && branchInfo.branchId) {
+        setActiveBranchId(branchInfo.branchId);
+      }
+      
+      return userDoc;
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
+      throw error;
+    }
+  };
+
+  // Logout function
+  const logout = async () => {
+    try {
+      await firebaseSignOut(auth);
+      setCurrentUser(null);
+      setFirebaseUser(null);
+      setUserMeta({});
+      setActiveBranchId(null);
+      localStorage.removeItem('activeBranchId');
+      return true;
+    } catch (error) {
+      console.error('Error signing out:', error);
+      return false;
+    }
+  };
+
+  // Update user profile
+  const updateProfile = async (updates: Partial<UserProfile>) => {
+    if (!firebaseUser) {
+      throw new Error('No user is currently signed in');
+    }
+
+    try {
+      // Update Firebase Auth profile
+      const profileUpdates: { displayName?: string; photoURL?: string } = {};
+      
+      if (updates.name) profileUpdates.displayName = updates.name;
+      if (updates.photoURL) profileUpdates.photoURL = updates.photoURL;
+
+      if (Object.keys(profileUpdates).length > 0) {
+        await firebaseUpdateProfile(firebaseUser, profileUpdates);
+      }
+
+      // Update Firestore user document if there are additional fields
+      const userDoc = doc(db, 'users', firebaseUser.uid);
+      const userUpdates: Partial<UserProfile> = { ...updates };
+      
+      // Remove fields that shouldn't be updated directly
+      delete userUpdates.id;
+      delete userUpdates.email; // Email updates should be handled separately with email verification
+      
+      if (Object.keys(userUpdates).length > 0) {
+        userUpdates.updatedAt = new Date().toISOString();
+        await setDoc(userDoc, userUpdates, { merge: true });
+      }
+
+      // Update local state
+      setCurrentUser(prev => (prev ? { ...prev, ...updates } : null));
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
   };
 
   const value: AuthContextType = {

@@ -112,12 +112,21 @@ export const BookingsPage = () => {
         
         // Determine which branch to query
         let targetBranchId = activeBranchId;
-        if (currentUser?.branch && currentUser.role !== 'admin') {
+        
+        // For branch admins, use their assigned branch
+        if (currentUser.role === 'branch-admin' && currentUser.branch) {
           targetBranchId = currentUser.branch;
+        }
+        // For HQ admins, use the selected branch or first available branch
+        else if (currentUser.role === 'hq-admin' || currentUser.role === 'admin') {
+          if (!targetBranchId && branchesData.length > 0) {
+            targetBranchId = branchesData[0].id;
+            setActiveBranchId(targetBranchId);
+          }
         }
 
         if (!targetBranchId) {
-          setError("No branch selected. Please select a branch to view bookings.");
+          setError("No branch available. Please check your account permissions or contact support.");
           setIsLoading(false);
           return;
         }
