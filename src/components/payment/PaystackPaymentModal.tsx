@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React, { useState, useEffect, useCallback } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  CreditCard, 
-  Shield, 
-  Clock, 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  CreditCard,
+  Shield,
+  Clock,
+  CheckCircle,
+  AlertCircle,
   Loader2,
   User,
   Mail,
@@ -20,8 +21,29 @@ import {
   Calendar,
   Users
 } from "lucide-react";
-import { formatCurrency } from "@/utils/currencyUtils";
-import { useAuth } from "@/contexts/AuthContext";
+import { getPaystackPaymentData, getBranchPaymentConfig } from "@/config/paymentConfig";
+
+// Simple currency formatter to avoid import issues
+const formatCurrency = (amount: number, currency: string = 'NGN', locale?: string): string => {
+  return new Intl.NumberFormat(locale || 'en-NG', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+interface UserProfile {
+  id: string;
+  email: string;
+  name?: string;
+  photoURL?: string;
+  role?: string;
+  branchId?: string;
+  joinDate?: string;
+  lastLogin?: string;
+  preferences?: any;
+}
 
 // Paystack types
 interface PaystackResponse {
@@ -75,7 +97,7 @@ interface PaystackPaymentModalProps {
 }
 
 // Paystack configuration
-const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "pk_test_xxxxxxxxxxxxxxxxxxxxxxxx";
+const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "pk_test_xxxxxxxxxxxxxxxxxxxxxxxx";
 
 // Declare Paystack global
 declare global {
@@ -95,16 +117,15 @@ export const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
   onPaymentSuccess,
   onPaymentError,
 }) => {
-  const { toast } = useToast();
   const { currentUser } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paystackLoaded, setPaystackLoaded] = useState(false);
-
-  // Calculate total amount
   const totalAmount = bookingData.roomPrice * bookingData.nights * (bookingData.adults + bookingData.children);
 
   // Load Paystack script
   useEffect(() => {
+    if (!isOpen) return;
+
     const loadPaystackScript = () => {
       // Check if Paystack is already loaded
       const existingScript = document.querySelector('script[src="https://js.paystack.co/v1/inline.js"]');
@@ -139,158 +160,169 @@ export const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
       };
       
       document.head.appendChild(script);
-      setPaystackLoaded(false);
     };
 
-    if (isOpen) {
-      loadPaystackScript();
-    }
+    loadPaystackScript();
+
+    // Cleanup function
+    return () => {
+      // Cleanup if needed when component unmounts
+    };
   }, [isOpen, onPaymentError]);
 
-  // Removed createBooking function - now handled entirely by backend verification
+  const handlePaymentVerification = useCallback(async (response: PaystackResponse) => {
+    setIsProcessing(true);
 
-  const handlePayment = async () => {
-    if (!paystackLoaded) {
+    try {
+      const verifyResponse = await fetch('/api/verify-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reference: response.reference,
+          transactionId: response.transaction,
+          amount: totalAmount,
+          currency: 'NGN',
+          bookingData: {
+            userId: currentUser?.id || null,
+            guestName: bookingData.guestName,
+            guestEmail: bookingData.guestEmail,
+            guestPhone: bookingData.guestPhone,
+            branchId: bookingData.branchId,
+            branchName: bookingData.branchName,
+            roomId: bookingData.roomType,
+            roomType: bookingData.roomType,
+            checkInDate: bookingData.checkInDate.toISOString(),
+            checkOutDate: bookingData.checkOutDate.toISOString(),
+            adults: bookingData.adults,
+            children: bookingData.children,
+            nights: bookingData.nights,
+            amount: totalAmount,
+            totalAmount: totalAmount,
+            specialRequests: bookingData.specialRequests,
+            paystackRef: response.reference,
+            transactionId: response.transaction,
+            paymentMethod: 'paystack',
+          }
+        })
+      });
+
+      if (!verifyResponse.ok) {
+        const errorText = await verifyResponse.text();
+        throw new Error(errorText || 'Payment verification failed');
+      }
+
+      const verifyData = await verifyResponse.json();
+
+      if (verifyData?.status === 'success' || verifyData?.success === true) {
+        toast({
+          title: "Payment Successful!",
+          description: "Your booking has been confirmed and payment processed.",
+        });
+
+        onPaymentSuccess(verifyData.bookingId || response.reference);
+      } else if (verifyData?.error) {
+        throw new Error(verifyData.error);
+      } else {
+        throw new Error('Payment verification failed');
+      }
+    } catch (error: any) {
+      console.error('Payment verification failed:', error);
+      onPaymentError(error?.message || 'Payment verification failed');
       toast({
-        title: "Payment system not ready",
-        description: "Please wait for the payment system to load.",
-        variant: "destructive",
+        title: "Payment Verification Failed",
+        description: error?.message || 'We could not verify your payment. Please contact support.',
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [bookingData, currentUser, onPaymentError, onPaymentSuccess, totalAmount]);
+
+  const initiatePayment = useCallback(() => {
+    if (!paystackLoaded || !window.PaystackPop) {
+      toast({
+        title: "Payment Unavailable",
+        description: "Payment system is still loading. Please try again shortly.",
+        variant: "destructive"
       });
       return;
     }
 
-    setIsProcessing(true);
+    // Get branch-specific payment configuration
+    const branchConfig = getBranchPaymentConfig(bookingData.branchId);
 
-    try {
-      const paymentData: PaystackConfig = {
-        key: PAYSTACK_PUBLIC_KEY,
-        email: bookingData.guestEmail,
-        amount: totalAmount * 100, // Convert to kobo (Paystack uses kobo)
-        currency: "NGN",
-        ref: `hoteleasy_${Date.now()}`,
-        metadata: {
-          custom_fields: [
-            {
-              display_name: "Guest Name",
-              variable_name: "guest_name",
-              value: bookingData.guestName
-            },
-            {
-              display_name: "Room Type",
-              variable_name: "room_type",
-              value: bookingData.roomType
-            },
-            {
-              display_name: "Branch",
-              variable_name: "branch",
-              value: bookingData.branchName
-            },
-            {
-              display_name: "Check-in Date",
-              variable_name: "checkin_date",
-              value: bookingData.checkInDate.toISOString().split('T')[0]
-            },
-            {
-              display_name: "Check-out Date",
-              variable_name: "checkout_date",
-              value: bookingData.checkOutDate.toISOString().split('T')[0]
-            }
-          ]
-        },
-        callback: (response: PaystackResponse) => {
-          console.log('Payment successful:', response);
-          
-          // Handle async operations in a separate function
-          const handlePaymentVerification = async () => {
-            try {
-              // Verify payment with backend - backend will create booking
-              const verifyResponse = await fetch('/api/verify-payment', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    reference: response.reference,
-                    bookingData: {
-                      userId: currentUser?.id || currentUser?.uid || '',
-                    guestName: bookingData.guestName,
-                    guestEmail: bookingData.guestEmail,
-                    guestPhone: bookingData.guestPhone,
-                    branchId: bookingData.branchId,
-                    branchName: bookingData.branchName,
-                    roomType: bookingData.roomType,
-                    roomId: bookingData.roomType,
-                    checkInDate: bookingData.checkInDate.toISOString(),
-                    checkOutDate: bookingData.checkOutDate.toISOString(),
-                    adults: bookingData.adults,
-                    children: bookingData.children,
-                    nights: bookingData.nights,
-                    amount: totalAmount,
-                    totalAmount: totalAmount,
-                    specialRequests: bookingData.specialRequests,
-                    paystackRef: response.reference,
-                    transactionId: response.transaction,
-                    paymentMethod: 'paystack',
-                  }
-                }),
-              });
+    // Use the payment configuration helper to get proper payment data
+    const paymentData = getPaystackPaymentData(
+      totalAmount * 100, // Convert to kobo
+      currentUser?.email || bookingData.guestEmail,
+      bookingData.branchId,
+      {
+        custom_fields: [
+          {
+            display_name: "Guest Name",
+            variable_name: "guest_name",
+            value: bookingData.guestName
+          },
+          {
+            display_name: "Room Type",
+            variable_name: "room_type",
+            value: bookingData.roomType
+          },
+          {
+            display_name: "Branch",
+            variable_name: "branch",
+            value: bookingData.branchName
+          },
+          {
+            display_name: "Check-in Date",
+            variable_name: "checkin_date",
+            value: bookingData.checkInDate.toISOString().split('T')[0]
+          },
+          {
+            display_name: "Check-out Date",
+            variable_name: "checkout_date",
+            value: bookingData.checkOutDate.toISOString().split('T')[0]
+          }
+        ]
+      }
+    );
 
-              const verifyData = await verifyResponse.json();
+    const handler = window.PaystackPop.setup({
+      key: PAYSTACK_PUBLIC_KEY,
+      email: currentUser?.email || bookingData.guestEmail,
+      amount: totalAmount * 100,
+      currency: 'NGN',
+      ref: `hoteleasy_${Date.now()}`,
+      metadata: paymentData.metadata,
+      // Add subaccount configuration if available
+      ...(branchConfig?.type === 'subaccount' && branchConfig.subaccount && {
+        subaccount: branchConfig.subaccount,
+        bearer: 'subaccount'
+      }),
+      callback: (response: PaystackResponse) => {
+        handlePaymentVerification(response);
+      },
+      onClose: () => {
+        setIsProcessing(false);
+        toast({
+          title: "Payment Cancelled",
+          description: "Payment was cancelled. You can try again anytime.",
+        });
+      }
+    } as PaystackConfig);
 
-              if (verifyData.status === 'success') {
-                // Backend has verified payment and created booking
-                toast({
-                  title: "Payment Successful!",
-                  description: "Your booking has been confirmed and payment processed.",
-                });
-                
-                // Use the booking ID returned from backend
-                onPaymentSuccess(verifyData.bookingId);
-                // Don't call onClose() here since modal is already closed
-              } else {
-                throw new Error(verifyData.message || 'Payment verification failed');
-              }
-            } catch (error: any) {
-              console.error('Payment verification failed:', error);
-              onPaymentError(error.message || 'Payment verification failed');
-            } finally {
-              setIsProcessing(false);
-            }
-          };
-
-          // Call the async function
-          handlePaymentVerification();
-        },
-        onClose: () => {
-          console.log('Payment window closed');
-          setIsProcessing(false);
-          toast({
-            title: "Payment Cancelled",
-            description: "Payment was cancelled. You can try again anytime.",
-            variant: "destructive",
-          });
-        }
-      };
-
-      // Close our modal to avoid conflicts with Paystack modal
-      onClose();
-      
-      // Open Paystack payment modal
-      const handler = window.PaystackPop.setup(paymentData);
-      handler.openIframe();
-
-    } catch (error: any) {
-      console.error('Payment initialization failed:', error);
-      setIsProcessing(false);
-      onPaymentError(error.message || 'Failed to initialize payment');
-    }
-  };
+    onClose(); // Close the current modal before opening Paystack iframe
+    handler.openIframe();
+  }, [bookingData, currentUser?.email, handlePaymentVerification, paystackLoaded, totalAmount]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-white/10 backdrop-blur-md border-white/20">
+      <DialogContent className="max-w-lg overflow-y-auto max-h-screen h-full bg-transparent backdrop-blur-md border-white/20 z-[9999]">
         <DialogHeader>
           <DialogTitle className="text-yellow-400 text-2xl">Complete Your Payment</DialogTitle>
+          <DialogDescription className="text-white/60">
+            Review your reservation details and proceed to Paystack to finalize payment.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">
@@ -350,7 +382,7 @@ export const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
                 <div className="flex justify-between items-center pt-2">
                   <span className="text-white font-medium">Total Amount:</span>
                   <span className="text-2xl font-bold text-yellow-400">
-                    {formatCurrency(totalAmount, 'NGN', 'en-NG')}
+                    {formatCurrency(totalAmount)}
                   </span>
                 </div>
               </div>
@@ -401,19 +433,18 @@ export const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
               Cancel
             </Button>
             <Button
-              onClick={handlePayment}
-              className="flex-1 bg-yellow-400 text-blue-900 hover:bg-yellow-300"
-              disabled={!paystackLoaded || isProcessing}
+              onClick={() => {
+                if (!isProcessing) {
+                  initiatePayment();
+                }
+              }}
+              disabled={isProcessing || !paystackLoaded}
+              className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-6 text-lg"
             >
               {isProcessing ? (
                 <div className="flex items-center">
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   Processing...
-                </div>
-              ) : !paystackLoaded ? (
-                <div className="flex items-center">
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Loading...
                 </div>
               ) : (
                 <div className="flex items-center">

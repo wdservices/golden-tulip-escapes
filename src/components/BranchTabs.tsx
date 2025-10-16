@@ -3,6 +3,7 @@ import hotelExterior from "@/assets/hotel-exterior.jpg";
 import hotelLobby from "@/assets/hotel-lobby.jpg";
 import luxurySuite from "@/assets/luxury-suite.jpg";
 import restaurant from "@/assets/restaurant.jpg";
+import stadiumRoad31 from "@/assets/stadium-road-31.jpg";
 
 interface BranchTabsProps {
   selectedBranch?: string;
@@ -15,9 +16,9 @@ export function BranchTabs({ selectedBranch, onBranchSelect }: BranchTabsProps) 
   const branches = [
     {
       id: "stadium-31",
-      name: "Stadium Road",
-      location: "Stadium Road, Port Harcourt",
-      image: hotelExterior,
+      name: "Stadium Road 31",
+      location: "stadium road 31, Port Harcourt",
+      image: stadiumRoad31,
       description: "Modern hotel with excellent facilities"
     },
     {

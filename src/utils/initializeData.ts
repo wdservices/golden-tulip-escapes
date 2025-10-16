@@ -141,6 +141,17 @@ export const sampleBranch = {
   updatedAt: new Date().toISOString()
 };
 
+const initializeBranch = async () => {
+  try {
+    const branchRef = doc(db, 'branches', sampleBranch.id);
+    await setDoc(branchRef, sampleBranch, { merge: true });
+    console.log(`Branch '${sampleBranch.name}' initialized successfully.`);
+  } catch (error) {
+    console.error('Error initializing branch:', error);
+    throw error;
+  }
+};
+
 export const initializeSampleData = async () => {
   try {
     console.log('Starting sample data initialization...');

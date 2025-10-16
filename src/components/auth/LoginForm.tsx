@@ -78,7 +78,7 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const { login, register: registerUser } = useAuth();
+  const { login, register: registerUser, currentUser, userMeta } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
@@ -110,18 +110,9 @@ export default function LoginForm() {
       setError(null);
 
       if (isLogin) {
-        // Handle login and get the redirect path
-        const redirectPath = await login(data.email, data.password);
-        // Always use the redirect path from login for admin, otherwise use the 'from' location or dashboard
-        const targetPath = redirectPath || from || '/dashboard';
-        console.log('LoginForm redirect after login:', {
-          email: data.email,
-          redirectPath,
-          from,
-          targetPath,
-          currentPath: window.location.pathname
-        });
-        navigate(targetPath, { replace: true });
+        await login(data.email, data.password);
+        // After successful login, currentUser and userMeta will be updated by AuthContext
+        // Use useEffect to handle navigation based on currentUser/userMeta changes
       } else {
         // Handle registration
         const registerData = data as RegisterFormData;
@@ -141,6 +132,32 @@ export default function LoginForm() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (currentUser && !isLoading) {
+      let targetPath = from;
+      if (userMeta.role === 'hq-admin' || userMeta.role === 'branch-admin') {
+        targetPath = '/admin';
+      } else if (currentUser.role === 'user') {
+        targetPath = '/dashboard';
+      }
+
+      if (targetPath && targetPath !== '/auth') {
+        console.log('LoginForm: Navigating to:', targetPath, 'from:', from, 'userRole:', userMeta.role);
+        navigate(targetPath, { replace: true });
+      } else if (window.location.pathname === '/auth') {
+        // If still on /auth and no specific targetPath, default to dashboard for users
+        // or admin for admins if not already handled
+        if (userMeta.role === 'hq-admin' || userMeta.role === 'branch-admin') {
+          console.log('LoginForm: Defaulting admin to /admin');
+          navigate('/admin', { replace: true });
+        } else if (currentUser.role === 'user') {
+          console.log('LoginForm: Defaulting user to /dashboard');
+          navigate('/dashboard', { replace: true });
+        }
+      }
+    }
+  }, [currentUser, isLoading, navigate, from, userMeta.role]);
 
   const toggleAuthMode = () => {
     setIsLogin(!isLogin);

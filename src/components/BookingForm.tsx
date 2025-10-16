@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Calendar, MapPin, Users, Loader2, Bed, CreditCard, Star, Sparkles, Clock, CheckCircle } from "lucide-react";
+import { Calendar, MapPin, Users, Loader2, Bed, CreditCard, Star, Sparkles, Clock, CheckCircle, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBranches } from "@/hooks/useBranches";
@@ -13,12 +12,8 @@ import { format } from "date-fns";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-
-interface BookingFormProps {
-  selectedBranch?: string;
-  showLocationDropdown?: boolean;
-  onBookingSuccess?: () => void;
-}
+import { Textarea } from "@/components/ui/textarea";
+import { PaystackPaymentModal } from "@/components/payment/PaystackPaymentModal";
 
 interface RoomType {
   id: string;
@@ -40,69 +35,77 @@ interface Branch {
 }
 
 const roomTypes: RoomType[] = [
-  { 
-    id: "test", 
-    name: "Test room", 
-    price: "",
+  {
+    id: "test",
+    name: "Test room",
+    price: "50000",
     description: "Test room for demonstration purposes"
   },
-  { 
-    id: "standard", 
-    name: "Standard Room", 
-    price: "",
+  {
+    id: "standard",
+    name: "Standard Room",
+    price: "75000",
     description: "Comfortable room with essential amenities"
   },
-  { 
-    id: "deluxe", 
-    name: "Deluxe Room", 
-    price: "",
+  {
+    id: "deluxe",
+    name: "Deluxe Room",
+    price: "120000",
     description: "Spacious room with premium amenities and city view"
   },
-  { 
-    id: "executive", 
-    name: "Executive Suite", 
-    price: "",
+  {
+    id: "executive",
+    name: "Executive Suite",
+    price: "180000",
     description: "Luxurious suite with separate living area and premium services"
   },
-  { 
-    id: "executive-deluxe", 
-    name: "Executive Deluxe Room", 
-    price: "",
+  {
+    id: "executive-deluxe",
+    name: "Executive Deluxe Room",
+    price: "220000",
     description: "Premium executive room with enhanced amenities and services"
   },
-  { 
-    id: "executive-twin", 
-    name: "Executive Twin Room", 
-    price: "",
+  {
+    id: "executive-twin",
+    name: "Executive Twin Room",
+    price: "200000",
     description: "Executive room with twin beds and premium amenities"
   },
-  { 
-    id: "super-executive", 
-    name: "Super Executive Room", 
-    price: "",
+  {
+    id: "super-executive",
+    name: "Super Executive Room",
+    price: "250000",
     description: "Superior executive accommodation with exclusive amenities"
   },
-  { 
-    id: "presidential", 
-    name: "Presidential Suite", 
-    price: "",
+  {
+    id: "presidential",
+    name: "Presidential Suite",
+    price: "500000",
     description: "The ultimate in luxury with premium services and amenities"
   },
-  { 
-    id: "royal-suites", 
-    name: "Royal Suites Room", 
-    price: "",
+  {
+    id: "royal-suites",
+    name: "Royal Suite",
+    price: "750000",
     description: "Royal luxury suite with exclusive services and premium amenities"
   },
 ];
 
-export const BookingForm = ({ selectedBranch, showLocationDropdown = true, onBookingSuccess }: BookingFormProps) => {
+export interface BookingFormProps {
+  selectedBranch?: string;
+  showLocationDropdown?: boolean;
+  onBookingSuccess?: () => void;
+}
+
+const BookingForm = ({ selectedBranch, showLocationDropdown = true, onBookingSuccess }: BookingFormProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { currentUser, isAuthenticated } = useAuth();
   const { branches, isLoading: branchesLoading, error: branchesError } = useBranches();
   
   const [isLoading, setIsLoading] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [date, setDate] = useState<{ from: Date | undefined; to: Date | undefined }>({
     from: undefined,
     to: undefined,
@@ -110,13 +113,18 @@ export const BookingForm = ({ selectedBranch, showLocationDropdown = true, onBoo
 
   const [formData, setFormData] = useState({
     location: selectedBranch || "",
+    branch: selectedBranch || "",
     roomType: "",
     guests: 2,
+    adults: 2,
+    children: 0,
     firstName: currentUser?.displayName?.split(' ')[0] || "",
     lastName: currentUser?.displayName?.split(' ').slice(1).join(' ') || "",
     email: currentUser?.email || "",
     phone: "",
-    specialRequests: ""
+    specialRequests: "",
+    checkIn: "",
+    checkOut: ""
   });
 
   // Auto-populate user data when authenticated
@@ -147,13 +155,14 @@ export const BookingForm = ({ selectedBranch, showLocationDropdown = true, onBoo
     return pricePerNight * nights * formData.guests;
   };
 
-  const handleInputChange = (field: keyof typeof formData, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!date.from || !date.to) {
       toast({
         title: "Please select check-in and check-out dates",
@@ -170,43 +179,16 @@ export const BookingForm = ({ selectedBranch, showLocationDropdown = true, onBoo
       return;
     }
 
-    setIsLoading(true);
-
-    try {
-      // In a real app, this would be an API call to your backend
-      const bookingData = {
-        ...formData,
-        checkInDate: date.from,
-        checkOutDate: date.to,
-        userId: currentUser?.uid,
-        status: 'confirmed',
-        createdAt: new Date().toISOString(),
-        totalPrice: calculateTotal()
-      };
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+    if (!formData.location) {
       toast({
-        title: "Booking Successful!",
-        description: "Your reservation has been confirmed. We've sent a confirmation to your email.",
-      });
-      
-      // Call the success callback if provided
-      onBookingSuccess?.();
-      
-      // Redirect to dashboard or bookings page
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Booking failed:', error);
-      toast({
-        title: "Booking Failed",
-        description: "There was an error processing your booking. Please try again.",
+        title: "Please select a branch",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
+      return;
     }
+
+    // Show payment modal instead of direct submission
+    setShowPaymentModal(true);
   };
 
   return (
@@ -324,7 +306,7 @@ export const BookingForm = ({ selectedBranch, showLocationDropdown = true, onBoo
                         <SelectValue placeholder="Choose your preferred location" />
                       </SelectTrigger>
                       <SelectContent className="bg-popover border-border">
-                        {isLoadingBranches ? (
+                        {branchesLoading ? (
                           <SelectItem value="loading" disabled>
                             <div className="flex items-center">
                               <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -602,6 +584,44 @@ export const BookingForm = ({ selectedBranch, showLocationDropdown = true, onBoo
           </div>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaystackPaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        bookingData={{
+          roomType: formData.roomType,
+          roomPrice: parseInt(roomTypes.find(room => room.id === formData.roomType)?.price || "0"),
+          checkInDate: date.from!,
+          checkOutDate: date.to!,
+          branchId: formData.location,
+          branchName: branches.find(b => b.id === formData.location)?.name || "",
+          adults: formData.adults,
+          children: formData.children,
+          nights: Math.ceil((date.to!.getTime() - date.from!.getTime()) / (1000 * 60 * 60 * 24)),
+          specialRequests: formData.specialRequests,
+          guestName: `${formData.firstName} ${formData.lastName}`,
+          guestEmail: formData.email,
+          guestPhone: formData.phone,
+        }}
+        onPaymentSuccess={(bookingId) => {
+          toast({
+            title: "Payment Successful!",
+            description: `Your booking has been confirmed with ID: ${bookingId}`,
+          });
+          setShowPaymentModal(false);
+          onBookingSuccess?.();
+          navigate('/dashboard');
+        }}
+        onPaymentError={(error) => {
+          toast({
+            title: "Payment Failed",
+            description: error,
+            variant: "destructive",
+          });
+          setShowPaymentModal(false);
+        }}
+      />
     </div>
   );
 };

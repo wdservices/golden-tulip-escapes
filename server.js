@@ -281,6 +281,7 @@ app.post('/api/paystack/webhook', async (req, res) => {
 
 // User bookings endpoint
 app.get('/api/user-bookings/:userId', async (req, res) => {
+  console.log('User bookings API route hit.');
   try {
     const { userId } = req.params;
 
@@ -291,7 +292,9 @@ app.get('/api/user-bookings/:userId', async (req, res) => {
     console.log('Fetching bookings for user:', userId);
 
     // Get all branches
+    console.log('Attempting to fetch all branches...');
     const branchesSnapshot = await db.collection('branches').get();
+    console.log(`Fetched ${branchesSnapshot.docs.length} branches.`);
     const allBookings = [];
     const branchCount = {};
 
@@ -301,6 +304,7 @@ app.get('/api/user-bookings/:userId', async (req, res) => {
       const branchData = branchDoc.data();
       
       try {
+        console.log(`Attempting to fetch bookings for branch ${branchId} and user ${userId}...`);
         const bookingsSnapshot = await db
           .collection('branches')
           .doc(branchId)
@@ -308,6 +312,7 @@ app.get('/api/user-bookings/:userId', async (req, res) => {
           .where('userId', '==', userId)
           .limit(20)
           .get();
+        console.log(`Fetched ${bookingsSnapshot.docs.length} bookings for branch ${branchId}.`);
 
         bookingsSnapshot.forEach((doc) => {
           const data = doc.data();

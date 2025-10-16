@@ -9,9 +9,9 @@ import { Branch } from '@/types';
 
 // Base Paystack configuration
 export const paystackConfig = {
-  publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
-  secretKey: process.env.PAYSTACK_SECRET_KEY || '',
-  baseUrl: process.env.NODE_ENV === 'production' 
+  publicKey: import.meta.env.VITE_NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
+  secretKey: import.meta.env.VITE_PAYSTACK_SECRET_KEY || '',
+  baseUrl: import.meta.env.MODE === 'production' 
     ? 'https://api.paystack.co' 
     : 'https://api.paystack.co', // Use production URL for all environments
   currency: 'NGN',
@@ -34,7 +34,7 @@ export const branchPaymentConfig: Record<string, BranchPaymentConfig> = {
   // Evo Road Branch (Port Harcourt)
   'evo-road': {
     type: 'subaccount',
-    subaccount: 'ACCT_qly8r7unbtx4mac',
+    subaccount: ' ACCT_qly8r7unbtx4mac',
     admin_email: 'reservations@goldentulipportharcourt.com',
     branch_name: 'GOLDEN TULIP PORT HARCOURT HOTEL',
     percentage_charge: 1.5, // Paystack's default subaccount charge

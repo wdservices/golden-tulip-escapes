@@ -18,7 +18,7 @@ export const Footer = () => {
     },
     {
       name: "GOLDEN TULIP STADIUM ROAD",
-      address: "31 Ken Saro Wiwa, Stadium Road, Port Harcourt, Rivers State",
+      address: "31 Ken Saro Wiwa, stadium road 31, Port Harcourt, Rivers State",
       phones: ["+234 704 338 3142", "+234 704 338 3141"],
       emails: ["reservationsgt@rivotels.com", "fomgt@rivotels.com"],
     },

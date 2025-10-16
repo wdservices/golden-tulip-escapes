@@ -19,13 +19,10 @@ import { toast } from '@/hooks/use-toast';
 import { handleFirebaseError, retryWithBackoff, checkNetworkConnectivity } from '@/utils/firebaseErrorHandler';
 import { getBranchFromEmail } from '@/services/adminEmailService';
 
-// User metadata interface for role and branch access
 interface UserMeta {
   role?: 'branch-admin' | 'hq-admin' | 'user';
   branchIds?: string[];
 }
-
-// Note: getBranchFromEmail function is now imported from adminEmailService
 
 interface AuthContextType {
   currentUser: UserProfile | null;
@@ -33,11 +30,11 @@ interface AuthContextType {
   userMeta: UserMeta;
   activeBranchId: string | null;
   setActiveBranchId: (id: string | null) => void;
-  login: (email: string, password: string) => Promise<string>; // Returns the redirect path
+  login: (email: string, password: string) => Promise<UserProfile>;
   register: (name: string, email: string, phone: string, password: string, isAdmin?: boolean) => Promise<UserProfile>;
   logout: () => Promise<boolean>; // Returns success status
   signInWithGoogle: () => Promise<void>;
-  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  updateProfile: (updates: Partial<UserProfile>) => Promise<boolean>;
   updateUserRole: (userId: string, role: 'admin' | 'user') => Promise<void>;
   setupNavigation: (navigate: (to: string) => void) => void;
   isAuthenticated: boolean;
@@ -314,7 +311,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setNavigateFn(() => navigate);
   }, []);
 
-  const login = async (email: string, password: string): Promise<string> => {
+  const login = async (email: string, password: string): Promise<UserProfile> => {
     try {
       setError(null);
       setIsLoading(true);
@@ -366,8 +363,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }, { merge: true });
           } else {
             const userDocRef = doc(db, 'users', user.uid);
+            const allowedFields = ['name', 'phone', 'preferences', 'lastLogin', 'email', 'displayName', 'photoURL'];
+            const filteredProfile = Object.fromEntries(
+              Object.entries(userProfile).filter(([key]) => allowedFields.includes(key))
+            );
             await setDoc(userDocRef, {
-              ...userProfile,
+              ...filteredProfile,
               joinDate: user.metadata.creationTime || new Date().toISOString(),
               preferences: {}
             }, { merge: true });
@@ -380,7 +381,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Run Firestore update in background
       updateFirestoreDoc();
       
-      return isAdminUser ? '/admin' : '/dashboard';
+      return userProfile;
     } catch (error: any) {
       const errorInfo = handleFirebaseError(error, 'Login');
       setError(errorInfo.userFriendlyMessage);
@@ -397,10 +398,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // Check if email is in the branch admin list
       let isDetectedAdmin = false;
+      let branchAssignment: BranchAssignment = { branchId: '', role: 'user' };
       
       // Only check admin status if the email matches the admin domain or is a known admin
       if (email && (email.endsWith('@goldentulip.com') || email.endsWith('@rivotels.com'))) {
-        const branchAssignment = await getBranchFromEmail(email);
+        branchAssignment = await getBranchFromEmail(email);
         isDetectedAdmin = branchAssignment.role === 'branch-admin' || branchAssignment.role === 'hq-admin';
       }
       
@@ -418,8 +420,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // Update profile with display name
       await firebaseUpdateProfile(userCredential.user, { 
-        displayName: name,
-        phoneNumber: phone // Note: phoneNumber updates require additional verification
+        displayName: name
       });
       
       // Create user object using metadata from Firebase Auth
@@ -467,7 +468,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       
       // Create session
-      await createSession(user.uid);
+      await createSession(user.id);
       
       setCurrentUser(user);
       
@@ -486,15 +487,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       
       return user;
-      
-      // Update local user state
-      setCurrentUser(prev => ({
-        ...prev!,
-        ...updates
-      } as UserProfile));
-      
-      // Here you might want to update additional user data in Firestore
-      // Example: await updateUserInFirestore(auth.currentUser.uid, updates);
       
     } catch (err: any) {
       setError('Failed to update profile. Please try again.');
@@ -560,7 +552,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Sign in with Google function
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (): Promise<void> => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
@@ -584,15 +576,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await setDoc(doc(db, 'users', user.uid), userDoc, { merge: true });
       
       // Set user state
-      setCurrentUser(userDoc);
+      setCurrentUser(userDoc as UserProfile);
       setFirebaseUser(user);
       
       // Set active branch for admin users
       if (isAdminUser && branchInfo.branchId) {
         setActiveBranchId(branchInfo.branchId);
       }
-      
-      return userDoc;
     } catch (error) {
       console.error('Error signing in with Google:', error);
       throw error;
@@ -615,8 +605,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Update user profile
-  const updateProfile = async (updates: Partial<UserProfile>) => {
+  const updateProfile = async (updates: Partial<UserProfile>): Promise<boolean> => {
     if (!firebaseUser) {
       throw new Error('No user is currently signed in');
     }

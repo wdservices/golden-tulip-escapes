@@ -1,122 +1,82 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { doc, updateDoc, addDoc, collection, Timestamp } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
-import { PaymentLogger } from '../../utils/paymentLogger';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { addDoc, collection, Timestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
+// Paystack verification response type
 interface PaystackVerificationResponse {
   status: boolean;
   message: string;
-  data: {
+  data?: {
     id: number;
-    domain: string;
-    status: string;
     reference: string;
     amount: number;
-    message: string | null;
-    gateway_response: string;
+    currency: string;
+    status: string;
     paid_at: string;
     created_at: string;
     channel: string;
-    currency: string;
-    ip_address: string;
-    metadata: any;
-    log: any;
-    fees: number;
-    fees_split: any;
-    authorization: {
-      authorization_code: string;
-      bin: string;
-      last4: string;
-      exp_month: string;
-      exp_year: string;
-      channel: string;
-      card_type: string;
-      bank: string;
-      country_code: string;
-      brand: string;
-      reusable: boolean;
-      signature: string;
-      account_name: string | null;
-    };
     customer: {
       id: number;
-      first_name: string | null;
-      last_name: string | null;
+      first_name: string;
+      last_name: string;
       email: string;
-      customer_code: string;
-      phone: string | null;
-      metadata: any;
-      risk_action: string;
-      international_format_phone: string | null;
+      phone: string;
     };
-    plan: any;
-    split: any;
-    order_id: any;
-    paidAt: string;
-    createdAt: string;
-    requested_amount: number;
-    pos_transaction_data: any;
-    source: any;
-    fees_breakdown: any;
+    gateway_response: string;
+    fees: number;
   };
 }
 
-interface BookingData {
-  userId: string;
-  guestName: string;
-  guestEmail: string;
-  guestPhone: string;
-  branchId: string;
-  branchName: string;
-  roomType: string;
-  roomId: string;
-  checkInDate: Date;
-  checkOutDate: Date;
-  adults: number;
-  children: number;
-  nights: number;
-  amount: number;
-  totalAmount: number;
-  specialRequests: string;
-  paystackRef: string;
-  transactionId: string;
-  paymentMethod: string;
+// Response type for the API
+interface ApiResponse {
+  status: 'success' | 'error';
+  message: string;
+  bookingId?: string;
+  error?: string;
+  [key: string]: any;
 }
+
+// Helper function to send JSON responses
+const sendJsonResponse = (res: NextApiResponse<ApiResponse>, status: number, data: Omit<ApiResponse, 'status'>) => {
+  return res.status(status).json({
+    status: status >= 200 && status < 300 ? 'success' : 'error',
+    ...data
+  });
+};
 
 // Set CORS headers
 const allowCors = (fn: Function) => async (req: NextApiRequest, res: NextApiResponse) => {
+  // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
+    'Content-Type, Authorization, X-Requested-With'
   );
-  
+
   // Handle preflight
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
   }
-  
-  return await fn(req, res);
-};
 
-// Helper function to send consistent JSON responses
-const sendJsonResponse = (res: NextApiResponse, status: number, data: any) => {
+  // Set content type for all responses
   res.setHeader('Content-Type', 'application/json');
-  return res.status(status).json(data);
+
+  return await fn(req, res);
 };
 
 export default allowCors(async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<ApiResponse>
 ) {
   // Ensure we only handle POST requests
   if (req.method !== 'POST') {
-    return sendJsonResponse(res, 405, { 
-      status: 'error', 
+    return res.status(405).json({
+      status: 'error',
       message: 'Method not allowed',
+      error: 'Only POST method is supported',
       code: 'method_not_allowed'
     });
   }
@@ -126,19 +86,19 @@ export default allowCors(async function handler(
   try {
     body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
   } catch (e) {
-    return sendJsonResponse(res, 400, {
+    return res.status(400).json({
       status: 'error',
       message: 'Invalid JSON payload',
       code: 'invalid_json'
     });
   }
 
-  const { reference, bookingData } = body;
+  const { reference, transactionId, amount, currency, bookingData } = body;
 
   // Validate required fields
   if (!reference) {
-    return sendJsonResponse(res, 400, { 
-      status: 'error', 
+    return sendJsonResponse(res, 400, {
+      status: 'error',
       message: 'Payment reference is required',
       code: 'missing_reference'
     });
@@ -147,8 +107,8 @@ export default allowCors(async function handler(
   const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
   if (!PAYSTACK_SECRET_KEY) {
     console.error('Paystack secret key not configured');
-    return sendJsonResponse(res, 500, { 
-      status: 'error', 
+    return sendJsonResponse(res, 500, {
+      status: 'error',
       message: 'Payment system not configured',
       code: 'server_error'
     });
@@ -156,7 +116,7 @@ export default allowCors(async function handler(
 
   try {
     console.log(`🔍 Verifying payment with reference: ${reference}`);
-    
+
     // Verify payment with Paystack using the secret key
     let response;
     try {
@@ -179,68 +139,28 @@ export default allowCors(async function handler(
       });
     }
 
-    let verificationData;
-    try {
-      const responseText = await response.text();
-      
-      if (!responseText) {
-        console.error('Empty response from Paystack API');
-        return sendJsonResponse(res, 502, {
-          status: 'error',
-          message: 'Empty response from payment processor',
-          code: 'empty_response'
-        });
-      }
-      
-      try {
-        verificationData = JSON.parse(responseText);
-      } catch (jsonError) {
-        console.error('Error parsing Paystack JSON response:', {
-          error: jsonError,
-          responseText: responseText.length > 500 ? responseText.substring(0, 500) + '...' : responseText
-        });
-        return sendJsonResponse(res, 502, {
-          status: 'error',
-          message: 'Invalid JSON response from payment processor',
-          code: 'invalid_json_response',
-          details: process.env.NODE_ENV === 'development' ? responseText : undefined
-        });
-      }
-    } catch (error) {
-      console.error('Unexpected error processing Paystack response:', error);
-      return sendJsonResponse(res, 500, {
-        status: 'error',
-        message: 'Failed to process payment verification',
-        code: 'processing_error',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
-      });
-    }
-
     if (!response.ok) {
-      const errorMessage = verificationData?.message || 'Unknown error';
-      console.error(`❌ Paystack API error (${response.status}):`, errorMessage);
-      
-      // Log the API error
-      await PaymentLogger.logVerificationFailed(
-        reference, 
-        `Paystack API error: ${response.status} - ${errorMessage}`,
-        { 
-          status: response.status, 
-          error: errorMessage,
-          response: verificationData 
-        }
-      );
-      
+      const errorText = await response.text();
+      console.error(`❌ Paystack API error (${response.status}):`, errorText);
+
       return sendJsonResponse(res, 400, {
         status: 'error',
-        message: errorMessage,
-        code: 'payment_verification_failed',
-        details: verificationData
+        message: 'Payment verification failed',
+        code: 'payment_verification_failed'
       });
     }
 
-    const verificationData: PaystackVerificationResponse = await response.json();
-    console.log('Paystack verification response:', verificationData);
+    let verificationData;
+    try {
+      verificationData = await response.json();
+    } catch (jsonError) {
+      console.error('Error parsing Paystack JSON response:', jsonError);
+      return sendJsonResponse(res, 502, {
+        status: 'error',
+        message: 'Invalid JSON response from payment processor',
+        code: 'invalid_json_response'
+      });
+    }
 
     if (!verificationData.status || !verificationData.data) {
       console.error('Invalid verification data structure:', verificationData);
@@ -254,17 +174,17 @@ export default allowCors(async function handler(
     if (verificationData.status === true && verificationData.data.status === 'success') {
       // Payment successful - create booking and update status
       console.log('Payment verified successfully:', verificationData.data);
-      
+
       try {
         // Convert amount from kobo to naira
         const paidAmount = verificationData.data.amount / 100;
-        
+
         // Create booking record in Firestore
         const bookingRecord = {
           // Add service account flag for Firestore rules
           serviceAccount: true,
           userId: bookingData?.userId || '',
-          guestName: bookingData?.guestName || verificationData.data.customer.first_name + ' ' + verificationData.data.customer.last_name || '',
+          guestName: bookingData?.guestName || `${verificationData.data.customer.first_name} ${verificationData.data.customer.last_name}`.trim(),
           guestEmail: bookingData?.guestEmail || verificationData.data.customer.email,
           guestPhone: bookingData?.guestPhone || verificationData.data.customer.phone || '',
           branchId: bookingData?.branchId || '',
@@ -287,7 +207,7 @@ export default allowCors(async function handler(
           updatedAt: Timestamp.now(),
           bookingDate: Timestamp.now(),
           paidAt: Timestamp.fromDate(new Date(verificationData.data.paid_at)),
-          
+
           // Paystack transaction details
           paystackRef: verificationData.data.reference,
           transactionId: verificationData.data.id.toString(),
@@ -296,53 +216,20 @@ export default allowCors(async function handler(
           paymentGatewayResponse: verificationData.data.gateway_response,
           paymentCurrency: verificationData.data.currency,
           paymentFees: verificationData.data.fees / 100, // Convert from kobo
-          
+
           // Store full Paystack response for audit
           paystackResponse: verificationData.data
         };
 
         // Save booking to branch subcollection
-        // Add service account flag to the document data for Firestore rules
         const docRef = await addDoc(collection(db, 'branches', bookingData.branchId, 'bookings'), {
           ...bookingRecord,
           serviceAccount: true
         });
         console.log('Booking created successfully with ID:', docRef.id);
 
-        // Log successful verification and booking creation
-        await PaymentLogger.logVerificationSuccess(reference, verificationData.data, 'backend', docRef.id);
-        await PaymentLogger.logBookingCreated(reference, docRef.id, 'backend');
-
-        // Also create a payment record for audit in branch subcollection
-        const paymentRecord = {
-          bookingId: docRef.id,
-          transactionId: verificationData.data.reference,
-          paystackTransactionId: verificationData.data.id,
-          amount: paidAmount,
-          currency: verificationData.data.currency,
-          status: 'successful',
-          paymentMethod: 'paystack',
-          customerEmail: verificationData.data.customer.email,
-          customerName: `${verificationData.data.customer.first_name || ''} ${verificationData.data.customer.last_name || ''}`.trim(),
-          customerPhone: verificationData.data.customer.phone || '',
-          channel: verificationData.data.channel,
-          gatewayResponse: verificationData.data.gateway_response,
-          fees: verificationData.data.fees / 100,
-          createdAt: Timestamp.now(),
-          verifiedAt: Timestamp.now(),
-          paidAt: Timestamp.fromDate(new Date(verificationData.data.paid_at)),
-          verificationData: verificationData.data,
-          branchId: bookingData.branchId // Add branchId for reference
-        };
-
-        await addDoc(collection(db, 'branches', bookingData.branchId, 'bookings', docRef.id, 'payments'), {
-          ...paymentRecord,
-          serviceAccount: true
-        });
-        console.log('Payment record created successfully as subcollection under booking:', docRef.id);
-
-        return res.status(200).json({ 
-          status: 'success', 
+        return res.status(200).json({
+          status: 'success',
           message: 'Payment verified and booking created successfully',
           bookingId: docRef.id,
           data: {
@@ -357,16 +244,9 @@ export default allowCors(async function handler(
 
       } catch (dbError: any) {
         console.error('Database error while creating booking:', dbError);
-        
-        // Log database error
-        await PaymentLogger.logBookingFailed(reference, dbError.message || 'Unknown database error', { 
-          bookingData, 
-          verificationData: verificationData?.data,
-          error: dbError.stack || dbError.toString()
-        });
-        
-        return sendJsonResponse(res, 500, { 
-          status: 'error', 
+
+        return sendJsonResponse(res, 500, {
+          status: 'error',
           message: 'Payment verified but failed to create booking record',
           code: 'database_error',
           error: process.env.NODE_ENV === 'development' ? dbError.message : 'Internal server error'
@@ -376,20 +256,9 @@ export default allowCors(async function handler(
       // Payment failed or not successful
       const failureMessage = verificationData.message || 'Payment verification failed';
       console.log(`❌ Payment verification failed (${verificationData.data?.status}):`, failureMessage);
-      
-      // Log verification failure
-      await PaymentLogger.logVerificationFailed(
-        reference, 
-        failureMessage,
-        {
-          status: verificationData.status,
-          data: verificationData.data,
-          gatewayResponse: verificationData.data?.gateway_response
-        }
-      );
-      
-      return sendJsonResponse(res, 400, { 
-        status: 'failed', 
+
+      return sendJsonResponse(res, 400, {
+        status: 'failed',
         message: failureMessage,
         code: 'payment_failed',
         data: {
@@ -397,36 +266,27 @@ export default allowCors(async function handler(
           reference: verificationData.data?.reference,
           amount: verificationData.data?.amount,
           currency: verificationData.data?.currency,
-          gatewayResponse: verificationData.data?.gateway_response
+          gatewayResponse: verificationData.data?.gateway_response || null
         }
       });
     }
-
   } catch (error: any) {
     const errorId = `err_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    const errorMessage = error.message || 'An unexpected error occurred';
+
     console.error(`🔥 [${errorId}] Unhandled error in payment verification:`, {
-      error: error.message,
+      error: errorMessage,
       stack: error.stack,
-      reference,
-      timestamp: new Date().toISOString()
+      reference: req.body?.reference,
+      body: req.body
     });
-    
-    // Log common errors with context
-    try {
-      await PaymentLogger.logCommonErrors(reference, error, `Payment Verification - ${errorId}`);
-    } catch (logError) {
-      console.error('Failed to log error:', logError);
-    }
-    
-    return sendJsonResponse(res, 500, {
+
+    // Return a clean error response
+    return res.status(500).json({
       status: 'error',
-      message: 'An unexpected error occurred',
-      code: 'unexpected_error',
-      errorId,
-      details: process.env.NODE_ENV === 'development' ? {
-        message: error.message,
-        stack: error.stack
-      } : undefined
+      message: 'Payment processing failed',
+      error: errorMessage,
+      errorId
     });
   }
 });
