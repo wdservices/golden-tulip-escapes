@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { BranchForm } from "@/components/admin/BranchForm";
 import { RoomForm } from "@/components/admin/RoomForm";
 import { getBranches } from "@/services/branchService";
@@ -43,6 +43,7 @@ interface Room {
 }
 
 export const BranchesPage = () => {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

@@ -10,7 +10,7 @@ import { useForm } from "@/hooks/useForm";
 import { updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { doc } from "firebase/firestore";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 
 interface ClientDetailsModalProps {
   client: User | null;
@@ -20,6 +20,7 @@ interface ClientDetailsModalProps {
 }
 
 export const ClientDetailsModal = ({ client, isOpen, onClose, onUpdate }: ClientDetailsModalProps) => {
+  const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 

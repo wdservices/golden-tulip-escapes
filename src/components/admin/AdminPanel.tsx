@@ -5,12 +5,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { useCollection } from '@/hooks/useCollection';
 import { Loader2, Building } from 'lucide-react';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 import { getBranches } from '@/services/branchService';
 
 
 export function AdminPanel() {
+  const { toast } = useToast();
   const { currentUser, updateUserRole, userMeta, activeBranchId, setActiveBranchId } = useAuth();
   const { data: users, loading, error } = useCollection('users');
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);

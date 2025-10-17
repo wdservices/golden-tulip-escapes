@@ -10,7 +10,7 @@ import { Building, Database, Plus, AlertTriangle, User, Mail, Shield } from "luc
 import { useAuth } from "@/contexts/AuthContext";
 import { getBranches } from "@/services/branchService";
 import { initializeSampleData } from "@/utils/initializeData";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { updateEmail, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 
 
@@ -24,6 +24,7 @@ type Settings = {
 };
 
 export const SettingsPage = () => {
+  const { toast } = useToast();
   const [settings, setSettings] = useState<Settings>({
     siteName: "Golden Tulip",
     currency: "NGN",
@@ -79,13 +80,24 @@ export const SettingsPage = () => {
     try {
       const result = await initializeSampleData();
       if (result.success) {
-        toast.success("Sample data initialized successfully! The dashboard should now show analytics.");
+        toast({
+          title: "Success",
+          description: "Sample data initialized successfully! The dashboard should now show analytics."
+        });
       } else {
-        toast.error("Failed to initialize sample data. Please try again.");
+        toast({
+          title: "Error",
+          description: "Failed to initialize sample data. Please try again.",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error("Error initializing data:", error);
-      toast.error("An error occurred while initializing data.");
+      toast({
+        title: "Error",
+        description: "An error occurred while initializing data.",
+        variant: "destructive"
+      });
     } finally {
       setIsInitializingData(false);
     }
@@ -95,12 +107,20 @@ export const SettingsPage = () => {
     e.preventDefault();
     
     if (!currentUser || !newEmail || !currentPassword) {
-      toast.error("Please fill in all required fields.");
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
       return;
     }
 
     if (newEmail === currentUser.email) {
-      toast.error("New email must be different from current email.");
+      toast({
+        title: "Error",
+        description: "New email must be different from current email.",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -118,20 +138,43 @@ export const SettingsPage = () => {
       setNewEmail("");
       setCurrentPassword("");
       
-      toast.success("Email updated successfully! Please verify your new email address.");
+      toast({
+        title: "Success",
+        description: "Email updated successfully! Please verify your new email address."
+      });
     } catch (error: any) {
       console.error("Error updating email:", error);
       
       if (error.code === 'auth/wrong-password') {
-        toast.error("Current password is incorrect.");
+        toast({
+          title: "Error",
+          description: "Current password is incorrect.",
+          variant: "destructive"
+        });
       } else if (error.code === 'auth/email-already-in-use') {
-        toast.error("This email is already in use by another account.");
+        toast({
+          title: "Error",
+          description: "This email is already in use by another account.",
+          variant: "destructive"
+        });
       } else if (error.code === 'auth/invalid-email') {
-        toast.error("Please enter a valid email address.");
+        toast({
+          title: "Error",
+          description: "Please enter a valid email address.",
+          variant: "destructive"
+        });
       } else if (error.code === 'auth/requires-recent-login') {
-        toast.error("Please log out and log back in before changing your email.");
+        toast({
+          title: "Error",
+          description: "Please log out and log back in before changing your email.",
+          variant: "destructive"
+        });
       } else {
-        toast.error("Failed to update email. Please try again.");
+        toast({
+          title: "Error",
+          description: "Failed to update email. Please try again.",
+          variant: "destructive"
+        });
       }
     } finally {
       setIsChangingEmail(false);

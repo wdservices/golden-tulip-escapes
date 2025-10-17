@@ -59,7 +59,7 @@ app.post('/api/verify-payment', async (req, res) => {
       });
     }
 
-    const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
+    const PAYSTACK_SECRET_KEY = process.env.VITE_PAYSTACK_SECRET_KEY;
 
     if (!PAYSTACK_SECRET_KEY) {
       console.error('Paystack secret key not configured');
@@ -108,12 +108,21 @@ app.post('/api/verify-payment', async (req, res) => {
            console.warn('Warning: No userId provided in booking data, using fallback:', userId);
          }
          
+          const branchId = bookingData?.branchId;
+          if (!branchId) {
+            console.error('Error: branchId is missing from bookingData.');
+            return res.status(400).json({
+              status: 'error',
+              message: 'Branch ID is required to create a booking.'
+            });
+          }
+
           const bookingRecord = {
             userId: userId,
           guestName: bookingData?.guestName || verificationData.data.customer.first_name + ' ' + verificationData.data.customer.last_name || '',
           guestEmail: bookingData?.guestEmail || verificationData.data.customer.email,
           guestPhone: bookingData?.guestPhone || verificationData.data.customer.phone || '',
-          branchId: bookingData?.branchId || '',
+          branchId: branchId,
           branchName: bookingData?.branchName || '',
           roomType: bookingData?.roomType || '',
           roomId: bookingData?.roomId || bookingData?.roomType || '',
@@ -147,7 +156,7 @@ app.post('/api/verify-payment', async (req, res) => {
           paystackResponse: verificationData.data
         };
 
-        const docRef = await db.collection('branches').doc(bookingData.branchId).collection('bookings').add(bookingRecord);
+        const docRef = await db.collection('branches').doc(branchId).collection('bookings').add(bookingRecord);
         console.log('Booking created successfully with ID:', docRef.id);
 
         // Also create a payment record for audit
@@ -171,7 +180,7 @@ app.post('/api/verify-payment', async (req, res) => {
           verificationData: verificationData.data
         };
 
-        await db.collection('branches').doc(bookingData.branchId).collection('bookings').doc(docRef.id).collection('payments').add(paymentRecord);
+        await db.collection('branches').doc(branchId).collection('bookings').doc(docRef.id).collection('payments').add(paymentRecord);
         console.log('Payment record created successfully as subcollection under booking:', docRef.id);
 
         return res.status(200).json({ 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { format } from 'date-fns';
 import { Home, Calendar, Star, Plus, CheckCircle, LogOut, Clock, MapPin, MessageSquare } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,7 @@ const LoadingSpinner = () => (
 
 export const UserDashboard = () => {
   const { currentUser, isAuthenticated, isLoading: isAuthLoading, logout } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -314,7 +315,10 @@ export const UserDashboard = () => {
     // Handle booking cancellation
     console.log("Cancel booking:", bookingId);
     // In a real app, this would trigger an API call
-    toast.info("Cancellation request sent");
+    toast({
+      title: "Info",
+      description: "Cancellation request sent"
+    });
   };
 
   const handleLogout = async () => {
@@ -824,7 +828,10 @@ export const UserDashboard = () => {
                   className="bg-white/10 border-white/20 text-white hover:bg-white/20"
                   onClick={() => {
                     // Handle edit profile
-                    toast.info('Edit profile functionality coming soon');
+                    toast({
+                      title: "Info",
+                      description: "Edit profile functionality coming soon"
+                    });
                   }}
                 >
                   Edit Profile

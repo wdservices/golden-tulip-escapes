@@ -359,8 +359,14 @@ export const BookingsPage = () => {
   // Update booking status in Firestore
   const updateBookingStatus = async (bookingId: string, newStatus: BookingStatus) => {
     try {
-      // Get reference to the booking document
-      const bookingRef = doc(db, "bookings", bookingId);
+      // Find the booking in our local state to get the branchId
+      const booking = bookings.find(b => b.id === bookingId);
+      if (!booking || !booking.branchId) {
+        throw new Error('Booking not found or missing branch information');
+      }
+      
+      // Get reference to the booking document in the correct branch subcollection
+      const bookingRef = doc(db, "branches", booking.branchId, "bookings", bookingId);
       
       // Update the status field
       await updateDoc(bookingRef, {

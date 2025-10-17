@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from 'sonner';
+import { useToast } from "@/hooks/use-toast";
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -15,6 +15,7 @@ interface FeedbackFormProps {
 }
 
 export function FeedbackForm({ className = '', userId, userEmail, onSuccess }: FeedbackFormProps) {
+  const { toast } = useToast();
   const [type, setType] = useState<'suggestion' | 'complaint' | ''>('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2 } from "lucide-react";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { BranchStatus } from "@/pages/admin/BranchesPage";
 import { reconnectFirebase } from "@/lib/firebase";
 
@@ -18,6 +18,7 @@ interface BranchFormProps {
 }
 
 export const BranchForm = ({ branch, onSuccess, onCancel }: BranchFormProps) => {
+  const { toast } = useToast();
   const { addDocument, updateDocument } = useDatabase();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
