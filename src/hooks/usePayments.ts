@@ -1,8 +1,85 @@
 import { useState, useEffect } from 'react';
-import { collection, collectionGroup, query, where, orderBy, limit, getDocs, QuerySnapshot, DocumentData } from 'firebase/firestore';
+import { collection, collectionGroup, query, where, orderBy, limit, getDocs, getDoc, doc, DocumentData } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Payment } from '@/types';
+
+// Fallback function to fetch payments from branch subcollections directly
+async function fetchPaymentsFromBranchSubcollections(branchId: string, queryLimit: number): Promise<Payment[]> {
+  try {
+    const payments: Payment[] = [];
+    
+    // Get all bookings for this branch
+    const bookingsSnapshot = await getDocs(
+      collection(db, 'branches', branchId, 'bookings')
+    );
+    
+    // Create a map of booking data for quick lookup
+    const bookingDataMap = new Map();
+    for (const bookingDoc of bookingsSnapshot.docs) {
+      bookingDataMap.set(bookingDoc.id, bookingDoc.data());
+    }
+    
+    // For each booking, get its payments
+    for (const bookingDoc of bookingsSnapshot.docs) {
+      const bookingData = bookingDataMap.get(bookingDoc.id);
+      const paymentsSnapshot = await getDocs(
+        query(
+          collection(db, 'branches', branchId, 'bookings', bookingDoc.id, 'payments'),
+          orderBy('createdAt', 'desc'),
+          limit(queryLimit)
+        )
+      );
+      
+      paymentsSnapshot.forEach(paymentDoc => {
+        const paymentData = paymentDoc.data();
+        
+        // Get guest name from booking data first, then fall back to payment data
+        const guestName = bookingData?.guestName || 
+                         paymentData.customer?.customer_name || 
+                         paymentData.customer?.name || 
+                         'Unknown Guest';
+        
+        const customerEmail = bookingData?.customerEmail || 
+                              paymentData.customer?.email || 
+                              'N/A';
+        
+        // Map the payment data to match the UI expectations
+        const mappedPayment = {
+          id: paymentDoc.id,
+          bookingId: bookingDoc.id,
+          branchId: branchId,
+          transactionId: paymentData.transactionId || paymentDoc.id,
+          guestName: guestName,
+          customerEmail: customerEmail,
+          amount: paymentData.amount || 0,
+          currency: paymentData.currency || 'NGN',
+          date: paymentData.createdAt?._seconds ? new Date(paymentData.createdAt._seconds * 1000).toISOString() : 
+                paymentData.paidAt?._seconds ? new Date(paymentData.paidAt._seconds * 1000).toISOString() : 
+                new Date().toISOString(),
+          status: paymentData.status || 'pending',
+          method: paymentData.paymentMethod || paymentData.method || 'paystack',
+          channel: paymentData.channel || paymentData.paymentMethod || 'paystack',
+          paystackTransactionId: paymentData.paystackTransactionId || paymentData.transactionId,
+          fees: paymentData.fees || 0,
+          receiptUrl: paymentData.receiptUrl || paymentData.receipt_url,
+          gatewayResponse: paymentData.gatewayResponse || paymentData.gateway_response,
+          ...paymentData
+        };
+        
+        payments.push(mappedPayment as Payment);
+      });
+    }
+    
+    // Sort by createdAt desc and apply limit
+    return payments
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, queryLimit);
+  } catch (error) {
+    console.error('Error in fallback payment fetch:', error);
+    return [];
+  }
+}
 
 interface UsePaymentsOptions {
   branchId?: string;
@@ -59,11 +136,52 @@ export function usePayments({ branchId, limit: queryLimit = 100 }: UsePaymentsOp
       // Execute query
       const querySnapshot = await getDocs(q);
 
-      // Process results
-      const paymentDocs = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Payment[];
+      // Process results and map to UI expectations
+      const paymentDocs = await Promise.all(querySnapshot.docs.map(async (doc) => {
+        const paymentData = doc.data();
+        
+        // Try to get guest name from multiple sources
+        let guestName = paymentData.customer?.customer_name || paymentData.customer?.name || 'Unknown Guest';
+        let customerEmail = paymentData.customer?.email || 'N/A';
+        
+        // If guest name is still "Unknown Guest", try to fetch booking data
+        if (guestName === 'Unknown Guest' && paymentData.bookingId) {
+          try {
+            const bookingDoc = await getDoc(
+              doc(db, 'branches', paymentData.branchId, 'bookings', paymentData.bookingId)
+            );
+            
+            if (bookingDoc.exists()) {
+              const bookingData = bookingDoc.data();
+              guestName = bookingData.guestName || guestName;
+              customerEmail = bookingData.customerEmail || customerEmail;
+            }
+          } catch (bookingError) {
+            console.warn(`Failed to fetch booking data for payment ${doc.id}:`, bookingError);
+          }
+        }
+        
+        // Map the payment data to match the UI expectations
+        return {
+          id: doc.id,
+          transactionId: paymentData.transactionId || doc.id,
+          guestName: guestName,
+          customerEmail: customerEmail,
+          amount: paymentData.amount || 0,
+          currency: paymentData.currency || 'NGN',
+          date: paymentData.createdAt?._seconds ? new Date(paymentData.createdAt._seconds * 1000).toISOString() : 
+                paymentData.paidAt?._seconds ? new Date(paymentData.paidAt._seconds * 1000).toISOString() : 
+                new Date().toISOString(),
+          status: paymentData.status || 'pending',
+          method: paymentData.paymentMethod || paymentData.method || 'paystack',
+          channel: paymentData.channel || paymentData.paymentMethod || 'paystack',
+          paystackTransactionId: paymentData.paystackTransactionId || paymentData.transactionId,
+          fees: paymentData.fees || 0,
+          receiptUrl: paymentData.receiptUrl || paymentData.receipt_url,
+          gatewayResponse: paymentData.gatewayResponse || paymentData.gateway_response,
+          ...paymentData
+        } as Payment;
+      }));
 
       setPayments(paymentDocs);
     } catch (err) {
@@ -71,14 +189,18 @@ export function usePayments({ branchId, limit: queryLimit = 100 }: UsePaymentsOp
       
       // Check if it's a Firebase index error
       if (err instanceof Error && err.message.includes('index')) {
-        console.warn('Firebase index not available for payments query. This is expected in development.');
-        console.warn('To create the required index, visit the Firebase Console and create a composite index for:');
-        console.warn('Collection: payments (collection group)');
-        console.warn('Fields: branchId (Ascending), createdAt (Descending)');
+        console.warn('Firebase index not available for payments query. Using fallback method.');
         
-        // Set empty payments array instead of showing error to user
-        setPayments([]);
-        setError(null);
+        // Use fallback method to fetch payments from branch subcollections
+        if (effectiveBranchId && effectiveBranchId !== 'all') {
+          const fallbackPayments = await fetchPaymentsFromBranchSubcollections(effectiveBranchId, queryLimit);
+          setPayments(fallbackPayments);
+          setError(null);
+        } else {
+          console.warn('Cannot use fallback method without branchId');
+          setPayments([]);
+          setError(null);
+        }
       } else {
         setError(err instanceof Error ? err : new Error('Failed to fetch payments'));
       }
