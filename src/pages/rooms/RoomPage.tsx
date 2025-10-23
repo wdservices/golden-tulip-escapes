@@ -70,7 +70,7 @@ export default function RoomPage() {
             <span className="text-primary">Back to Rooms</span>
           </Button>
           <div className="text-primary font-serif text-xl">Golden Tulip</div>
-          <Button className="bg-gradient-to-r from-primary to-amber-600 hover:from-amber-600 hover:to-primary text-white px-6 transition-all duration-300">
+          <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 transition-all duration-300">
             Book Now
           </Button>
         </div>
@@ -79,25 +79,25 @@ export default function RoomPage() {
       {/* 360° VR Room View */}
       <div className="relative w-full py-16 px-4 sm:px-8 md:px-12 lg:px-24 xl:px-32 2xl:px-40 bg-background">
         <div className="max-w-[100rem] mx-auto relative">
-          {/* Gold glow effect */}
-          <div className="absolute -inset-3 bg-gradient-to-r from-yellow-500/40 via-yellow-400/30 to-yellow-500/40 rounded-3xl blur-3xl -z-10 group-hover:opacity-100 opacity-70 transition-all duration-700"></div>
-          <div className="absolute -inset-4 bg-gradient-to-r from-yellow-600/20 via-yellow-500/15 to-yellow-600/20 rounded-3xl blur-xl -z-20 group-hover:opacity-100 opacity-50 transition-all duration-1000"></div>
+          {/* Blue glow effect - toned down */}
+          <div className="absolute -inset-3 bg-gradient-to-r from-blue-500/20 via-blue-400/15 to-blue-500/20 rounded-3xl blur-3xl -z-10 group-hover:opacity-100 opacity-50 transition-all duration-700"></div>
+          <div className="absolute -inset-4 bg-gradient-to-r from-blue-600/10 via-blue-500/8 to-blue-600/10 rounded-3xl blur-xl -z-20 group-hover:opacity-100 opacity-30 transition-all duration-1000"></div>
           {/* Main container */}
           <div className="relative bg-[var(--gradient-card)] rounded-2xl p-2 shadow-2xl group border border-border/20">
             {/* Inner bezel */}
             <div className="relative overflow-hidden rounded-xl" style={{ paddingTop: '80vh', minHeight: '400px' }}>
               <div className="md:hidden absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-                <div className="text-xs text-amber-300/80 bg-black/40 px-2 py-1 rounded-full">Swipe to rotate view</div>
+                <div className="text-xs text-primary/80 bg-black/40 px-2 py-1 rounded-full">Swipe to rotate view</div>
               </div>
               {/* Shine effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 z-10 pointer-events-none" />
               {/* Frame */}
-              <div className="absolute inset-0.5 rounded-xl border border-amber-500/30 shadow-inner pointer-events-none" />
+              <div className="absolute inset-0.5 rounded-xl border border-primary/30 shadow-inner pointer-events-none" />
               {/* Corners */}
-              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-gold-500 rounded-tl-lg z-10" />
-              <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-gold-500 rounded-tr-lg z-10" />
-              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-gold-500 rounded-bl-lg z-10" />
-              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-gold-500 rounded-br-lg z-10" />
+              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-primary/60 rounded-tl-lg z-10" />
+              <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary/60 rounded-tr-lg z-10" />
+              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-primary/60 rounded-bl-lg z-10" />
+              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-primary/60 rounded-br-lg z-10" />
               
               <iframe 
                 id="evrFrame"
@@ -115,7 +115,7 @@ export default function RoomPage() {
       <div className="bg-background py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gradient-gold font-serif">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-primary font-serif">
               {room.name}
             </h1>
             <div className="flex flex-col items-center space-y-6 text-lg text-foreground">
@@ -147,7 +147,7 @@ export default function RoomPage() {
           <div className="lg:col-span-2 space-y-12">
             {/* Description */}
             <div className="bg-background/50 backdrop-blur-sm border border-border/20 rounded-2xl p-8 shadow-sm hover:shadow-glow transition-all duration-300">
-              <h2 className="text-3xl font-bold text-gradient-gold mb-6 font-serif">Description</h2>
+              <h2 className="text-3xl font-bold text-blue-600 mb-6 text-center">Description</h2>
               <p className="text-muted-foreground leading-relaxed text-lg">
                 {room.longDescription || room.description}
               </p>
@@ -155,7 +155,7 @@ export default function RoomPage() {
             
             {/* Amenities */}
             <div className="bg-background/50 backdrop-blur-sm border border-border/20 rounded-2xl p-8 shadow-sm hover:shadow-glow transition-all duration-300">
-              <h2 className="text-3xl font-bold text-gradient-gold mb-8 font-serif">Amenities</h2>
+              <h2 className="text-3xl font-bold text-primary mb-8 text-center">Amenities</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {room.amenities?.map((amenity, index) => (
                   <div key={index} className="flex items-center space-x-4 p-4 bg-background/30 rounded-xl border border-border/10 hover:border-primary/20 transition-all duration-300 group">
@@ -173,7 +173,7 @@ export default function RoomPage() {
           <div className="lg:sticky lg:top-24 h-fit">
             <div className="bg-background/80 backdrop-blur-sm border border-border/20 rounded-2xl p-8 shadow-xl hover:shadow-glow transition-all duration-500">
               <div className="mb-8 text-center">
-                <div className="text-4xl font-bold text-gradient-gold mb-1">₦{room.price?.toLocaleString()}</div>
+                <div className="text-4xl font-bold text-primary mb-1">₦{room.price?.toLocaleString()}</div>
                 <div className="text-muted-foreground">per night</div>
               </div>
               
@@ -201,7 +201,7 @@ export default function RoomPage() {
                 </div>
               </div>
               
-              <Button className="w-full bg-gradient-to-r from-primary to-amber-600 hover:from-amber-600 hover:to-primary text-white py-6 text-lg font-medium rounded-xl transition-all duration-500 hover:shadow-glow">
+              <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-6 text-lg font-medium rounded-xl transition-all duration-500 hover:shadow-lg">
                 Book Now
               </Button>
               
@@ -212,31 +212,40 @@ export default function RoomPage() {
               <div className="mt-8 pt-8 border-t border-border/20">
                 <h3 className="font-semibold text-xl text-foreground mb-6 text-center">Contact Information</h3>
                 <div className="space-y-4">
-                  <div className="flex items-center p-3 bg-background/50 rounded-lg border border-border/10 hover:border-primary/20 transition-colors">
-                    <div className="p-2 bg-primary/10 rounded-lg text-primary mr-4">
-                      <Phone className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Phone</div>
-                      <div className="font-medium">+234 123 456 7890</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center p-3 bg-background/50 rounded-lg border border-border/10 hover:border-primary/20 transition-colors">
-                    <div className="p-2 bg-primary/10 rounded-lg text-primary mr-4">
-                      <Mail className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Email</div>
-                      <div className="font-medium">info@goldentulip.com</div>
+                  <div className="p-4 bg-background/50 rounded-xl border border-border/10 hover:border-blue-500/20 transition-colors">
+                    <div className="flex items-start space-x-4">
+                      <div className="p-2 bg-blue-500/10 rounded-lg text-blue-600 flex-shrink-0">
+                        <Phone className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm text-muted-foreground mb-2">Phone</div>
+                        <div className="space-y-1">
+                          <div className="font-medium text-sm">+234 905 777 7780</div>
+                          <div className="font-medium text-sm">+234 905 777 7782</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center p-3 bg-background/50 rounded-lg border border-border/10 hover:border-primary/20 transition-colors">
-                    <div className="p-2 bg-primary/10 rounded-lg text-primary mr-4">
-                      <Clock className="h-5 w-5" />
+                  <div className="p-4 bg-background/50 rounded-xl border border-border/10 hover:border-blue-500/20 transition-colors">
+                    <div className="flex items-start space-x-4">
+                      <div className="p-2 bg-blue-500/10 rounded-lg text-blue-600 flex-shrink-0">
+                        <Mail className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm text-muted-foreground mb-2">Email</div>
+                        <div className="font-medium text-sm break-all">reservations@goldentulipportharcourt.com</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Support</div>
-                      <div className="font-medium">24/7 Customer Support</div>
+                  </div>
+                  <div className="p-4 bg-background/50 rounded-xl border border-border/10 hover:border-blue-500/20 transition-colors">
+                    <div className="flex items-start space-x-4">
+                      <div className="p-2 bg-blue-500/10 rounded-lg text-blue-600 flex-shrink-0">
+                        <Clock className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm text-muted-foreground mb-2">Support</div>
+                        <div className="font-medium text-sm">24/7 Customer Support</div>
+                      </div>
                     </div>
                   </div>
                 </div>

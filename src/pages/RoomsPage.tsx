@@ -31,13 +31,13 @@ export default function RoomsPage() {
   }, [queryDocuments]);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 text-slate-800">
       {/* Hero Section */}
-      <section className="relative h-96 flex items-center justify-center bg-gradient-to-b from-black/80 to-black/50">
+      <section className="relative h-96 flex items-center justify-center bg-gradient-to-b from-blue-900/70 to-blue-800/60">
         <div className="absolute inset-0 bg-[url('/images/rooms/hero-bg.jpg')] bg-cover bg-center -z-10" />
         <div className="text-center px-4 z-10">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gold-400">Our Rooms & Suites</h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">Our Rooms & Suites</h1>
+          <p className="text-xl text-blue-50 max-w-2xl mx-auto drop-shadow-md">
             Experience luxury and comfort in our meticulously designed rooms and suites, each offering a unique blend of modern amenities and elegant decor.
           </p>
         </div>
@@ -47,7 +47,7 @@ export default function RoomsPage() {
       <section className="py-16 px-4 max-w-7xl mx-auto">
         {isLoading ? (
           <div className="text-center py-12">
-            <p className="text-xl text-gray-400">Loading room information...</p>
+            <p className="text-xl text-slate-500">Loading room information...</p>
           </div>
         ) : (
           <div className="whitespace-nowrap overflow-x-auto pb-6 -mx-4 scrollbar-hide">
@@ -58,48 +58,48 @@ export default function RoomsPage() {
               const totalRooms = roomsOfThisType.length;
               
               return (
-                <div key={room.id} className="inline-block w-80 mx-3 first:ml-0 last:mr-0 bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700 hover:border-gold-400/50 transition-colors" style={{ minWidth: '320px' }}>
+                <div key={room.id} className="inline-block w-80 mx-3 first:ml-0 last:mr-0 bg-white/90 backdrop-blur-sm rounded-xl overflow-hidden border border-blue-200 hover:border-blue-400 shadow-lg hover:shadow-xl transition-all duration-300" style={{ minWidth: '320px' }}>
                   <div className="relative h-64">
                     <img 
                       src={room.images?.[0] || '/placeholder-room.jpg'} 
                       alt={room.name}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                    <div className="absolute bottom-4 right-4 bg-blue-900/80 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
                       From ₦{room.price?.toLocaleString()}/night
                     </div>
                   </div>
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-xl font-bold">{room.name}</h3>
-                      <div className="flex items-center text-yellow-400">
+                      <h3 className="text-xl font-bold text-slate-800">{room.name}</h3>
+                      <div className="flex items-center text-blue-600">
                         <Star className="w-5 h-5 fill-current" />
                         <span className="ml-1">4.9</span>
                       </div>
                     </div>
-                    <p className="text-gray-400 text-sm mb-4 line-clamp-2">{room.description}</p>
+                    <p className="text-slate-600 text-sm mb-4 line-clamp-2">{room.description}</p>
                     
                     <div className="flex flex-wrap gap-2 mb-4">
-                      <div className="flex items-center text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
+                      <div className="flex items-center text-xs text-slate-600 bg-blue-50 px-2 py-1 rounded">
                         <Users className="w-3 h-3 mr-1" />
                         {room.capacity} {room.capacity > 1 ? 'Guests' : 'Guest'}
                       </div>
-                      <div className="flex items-center text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
+                      <div className="flex items-center text-xs text-slate-600 bg-blue-50 px-2 py-1 rounded">
                         <span>Size: {room.size} m²</span>
                       </div>
-                      <div className="flex items-center text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
+                      <div className="flex items-center text-xs text-slate-600 bg-blue-50 px-2 py-1 rounded">
                         <span>Available: {availableRooms}/{totalRooms}</span>
                       </div>
                     </div>
                     
                     <div className="flex justify-between items-center mt-4">
                       <Link to={`/rooms/${room.id}`} className="group">
-                        <Button variant="link" className="text-gold-400 p-0 group-hover:underline">
+                        <Button variant="link" className="text-blue-600 p-0 group-hover:underline">
                           View Details <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                         </Button>
                       </Link>
                       <Link to={`/book?room=${room.id}`}>
-                        <Button className="bg-gold-500 hover:bg-gold-600 text-white">
+                        <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-300">
                           Book Now
                         </Button>
                       </Link>
@@ -113,40 +113,40 @@ export default function RoomsPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 px-4 bg-gray-800/30">
+      <section className="py-16 px-4 bg-gradient-to-b from-blue-50/50 to-white/80">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gold-400">Room Amenities</h2>
+          <h2 className="text-3xl font-bold text-center mb-12 text-blue-800">Room Amenities</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gold-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Wifi className="w-8 h-8 text-gold-400" />
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+                <Wifi className="w-8 h-8 text-blue-600" />
               </div>
-              <h3 className="font-semibold mb-1">Free WiFi</h3>
-              <p className="text-sm text-gray-400">High-speed internet access</p>
+              <h3 className="font-semibold mb-1 text-slate-800">Free WiFi</h3>
+              <p className="text-sm text-slate-600">High-speed internet access</p>
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-gold-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Coffee className="w-8 h-8 text-gold-400" />
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+                <Coffee className="w-8 h-8 text-blue-600" />
               </div>
-              <h3 className="font-semibold mb-1">Coffee Maker</h3>
-              <p className="text-sm text-gray-400">Premium coffee selection</p>
+              <h3 className="font-semibold mb-1 text-slate-800">Coffee Maker</h3>
+              <p className="text-sm text-slate-600">Premium coffee selection</p>
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-gold-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Tv className="w-8 h-8 text-gold-400" />
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+                <Tv className="w-8 h-8 text-blue-600" />
               </div>
-              <h3 className="font-semibold mb-1">Smart TV</h3>
-              <p className="text-sm text-gray-400">Streaming services available</p>
+              <h3 className="font-semibold mb-1 text-slate-800">Smart TV</h3>
+              <p className="text-sm text-slate-600">Streaming services available</p>
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-gold-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <AirVent className="w-8 h-8 text-gold-400" />
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+                <AirVent className="w-8 h-8 text-blue-600" />
               </div>
-              <h3 className="font-semibold mb-1">Climate Control</h3>
-              <p className="text-sm text-gray-400">Individual temperature settings</p>
+              <h3 className="font-semibold mb-1 text-slate-800">Climate Control</h3>
+              <p className="text-sm text-slate-600">Individual temperature settings</p>
             </div>
           </div>
         </div>

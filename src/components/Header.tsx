@@ -54,15 +54,15 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-border shadow-sm">
+    <header className="sticky top-0 z-50 bg-secondary/95 backdrop-blur-md border-b border-secondary/20 shadow-lg">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
-            <img src="/golden tulip logo.svg" alt="Golden Tulip Logo" className="h-8 w-8" />
+            <img src="/logo-mobile.png" alt="Golden Tulip Logo" className="h-8 w-auto" />
             <div className="flex flex-col">
-              <span className="text-xl font-bold text-foreground">Golden Tulip</span>
-              <span className="text-sm text-golden-yellow font-medium -mt-1">Port Harcourt</span>
+              <span className="text-xl font-bold text-white">Golden Tulip</span>
+              <span className="text-sm text-primary font-medium -mt-1">Port Harcourt</span>
             </div>
           </Link>
 
@@ -73,14 +73,14 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
                 {item.isRoute ? (
                   <Link
                     to={item.href}
-                    className="px-4 py-2 rounded-lg text-foreground hover-golden-text transition-all duration-300 font-medium"
+                    className="px-4 py-2 rounded-lg text-white hover:text-primary transition-all duration-300 font-medium"
                   >
                     {item.name}
                   </Link>
                 ) : (
                   <button
                     onClick={() => scrollToSection(item.href)}
-                    className="px-4 py-2 rounded-lg text-foreground hover-golden-text transition-all duration-300 font-medium"
+                    className="px-4 py-2 rounded-lg text-white hover:text-primary transition-all duration-300 font-medium"
                   >
                     {item.name}
                   </button>
@@ -108,7 +108,7 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
             <Button
               variant="ghost"
               size="sm"
-              className="hover-golden text-foreground"
+              className="text-white hover:text-primary hover:bg-white/10"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
             <div className="relative">
@@ -123,14 +123,14 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
         <div className={`md:hidden overflow-hidden transition-all duration-500 ease-in-out ${
           isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
         }`}>
-          <div className="py-4 border-t border-border/20 bg-white/95">
+          <div className="py-4 border-t border-white/20 bg-secondary/95">
             <nav className="space-y-1">
               {navigation.map((item, index) => (
                 item.isRoute ? (
                   <Link
                     key={item.name}
                     to={item.href}
-                    className="block px-4 py-3 text-foreground hover-golden-text transition-all duration-300 font-medium rounded-lg mx-2"
+                    className="block px-4 py-3 text-white hover:text-primary hover:bg-white/10 transition-all duration-300 font-medium rounded-lg mx-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.name}
@@ -142,7 +142,7 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
                       scrollToSection(item.href);
                       setIsMenuOpen(false);
                     }}
-                    className="block w-full text-left px-4 py-3 text-foreground hover-golden-text transition-all duration-300 font-medium rounded-lg mx-2"
+                    className="block w-full text-left px-4 py-3 text-white hover:text-primary hover:bg-white/10 transition-all duration-300 font-medium rounded-lg mx-2"
                   >
                     {item.name}
                   </button>

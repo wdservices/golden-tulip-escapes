@@ -326,13 +326,13 @@ export const InfoSections = () => {
   return (
     <div className="space-y-16">
       {/* Rooms & Suites Section */}
-      <section id="rooms" className="py-16">
+      <section id="rooms" className="py-16 bg-gradient-to-b from-background to-golden-yellow/5">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-serif font-bold mb-4 text-golden-yellow drop-shadow-lg">
+            <h2 className="text-4xl font-serif font-bold mb-4 text-golden-yellow drop-shadow-sm">
               Rooms & Suites
             </h2>
-            <p className="text-lg text-foreground/80 max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Discover our carefully designed accommodations that blend comfort with luxury
             </p>
           </div>
@@ -342,28 +342,29 @@ export const InfoSections = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {roomTypes.map((room, index) => (
                 <Link to={`/rooms/${room.id}`} key={index} className="block h-full">
-                  <Card className="brand-card group hover-golden transition-all duration-500 h-full flex flex-col">
+                  <Card className="bg-white border border-golden-yellow/20 shadow-lg hover:shadow-xl group transition-all duration-500 h-full flex flex-col hover:border-golden-yellow/40">
                     <div className="relative overflow-hidden rounded-t-2xl flex-grow">
                       <img
                         src={luxurySuite}
                         alt={room.name}
                         className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-golden-yellow/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
                     <div className="p-6 flex flex-col flex-grow">
-                      <div className="text-2xl font-bold text-golden-yellow mb-2">₦{room.price.toLocaleString()}<span className="text-sm font-normal text-foreground/60">/night</span></div>
+                      <div className="text-2xl font-bold text-golden-yellow mb-2">₦{room.price.toLocaleString()}<span className="text-sm font-normal text-muted-foreground">/night</span></div>
                       <h3 className="text-xl font-semibold mb-3 text-foreground">
                         {room.name}
                       </h3>
                       <ul className="space-y-2 mb-6 flex-grow">
                         {room.amenities.slice(0, 4).map((amenity, idx) => (
-                          <li key={idx} className="text-sm text-foreground/70 flex items-start">
+                          <li key={idx} className="text-sm text-muted-foreground flex items-start">
                             <span className="inline-block w-1.5 h-1.5 rounded-full bg-golden-yellow mt-2 mr-2 flex-shrink-0"></span>
                             <span>{amenity}</span>
                           </li>
                         ))}
                       </ul>
-                      <Button className="brand-button w-full mt-4">
+                      <Button className="bg-golden-yellow hover:bg-golden-yellow/90 text-white border-0 w-full mt-4 shadow-md hover:shadow-lg transition-all duration-300">
                         View Details
                       </Button>
                     </div>

@@ -199,6 +199,13 @@
     background-clip: text;
   }
 
+  .text-gradient-blue-gold {
+    background: linear-gradient(135deg, hsl(220 100% 45%), hsl(45 100% 50%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
   /* Custom Calendar Styling for Booking Form */
   .booking-calendar {
     @apply bg-white/10 backdrop-blur-md border-white/20 text-white;
