@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Bed, Utensils, Waves, Calendar, Globe, Car, Dumbbell, Shield, Coffee, Tv, ShowerHead, Refrigerator, Clock } from "lucide-react";
 import luxurySuite from "@/assets/luxury-suite.jpg";
 import restaurant from "@/assets/restaurant.jpg";
-import spa from "@/assets/spa.jpg";
 import { EventDetailsDialog } from "@/components/events/EventDetailsDialog";
 import { roomTypes } from '@/data/rooms';
 
@@ -492,7 +491,7 @@ export const InfoSections = () => {
               <div className="relative group">
                 <div className="relative overflow-hidden rounded-3xl h-[500px]">
                   <img
-                    src={spa}
+                    src="/images/spa.png"
                     alt="Luxury Spa Experience"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />

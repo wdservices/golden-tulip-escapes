@@ -118,10 +118,10 @@ const App = () => {
           <Toaster />
           <Sonner />
           {/* Zapier Chatbot - Always present in DOM */}
-          <zapier-interfaces-chatbot-embed 
+          {/* <zapier-interfaces-chatbot-embed 
             is-popup='true' 
             chatbot-id='cmfxud1f70034pj83m904ssvf'
-          />
+          /> */}
           <BrowserRouter
             future={{
               v7_startTransition: true,
@@ -130,7 +130,7 @@ const App = () => {
           >
             <AuthProvider>
               <DatabaseProvider>
-                <ConditionalChatbot />
+                {/* <ConditionalChatbot /> */}
               <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
