@@ -106,10 +106,10 @@ export const roomTypes: RoomType[] = [
       'Complimentary breakfast'
     ],
     images: [
-      '/src/assets/luxury-suite.jpg',
-      '/src/assets/luxury-suite.jpg',
-      '/src/assets/luxury-suite.jpg',
-      '/src/assets/luxury-suite.jpg'
+      '/images/premium superior suite.png',
+      '/images/premium superior suite.png',
+      '/images/premium superior suite.png',
+      '/images/premium superior suite.png'
     ],
     vrTourUrl: 'https://webobook.com/public/premium-superior-room-vr-tour'
   },
@@ -134,10 +134,10 @@ export const roomTypes: RoomType[] = [
       'Complimentary breakfast'
     ],
     images: [
-      '/src/assets/spa.jpg',
-      '/src/assets/spa.jpg',
-      '/src/assets/spa.jpg',
-      '/src/assets/spa.jpg'
+      '/images/deluxe room suite.png',
+      '/images/deluxe room suite.png',
+      '/images/deluxe room suite.png',
+      '/images/deluxe room suite.png'
     ],
     vrTourUrl: 'https://webobook.com/public/deluxe-room-vr-tour'
   },
@@ -163,10 +163,10 @@ export const roomTypes: RoomType[] = [
       'Complimentary breakfast'
     ],
     images: [
-      '/src/assets/hotel-lobby.jpg',
-      '/src/assets/hotel-lobby.jpg',
-      '/src/assets/hotel-lobby.jpg',
-      '/src/assets/hotel-lobby.jpg'
+      '/images/premium deplomatic suite.png',
+      '/images/premium deplomatic suite.png',
+      '/images/premium deplomatic suite.png',
+      '/images/premium deplomatic suite.png'
     ],
     vrTourUrl: 'https://webobook.com/public/premium-diplomatic-suite-vr-tour'
   },
@@ -194,10 +194,10 @@ export const roomTypes: RoomType[] = [
       'Complimentary breakfast'
     ],
     images: [
-      '/src/assets/restaurant.jpg',
-      '/src/assets/restaurant.jpg',
-      '/src/assets/restaurant.jpg',
-      '/src/assets/restaurant.jpg'
+      '/images/ambassadorial room suite.jpg',
+      '/images/ambassadorial room suite.jpg',
+      '/images/ambassadorial room suite.jpg',
+      '/images/ambassadorial room suite.jpg'
     ],
     vrTourUrl: 'https://webobook.com/public/ambassadorial-suite-vr-tour'
   },
