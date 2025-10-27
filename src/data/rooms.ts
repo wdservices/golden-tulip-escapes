@@ -22,10 +22,10 @@ export const roomTypes: RoomType[] = [
       'Complimentary breakfast'
     ],
     images: [
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg'
+      '/images/standard room.jpg',
+      '/images/standard room.jpg',
+      '/images/standard room.jpg',
+      '/images/standard room.jpg'
     ],
     vrTourUrl: 'https://webobook.com/public/648aed3e38418a65e92441d2,en?ap=true&si=false&sm=false&sp=false&sfr=false&sl=false&sop=false&sl=false'
   },
@@ -50,10 +50,10 @@ export const roomTypes: RoomType[] = [
       'Complimentary breakfast'
     ],
     images: [
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg'
+      '/images/superior room.png',
+      '/images/superior room.png',
+      '/images/superior room.png',
+      '/images/superior room.png'
     ],
     vrTourUrl: 'https://webobook.com/public/superior-room-vr-tour'
   },
@@ -78,10 +78,10 @@ export const roomTypes: RoomType[] = [
       'Complimentary breakfast'
     ],
     images: [
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg'
+      '/images/premium standard.png',
+      '/images/premium standard.png',
+      '/images/premium standard.png',
+      '/images/premium standard.png'
     ],
     vrTourUrl: 'https://webobook.com/public/premium-standard-room-vr-tour'
   },
@@ -106,10 +106,10 @@ export const roomTypes: RoomType[] = [
       'Complimentary breakfast'
     ],
     images: [
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg'
+      '/src/assets/luxury-suite.jpg',
+      '/src/assets/luxury-suite.jpg',
+      '/src/assets/luxury-suite.jpg',
+      '/src/assets/luxury-suite.jpg'
     ],
     vrTourUrl: 'https://webobook.com/public/premium-superior-room-vr-tour'
   },
@@ -134,10 +134,10 @@ export const roomTypes: RoomType[] = [
       'Complimentary breakfast'
     ],
     images: [
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg'
+      '/src/assets/spa.jpg',
+      '/src/assets/spa.jpg',
+      '/src/assets/spa.jpg',
+      '/src/assets/spa.jpg'
     ],
     vrTourUrl: 'https://webobook.com/public/deluxe-room-vr-tour'
   },
@@ -163,10 +163,10 @@ export const roomTypes: RoomType[] = [
       'Complimentary breakfast'
     ],
     images: [
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg'
+      '/src/assets/hotel-lobby.jpg',
+      '/src/assets/hotel-lobby.jpg',
+      '/src/assets/hotel-lobby.jpg',
+      '/src/assets/hotel-lobby.jpg'
     ],
     vrTourUrl: 'https://webobook.com/public/premium-diplomatic-suite-vr-tour'
   },
@@ -194,10 +194,10 @@ export const roomTypes: RoomType[] = [
       'Complimentary breakfast'
     ],
     images: [
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg'
+      '/src/assets/restaurant.jpg',
+      '/src/assets/restaurant.jpg',
+      '/src/assets/restaurant.jpg',
+      '/src/assets/restaurant.jpg'
     ],
     vrTourUrl: 'https://webobook.com/public/ambassadorial-suite-vr-tour'
   },
@@ -227,10 +227,10 @@ export const roomTypes: RoomType[] = [
       'Complimentary breakfast'
     ],
     images: [
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg',
-      '/images/rooms/placeholder-room.jpg'
+      '/images/presidential room.jpg',
+      '/images/presidential room.jpg',
+      '/images/presidential room.jpg',
+      '/images/presidential room.jpg'
     ],
     vrTourUrl: 'https://webobook.com/public/presidential-suite-vr-tour'
   }

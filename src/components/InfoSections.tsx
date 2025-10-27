@@ -344,7 +344,7 @@ export const InfoSections = () => {
                   <Card className="bg-white border border-golden-yellow/20 shadow-lg hover:shadow-xl group transition-all duration-500 h-full flex flex-col hover:border-golden-yellow/40">
                     <div className="relative overflow-hidden rounded-t-2xl flex-grow">
                       <img
-                        src={luxurySuite}
+                        src={room.images[0]}
                         alt={room.name}
                         className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                       />

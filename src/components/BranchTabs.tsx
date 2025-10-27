@@ -18,7 +18,7 @@ export function BranchTabs({ selectedBranch, onBranchSelect }: BranchTabsProps) 
       id: "stadium-31",
       name: "Stadium Road 31",
       location: "stadium road 31, Port Harcourt",
-      image: stadiumRoad31,
+      image: "/images/standium rd 31.png",
       description: "Modern hotel with excellent facilities"
     },
     {
@@ -32,7 +32,7 @@ export function BranchTabs({ selectedBranch, onBranchSelect }: BranchTabsProps) 
       id: "evergreen",
       name: "Evergreen",
       location: "Evergreen, Port Harcourt",
-      image: luxurySuite,
+      image: "/images/Evergreen.png",
       description: "Tranquil setting with premium amenities and personalized service"
     }
   ];
@@ -70,9 +70,9 @@ export function BranchTabs({ selectedBranch, onBranchSelect }: BranchTabsProps) 
                     alt={branch.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0">
-                    <div className="backdrop-blur-sm bg-black/60 p-4 rounded-b-xl">
+                    <div className="backdrop-blur-sm bg-black/40 p-4 rounded-b-xl">
                       <h3 className="text-base font-serif font-bold text-white mb-1">
                         {branch.name}
                       </h3>
