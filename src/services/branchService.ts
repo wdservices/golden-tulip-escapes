@@ -138,6 +138,7 @@ const branches: Branch[] = [
         description: "Our Deluxe Rooms are complemented with modern and luxurious amenities for a wonderful stay.",
         priceRange: "₦120,500 (₦86,250 discounted)",
         capacity: 2,
+        image: "/images/stadium road 31 images/deluxe.webp",
         features: [
           "Car hire",
           "Flat Tv",
@@ -156,6 +157,7 @@ const branches: Branch[] = [
         description: "Our Executive Rooms are spacious, nice and comfortable. The rooms gives access to our gym or swimming pool. The rooms are spacious with a read area.",
         priceRange: "₦135,500 (₦97,750 discounted)",
         capacity: 2,
+        image: "/images/stadium road 31 images/executive deluxe.webp",
         features: [
           "Car hire",
           "Refrigerator",
@@ -177,6 +179,7 @@ const branches: Branch[] = [
         description: "Need more fun, our Executive Twin Rooms give comfort and space to suite your relaxation need. Enjoy complimentary Breakfast with access to pool and gym facilities.",
         priceRange: "₦154,700 (₦115,000 discounted)",
         capacity: 2,
+        image: "/images/stadium road 31 images/executive twin.webp",
         features: [
           "Car hire",
           "Refrigerator",
@@ -198,6 +201,7 @@ const branches: Branch[] = [
         description: "The Super Executive Suites are always welcoming with nice furniture, either for business or pleasure the suites are always there to make you feel at home.",
         priceRange: "₦197,200 (₦138,000 discounted)",
         capacity: 2,
+        image: "/images/stadium road 31 images/super executive.webp",
         features: [
           "Car hire",
           "Refrigerator",
@@ -219,6 +223,7 @@ const branches: Branch[] = [
         description: "Pamper yourself in our well sized Royal Suite. Your nights will be enjoyable with inour nice laid king Beds. Have your meetings or leisure with family and friends in a cossy and relaxed atmosphere. Nice furniture access to pool and gym, Free Wifi, Breakfast, etc",
         priceRange: "₦272,300 (₦161,000 discounted)",
         capacity: 3,
+        image: "/images/stadium road 31 images/royal room.webp",
         features: [
           "Car hire",
           "Refrigerator",
