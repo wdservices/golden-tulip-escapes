@@ -29,7 +29,13 @@ export const BranchDining = ({ diningOptions }: BranchDiningProps) => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className={`grid gap-8 max-w-6xl mx-auto ${
+          diningOptions.length === 1 
+            ? 'grid-cols-1 max-w-md' 
+            : diningOptions.length === 2 
+            ? 'grid-cols-1 md:grid-cols-2 max-w-4xl' 
+            : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+        }`}>
           {diningOptions.map((option, index) => (
             <div 
               key={index}
