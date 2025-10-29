@@ -155,7 +155,6 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
       {/* 360° Iframe Viewer */}
       <div className="absolute inset-0 w-full h-full">
         <iframe 
-          id="evrFrame" 
           width="100%" 
           height="100%" 
           style={{ 
@@ -163,11 +162,13 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
             height: '100%', 
             border: 'none', 
             maxWidth: '100%' 
-          }}  
-          allow="xr-spatial-tracking; gyroscope; accelerometer; fullscreen"
-              loading="lazy"
+          }} 
+          allow="xr-spatial-tracking; vr; gyroscope; accelerometer; fullscreen; autoplay; xr" 
+          scrolling="no" 
+          allowFullScreen={true}
           frameBorder="0" 
-          src="https://webobook.com/public/648aed3e38418a65e92441d2,en?ap=true&si=true&sm=false&sp=true&sfr=false&sl=false&sop=false&"
+          src="https://webobook.com/public/69016df4e558c238a7307e22,en" 
+          allowvr="yes"
           title="360° Virtual Tour of Golden Tulip Hotel"
           className="absolute inset-0 w-full h-full"
         />
