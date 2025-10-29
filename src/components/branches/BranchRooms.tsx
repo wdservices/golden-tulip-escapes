@@ -1,5 +1,4 @@
 import { Branch } from "@/types/branch";
-import { roomTypes as updatedRoomTypes } from "@/data/rooms";
 import { Bed, Users, DollarSign, Check, Star, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,8 +11,8 @@ interface BranchRoomsProps {
 }
 
 export const BranchRooms = ({ roomTypes = [], branchId }: BranchRoomsProps) => {
-  // Use updated room data instead of branch-specific room types
-  const roomsToDisplay = updatedRoomTypes;
+  // Use branch-specific room types instead of generic room data
+  const roomsToDisplay = roomTypes;
 
   return (
     <section className="py-16" id="rooms">
@@ -39,29 +38,29 @@ export const BranchRooms = ({ roomTypes = [], branchId }: BranchRoomsProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {roomsToDisplay.map((room, index) => (
             <div 
-              key={room.id}
+              key={room.name || index}
               className="bg-card rounded-xl shadow-lg h-full flex flex-col"
             >
               {/* Room Image */}
               <div className="relative overflow-hidden rounded-t-xl flex-grow">
                 <img 
-                  src={luxurySuite} 
+                  src={room.image || luxurySuite} 
                   alt={room.name}
                   className="w-full h-48 object-cover"
                 />
               </div>
               
               <div className="p-6 flex flex-col flex-grow">
-                <div className="text-2xl font-bold text-primary mb-2">₦{room.price.toLocaleString()}<span className="text-sm font-normal text-muted-foreground">/night</span></div>
+                <div className="text-2xl font-bold text-primary mb-2">{room.priceRange}<span className="text-sm font-normal text-muted-foreground">/night</span></div>
                 <h3 className="text-xl font-semibold mb-3">
                   {room.name}
                 </h3>
                 {/* Description removed as requested */}
                 <ul className="space-y-2 mb-6 flex-grow">
-                  {room.amenities.slice(0, 4).map((amenity, idx) => (
+                  {(room.features || []).slice(0, 4).map((feature, idx) => (
                     <li key={idx} className="text-sm text-muted-foreground flex items-start">
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary mt-2 mr-2 flex-shrink-0"></span>
-                      <span>{amenity}</span>
+                      <span>{feature}</span>
                     </li>
                   ))}
                 </ul>

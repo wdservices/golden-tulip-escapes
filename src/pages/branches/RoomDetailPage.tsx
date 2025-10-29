@@ -4,15 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Bed, Users, ArrowLeft, Check, Star, ArrowRight, Phone, Mail, MapPin } from 'lucide-react';
 import { getBranchById } from '@/services/branchService';
 import { Branch } from '@/types/branch';
-import { Panorama360Viewer } from '@/components/ui/Panorama360Viewer';
-import { roomTypes as updatedRoomTypes } from '@/data/rooms';
-import { RoomType } from '@/types/room';
 
 export const RoomDetailPage = () => {
   const { branchId, roomId } = useParams<{ branchId: string; roomId: string }>();
   const navigate = useNavigate();
   const [branch, setBranch] = useState<Branch | null>(null);
-  const [room, setRoom] = useState<RoomType | null>(null);
+  const [room, setRoom] = useState<Branch['roomTypes'][0] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,9 +30,9 @@ export const RoomDetailPage = () => {
 
       setBranch(branchData);
 
-      // Find the room by its URL-friendly name using updated room data
+      // Find the room by its URL-friendly name using branch-specific room data
       const decodedRoomId = roomId.replace(/-/g, ' ');
-      const roomData = updatedRoomTypes.find(
+      const roomData = branchData.roomTypes?.find(
         (r) => r.name.toLowerCase() === decodedRoomId.toLowerCase()
       );
 
@@ -45,14 +42,7 @@ export const RoomDetailPage = () => {
         return;
       }
 
-      // Use the updated room data with VR tour URL and rating
-      const roomWithExtras = {
-        ...roomData,
-        rating: 4.8, // Sample rating
-        image360: roomData.vrTourUrl || 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070', // Use VR tour URL or placeholder
-      };
-
-      setRoom(roomWithExtras);
+      setRoom(roomData);
     } catch (err) {
       console.error('Error fetching data:', err);
       setError('Failed to load room information');
@@ -87,9 +77,15 @@ export const RoomDetailPage = () => {
   
   return (
     <div className={`min-h-screen ${isEvoRoad ? 'bg-gradient-to-br from-blue-50 via-white to-yellow-50' : 'bg-background'}`}>
-      {/* Hero Section with 360 Viewer */}
+      {/* Hero Section */}
       <section className={`relative h-[70vh] ${isEvoRoad ? 'bg-gradient-to-b from-blue-900/80 via-blue-800/70 to-yellow-900/60' : 'bg-gradient-to-b from-black/80 to-black/60'}`}>
-        <Panorama360Viewer imageUrl={room.image360 || ''} />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-black/30">
+          <img 
+            src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070" 
+            alt={room.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
         <div className={`absolute bottom-0 left-0 w-full bg-gradient-to-t ${isEvoRoad ? 'from-blue-900/90 to-transparent' : 'from-black/90 to-transparent'} p-6`}>
           <div className="container mx-auto">
             <Button 
@@ -105,10 +101,10 @@ export const RoomDetailPage = () => {
               <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{room.name}</h1>
               <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${isEvoRoad ? 'bg-yellow-500/20 border border-yellow-300/30' : 'bg-white/20 border border-white/30'}`}>
                 <Star className={`h-5 w-5 ${isEvoRoad ? 'text-yellow-300' : 'text-primary'}`} />
-                <span className="font-medium text-white">{room.rating}</span>
+                <span className="font-medium text-white">4.8</span>
               </div>
             </div>
-            <p className={`text-xl mt-2 drop-shadow-md ${isEvoRoad ? 'text-yellow-100' : 'text-white'}`}>₦{room.price?.toLocaleString()}/night</p>
+            <p className={`text-xl mt-2 drop-shadow-md ${isEvoRoad ? 'text-yellow-100' : 'text-white'}`}>{room.priceRange}/night</p>
           </div>
         </div>
       </section>
@@ -126,12 +122,12 @@ export const RoomDetailPage = () => {
                 <span>Accommodates up to {room.capacity} guests</span>
               </div>
               
-              <h3 className={`text-xl font-semibold mb-3 ${isEvoRoad ? 'text-blue-900' : 'text-foreground'}`}>Room Amenities</h3>
+              <h3 className={`text-xl font-semibold mb-3 ${isEvoRoad ? 'text-blue-900' : 'text-foreground'}`}>Room Features</h3>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
-                {room.amenities?.map((amenity, idx) => (
+                {room.features?.map((feature, idx) => (
                   <li key={idx} className={`flex items-center gap-2 ${isEvoRoad ? 'text-slate-700' : 'text-muted-foreground'}`}>
                     <Check className={`h-5 w-5 ${isEvoRoad ? 'text-blue-600' : 'text-primary'}`} />
-                    <span>{amenity}</span>
+                    <span>{feature}</span>
                   </li>
                 ))}
               </ul>

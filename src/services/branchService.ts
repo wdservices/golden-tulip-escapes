@@ -145,7 +145,10 @@ const branches: Branch[] = [
           "Internet – Wifi",
           "Coffee and tea",
           "Air Condition",
-          "Work Desk"
+          "Work Desk",
+          "Room service available 24hrs",
+          "Access with card",
+          "Well Trained Security Guard"
         ]
       },
       {
@@ -163,7 +166,10 @@ const branches: Branch[] = [
           "Coffee and tea",
           "Swimming Pool",
           "Air Condition",
-          "Work Desk"
+          "Work Desk",
+          "Room service available 24hrs",
+          "Access with card",
+          "Well Trained Security Guard"
         ]
       },
       {
@@ -181,7 +187,10 @@ const branches: Branch[] = [
           "Coffee and tea",
           "Air Condition",
           "Work Desk",
-          "Swimming Pool"
+          "Swimming Pool",
+          "Room service available 24hrs",
+          "Access with card",
+          "Well Trained Security Guard"
         ]
       },
       {
@@ -199,7 +208,10 @@ const branches: Branch[] = [
           "Coffee and tea",
           "Air Condition",
           "Work Desk",
-          "Swimming Pool"
+          "Swimming Pool",
+          "Room service available 24hrs",
+          "Access with card",
+          "Well Trained Security Guard"
         ]
       },
       {
@@ -217,7 +229,10 @@ const branches: Branch[] = [
           "Coffee and tea",
           "Air Condition",
           "Work Desk",
-          "Swimming Pool"
+          "Swimming Pool",
+          "Room service available 24hrs",
+          "Access with card",
+          "Well Trained Security Guard"
         ]
       }
     ],
@@ -647,6 +662,7 @@ const branches: Branch[] = [
         description: "Elegantly furnished room with complimentary buffet breakfast, access to gym and outdoor swimming pool, and exceptional dining experiences.",
         priceRange: "₦84,200/night",
         capacity: 2,
+        image: "/images/evergreen images/standard room.webp",
         features: [
           "Queen-size bed",
           "City view",
@@ -662,6 +678,7 @@ const branches: Branch[] = [
         description: "Elegantly furnished suite with premium furnishings and city views.",
         priceRange: "₦122,300/night",
         capacity: 2,
+        image: "/images/evergreen images/deluxe room.webp",
         features: [
           "King-size bed",
           "Premium view",
@@ -676,6 +693,7 @@ const branches: Branch[] = [
         description: "Luxurious suites with separate living area, premium amenities, concierge service, premium furnishings, and complimentary breakfast.",
         priceRange: "₦165,000/night",
         capacity: 3,
+        image: "/images/evergreen images/executive room.webp",
         features: [
           "Premium amenities",
           "Concierge service",
