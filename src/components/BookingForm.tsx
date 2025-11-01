@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Calendar, MapPin, Users, Loader2, Bed, CreditCard, Star, Sparkles, Clock, CheckCircle, MessageSquare } from "lucide-react";
+import { Calendar, MapPin, Users, User, Loader2, Bed, CreditCard, Star, Sparkles, Clock, CheckCircle, MessageSquare, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBranches } from "@/hooks/useBranches";
@@ -550,12 +551,12 @@ const BookingForm = ({ selectedBranch, showLocationDropdown = true, onBookingSuc
                     </span>
                   </div>
 
-                  {totalPrice > 0 && (
+                  {calculateTotal() > 0 && (
                     <div className="pt-4">
                       <div className="flex justify-between items-center py-3 bg-gradient-primary rounded-lg px-4">
                         <span className="text-primary-foreground font-semibold text-lg">Total Price:</span>
                         <span className="text-primary-foreground font-bold text-2xl">
-                          ₦{totalPrice.toLocaleString()}
+                          ₦{calculateTotal().toLocaleString()}
                         </span>
                       </div>
                     </div>

@@ -119,7 +119,7 @@ export const NewBookingForm = ({
 
   const totalPrice = calculateTotal();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -507,11 +507,11 @@ export const NewBookingForm = ({
                 </div>
 
                 <div className="space-y-4">
-                  {formData.branch && (
+                  {formData.location && (
                     <div className="flex justify-between items-center py-2 border-b border-white/20">
                       <span className="text-blue-200">Location:</span>
                       <span className="text-white font-medium">
-                        {branches.find(b => b.id === formData.branch)?.name || 'Selected Branch'}
+                        {branches.find(b => b.id === formData.location)?.name || 'Selected Branch'}
                       </span>
                     </div>
                   )}

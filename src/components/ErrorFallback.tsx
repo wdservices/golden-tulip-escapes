@@ -1,7 +1,7 @@
 import React from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Icons } from '@/components/icons';
+import { AlertCircle, RefreshCw, Undo } from 'lucide-react';
 
 interface ErrorFallbackProps {
   error: Error;
@@ -20,7 +20,7 @@ export default function ErrorFallback({ error, resetErrorBoundary }: ErrorFallba
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
         <Alert variant="destructive">
-          <Icons.alertCircle className="h-4 w-4" />
+          <AlertCircle className="h-4 w-4" />
           <AlertTitle>Something went wrong</AlertTitle>
           <AlertDescription className="mb-4">
             {error.message || 'An unexpected error occurred. Please try again.'}
@@ -32,7 +32,7 @@ export default function ErrorFallback({ error, resetErrorBoundary }: ErrorFallba
               onClick={() => window.location.reload()}
               className="flex-1"
             >
-              <Icons.refresh className="mr-2 h-4 w-4" />
+              <RefreshCw className="mr-2 h-4 w-4" />
               Reload Page
             </Button>
             <Button
@@ -41,7 +41,7 @@ export default function ErrorFallback({ error, resetErrorBoundary }: ErrorFallba
               onClick={resetErrorBoundary}
               className="flex-1"
             >
-              <Icons.undo className="mr-2 h-4 w-4" />
+              <Undo className="mr-2 h-4 w-4" />
               Try Again
             </Button>
           </div>
@@ -61,21 +61,4 @@ export default function ErrorFallback({ error, resetErrorBoundary }: ErrorFallba
   );
 }
 
-// This component can be used to wrap parts of your app with error boundaries
-export function withErrorBoundary<T extends React.ComponentType>(
-  Component: T,
-  FallbackComponent: React.ComponentType<ErrorFallbackProps> = ErrorFallback
-) {
-  return function WithErrorBoundary(props: React.ComponentProps<T>) {
-    return (
-      <ErrorBoundary
-        FallbackComponent={FallbackComponent}
-        onError={(error, info) => {
-          console.error('Error in component:', { error, info });
-        }}
-      >
-        <Component {...props} />
-      </ErrorBoundary>
-    );
-  };
-}
+// withErrorBoundary helper removed - use react-error-boundary package directly if needed

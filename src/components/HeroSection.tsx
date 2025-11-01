@@ -164,11 +164,9 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
             maxWidth: '100%' 
           }} 
           allow="xr-spatial-tracking; vr; gyroscope; accelerometer; fullscreen; autoplay; xr" 
-          scrolling="no" 
           allowFullScreen={true}
           frameBorder="0" 
           src="https://webobook.com/public/69016df4e558c238a7307e22,en" 
-          allowvr="yes"
           title="360° Virtual Tour of Golden Tulip Hotel"
           className="absolute inset-0 w-full h-full"
         />
