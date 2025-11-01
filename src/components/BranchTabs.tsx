@@ -25,7 +25,7 @@ export function BranchTabs({ selectedBranch, onBranchSelect }: BranchTabsProps) 
       id: "garden-city",
       name: "Garden City",
       location: "Garden City, Port Harcourt",
-      image: hotelLobby,
+      image: "/images/garden city images/standard room.webp",
       description: "Luxury accommodation in the heart of Garden City"
     },
     {

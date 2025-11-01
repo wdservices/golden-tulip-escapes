@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Bed, Users, Ruler, ArrowLeft, MapPin, Clock, Calendar, User, Phone, Mail, Tv, Coffee, Refrigerator, ShieldCheck, Wifi, Wind } from 'lucide-react';
 import { roomTypes } from '../../data/rooms';
 import type { RoomType } from '../../types/room';
+import { ThreeSixtyViewer } from '@/components/ThreeSixtyViewer';
 
 // Amenity icon mapping
 const amenityIcons: Record<string, JSX.Element> = {
@@ -27,6 +28,43 @@ export default function RoomPage() {
     setRoom(selectedRoom);
     setIsLoading(false);
   }, [id]);
+
+  // Device motion script for Panoee VR/AR functionality
+  useEffect(() => {
+    const handleDeviceMotion = (e: DeviceMotionEvent) => {
+      const iframe = document.getElementById("tour-embeded") as HTMLIFrameElement;
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+          type: "devicemotion",
+          deviceMotionEvent: {
+            acceleration: {
+              x: e.acceleration?.x,
+              y: e.acceleration?.y,
+              z: e.acceleration?.z
+            },
+            accelerationIncludingGravity: {
+              x: e.accelerationIncludingGravity?.x,
+              y: e.accelerationIncludingGravity?.y,
+              z: e.accelerationIncludingGravity?.z
+            },
+            rotationRate: {
+              alpha: e.rotationRate?.alpha,
+              beta: e.rotationRate?.beta,
+              gamma: e.rotationRate?.gamma
+            },
+            interval: e.interval,
+            timeStamp: e.timeStamp
+          }
+        }, "*");
+      }
+    };
+
+    window.addEventListener("devicemotion", handleDeviceMotion);
+
+    return () => {
+      window.removeEventListener("devicemotion", handleDeviceMotion);
+    };
+  }, []);
 
   if (isLoading) {
     return (
@@ -103,11 +141,29 @@ export default function RoomPage() {
                 width="100%" 
                 height="640" 
                 frameBorder="0" 
-                className="absolute top-0 left-0 w-full h-full border-none rounded-lg"
                 allow="xr-spatial-tracking; gyroscope; accelerometer" 
                 allowFullScreen 
                 scrolling="no" 
-                src="https://kuula.co/share/collection/7HmvD?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+                src={
+                  room.id === 'standard-room' 
+                    ? "https://kuula.co/share/collection/7Hmy2?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+                    : room.id === 'superior-room'
+                    ? "https://kuula.co/share/collection/7Hmyy?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+                    : room.id === 'premium-standard-room'
+                    ? "https://kuula.co/share/collection/7HmyS?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+                    : room.id === 'premium-superior-room'
+                    ? "https://kuula.co/share/collection/7HmyB?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+                    : room.id === 'deluxe-room'
+                    ? "https://kuula.co/share/collection/7Hmyt?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+                    : room.id === 'premium-diplomatic-suite'
+                    ? "https://kuula.co/share/collection/7Hmz7?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+                    : room.id === 'ambassadorial-suite'
+                    ? "https://kuula.co/share/collection/7Hmzh?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+                    : room.id === 'presidential-suite'
+                    ? "https://kuula.co/share/collection/7HmvD?logo=0&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+                    : room.vrTourUrl || "https://kuula.co/share/collection/7HmvD?logo=0&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+                }
+                className="absolute top-0 left-0 w-full h-full border-none rounded-lg"
               ></iframe>
             </div>
           </div>

@@ -463,6 +463,7 @@ const branches: Branch[] = [
         description: "Comfortable and well-appointed rooms with modern amenities.",
         priceRange: "₦91,831 per night",
         capacity: 2,
+        image: "/images/garden city images/standard room.webp",
         features: [
           "Size: 30 sqm",
           "Queen-size bed",
@@ -479,6 +480,7 @@ const branches: Branch[] = [
         description: "Comfortable and well-appointed rooms with modern amenities.",
         priceRange: "₦107,154 per night",
         capacity: 2,
+        image: "/images/garden city images/superior room.webp",
         features: [
           "Size: 30 sqm",
           "Queen-size bed",

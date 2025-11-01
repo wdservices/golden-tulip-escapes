@@ -137,34 +137,97 @@ export const UserDashboard = () => {
       };
 
       try {
-        // Fetch user bookings from API endpoint
-        const response = await fetch(`/api/user-bookings/${user.id}`);
+        // Create fetch request with timeout
+        const fetchRequest = fetch(`/api/user-bookings/${user.id}`);
+        
+        // Race between fetch and timeout
+        const response = await Promise.race([
+          fetchRequest,
+          timeoutPromise
+        ]) as Response;
         
         if (response.ok) {
-          const data = await response.json();
-          bookings = data.bookings || [];
-          
-          // Map API stats to dashboard stats format
-          stats = {
-            totalBookings: data.stats.totalBookings || 0,
-            totalNights: data.stats.totalNights || 0,
-            loyaltyPoints: data.stats.loyaltyPoints || 0,
-            upcomingTrips: data.stats.upcomingBookings || 0,
-            pastTrips: data.stats.pastBookings || 0
-          };
+          // Check if response is actually JSON
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            bookings = data.bookings || [];
+            
+            // Map API stats to dashboard stats format
+            stats = {
+              totalBookings: data.stats.totalBookings || 0,
+              totalNights: data.stats.totalNights || 0,
+              loyaltyPoints: data.stats.loyaltyPoints || 0,
+              upcomingTrips: data.stats.upcomingBookings || 0,
+              pastTrips: data.stats.pastBookings || 0
+            };
 
-          // Set favorite branch
-          if (data.stats.favoriteBranch && data.stats.favoriteBranch !== 'No bookings yet') {
-            branchCount[data.stats.favoriteBranch] = 1;
+            // Set favorite branch
+            if (data.stats.favoriteBranch && data.stats.favoriteBranch !== 'No bookings yet') {
+              branchCount[data.stats.favoriteBranch] = 1;
+            }
+          } else {
+            // Response is not JSON (likely HTML error page)
+            const textResponse = await response.text();
+            console.error('API returned non-JSON response:', textResponse.substring(0, 200));
+            throw new Error('Server returned an invalid response format');
           }
-
-
         } else {
-          console.error('Failed to fetch user bookings from API:', response.status);
+          // Handle HTTP error responses
+          const errorText = await response.text();
+          console.error(`API request failed with status ${response.status}:`, errorText.substring(0, 200));
+          throw new Error(`API request failed: ${response.status} ${response.statusText}`);
         }
 
       } catch (error) {
         console.error('Error fetching booking data from API:', error);
+        
+        // Provide user-friendly error messages with toast notifications
+        if (error instanceof Error) {
+          if (error.message === 'Request timeout') {
+            console.error('API request timed out after 10 seconds');
+            toast({
+              title: "Connection Timeout",
+              description: "The request took too long to complete. Please check your internet connection and try again.",
+              variant: "destructive"
+            });
+          } else if (error.message.includes('invalid response format')) {
+            console.error('Server returned an error page instead of data');
+            toast({
+              title: "Server Error",
+              description: "The server encountered an error. Please try refreshing the page or contact support if the issue persists.",
+              variant: "destructive"
+            });
+          } else if (error.message.includes('Failed to fetch')) {
+            console.error('Network error - check if the API server is running');
+            toast({
+              title: "Connection Error",
+              description: "Unable to connect to the server. Please check your internet connection and try again.",
+              variant: "destructive"
+            });
+          } else if (error.message.includes('API request failed')) {
+            toast({
+              title: "Data Loading Error",
+              description: "Failed to load your booking data. Please try refreshing the page.",
+              variant: "destructive"
+            });
+          } else {
+            // Generic error fallback
+            toast({
+              title: "Unexpected Error",
+              description: "Something went wrong while loading your data. Please try again.",
+              variant: "destructive"
+            });
+          }
+        } else {
+          // Non-Error object thrown
+          toast({
+            title: "Unexpected Error",
+            description: "Something went wrong while loading your data. Please try again.",
+            variant: "destructive"
+          });
+        }
+        
         // Keep default values if there's an error
       }
       

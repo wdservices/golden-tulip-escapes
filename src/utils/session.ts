@@ -30,7 +30,12 @@ export const createSession = async (userId: string): Promise<string> => {
     const docRef = await addDoc(collection(db, 'sessions'), sessionData);
     return docRef.id;
   } catch (error) {
-    console.error('Error creating session:', error);
+    // Silently handle permissions errors to prevent console spam
+    if (error instanceof Error && error.message.includes('Missing or insufficient permissions')) {
+      // Session management is not critical, silently fail
+      return '';
+    }
+    console.warn('Session creation failed (non-critical):', error);
     // Don't block login if session creation fails
     return '';
   }
@@ -62,8 +67,13 @@ export const endUserSessions = async (userId: string): Promise<void> => {
 
     await Promise.all(batch);
   } catch (error) {
-    console.error('Error ending sessions:', error);
-    throw new Error('Failed to end sessions');
+    // Silently handle permissions errors to prevent console spam
+    if (error instanceof Error && error.message.includes('Missing or insufficient permissions')) {
+      // Session management is not critical, silently fail
+      return;
+    }
+    console.warn('Error ending sessions (non-critical):', error);
+    // Don't throw error as session management is not critical
   }
 };
 

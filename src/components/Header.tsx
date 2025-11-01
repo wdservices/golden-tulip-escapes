@@ -55,7 +55,7 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
 
   return (
     <header className="sticky top-0 z-50 bg-secondary/95 backdrop-blur-md border-b border-secondary/20 shadow-lg">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">

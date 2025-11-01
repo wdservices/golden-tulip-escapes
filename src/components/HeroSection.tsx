@@ -151,9 +151,9 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
   }, [fallbackImages.length]);
 
   return (
-    <section id="home" className="relative h-screen overflow-hidden">
+    <section id="home" className="relative h-screen overflow-hidden pt-20">
       {/* 360° Iframe Viewer */}
-      <div className="absolute inset-0 w-full h-full">
+      <div className="absolute top-0 left-0 right-0 bottom-0 w-full h-full">
         <iframe 
           width="100%" 
           height="100%" 
@@ -168,9 +168,9 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
           frameBorder="0" 
           src="https://webobook.com/public/69016df4e558c238a7307e22,en" 
           title="360° Virtual Tour of Golden Tulip Hotel"
-          className="absolute inset-0 w-full h-full"
+          className="absolute top-0 left-0 right-0 bottom-0 w-full h-full"
         />
-        <div className="absolute inset-0 hero-gradient" />
+        <div className="absolute top-0 left-0 right-0 bottom-0 hero-gradient" />
       </div>
 
 
