@@ -7,14 +7,19 @@ export interface BaseDocument {
 
 // User related types
 export interface User extends BaseDocument {
-  uid: string;
+  uid?: string;
   email: string;
-  displayName: string;
+  displayName?: string;
+  name?: string;
   photoURL?: string;
   phoneNumber?: string;
-  role: 'admin' | 'staff' | 'user';
-  isActive: boolean;
+  role?: 'admin' | 'staff' | 'user';
+  isActive?: boolean;
   lastLogin?: Date;
+  lastSignInAt?: string;
+  isAdmin?: boolean;
+  bookingIds?: string[];
+  updatedAt?: string | Date;
   preferences?: UserPreferences;
 }
 
@@ -79,6 +84,8 @@ export type PaymentStatus =
   | 'cancelled' 
   | 'failed';
 
+export type ClientStatus = 'active' | 'inactive' | 'suspended';
+
 // Branch related types
 export interface Branch extends BaseDocument {
   name: string;
@@ -100,6 +107,7 @@ export interface Branch extends BaseDocument {
 // Payment related types
 export interface Payment extends BaseDocument {
   bookingId: string;
+  branchId?: string;
   userId: string;
   amount: number;
   paymentMethod: PaymentMethod;
@@ -107,6 +115,15 @@ export interface Payment extends BaseDocument {
   transactionId?: string;
   receiptUrl?: string;
   notes?: string;
+  guestName?: string;
+  customerEmail?: string;
+  currency?: string;
+  date?: string;
+  method?: string;
+  channel?: string;
+  paystackTransactionId?: string;
+  fees?: number;
+  gatewayResponse?: string;
 }
 
 export type PaymentMethod = 

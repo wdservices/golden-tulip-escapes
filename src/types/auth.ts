@@ -1,6 +1,7 @@
 // Base user type for our application
 export interface UserProfile {
   id: string;
+  uid?: string;
   name: string;
   email: string;
   displayName?: string;
@@ -10,6 +11,10 @@ export interface UserProfile {
   branch?: string;
   joinDate?: string;
   lastLogin?: string;
+  lastSignInAt?: string;
+  isAdmin?: boolean;
+  bookingIds?: string[];
+  updatedAt?: string;
   preferences?: {
     roomType?: string;
     floorPreference?: string;
