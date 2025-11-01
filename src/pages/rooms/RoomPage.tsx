@@ -100,11 +100,14 @@ export default function RoomPage() {
               <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-primary/60 rounded-br-lg z-10" />
               
               <iframe 
-                id="evrFrame"
+                width="100%" 
+                height="640" 
+                frameBorder="0" 
                 className="absolute top-0 left-0 w-full h-full border-none rounded-lg"
-                allow="xr-spatial-tracking; gyroscope; accelerometer; fullscreen"
-            loading="lazy"
-                src={`https://webobook.com/public/648aed3e38418a65e92441d2,en?ap=true&si=false&sm=false&sp=false&sfr=false&sl=false&sop=false&`}
+                allow="xr-spatial-tracking; gyroscope; accelerometer" 
+                allowFullScreen 
+                scrolling="no" 
+                src="https://kuula.co/share/collection/7HmvD?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
               ></iframe>
             </div>
           </div>

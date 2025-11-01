@@ -21,6 +21,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { collection, addDoc, serverTimestamp, query, where, getDocs, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useNavigate } from "react-router-dom";
+import { useBranches } from "@/hooks/useBranches";
+import { Loader2 } from "lucide-react";
 
 interface BookingFormData {
   branch: string;
@@ -284,9 +286,10 @@ const Booking = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Booking Form */}
-            <div className="lg:col-span-2">
+          <form onSubmit={handleSubmitBooking}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Booking Form */}
+              <div className="lg:col-span-2 space-y-6">
               <Card className="card-luxury border-l-4 border-l-amber-500 shadow-glow">
                 <CardHeader className="border-b border-amber-500/20">
                   <CardTitle className="text-3xl font-serif text-gradient-gold">
@@ -493,7 +496,7 @@ const Booking = () => {
                       </div>
                     </CardContent>
                   </Card>
-                </form>
+                </div>
 
                 {/* Booking Summary Sidebar */}
                 <div className="lg:col-span-1">
@@ -658,10 +661,9 @@ const Booking = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </form>
           </div>
-        </section>
-      </main>
+        </main>
 
       <Footer />
     </div>
