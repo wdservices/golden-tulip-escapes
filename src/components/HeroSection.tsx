@@ -156,17 +156,18 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
       <div className="absolute top-0 left-0 right-0 bottom-0 w-full h-full">
         <iframe 
           width="100%" 
-          height="100%" 
+          height="640" 
           style={{ 
             width: '100%', 
             height: '100%', 
             border: 'none', 
             maxWidth: '100%' 
           }} 
-          allow="xr-spatial-tracking; vr; gyroscope; accelerometer; fullscreen; autoplay; xr" 
+          allow="xr-spatial-tracking; gyroscope; accelerometer" 
           allowFullScreen={true}
           frameBorder="0" 
-          src="https://webobook.com/public/69016df4e558c238a7307e22,en" 
+          scrolling="no"
+          src="https://kuula.co/share/collection/7Hpm5?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.53&autop=90&autopalt=1&thumbs=-1" 
           title="360° Virtual Tour of Golden Tulip Hotel"
           className="absolute top-0 left-0 right-0 bottom-0 w-full h-full"
         />
