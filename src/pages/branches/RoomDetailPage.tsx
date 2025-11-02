@@ -135,6 +135,28 @@ export const RoomDetailPage = () => {
               src="https://kuula.co/share/collection/7HphC?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
               className="w-full h-full object-cover"
             />
+          ) : room.name.toLowerCase() === 'standard room' ? (
+            <iframe 
+              width="100%" 
+              height="640" 
+              frameBorder="0" 
+              allow="xr-spatial-tracking; gyroscope; accelerometer" 
+              allowFullScreen 
+              scrolling="no" 
+              src="https://kuula.co/share/collection/7HpLN?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+              className="w-full h-full object-cover"
+            />
+          ) : room.name.toLowerCase() === 'executive suite' ? (
+            <iframe 
+              width="100%" 
+              height="640" 
+              frameBorder="0" 
+              allow="xr-spatial-tracking; gyroscope; accelerometer" 
+              allowFullScreen 
+              scrolling="no" 
+              src="https://kuula.co/share/collection/7HpLm?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+              className="w-full h-full object-cover"
+            />
           ) : (
             <img 
               src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070" 
