@@ -22,6 +22,7 @@ import { RoomDetailPage } from "./pages/branches/RoomDetailPage";
 import { HallDetailPage } from "./pages/branches/HallDetailPage";
 import PublicRoomsPage from "./pages/RoomsPage";
 import CorporateHallsPage from "./pages/CorporateHallsPage";
+import { CorporateHallDetailPage } from "./pages/CorporateHallDetailPage";
 import { Button } from "@/components/ui/button";
 import { AdminPanel } from "./components/admin/AdminPanel";
 import FirebaseTest from "./pages/FirebaseTest";
@@ -143,6 +144,7 @@ const App = () => {
             <Route path="/rooms" element={<PublicRoomsPage />} />
             <Route path="/rooms/:id" element={<RoomPage />} />
             <Route path="/corporate-halls" element={<CorporateHallsPage />} />
+            <Route path="/corporate-halls/:hallId" element={<CorporateHallDetailPage />} />
 
             {/* User Dashboard - Only accessible to non-admin users */}
             <Route

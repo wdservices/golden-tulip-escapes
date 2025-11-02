@@ -48,7 +48,7 @@ export const HallDetailPage: React.FC = () => {
         </div>
 
         {/* Hero Section with 360 Viewer */}
-        <section className="relative h-[60vh] min-h-[400px] overflow-hidden">
+        <section className="relative h-[75vh] min-h-[600px] overflow-hidden">
           <div className="absolute inset-0">
             <Panorama360Viewer 
               imageUrl="/images/360/hall-360.jpg"

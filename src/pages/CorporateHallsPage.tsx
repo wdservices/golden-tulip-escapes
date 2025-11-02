@@ -97,24 +97,6 @@ const corporateHalls = [
     ]
   },
   {
-    id: "the-marquee",
-    name: "The Marquee",
-    capacity: "40 - 100 guests",
-    priceRange: "From ₦500,000 per day",
-    description: "A flexible outdoor/indoor space, perfect for corporate receptions and product launches.",
-    features: [
-      "Professional meeting rooms",
-      "Conference facilities",
-      "Catering services",
-      "Audio/Visual equipment",
-      "Dedicated event coordinator",
-      "High-speed Wi-Fi",
-      "Projector & screen",
-      "Microphone & sound system",
-      "Whiteboard & flip charts"
-    ]
-  },
-  {
     id: "the-pavilion-event-centre",
     name: "The Pavilion/ Event Centre",
     capacity: "100 - 300 guests",
@@ -189,11 +171,13 @@ const CorporateHallsPage: React.FC = () => {
                       </ul>
                     </div>
 
-                    <Button 
-                      className="w-full btn-luxury mt-auto"
-                    >
-                      Book This Venue
-                    </Button>
+                    <Link to={`/corporate-halls/${hall.id}`}>
+                      <Button 
+                        className="w-full btn-luxury mt-auto"
+                      >
+                        View Details & Book
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
               ))}
