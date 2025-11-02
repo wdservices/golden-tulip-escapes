@@ -11,6 +11,15 @@ interface BranchHeroProps {
 export const BranchHero = ({ branch }: BranchHeroProps) => {
   const [show360, setShow360] = useState(true);
   
+  // Determine which iframe source to use based on branch ID
+  const getIframeSrc = () => {
+    if (branch.id === 'stadium-31') {
+      return "https://kuula.co/share/collection/7HphP?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1";
+    }
+    // Default iframe for other branches
+    return "https://webobook.com/public/648aed3e38418a65e92441d2,en?ap=true&si=true&sm=false&sp=true&sfr=false&sl=false&sop=false&";
+  };
+  
   return (
     <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden">
       {/* 360° Iframe Viewer */}
@@ -18,7 +27,7 @@ export const BranchHero = ({ branch }: BranchHeroProps) => {
         {show360 ? (
           <iframe 
             width="100%" 
-            height="100%" 
+            height="640" 
             style={{ 
               width: '100%', 
               height: '100%', 
@@ -28,7 +37,7 @@ export const BranchHero = ({ branch }: BranchHeroProps) => {
             allow="xr-spatial-tracking; gyroscope; accelerometer; fullscreen"
             loading="lazy"
             frameBorder="0" 
-            src="https://webobook.com/public/648aed3e38418a65e92441d2,en?ap=true&si=true&sm=false&sp=true&sfr=false&sl=false&sop=false&"
+            src={getIframeSrc()}
             title="360° Virtual Tour of Golden Tulip Hotel"
             className="absolute inset-0 w-full h-full"
             onError={() => setShow360(false)}
@@ -46,10 +55,10 @@ export const BranchHero = ({ branch }: BranchHeroProps) => {
       {/* Content */}
       <div className="container mx-auto px-4 h-full flex flex-col justify-center relative z-10 text-white">
         <div className="max-w-3xl">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4">
             {branch.fullName}
           </h1>
-          <p className="text-xl md:text-2xl mb-10 max-w-2xl leading-relaxed">
+          <p className="text-lg md:text-xl mb-8 max-w-2xl leading-relaxed">
             {branch.description}
           </p>
           <div className="flex flex-col sm:flex-row gap-6">
@@ -61,16 +70,6 @@ export const BranchHero = ({ branch }: BranchHeroProps) => {
               <Link to="/book">
                 <Calendar className="mr-3 h-5 w-5" />
                 Book Now
-              </Link>
-            </Button>
-            <Button 
-              asChild 
-              variant="outline" 
-              size="lg"
-              className="border-white text-white bg-white/10 hover:bg-yellow-400/20 hover:text-yellow-300 hover:border-yellow-400/30 text-lg px-10 py-7 rounded-xl font-medium transition-all duration-300"
-            >
-              <Link to={`/branches/${branch.id}#rooms`}>
-                View Rooms & Suites
               </Link>
             </Button>
           </div>

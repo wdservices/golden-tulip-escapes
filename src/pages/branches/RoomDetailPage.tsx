@@ -80,11 +80,68 @@ export const RoomDetailPage = () => {
       {/* Hero Section */}
       <section className={`relative h-[70vh] ${isEvoRoad ? 'bg-gradient-to-b from-blue-900/80 via-blue-800/70 to-yellow-900/60' : 'bg-gradient-to-b from-black/80 to-black/60'}`}>
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-black/30">
-          <img 
-            src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070" 
-            alt={room.name}
-            className="w-full h-full object-cover"
-          />
+          {room.name.toLowerCase() === 'super executive room' ? (
+            <iframe 
+              width="100%" 
+              height="100%" 
+              frameBorder="0" 
+              allow="xr-spatial-tracking; gyroscope; accelerometer" 
+              allowFullScreen 
+              scrolling="no" 
+              src="https://kuula.co/share/collection/7HphP?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+              className="w-full h-full object-cover"
+            />
+          ) : room.name.toLowerCase() === 'deluxe room' ? (
+            <iframe 
+              width="100%" 
+              height="640" 
+              frameBorder="0" 
+              allow="xr-spatial-tracking; gyroscope; accelerometer" 
+              allowFullScreen 
+              scrolling="no" 
+              src="https://kuula.co/share/collection/7HphX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+              className="w-full h-full object-cover"
+            />
+          ) : room.name.toLowerCase() === 'executive deluxe room' ? (
+            <iframe 
+              width="100%" 
+              height="640" 
+              frameBorder="0" 
+              allow="xr-spatial-tracking; gyroscope; accelerometer" 
+              allowFullScreen 
+              scrolling="no" 
+              src="https://kuula.co/share/collection/7Hph1?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+              className="w-full h-full object-cover"
+            />
+          ) : room.name.toLowerCase() === 'executive twin room' ? (
+            <iframe 
+              width="100%" 
+              height="640" 
+              frameBorder="0" 
+              allow="xr-spatial-tracking; gyroscope; accelerometer" 
+              allowFullScreen 
+              scrolling="no" 
+              src="https://kuula.co/share/collection/7Hphd?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+              className="w-full h-full object-cover"
+            />
+          ) : room.name.toLowerCase() === 'royal suites room' ? (
+            <iframe 
+              width="100%" 
+              height="640" 
+              frameBorder="0" 
+              allow="xr-spatial-tracking; gyroscope; accelerometer" 
+              allowFullScreen 
+              scrolling="no" 
+              src="https://kuula.co/share/collection/7HphC?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <img 
+              src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070" 
+              alt={room.name}
+              className="w-full h-full object-cover"
+            />
+          )}
         </div>
         <div className={`absolute bottom-0 left-0 w-full bg-gradient-to-t ${isEvoRoad ? 'from-blue-900/90 to-transparent' : 'from-black/90 to-transparent'} p-6`}>
           <div className="container mx-auto">
