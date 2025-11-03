@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Admin User</title>
+</head>
+<body>
+    <h1>Debug Admin User</h1>
+    <div id="output"></div>
+    
+    <script>
+        // Check localStorage for admin user info
+        const activeBranchId = localStorage.getItem('activeBranchId');
+        const userInfo = localStorage.getItem('user');
+        
+        const output = document.getElementById('output');
+        output.innerHTML = `
+            <h2>LocalStorage Info:</h2>
+            <p><strong>Active Branch ID:</strong> ${activeBranchId || 'Not set'}</p>
+            <p><strong>User Info:</strong> ${userInfo || 'Not set'}</p>
+            
+            <h2>Instructions:</h2>
+            <p>1. Open the main application at <a href="http://localhost:3001" target="_blank">http://localhost:3001</a></p>
+            <p>2. Open browser developer tools (F12)</p>
+            <p>3. In the console, run: <code>console.log('activeBranchId:', localStorage.getItem('activeBranchId'))</code></p>
+            <p>4. Also run: <code>console.log('user:', JSON.parse(localStorage.getItem('user') || '{}'))</code></p>
+        `;
+    </script>
+</body>
+</html>

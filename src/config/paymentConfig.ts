@@ -34,7 +34,7 @@ export const branchPaymentConfig: Record<string, BranchPaymentConfig> = {
   // Evo Road Branch (Port Harcourt)
   'evo-road': {
     type: 'subaccount',
-    subaccount: ' ACCT_qly8r7unbtx4mac',
+    subaccount: 'ACCT_qly8r7unbtx4mac',
     admin_email: 'reservations@goldentulipportharcourt.com',
     branch_name: 'GOLDEN TULIP PORT HARCOURT HOTEL',
     percentage_charge: 1.5, // Paystack's default subaccount charge

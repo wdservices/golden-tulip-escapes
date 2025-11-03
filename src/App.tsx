@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DatabaseProvider } from "@/contexts/DatabaseContext";
 import { ConditionalChatbot } from "@/components/chat/ConditionalChatbot";
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense } from 'react';
 import Index from "./pages/Index";
 import { BookPage } from "./pages/BookPage";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -74,41 +74,6 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
 };
 
 const App = () => {
-  useEffect(() => {
-    // Set up global chatbot trigger function
-    (window as any).triggerZapierChatbot = () => {
-      console.log('Global chatbot trigger called');
-      const chatbotElement = document.querySelector('zapier-interfaces-chatbot-embed[is-popup="true"]') as any;
-      
-      if (chatbotElement) {
-        console.log('Chatbot element found, attempting to trigger');
-        
-        // Try different methods to trigger the popup
-        if (typeof chatbotElement.open === 'function') {
-          console.log('Using open() method');
-          chatbotElement.open();
-        } else if (typeof chatbotElement.show === 'function') {
-          console.log('Using show() method');
-          chatbotElement.show();
-        } else if (typeof chatbotElement.trigger === 'function') {
-          console.log('Using trigger() method');
-          chatbotElement.trigger();
-        } else {
-          console.log('Using click event simulation');
-          // Simulate a click event
-          const clickEvent = new MouseEvent('click', {
-            view: window,
-            bubbles: true,
-            cancelable: true
-          });
-          chatbotElement.dispatchEvent(clickEvent);
-        }
-      } else {
-        console.error('Zapier chatbot element not found in DOM');
-      }
-    };
-  }, []);
-
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
@@ -118,11 +83,6 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          {/* Zapier Chatbot - Always present in DOM */}
-          {/* <zapier-interfaces-chatbot-embed 
-            is-popup='true' 
-            chatbot-id='cmfxud1f70034pj83m904ssvf'
-          /> */}
           <BrowserRouter
             future={{
               v7_startTransition: true,
@@ -131,7 +91,7 @@ const App = () => {
           >
             <AuthProvider>
               <DatabaseProvider>
-                {/* <ConditionalChatbot /> */}
+                <ConditionalChatbot />
               <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />

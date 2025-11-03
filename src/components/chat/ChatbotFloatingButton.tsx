@@ -35,55 +35,11 @@ export const ChatbotFloatingButton = () => {
     setIsBreathing(false);
     
     try {
-      // First, try to find the chatbot element
-      let chatbotElement = document.querySelector('zapier-interfaces-chatbot-embed[is-popup="true"]') as any;
-      
-      if (!chatbotElement) {
-        console.log('Chatbot element not found, waiting for it to load...');
-        // Wait a bit for the element to load
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        chatbotElement = document.querySelector('zapier-interfaces-chatbot-embed[is-popup="true"]') as any;
-      }
-      
-      if (chatbotElement) {
-        console.log('Chatbot element found, attempting to trigger...');
-        
-        // Make sure the element is visible
-        chatbotElement.style.display = 'block';
-        
-        // Try multiple methods to trigger the chatbot
-        if (typeof chatbotElement.open === 'function') {
-          console.log('Using open() method');
-          chatbotElement.open();
-        } else if (typeof chatbotElement.show === 'function') {
-          console.log('Using show() method');
-          chatbotElement.show();
-        } else if (typeof chatbotElement.trigger === 'function') {
-          console.log('Using trigger() method');
-          chatbotElement.trigger();
-        } else {
-          console.log('Using click event simulation');
-          // Simulate a click event
-          const clickEvent = new MouseEvent('click', {
-            view: window,
-            bubbles: true,
-            cancelable: true
-          });
-          chatbotElement.dispatchEvent(clickEvent);
-        }
-      } else {
-         console.error('Zapier chatbot element not found in DOM');
-         // Fallback: try to trigger using the global function
-         if ((window as any).triggerZapierChatbot) {
-           (window as any).triggerZapierChatbot();
-         } else {
-           // Show fallback modal if Zapier chatbot is not available
-           console.log('Showing fallback chat modal');
-           setShowFallbackModal(true);
-         }
-       }
+      // Show the fallback chat modal directly
+      console.log('Showing chat modal');
+      setShowFallbackModal(true);
     } catch (error) {
-      console.error('Error triggering chatbot:', error);
+      console.error('Error opening chat:', error);
     } finally {
       setIsLoading(false);
     }
