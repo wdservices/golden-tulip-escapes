@@ -4,6 +4,7 @@ import { db } from '@/lib/firebase';
 import { Booking } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { handleFirebaseError, retryWithBackoff } from '@/utils/firebaseErrorHandler';
+import { getDatabaseBranchId } from '@/config/branchMappings';
 
 export const useBookings = (branchId?: string) => {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -25,8 +26,9 @@ export const useBookings = (branchId?: string) => {
         
         // Query bookings for the specific branch from subcollection
         if (effectiveBranchId && effectiveBranchId !== 'all') {
+          const databaseBranchId = getDatabaseBranchId(effectiveBranchId);
           q = query(
-            collection(db, "branches", effectiveBranchId, "bookings"),
+            collection(db, "branches", databaseBranchId, "bookings"),
             limit(100) // Limit to 100 most recent bookings for performance
           );
         } else if (effectiveBranchId === 'all') {
@@ -53,8 +55,9 @@ export const useBookings = (branchId?: string) => {
             
             // Fallback to a simpler query without orderBy to avoid index requirement
             if (effectiveBranchId && effectiveBranchId !== 'all') {
+              const databaseBranchId = getDatabaseBranchId(effectiveBranchId);
               q = query(
-                collection(db, "branches", effectiveBranchId, "bookings"),
+                collection(db, "branches", databaseBranchId, "bookings"),
                 limit(150) // Limit fallback query for performance
               );
             } else if (effectiveBranchId === 'all') {

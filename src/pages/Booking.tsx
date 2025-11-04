@@ -22,6 +22,7 @@ import { collection, addDoc, serverTimestamp, query, where, getDocs, Timestamp }
 import { db } from "@/lib/firebase";
 import { useNavigate } from "react-router-dom";
 import { useBranches } from "@/hooks/useBranches";
+import { getDatabaseBranchId } from "@/config/branchMappings";
 import { Loader2 } from "lucide-react";
 
 interface BookingFormData {
@@ -198,7 +199,7 @@ const Booking = () => {
         }
       }
 
-      const bookingRef = collection(db, 'branches', bookingData.branch, 'bookings');
+      const bookingRef = collection(db, 'branches', getDatabaseBranchId(bookingData.branch), 'bookings');
       const newBooking = {
         userId: userId || 'guest',
         branchId: bookingData.branch,

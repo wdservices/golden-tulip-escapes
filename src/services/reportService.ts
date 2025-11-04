@@ -10,6 +10,7 @@ import {
   type DateRange as DateRangeType
 } from '@/types/report';
 import { Booking, BookingStatus } from '@/types/booking';
+import { getDatabaseBranchId } from '@/config/branchMappings';
 
 // Export types for use in other files
 export type { ReportData, ReportType, DateRangeType };
@@ -48,8 +49,9 @@ const fetchBookings = async (
   }
 
   // Query bookings from branch subcollection
+  const databaseBranchId = getDatabaseBranchId(branchId);
   let q = query(
-    collection(db, 'branches', branchId, 'bookings'),
+    collection(db, 'branches', databaseBranchId, 'bookings'),
     where('checkInDate', '>=', startDate),
     where('checkInDate', '<=', endDate),
     orderBy('checkInDate')

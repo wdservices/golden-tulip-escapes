@@ -51,6 +51,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useCollection } from "@/hooks/useCollection";
 import { getBranches } from "@/services/branchService";
 import { useBranches } from "@/hooks/useBranches";
+import { getDatabaseBranchId } from "@/config/branchMappings";
 
 import { BookingsTable } from "@/components/bookings/BookingsTable";
 import { clearBookingData } from "@/utils/clearDatabase";
@@ -207,9 +208,12 @@ export const BookingsPage = () => {
         return;
       }
 
+      // Convert static branch ID to database ID
+      const databaseBranchId = getDatabaseBranchId(targetBranchId);
+
       // Query branch subcollection
       const q = query(
-        collection(db, "branches", targetBranchId, "bookings"),
+        collection(db, "branches", databaseBranchId, "bookings"),
         orderBy("checkInDate", "desc")
       );
 
