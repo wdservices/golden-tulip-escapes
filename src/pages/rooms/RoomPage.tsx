@@ -108,7 +108,7 @@ export default function RoomPage() {
             <span className="text-primary">Back to Rooms</span>
           </Button>
           <div className="text-primary font-serif text-xl">Golden Tulip</div>
-          <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 transition-all duration-300">
+          <Button onClick={() => navigate('/book')} className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 transition-all duration-300">
             Book Now
           </Button>
         </div>
@@ -260,7 +260,7 @@ export default function RoomPage() {
                 </div>
               </div>
               
-              <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-6 text-lg font-medium rounded-xl transition-all duration-500 hover:shadow-lg">
+              <Button onClick={() => navigate('/book')} className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-6 text-lg font-medium rounded-xl transition-all duration-500 hover:shadow-lg">
                 Book Now
               </Button>
               

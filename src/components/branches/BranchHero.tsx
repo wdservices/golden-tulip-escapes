@@ -13,6 +13,9 @@ export const BranchHero = ({ branch }: BranchHeroProps) => {
   
   // Determine which iframe source to use based on branch ID
   const getIframeSrc = () => {
+    if (branch.id === 'garden-city') {
+      return "https://kuula.co/share/collection/7HGxY?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1";
+    }
     if (branch.id === 'stadium-31') {
       return "https://kuula.co/share/collection/7HphP?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1";
     }

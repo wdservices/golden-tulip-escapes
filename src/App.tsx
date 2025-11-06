@@ -23,6 +23,7 @@ import { HallDetailPage } from "./pages/branches/HallDetailPage";
 import PublicRoomsPage from "./pages/RoomsPage";
 import CorporateHallsPage from "./pages/CorporateHallsPage";
 import { CorporateHallDetailPage } from "./pages/CorporateHallDetailPage";
+import AndroidPage from "./pages/AndroidPage";
 import { Button } from "@/components/ui/button";
 import { AdminPanel } from "./components/admin/AdminPanel";
 import FirebaseTest from "./pages/FirebaseTest";
@@ -97,6 +98,9 @@ const App = () => {
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/firebase-test" element={<FirebaseTest />} />
             <Route path="/book" element={<BookPage />} />
+            {/* Alias to prevent 404s from legacy links */}
+            <Route path="/booking" element={<Navigate to="/book" replace />} />
+            <Route path="/android" element={<AndroidPage />} />
             <Route path="/branch/:branchId" element={<BranchPage />} />
             <Route path="/branches/:branchId" element={<BranchPage />} />
             <Route path="/branch/:branchId/room/:roomId" element={<RoomDetailPage />} />

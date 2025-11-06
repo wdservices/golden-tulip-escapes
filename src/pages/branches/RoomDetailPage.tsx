@@ -80,7 +80,29 @@ export const RoomDetailPage = () => {
       {/* Hero Section */}
       <section className={`relative h-[70vh] ${isEvoRoad ? 'bg-gradient-to-b from-blue-900/80 via-blue-800/70 to-yellow-900/60' : 'bg-gradient-to-b from-black/80 to-black/60'}`}>
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-black/30">
-          {room.name.toLowerCase() === 'super executive room' ? (
+          {branchId === 'garden-city' && room.name.toLowerCase() === 'superior room' ? (
+            <iframe 
+              width="100%" 
+              height="640" 
+              frameBorder="0" 
+              allow="xr-spatial-tracking; gyroscope; accelerometer" 
+              allowFullScreen 
+              scrolling="no" 
+              src="https://kuula.co/share/collection/7HGx1?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
+              className="w-full h-full object-cover"
+            />
+          ) : branchId === 'garden-city' && room.name.toLowerCase() === 'standard room' ? (
+            <iframe 
+              width="100%" 
+              height="640" 
+              frameBorder="0" 
+              allow="xr-spatial-tracking; gyroscope; accelerometer" 
+              allowFullScreen 
+              scrolling="no" 
+              src="https://kuula.co/share/collection/7HGxX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
+              className="w-full h-full object-cover"
+            />
+          ) : room.name.toLowerCase() === 'super executive room' ? (
             <iframe 
               width="100%" 
               height="100%" 
@@ -223,7 +245,7 @@ export const RoomDetailPage = () => {
               </ul>
               
               <Button size="lg" className={`w-full md:w-auto shadow-md ${isEvoRoad ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}>
-                <Link to={`/booking?branch=${branchId}&room=${roomId}`} className="flex items-center">
+                <Link to={`/book?branch=${branchId}&room=${roomId}`} className="flex items-center">
                   Book Now
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
