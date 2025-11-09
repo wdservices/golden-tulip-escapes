@@ -21,7 +21,7 @@ type RoomStatus = 'available' | 'occupied' | 'maintenance' | 'reserved';
 
 export const RoomForm = ({ branchId, room, onSuccess, onCancel }: RoomFormProps) => {
   const { addDocument, updateDocument } = useDatabase();
-  const { branches, branchesLoading } = useBranches();
+  const { branches, isLoading: branchesLoading } = useBranches();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedBranchId, setSelectedBranchId] = useState(branchId || '');
   

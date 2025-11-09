@@ -174,7 +174,7 @@ export const AnalyticsDashboard = () => {
         labels: {
           font: {
             size: 12,
-            weight: 'bold'
+            weight: 'bold' as const
           },
           padding: 20,
           usePointStyle: true,
@@ -185,7 +185,7 @@ export const AnalyticsDashboard = () => {
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
         titleFont: {
           size: 14,
-          weight: 'bold'
+          weight: 'bold' as const
         },
         bodyFont: {
           size: 13
@@ -211,7 +211,7 @@ export const AnalyticsDashboard = () => {
           maxTicksLimit: 7,
           font: {
             size: 11,
-            weight: 'bold'
+            weight: 'bold' as const
           },
           color: 'rgba(100, 116, 139, 0.8)'
         }
@@ -227,7 +227,7 @@ export const AnalyticsDashboard = () => {
           },
           font: {
             size: 11,
-            weight: 'bold'
+            weight: 'bold' as const
           },
           color: 'rgba(100, 116, 139, 0.8)',
           padding: 10

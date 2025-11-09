@@ -21,6 +21,16 @@ export function AdminPanel() {
   // Determine if user is HQ admin
   const isHqAdmin = userMeta.role === 'hq-admin';
   
+  // Type users properly
+  interface UserData {
+    id: string;
+    name?: string;
+    email?: string;
+    role?: string;
+    [key: string]: any;
+  }
+  const typedUsers = (users || []) as UserData[];
+  
   // Load current branch name
   useEffect(() => {
     async function loadBranchName() {
@@ -108,7 +118,7 @@ export function AdminPanel() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users?.map((user) => (
+                {typedUsers?.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.name || 'N/A'}</TableCell>
                     <TableCell>{user.email}</TableCell>
@@ -118,7 +128,7 @@ export function AdminPanel() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleUpdateRole(user.id, user.role)}
+                          onClick={() => handleUpdateRole(user.id, user.role || 'user')}
                           disabled={updatingUserId === user.id}
                         >
                           {updatingUserId === user.id ? (

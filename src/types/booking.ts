@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 
 export type BookingStatus = 'confirmed' | 'completed' | 'cancelled';
-export type PaymentStatus = 'paid' | 'pending' | 'refunded';
+export type PaymentStatus = 'paid' | 'pending' | 'refunded' | 'failed' | 'successful';
 
 export interface Booking {
   id: string;

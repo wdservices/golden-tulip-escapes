@@ -57,3 +57,5 @@ export interface BranchMeta {
   logo?: string;
   color?: string;
 }
+
+export type BranchStatus = 'active' | 'inactive' | 'maintenance';
