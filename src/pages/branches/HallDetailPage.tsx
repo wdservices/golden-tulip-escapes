@@ -52,6 +52,8 @@ export const HallDetailPage: React.FC = () => {
           <div className="absolute inset-0">
             <Panorama360Viewer 
               imageUrl="/images/360/hall-360.jpg"
+              autoRotate={true}
+              rotationSpeed={0.05}
             />
           </div>
           <div className="absolute inset-0 bg-black/30 flex items-end">

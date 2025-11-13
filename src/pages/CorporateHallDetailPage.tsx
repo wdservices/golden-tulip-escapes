@@ -30,7 +30,7 @@ const corporateHalls = [
     features: ["Air Conditioning", "Free WiFi", "Parking", "Catering Service", "Sound System", "Projector", "Stage"],
     location: "Ground Floor, Main Building",
     size: "2,500 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.53"
+    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16"
   },
   {
     id: "abuja-hall",
@@ -41,7 +41,7 @@ const corporateHalls = [
     features: ["Air Conditioning", "Free WiFi", "Parking", "Sound System", "Projector", "Catering Service"],
     location: "First Floor, East Wing",
     size: "1,800 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7Hpmv?logo=0&info=1&fs=1&vr=0&sd=1&autop=90&thumbs=1"
+    kuulaEmbedUrl: "https://kuula.co/share/collection/7Hpmv?logo=0&info=1&fs=1&vr=0&sd=1&autop=90&thumbs=1&autorotate=0.16"
   },
   {
     id: "lagos-hall",
@@ -52,7 +52,7 @@ const corporateHalls = [
     features: ["Air Conditioning", "Free WiFi", "Parking", "Sound System", "Projector"],
     location: "Second Floor, West Wing",
     size: "1,200 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7HpmX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.53&autop=90&autopalt=1&thumbs=-1"
+    kuulaEmbedUrl: "https://kuula.co/share/collection/7HpmX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
   },
   {
     id: "kano-hall",
@@ -63,7 +63,7 @@ const corporateHalls = [
     features: ["Air Conditioning", "Free WiFi", "Sound System", "Projector"],
     location: "First Floor, Central Wing",
     size: "900 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7Hpmq?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.53&autop=90&autopalt=1&thumbs=-1"
+    kuulaEmbedUrl: "https://kuula.co/share/collection/7Hpmq?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
   },
   {
     id: "port-harcourt-hall",
@@ -74,7 +74,7 @@ const corporateHalls = [
     features: ["Air Conditioning", "Free WiFi", "Parking", "Catering Service", "Sound System", "Projector", "Stage", "VIP Lounge"],
     location: "Ground Floor, South Wing",
     size: "2,200 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.53"
+    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16"
   },
   {
     id: "kaduna-hall",
@@ -85,7 +85,7 @@ const corporateHalls = [
     features: ["Air Conditioning", "Free WiFi", "Parking", "Sound System", "Projector", "Catering Service"],
     location: "Second Floor, North Wing",
     size: "1,500 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.53"
+    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16"
   },
   {
     id: "rivers-hall-boardroom",
@@ -96,7 +96,7 @@ const corporateHalls = [
     features: ["Air Conditioning", "Free WiFi", "Parking", "Sound System", "Projector", "Catering Service", "Executive Seating"],
     location: "Executive Floor, Premium Wing",
     size: "800 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7Hpm9?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.53&autop=90&autopalt=1&thumbs=-1"
+    kuulaEmbedUrl: "https://kuula.co/share/collection/7Hpm9?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
   },
   {
     id: "the-pavilion-event-centre",
@@ -107,7 +107,7 @@ const corporateHalls = [
     features: ["Air Conditioning", "Free WiFi", "Parking", "Catering Service", "Sound System", "Projector", "Stage", "VIP Lounge", "Exhibition Space", "Multiple Breakout Rooms"],
     location: "Ground Floor, Grand Wing",
     size: "5,000 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.53"
+    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16"
   },
   {
     id: "rivers-hall-boardroom",
@@ -118,7 +118,7 @@ const corporateHalls = [
     features: ["Air Conditioning", "Free WiFi", "Parking", "Sound System", "Projector", "Executive Seating", "Conference Phone"],
     location: "Executive Floor, North Tower",
     size: "800 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.53"
+    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16"
   },
   {
     id: "the-marquee",
@@ -129,7 +129,7 @@ const corporateHalls = [
     features: ["Air Conditioning", "Free WiFi", "Parking", "Catering Service", "Sound System", "Projector", "Outdoor Access", "Garden View"],
     location: "Garden Terrace, West Wing",
     size: "3,000 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.53"
+    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16"
   },
   {
     id: "the-pavilion-event-centre",
