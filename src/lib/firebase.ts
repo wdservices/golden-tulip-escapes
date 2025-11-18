@@ -37,7 +37,6 @@ if (!getApps().length) {
   // Initialize Firestore with robust settings for dev environments
   db = initializeFirestore(app, {
     experimentalAutoDetectLongPolling: true,
-    useFetchStreams: false,
   }) as unknown as ReturnType<typeof getFirestore>;
   console.log('Firebase initialized with new app instance');
 } else {

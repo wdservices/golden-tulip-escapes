@@ -21,8 +21,8 @@ type RoomStatus = 'available' | 'occupied' | 'maintenance' | 'reserved';
 
 export const RoomForm = ({ branchId, room, onSuccess, onCancel }: RoomFormProps) => {
   const { addDocument, updateDocument } = useDatabase();
-  const { branches, isLoading: branchesLoading } = useBranches();
-  const [isLoading, setIsLoading] = useState(false);
+  const { branches, isLoading } = useBranches();
+  const [isFormLoading, setIsFormLoading] = useState(false);
   const [selectedBranchId, setSelectedBranchId] = useState(branchId || '');
   
   const [formData, setFormData] = useState({
@@ -81,7 +81,7 @@ export const RoomForm = ({ branchId, room, onSuccess, onCancel }: RoomFormProps)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsFormLoading(true);
     console.log('Submitting room form with data:', formData);
     const startTime = performance.now();
 
@@ -113,6 +113,7 @@ export const RoomForm = ({ branchId, room, onSuccess, onCancel }: RoomFormProps)
       } else {
         console.log(`Adding new room to branch ${selectedBranchId}`);
         roomData.createdAt = new Date().toISOString();
+        roomData.updatedAt = new Date().toISOString();
         const addStartTime = performance.now();
         await addDocument(`branches/${selectedBranchId}/rooms`, roomData);
         const addEndTime = performance.now();

@@ -5,6 +5,7 @@ import { Calendar, MapPin, Users, CreditCard, Clock, CheckCircle, XCircle } from
 import { Badge } from "@/components/ui/badge";
 import { Booking } from "@/types/booking";
 import { cn } from "@/lib/utils";
+import { Timestamp } from "firebase/firestore";
 
 interface BookingCardProps {
   booking: Booking;
@@ -19,9 +20,9 @@ export const BookingCard = ({
   onCancel,
   className,
 }: BookingCardProps) => {
-  const checkInDate = new Date(booking.checkInDate);
-  const checkOutDate = new Date(booking.checkOutDate);
-  const isUpcoming = new Date(booking.checkInDate) > new Date();
+  const checkInDate = booking.checkInDate instanceof Timestamp ? booking.checkInDate.toDate() : new Date(booking.checkInDate);
+  const checkOutDate = booking.checkOutDate instanceof Timestamp ? booking.checkOutDate.toDate() : new Date(booking.checkOutDate);
+  const isUpcoming = checkInDate > new Date();
   const isCompleted = booking.status === 'completed';
   const isCancelled = booking.status === 'cancelled';
 

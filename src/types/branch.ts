@@ -59,3 +59,10 @@ export interface BranchMeta {
 }
 
 export type BranchStatus = 'active' | 'inactive' | 'maintenance';
+
+// Legacy enum for backwards compatibility
+export const BranchStatus = {
+  Active: 'active' as const,
+  Inactive: 'inactive' as const,
+  Maintenance: 'maintenance' as const,
+};

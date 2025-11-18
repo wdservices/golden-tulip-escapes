@@ -7,7 +7,7 @@ import { User, ClientStatus } from "@/types/index";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useForm } from "@/hooks/useForm";
-import { updateDoc } from "firebase/firestore";
+import { updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { doc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
@@ -73,8 +73,8 @@ export const ClientDetailsModal = ({ client, isOpen, onClose, onUpdate }: Client
     if (client && isOpen) {
       const lastSignInDate = client.lastSignInAt ? (
         client.lastSignInAt instanceof Date ? client.lastSignInAt :
-        typeof client.lastSignInAt === 'object' && client.lastSignInAt.toDate ?
-        client.lastSignInAt.toDate() : new Date(client.lastSignInAt)
+        client.lastSignInAt instanceof Timestamp ? client.lastSignInAt.toDate() :
+        new Date(client.lastSignInAt)
       ) : null;
 
       setValues({
@@ -93,14 +93,14 @@ export const ClientDetailsModal = ({ client, isOpen, onClose, onUpdate }: Client
 
   const lastActive = client.lastSignInAt ? formatDateTime(
     client.lastSignInAt instanceof Date ? client.lastSignInAt :
-    typeof client.lastSignInAt === 'object' && client.lastSignInAt.toDate ?
-    client.lastSignInAt.toDate() : new Date(client.lastSignInAt)
+    client.lastSignInAt instanceof Timestamp ? client.lastSignInAt.toDate() :
+    new Date(client.lastSignInAt)
   ) : 'Never';
 
   const joinDate = client.createdAt ? formatDate(
     client.createdAt instanceof Date ? client.createdAt :
-    typeof client.createdAt === 'object' && client.createdAt.toDate ?
-    client.createdAt.toDate() : new Date(client.createdAt)
+    client.createdAt instanceof Timestamp ? client.createdAt.toDate() :
+    new Date(client.createdAt)
   ) : 'N/A';
 
   return (

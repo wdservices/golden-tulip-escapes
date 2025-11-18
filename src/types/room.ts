@@ -53,13 +53,17 @@ export interface RoomTypeConfig {
   id: string;
   name: string;
   description: string;
+  priceRange: string;
   maxOccupancy: number;
-  basePrice: number;
-  amenities: RoomAmenity[];
-  imageUrl: string;
-  size: string; // e.g., '30 sqm'
-  bedType: 'single' | 'double' | 'queen' | 'king' | 'twin' | 'bunk';
-  bedCount: number;
+  capacity: number;
+  basePrice?: number;
+  amenities?: RoomAmenity[];
+  features?: string[];
+  imageUrl?: string;
+  image?: string;
+  size?: string; // e.g., '30 sqm'
+  bedType?: 'single' | 'double' | 'queen' | 'king' | 'twin' | 'bunk';
+  bedCount?: number;
 }
 
 export interface RoomInventoryStats {
