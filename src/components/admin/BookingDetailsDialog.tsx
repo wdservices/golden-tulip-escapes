@@ -184,8 +184,8 @@ export function BookingDetailsDialog({
                     <span className="text-muted-foreground">Nights</span>
                     <span className="font-medium">
                       {Math.ceil(
-                        (new Date(booking.checkOutDate).getTime() -
-                          new Date(booking.checkInDate).getTime()) /
+                        ((booking.checkOutDate instanceof Timestamp ? booking.checkOutDate.toDate() : new Date(booking.checkOutDate)).getTime() -
+                          (booking.checkInDate instanceof Timestamp ? booking.checkInDate.toDate() : new Date(booking.checkInDate)).getTime()) /
                           (1000 * 60 * 60 * 24)
                       )}
                     </span>

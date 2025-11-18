@@ -93,14 +93,14 @@ export const ClientDetailsModal = ({ client, isOpen, onClose, onUpdate }: Client
 
   const lastActive = client.lastSignInAt ? formatDateTime(
     client.lastSignInAt instanceof Date ? client.lastSignInAt :
-    client.lastSignInAt instanceof Timestamp ? client.lastSignInAt.toDate() :
-    new Date(client.lastSignInAt)
+    (typeof client.lastSignInAt === 'object' && 'toDate' in client.lastSignInAt) ? (client.lastSignInAt as Timestamp).toDate() :
+    new Date(client.lastSignInAt as string)
   ) : 'Never';
 
   const joinDate = client.createdAt ? formatDate(
     client.createdAt instanceof Date ? client.createdAt :
-    client.createdAt instanceof Timestamp ? client.createdAt.toDate() :
-    new Date(client.createdAt)
+    (typeof client.createdAt === 'object' && 'toDate' in client.createdAt) ? (client.createdAt as Timestamp).toDate() :
+    new Date(client.createdAt as string)
   ) : 'N/A';
 
   return (

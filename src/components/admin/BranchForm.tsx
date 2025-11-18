@@ -212,8 +212,11 @@ export const BranchForm = ({ branch, onSuccess, onCancel }: BranchFormProps) => 
         }
       } else {
         console.log('Adding new branch');
-        branchData.createdAt = new Date().toISOString();
-        branchData.updatedAt = new Date().toISOString();
+        const newBranchData = {
+          ...branchData,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
         const addStartTime = performance.now();
         let retryCount = 0;
         const maxRetries = 2;

@@ -244,16 +244,16 @@ export const UserDashboard = () => {
 
       const now = new Date();
       const upcoming = bookings
-        .filter(b => new Date(b.checkOutDate) >= now)
-        .sort((a, b) => new Date(a.checkInDate).getTime() - new Date(b.checkInDate).getTime());
+        .filter(b => timestampToDate(b.checkOutDate) >= now)
+        .sort((a, b) => timestampToDate(a.checkInDate).getTime() - timestampToDate(b.checkInDate).getTime());
 
       const past = bookings
-        .filter(b => new Date(b.checkOutDate) < now);
+        .filter(b => timestampToDate(b.checkOutDate) < now);
 
       // Calculate total nights stayed (limit to prevent performance issues)
       const totalNights = past.slice(0, 20).reduce((total, booking) => {
-        const checkIn = new Date(booking.checkInDate);
-        const checkOut = new Date(booking.checkOutDate);
+        const checkIn = timestampToDate(booking.checkInDate);
+        const checkOut = timestampToDate(booking.checkOutDate);
         const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
         return total + Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       }, 0);
@@ -563,9 +563,9 @@ export const UserDashboard = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="font-medium">{booking.branchName}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {format(new Date(booking.checkInDate), 'MMM d, yyyy')} - {format(new Date(booking.checkOutDate), 'MMM d, yyyy')}
-                  </p>
+                    <p className="text-sm text-muted-foreground">
+                      {format(timestampToDate(booking.checkInDate), 'MMM d, yyyy')} - {format(timestampToDate(booking.checkOutDate), 'MMM d, yyyy')}
+                    </p>
                 </div>
                 <div className="flex space-x-2">
                   <Button 
@@ -611,8 +611,8 @@ export const UserDashboard = () => {
                   <div className="space-y-4">
                     <p className="text-lg font-medium text-white">{upcomingBookings[0].branchName}</p>
                     <p className="text-sm text-blue-200">
-                      {format(new Date(upcomingBookings[0].checkInDate), 'MMM d, yyyy')} -{' '}
-                      {format(new Date(upcomingBookings[0].checkOutDate), 'MMM d, yyyy')}
+                      {format(timestampToDate(upcomingBookings[0].checkInDate), 'MMM d, yyyy')} -{' '}
+                      {format(timestampToDate(upcomingBookings[0].checkOutDate), 'MMM d, yyyy')}
                     </p>
                     <p className="text-sm text-blue-100">
                       {upcomingBookings[0].roomType} • {upcomingBookings[0].guests} {upcomingBookings[0].guests === 1 ? 'guest' : 'guests'}
@@ -735,10 +735,10 @@ export const UserDashboard = () => {
                         {getPaymentStatusBadge(booking.paymentStatus)}
                       </div>
                       <p className="text-sm text-blue-200">
-                        {format(new Date(booking.checkInDate), 'MMM d, yyyy')} - {format(new Date(booking.checkOutDate), 'MMM d, yyyy')}
+                        {format(timestampToDate(booking.checkInDate), 'MMM d, yyyy')} - {format(timestampToDate(booking.checkOutDate), 'MMM d, yyyy')}
                       </p>
                       <p className="text-sm text-blue-100">
-                        {booking.roomType} • {booking.guestCount} guests
+                        {booking.roomType} • {booking.guests} guests
                       </p>
                     </div>
                     <div className="flex space-x-2">
@@ -795,7 +795,7 @@ export const UserDashboard = () => {
                         {getPaymentStatusBadge(booking.paymentStatus)}
                       </div>
                       <p className="text-sm text-blue-200">
-                        {format(new Date(booking.checkInDate), 'MMM d, yyyy')} - {format(new Date(booking.checkOutDate), 'MMM d, yyyy')}
+                        {format(timestampToDate(booking.checkInDate), 'MMM d, yyyy')} - {format(timestampToDate(booking.checkOutDate), 'MMM d, yyyy')}
                       </p>
                       <p className="text-sm text-blue-100">
                         {booking.roomType} • {booking.status} • ${booking.totalAmount}
