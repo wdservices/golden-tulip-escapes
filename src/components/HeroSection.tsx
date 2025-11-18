@@ -13,6 +13,13 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 
+// Import images from the assets folder
+import hotelExterior from "@/assets/hotel-exterior.jpg";
+import hotelLobby from "@/assets/hotel-lobby.jpg";
+import luxurySuite from "@/assets/luxury-suite.jpg";
+import restaurant from "@/assets/restaurant.jpg";
+import spa from "@/assets/spa.jpg";
+
 
 interface HeroSectionProps {
   activeBranch: string;
@@ -42,11 +49,11 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
   
   // Hero images for carousel
   const heroImages = [
-    { src: "/images/hotel-exterior.jpg", alt: "Golden Tulip Hotel Exterior", title: "Welcome to Luxury" },
-    { src: "/images/hotel-lobby.jpg", alt: "Elegant Hotel Lobby", title: "Sophisticated Elegance" },
-    { src: "/images/luxury-suite.jpg", alt: "Luxury Suite", title: "Premium Comfort" },
-    { src: "/images/restaurant.jpg", alt: "Fine Dining Restaurant", title: "Exquisite Cuisine" },
-    { src: "/images/spa.jpg", alt: "Luxury Spa", title: "Ultimate Relaxation" }
+    { src: hotelExterior, alt: "Golden Tulip Hotel Exterior", title: "Welcome to Luxury" },
+    { src: hotelLobby, alt: "Elegant Hotel Lobby", title: "Sophisticated Elegance" },
+    { src: luxurySuite, alt: "Luxury Suite", title: "Premium Comfort" },
+    { src: restaurant, alt: "Fine Dining Restaurant", title: "Exquisite Cuisine" },
+    { src: spa, alt: "Luxury Spa", title: "Ultimate Relaxation" }
   ];
 
   const branchInfo = {
@@ -75,7 +82,7 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
   const currentBranch = branchInfo[activeBranch as keyof typeof branchInfo] || branchInfo.main;
 
   return (
-    <section id="home" className="relative h-screen overflow-hidden pt-20">
+    <section id="home" className="relative h-screen overflow-hidden flex items-center justify-center pt-20">
       {/* Image Carousel */}
       <Carousel
         opts={{
@@ -97,7 +104,7 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
                 <img
                   src={image.src}
                   alt={image.alt}
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out"
+                  className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
               </div>
@@ -105,23 +112,22 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
           ))}
         </CarouselContent>
         <CarouselPrevious className="left-4 h-12 w-12 bg-background/20 backdrop-blur-sm border-primary/30 hover:bg-primary/90 hover:border-primary text-white" />
-        <CarouselNext className="right-4 h-12 w-12 bg-background/20 backdrop-blur-sm border-primary/30 hover:bg-primary/90 hover:border-primary text-white" />
+        <CarouselNext className="right-4 h-10 w-10 md:h-12 md:w-12 bg-background/20 backdrop-blur-sm border-primary/30 hover:bg-primary/90 hover:border-primary text-white" />
       </Carousel>
-
 
       {/* Hero Content */}
       <div className="absolute inset-0 flex items-center justify-center z-10">
-        <div className="container mx-auto px-4 text-center text-white">
+        <div className="container mx-auto px-4 sm:px-6 text-center text-white">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-4 leading-tight">
               <span className="golden-yellow drop-shadow-lg">{currentBranch.title}</span>
             </h1>
 
-            <p className="text-xl md:text-2xl mb-4 font-light text-white/90">
+            <p className="text-lg sm:text-xl md:text-2xl mb-3 font-light text-white/90">
               {currentBranch.subtitle}
             </p>
 
-            <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto leading-relaxed text-white/80">
+            <p className="text-base sm:text-lg md:text-xl mb-6 max-w-2xl mx-auto leading-relaxed text-white/80">
               {currentBranch.description}
             </p>
 
@@ -129,16 +135,16 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
                 onClick={handleBookNowClick}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xl px-12 py-6 min-w-[250px] font-bold shadow-2xl hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg sm:text-xl px-8 sm:px-12 py-4 sm:py-6 min-w-[220px] sm:min-w-[250px] font-bold shadow-2xl hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                 size="lg"
               >
-                <Calendar className="mr-3 h-6 w-6" />
+                <Calendar className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" />
                 Book Your Stay
               </Button>
             </div>
 
             {/* Scroll Indicator */}
-            <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <div className="absolute bottom-8 sm:bottom-12 left-1/2 transform -translate-x-1/2 animate-bounce">
               <div className="w-6 h-10 border-2 border-golden-yellow/70 rounded-full flex justify-center">
                 <div className="w-1 h-3 bg-golden-yellow rounded-full mt-2 animate-pulse"></div>
               </div>
