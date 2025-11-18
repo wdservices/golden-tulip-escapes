@@ -45,8 +45,8 @@ const Index = () => {
         />
         
         <BranchTabs 
-          activeTab={activeBranch} 
-          onTabChange={handleTabChange}
+          selectedBranch={activeBranch} 
+          onBranchSelect={handleTabChange}
         />
         
         <InfoSections />

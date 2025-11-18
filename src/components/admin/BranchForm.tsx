@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { BranchStatus } from "@/pages/admin/BranchesPage";
+import { BranchStatus, type BranchStatus as BranchStatusType } from "@/types/branch";
 import { reconnectFirebase } from "@/lib/firebase";
 
 interface BranchFormProps {
@@ -27,7 +27,7 @@ export const BranchForm = ({ branch, onSuccess, onCancel }: BranchFormProps) => 
     email: branch?.email || '',
     location: branch?.location || '',
     phone: branch?.phone || '',
-    status: (branch?.status as BranchStatus) || 'active',
+    status: (branch?.status as BranchStatusType) || 'active',
   });
 
   const branchStatuses = [
@@ -213,6 +213,7 @@ export const BranchForm = ({ branch, onSuccess, onCancel }: BranchFormProps) => 
       } else {
         console.log('Adding new branch');
         branchData.createdAt = new Date().toISOString();
+        branchData.updatedAt = new Date().toISOString();
         const addStartTime = performance.now();
         let retryCount = 0;
         const maxRetries = 2;
@@ -341,7 +342,7 @@ export const BranchForm = ({ branch, onSuccess, onCancel }: BranchFormProps) => 
           <Label htmlFor="status">Status *</Label>
           <Select
             value={formData.status}
-            onValueChange={(value: BranchStatus) => setFormData({...formData, status: value})}
+            onValueChange={(value: BranchStatusType) => setFormData({...formData, status: value})}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select branch status" />

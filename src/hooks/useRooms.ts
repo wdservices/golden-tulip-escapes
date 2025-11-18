@@ -129,14 +129,14 @@ export const useAllRooms = () => {
         
         // All users only see their specific branch
         if (activeBranchId) {
-          branchesToFetch = branches.filter(branch => branch.id === activeBranchId);
+          branchesToFetch = branches.filter((branch: any) => branch.id === activeBranchId);
         }
         
         // Then fetch rooms from each branch
-        const allRoomsPromises = branchesToFetch.map(async (branch) => {
+        const allRoomsPromises = branchesToFetch.map(async (branch: any) => {
           try {
             const branchRooms = await queryDocuments<Room>(`branches/${branch.id}/rooms`, []);
-            return branchRooms.map(room => ({ ...room, branchId: branch.id }));
+            return branchRooms.map((room: any) => ({ ...room, branchId: branch.id }));
           } catch (error) {
             console.error(`Error fetching rooms for branch ${branch.id}:`, error);
             return [];

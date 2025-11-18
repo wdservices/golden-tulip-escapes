@@ -34,6 +34,8 @@ import {
 } from "lucide-react";
 import { paymentService } from "@/services/paymentService";
 import { useAuth } from "@/contexts/AuthContext";
+import { timestampToString } from "@/utils/timestampUtils";
+import { Timestamp } from "firebase/firestore";
 
 interface BookingDetailsDialogProps {
   booking: Booking | null;
@@ -85,19 +87,21 @@ export function BookingDetailsDialog({
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (date: string | Timestamp) => {
     try {
-      return format(new Date(dateString), "PPP");
+      const dateObj = date instanceof Timestamp ? date.toDate() : new Date(date);
+      return format(dateObj, "PPP");
     } catch (error) {
-      return dateString;
+      return timestampToString(date);
     }
   };
 
-  const formatDateTime = (dateString: string) => {
+  const formatDateTime = (date: string | Timestamp) => {
     try {
-      return format(new Date(dateString), "PPP p");
+      const dateObj = date instanceof Timestamp ? date.toDate() : new Date(date);
+      return format(dateObj, "PPP p");
     } catch (error) {
-      return dateString;
+      return timestampToString(date);
     }
   };
 

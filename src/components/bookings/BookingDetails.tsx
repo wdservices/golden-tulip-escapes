@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Booking, BookingStatus, PaymentStatus } from "@/types/booking";
 import { formatCurrency } from "@/utils/currencyUtils";
+import { Timestamp } from "firebase/firestore";
 
 interface BookingDetailsProps {
   booking: Booking | null;
@@ -103,7 +104,7 @@ export function BookingDetails({
                 <div>
                   <Label>Booking Date</Label>
                   <Input
-                    value={format(new Date(booking.bookingDate), "PPpp")}
+                    value={format(booking.bookingDate instanceof Timestamp ? booking.bookingDate.toDate() : new Date(booking.bookingDate), "PPpp")}
                     disabled
                     className="mt-1"
                   />
@@ -147,7 +148,7 @@ export function BookingDetails({
                   <div>
                     <Label>Check-in</Label>
                     <Input
-                      value={format(new Date(booking.checkInDate), "PP")}
+                      value={format(booking.checkInDate instanceof Timestamp ? booking.checkInDate.toDate() : new Date(booking.checkInDate), "PP")}
                       disabled={!isEditing}
                       className="mt-1"
                     />
@@ -155,7 +156,7 @@ export function BookingDetails({
                   <div>
                     <Label>Check-out</Label>
                     <Input
-                      value={format(new Date(booking.checkOutDate), "PP")}
+                      value={format(booking.checkOutDate instanceof Timestamp ? booking.checkOutDate.toDate() : new Date(booking.checkOutDate), "PP")}
                       disabled={!isEditing}
                       className="mt-1"
                     />

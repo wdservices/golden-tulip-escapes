@@ -152,7 +152,7 @@ export function usePayments({ branchId, limit: queryLimit = 100 }: UsePaymentsOp
             );
             
             if (bookingDoc.exists()) {
-              const bookingData = bookingDoc.data();
+              const bookingData = bookingDoc.data() as { guestName?: string; customerEmail?: string };
               guestName = bookingData.guestName || guestName;
               customerEmail = bookingData.customerEmail || customerEmail;
             }
