@@ -1,74 +1,18 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
-// Simple 360° viewer implementation
-const use360Viewer = (imageUrl: string) => {
-  const [rotation, setRotation] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [currentRotation, setCurrentRotation] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const frameCount = 36; // Number of frames in the 360° sequence
-  const frameWidth = 100; // Width of each frame in pixels
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setStartX(e.clientX);
-  };
-
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging) return;
-    
-    const deltaX = e.clientX - startX;
-    const rotationChange = (deltaX / 5) % 360;
-    setRotation(rotationChange);
-    
-    // Calculate frame based on rotation
-    const frame = Math.floor((((rotationChange % 360) + 360) % 360) / (360 / frameCount));
-    setCurrentRotation(frame);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  useEffect(() => {
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isDragging, startX]);
-
-  // Auto-rotate when not dragging
-  useEffect(() => {
-    if (!isDragging) {
-      const interval = setInterval(() => {
-        setRotation(prev => (prev + 0.5) % 360);
-        const frame = Math.floor((rotation % 360) / (360 / frameCount));
-        setCurrentRotation(frame);
-      }, 50);
-      return () => clearInterval(interval);
-    }
-  }, [isDragging, rotation]);
-
-  return {
-    rotation,
-    currentRotation,
-    handleMouseDown,
-    isDragging,
-    containerRef,
-    frameCount,
-    frameWidth
-  };
-};
 
 interface HeroSectionProps {
   activeBranch: string;
@@ -96,15 +40,14 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
     }
   };
   
-  // Fallback images in case 360 viewer fails
-  const fallbackImages = [
+  // Hero images for carousel
+  const heroImages = [
     { src: "/images/hotel-exterior.jpg", alt: "Golden Tulip Hotel Exterior", title: "Welcome to Luxury" },
     { src: "/images/hotel-lobby.jpg", alt: "Elegant Hotel Lobby", title: "Sophisticated Elegance" },
-    { src: "/images/luxury-suite.jpg", alt: "Luxury Suite", title: "Premium Comfort" }
+    { src: "/images/luxury-suite.jpg", alt: "Luxury Suite", title: "Premium Comfort" },
+    { src: "/images/restaurant.jpg", alt: "Fine Dining Restaurant", title: "Exquisite Cuisine" },
+    { src: "/images/spa.jpg", alt: "Luxury Spa", title: "Ultimate Relaxation" }
   ];
-  
-  const [show360Viewer, setShow360Viewer] = useState(true);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const branchInfo = {
     main: {
@@ -131,48 +74,39 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
 
   const currentBranch = branchInfo[activeBranch as keyof typeof branchInfo] || branchInfo.main;
 
-  // Initialize 360° viewer
-  const {
-    rotation,
-    currentRotation,
-    handleMouseDown,
-    isDragging,
-    containerRef,
-    frameCount,
-    frameWidth
-  } = use360Viewer("");
-
-  // Auto-rotate through fallback images when 360 viewer is not active
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % fallbackImages.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [fallbackImages.length]);
-
   return (
     <section id="home" className="relative h-screen overflow-hidden pt-20">
-      {/* 360° Iframe Viewer */}
-      <div className="absolute top-0 left-0 right-0 bottom-0 w-full h-full">
-        <iframe 
-          width="100%" 
-          height="640" 
-          style={{ 
-            width: '100%', 
-            height: '100%', 
-            border: 'none', 
-            maxWidth: '100%' 
-          }} 
-          allow="xr-spatial-tracking; gyroscope; accelerometer" 
-          allowFullScreen={true}
-          frameBorder="0" 
-          scrolling="no"
-          src="https://kuula.co/share/collection/7Hpm5?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.53&autop=90&autopalt=1&thumbs=-1" 
-          title="360° Virtual Tour of Golden Tulip Hotel"
-          className="absolute top-0 left-0 right-0 bottom-0 w-full h-full"
-        />
-        <div className="absolute top-0 left-0 right-0 bottom-0 hero-gradient" />
-      </div>
+      {/* Image Carousel */}
+      <Carousel
+        opts={{
+          align: "start",
+          loop: true,
+        }}
+        plugins={[
+          Autoplay({
+            delay: 5000,
+            stopOnInteraction: false,
+          }),
+        ]}
+        className="absolute inset-0 w-full h-full"
+      >
+        <CarouselContent className="h-full ml-0">
+          {heroImages.map((image, index) => (
+            <CarouselItem key={index} className="h-full pl-0">
+              <div className="relative h-full w-full">
+                <img
+                  src={image.src}
+                  alt={image.alt}
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="left-4 h-12 w-12 bg-background/20 backdrop-blur-sm border-primary/30 hover:bg-primary/90 hover:border-primary text-white" />
+        <CarouselNext className="right-4 h-12 w-12 bg-background/20 backdrop-blur-sm border-primary/30 hover:bg-primary/90 hover:border-primary text-white" />
+      </Carousel>
 
 
       {/* Hero Content */}
@@ -195,9 +129,10 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
                 onClick={handleBookNowClick}
-                className="brand-button text-xl px-12 py-6 min-w-[250px] font-bold shadow-2xl hover:shadow-golden-yellow/50 transform hover:scale-105 transition-all duration-300 border-2 border-golden-yellow/30 hover:text-black"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xl px-12 py-6 min-w-[250px] font-bold shadow-2xl hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                 size="lg"
               >
+                <Calendar className="mr-3 h-6 w-6" />
                 Book Your Stay
               </Button>
             </div>
