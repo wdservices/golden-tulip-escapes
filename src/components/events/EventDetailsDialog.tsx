@@ -148,7 +148,7 @@ export const EventDetailsDialog = ({ isOpen, onClose, event }: EventDetailsDialo
                     loading="lazy"
                     scrolling="no"
                     frameBorder="0" 
-                    src="https://webobook.com/public/648aed3e38418a65e92441d2,en?ap=true&si=true&sm=false&sp=true&sfr=false&sl=false&sop=false&"
+                    src="https://kuula.co/share/collection/7HvmX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
                     title="360° Virtual Tour of Golden Tulip Hotel"
                     className="absolute inset-0 w-full h-full"
                   />

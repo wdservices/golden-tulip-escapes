@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { collection, query, where, getDocs, orderBy, Timestamp } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { collection, getDocs, orderBy, query, Timestamp, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Booking, BookingStatus, PaymentStatus } from "@/types/booking";
@@ -9,9 +9,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarDays, Search, Filter, MoreHorizontal } from "lucide-react";
+import { CalendarDays, Check, Copy, Filter, Mail as MailIcon, MoreHorizontal, Search } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/utils/currencyUtils";
 
 interface BookingsTableProps {
@@ -28,6 +30,78 @@ export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: B
     from: Date | undefined;
     to: Date | undefined;
   }>({ from: undefined, to: undefined });
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [emailBooking, setEmailBooking] = useState<Booking | null>(null);
+  const [hasCopied, setHasCopied] = useState(false);
+
+  const openEmailDialog = (booking: Booking) => {
+    setEmailBooking(booking);
+    setEmailDialogOpen(true);
+    setHasCopied(false);
+  };
+
+  const closeEmailDialog = (open: boolean) => {
+    setEmailDialogOpen(open);
+    if (!open) {
+      setEmailBooking(null);
+    }
+  };
+
+  const formatDateForEmail = (date: Timestamp | string) => {
+    if (date instanceof Timestamp) {
+      return format(date.toDate(), "PPP");
+    }
+    return format(new Date(date), "PPP");
+  };
+
+  const buildEmailContent = (booking: Booking) => {
+    const lines = [
+      `Hello ${booking.guestName || "Valued Guest"},`,
+      "",
+      `Thank you for booking with ${booking.branchName}. We're excited to host you at our property!`,
+      "",
+      "Booking Summary:",
+      `• Booking ID: ${booking.id}`,
+      `• Branch: ${booking.branchName}`,
+      `• Room Type: ${booking.roomType}`,
+      `• Check-in: ${formatDateForEmail(booking.checkInDate)}`,
+      `• Check-out: ${formatDateForEmail(booking.checkOutDate)}`,
+      `• Guests: ${booking.guests ?? "N/A"}`,
+      `• Total Amount: ${formatCurrency(booking.totalAmount, "NGN", "en-NG")}`,
+      "",
+      "Guest Contact:",
+      `• Email: ${booking.guestEmail || "N/A"}`,
+      `• Phone: ${booking.guestPhone || "N/A"}`,
+      "",
+      "If you have any questions or special requests before your arrival, please let us know. We look forward to providing you with a memorable stay.",
+      "",
+      "Warm regards,",
+      `${booking.branchName} Team`,
+    ];
+
+    return lines.join("\n");
+  };
+
+  const handleCopyEmailContent = async () => {
+    if (!emailBooking) return;
+
+    try {
+      await navigator.clipboard.writeText(buildEmailContent(emailBooking));
+      setHasCopied(true);
+      setTimeout(() => setHasCopied(false), 2000);
+    } catch (error) {
+      console.error("Failed to copy booking email content", error);
+    }
+  };
+
+  const handleComposeEmail = () => {
+    if (!emailBooking) return;
+
+    const subject = encodeURIComponent(`Your booking at ${emailBooking.branchName}`);
+    const body = encodeURIComponent(buildEmailContent(emailBooking));
+    const recipient = emailBooking.guestEmail || "";
+    window.open(`mailto:${recipient}?subject=${subject}&body=${body}`);
+  };
 
   const filteredBookings = bookings.filter((booking) => {
     const matchesSearch =
@@ -208,6 +282,14 @@ export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: B
                           >
                             View Details
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="justify-start"
+                            onClick={() => openEmailDialog(booking)}
+                          >
+                            Email Client
+                          </Button>
                           {booking.status !== "completed" && (
                             <Button
                               variant="ghost"
@@ -246,6 +328,51 @@ export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: B
           </TableBody>
         </Table>
       </div>
+
+      <Dialog open={emailDialogOpen} onOpenChange={closeEmailDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Email client</DialogTitle>
+            {emailBooking && (
+              <DialogDescription>
+                Prepare a thank-you email for booking #{emailBooking.id.substring(0, 8)}.
+              </DialogDescription>
+            )}
+          </DialogHeader>
+
+          {emailBooking && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div>
+                  <p className="font-medium text-foreground">{emailBooking.guestName || "Guest"}</p>
+                  <p>{emailBooking.guestEmail || "No email provided"}</p>
+                  {emailBooking.guestPhone && <p>{emailBooking.guestPhone}</p>}
+                </div>
+                <Button variant="ghost" size="icon" onClick={handleCopyEmailContent}>
+                  {hasCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                  <span className="sr-only">Copy email content</span>
+                </Button>
+              </div>
+
+              <Textarea
+                value={buildEmailContent(emailBooking)}
+                readOnly
+                className="min-h-[220px] text-sm"
+              />
+
+              <Button className="w-full" onClick={handleComposeEmail} disabled={!emailBooking.guestEmail}>
+                <MailIcon className="h-4 w-4 mr-2" />
+                Compose Email
+              </Button>
+              {!emailBooking.guestEmail && (
+                <p className="text-xs text-muted-foreground text-center">
+                  No email address available for this guest.
+                </p>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

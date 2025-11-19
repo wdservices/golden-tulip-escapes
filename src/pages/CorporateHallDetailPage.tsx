@@ -30,7 +30,7 @@ const corporateHalls = [
     features: ["Air Conditioning", "Free WiFi", "Parking", "Catering Service", "Sound System", "Projector", "Stage"],
     location: "Ground Floor, Main Building",
     size: "2,500 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16"
+    kuulaEmbedUrl: "https://kuula.co/share/collection/7HvLS?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
   },
   {
     id: "abuja-hall",

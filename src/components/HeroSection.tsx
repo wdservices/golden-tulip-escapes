@@ -13,14 +13,6 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 
-// Import images from the assets folder
-import hotelExterior from "@/assets/hotel-exterior.jpg";
-import hotelLobby from "@/assets/hotel-lobby.jpg";
-import luxurySuite from "@/assets/luxury-suite.jpg";
-import restaurant from "@/assets/restaurant.jpg";
-import spa from "@/assets/spa.jpg";
-
-
 interface HeroSectionProps {
   activeBranch: string;
   onBookNowClick: () => void;
@@ -49,11 +41,12 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
   
   // Hero images for carousel
   const heroImages = [
-    { src: hotelExterior, alt: "Golden Tulip Hotel Exterior", title: "Welcome to Luxury" },
-    { src: hotelLobby, alt: "Elegant Hotel Lobby", title: "Sophisticated Elegance" },
-    { src: luxurySuite, alt: "Luxury Suite", title: "Premium Comfort" },
-    { src: restaurant, alt: "Fine Dining Restaurant", title: "Exquisite Cuisine" },
-    { src: spa, alt: "Luxury Spa", title: "Ultimate Relaxation" }
+    { src: "/images/hero section image/image (1).jpg", alt: "Luxury Hotel Room", title: "Elegant Accommodations" },
+    { src: "/images/hero section image/image (2).jpg", alt: "Hotel Exterior View", title: "Stunning Architecture" },
+    { src: "/images/hero section image/image (3).jpg", alt: "Luxury Suite", title: "Premium Comfort" },
+    { src: "/images/hero section image/image (4).jpg", alt: "Hotel Lobby", title: "Sophisticated Elegance" },
+    { src: "/images/hero section image/image (5).jpg", alt: "Dining Area", title: "Exquisite Cuisine" },
+    { src: "/images/hero section image/image (6).jpg", alt: "Relaxation Area", title: "Ultimate Relaxation" }
   ];
 
   const branchInfo = {
