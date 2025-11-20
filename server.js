@@ -59,7 +59,8 @@ app.post('/api/verify-payment', async (req, res) => {
       });
     }
 
-    const PAYSTACK_SECRET_KEY = process.env.VITE_PAYSTACK_SECRET_KEY;
+    // Support both legacy Vite-prefixed env vars and backend-specific ones
+    const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || process.env.VITE_PAYSTACK_SECRET_KEY;
 
     if (!PAYSTACK_SECRET_KEY) {
       console.error('Paystack secret key not configured');
@@ -86,7 +87,11 @@ app.post('/api/verify-payment', async (req, res) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Paystack API error: ${response.status} - ${errorText}`);
-      throw new Error(`Paystack API error: ${response.status}`);
+      return res.status(400).json({
+        status: 'failed',
+        message: 'Payment verification failed',
+        error: `Paystack API error: ${response.status}`
+      });
     }
 
     const verificationData = await response.json();
@@ -244,7 +249,8 @@ app.post('/api/paystack/webhook', async (req, res) => {
     }
 
     // Verify the webhook signature
-    const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
+    const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || process.env.VITE_PAYSTACK_SECRET_KEY;
+
     const hash = crypto
       .createHmac('sha512', PAYSTACK_SECRET_KEY)
       .update(payload, 'utf8')
