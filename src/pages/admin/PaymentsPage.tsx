@@ -122,7 +122,7 @@ export const PaymentsPage = () => {
         'Guest Email': payment.customerEmail,
         'Amount': formatCurrency(payment.amount),
         'Currency': payment.currency,
-        'Date': new Date(payment.date).toLocaleDateString(),
+        'Date': new Date(payment.date),
         'Status': payment.status.charAt(0).toUpperCase() + payment.status.slice(1),
         'Method': formatMethod(payment.method),
         'Channel': payment.channel,
