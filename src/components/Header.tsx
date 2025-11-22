@@ -57,13 +57,13 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
     <header className="sticky top-0 z-50 bg-secondary/95 backdrop-blur-md border-b border-secondary/20 shadow-lg">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
-            <img src="/logo-mobile.png" alt="Golden Tulip Logo" className="h-8 w-auto" />
-            <div className="flex flex-col">
+          {/* Logo and Text Layout (Golden Tulip with Port Harcourt under; logo after text) */}
+          <Link to="/" className="flex items-center gap-2">
+            <div className="flex flex-col leading-tight">
               <span className="text-xl font-bold text-white">Golden Tulip</span>
-              <span className="text-sm text-primary font-medium -mt-1">Port Harcourt</span>
+              <span className="text-sm text-primary font-medium">Port Harcourt</span>
             </div>
+            <img src="/logo-mobile.png" alt="Golden Tulip Logo" className="h-8 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}

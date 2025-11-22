@@ -52,6 +52,7 @@ import { useCollection } from "@/hooks/useCollection";
 import { getBranches } from "@/services/branchService";
 import { useBranches } from "@/hooks/useBranches";
 import { getDatabaseBranchId } from "@/config/branchMappings";
+import { AdminBookingForm } from "@/components/admin/AdminBookingForm";
 
 import { BookingsTable } from "@/components/bookings/BookingsTable";
 import { clearBookingData } from "@/utils/clearDatabase";
@@ -480,28 +481,17 @@ export const BookingsPage = () => {
                 Create Booking
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-md border-white/20">
-              <DialogHeader>
-                <DialogTitle className="text-yellow-400">Create New Booking</DialogTitle>
-              </DialogHeader>
-              <div className="p-0">
-                <iframe 
-                  src="/book" 
-                  className="w-full h-[80vh] border-0 rounded-lg"
-                  title="Create Booking"
-                  onLoad={() => {
-                    console.log('Booking iframe loaded successfully');
-                  }}
-                  onError={() => {
-                    console.error('Failed to load booking iframe');
-                    toast({
-                      variant: "destructive",
-                      title: "Error",
-                      description: "Failed to load booking form. Please try again.",
-                    });
-                  }}
-                />
-              </div>
+            <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto bg-white/10 backdrop-blur-md border-white/20 p-0">
+              <AdminBookingForm 
+                onBookingSuccess={() => {
+                  setShowCreateBooking(false);
+                  toast({
+                    title: "Success",
+                    description: "Booking created successfully!",
+                  });
+                }}
+                onCancel={() => setShowCreateBooking(false)}
+              />
             </DialogContent>
           </Dialog>
         </div>

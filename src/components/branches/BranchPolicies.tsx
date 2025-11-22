@@ -24,15 +24,16 @@ export const BranchPolicies = ({ policies, paymentMethods, operatingHours }: Bra
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-          {operatingHours && (
-            <div className="bg-card rounded-xl shadow-lg p-8">
-              <h3 className="text-xl font-medium mb-6 flex items-center">
-                <Info className="h-5 w-5 text-primary mr-3" />
-                Operating Hours
-              </h3>
-              <ul className="space-y-4">
-                <li className="flex justify-between items-center group transition-colors">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex justify-center gap-8 mb-8">
+            {operatingHours && (
+              <div className="bg-card rounded-xl shadow-lg p-8 w-full max-w-2xl">
+                <h3 className="text-xl font-medium mb-6 flex items-center">
+                  <Info className="h-5 w-5 text-primary mr-3" />
+                  Operating Hours
+                </h3>
+                <ul className="space-y-4">
+                  <li className="flex justify-between items-center group transition-colors">
                   <span className="text-muted-foreground">Check-in:</span>
                   <span className="text-foreground font-medium">{operatingHours.checkIn}</span>
                 </li>
@@ -44,50 +45,53 @@ export const BranchPolicies = ({ policies, paymentMethods, operatingHours }: Bra
                   <span className="text-muted-foreground">Front Desk:</span>
                   <span className="text-foreground font-medium">{operatingHours.frontDesk}</span>
                 </li>
-                <li className="flex justify-between items-center group">
-                  <span className="text-muted-foreground">Restaurant:</span>
-                  <span className="text-foreground font-medium">{operatingHours.restaurant}</span>
-                </li>
-                <li className="flex justify-between items-center group">
-                  <span className="text-muted-foreground">Bar:</span>
-                  <span className="text-foreground font-medium">{operatingHours.bar}</span>
-                </li>
-              </ul>
-            </div>
-          )}
-
-          {paymentMethods && paymentMethods.length > 0 && (
-            <div className="bg-card rounded-xl shadow-lg p-8">
-              <h3 className="text-xl font-medium mb-6 flex items-center">
-                <CreditCard className="h-5 w-5 text-primary mr-3" />
-                Payment Methods
-              </h3>
-              <ul className="space-y-3">
-                {paymentMethods.map((method, index) => (
-                  <li key={index} className="text-muted-foreground flex items-start group transition-colors">
-                    <span className="text-primary mr-2">•</span>
-                    {method}
+                  <li className="flex flex-col items-start group space-y-2">
+                    <span className="text-muted-foreground">Bar:</span>
+                    <span className="text-foreground font-medium text-left leading-relaxed">{operatingHours.bar}</span>
                   </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {policies && policies.length > 0 && (
-            <div className="bg-card rounded-xl shadow-lg p-8 md:col-span-2">
-              <h3 className="text-xl font-medium mb-6">
-                Hotel Policies
-              </h3>
-              <ul className="space-y-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {policies.map((policy, index) => (
-                  <li key={index} className="text-muted-foreground flex items-start group transition-colors">
-                    <span className="text-primary mr-2">•</span>
-                    {policy}
+                  <li className="flex flex-col items-start group space-y-2">
+                    <span className="text-muted-foreground">Restaurant:</span>
+                    <span className="text-foreground font-medium text-left leading-relaxed">{operatingHours.restaurant}</span>
                   </li>
-                ))}
-              </ul>
-            </div>
-          )}
+                </ul>
+              </div>
+            )}
+
+            {paymentMethods && paymentMethods.length > 0 && (
+              <div className="bg-card rounded-xl shadow-lg p-8 w-full max-w-2xl">
+                <h3 className="text-xl font-medium mb-6 flex items-center">
+                  <CreditCard className="h-5 w-5 text-primary mr-3" />
+                  Payment Methods
+                </h3>
+                <ul className="space-y-3">
+                  {paymentMethods.map((method, index) => (
+                    <li key={index} className="text-muted-foreground flex items-start group transition-colors">
+                      <span className="text-primary mr-2">•</span>
+                      {method}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-center">
+            {policies && policies.length > 0 && (
+              <div className="bg-card rounded-xl shadow-lg p-8 w-full max-w-4xl">
+                <h3 className="text-xl font-medium mb-6">
+                  Hotel Policies
+                </h3>
+                <ul className="space-y-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {policies.map((policy, index) => (
+                    <li key={index} className="text-muted-foreground flex items-start group transition-colors">
+                      <span className="text-primary mr-2">•</span>
+                      {policy}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>

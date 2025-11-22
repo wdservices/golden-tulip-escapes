@@ -23,10 +23,10 @@ import { Footer } from "@/components/Footer";
 const corporateHalls = [
   {
     id: "anioma-hall",
-    name: "Anioma Hall",
+    name: "Anioma Restaurant",
     capacity: 500,
     priceRange: "₦150,000 - ₦300,000",
-    description: "A grand hall perfect for large corporate events, conferences, and celebrations. Features state-of-the-art facilities and elegant décor.",
+    description: "A grand restaurant perfect for large corporate events, conferences, and celebrations. Features state-of-the-art facilities and elegant décor. Can also be arranged to hall standard for various events.",
     features: ["Air Conditioning", "Free WiFi", "Parking", "Catering Service", "Sound System", "Projector", "Stage"],
     location: "Ground Floor, Main Building",
     size: "2,500 sq ft",
@@ -190,17 +190,29 @@ export const CorporateHallDetailPage = () => {
             </div>
           )}
           
-          <iframe
-            src={hall.kuulaEmbedUrl}
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            allow="vr,gyroscope,accelerometer,fullscreen"
-            scrolling="no"
-            className="w-full h-full"
-            title={`${hall.name} 360° Virtual Tour`}
-            onLoad={() => setIframeLoaded(true)}
-          />
+          {/* Wedding Hall 360° Viewer - using the same code from wedding popup */}
+          <div className="h-full relative">
+            <iframe 
+              id="evrFramePopup" 
+              width="100%" 
+              height="100%" 
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                border: 'none', 
+                maxWidth: '100%' 
+              }}  
+              allow="xr-spatial-tracking; gyroscope; accelerometer; fullscreen" 
+              loading="lazy"
+              scrolling="no"
+              frameBorder="0" 
+              src="https://kuula.co/share/collection/7HvmX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
+              title="360° Virtual Tour of Golden Tulip Hotel"
+              className="absolute inset-0 w-full h-full"
+              onLoad={() => setIframeLoaded(true)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+          </div>
         </div>
         
         <div className="absolute bottom-0 left-0 right-0 z-20 p-8 text-white bg-gradient-to-t from-black/70 to-transparent">

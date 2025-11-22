@@ -15,11 +15,11 @@ export function BranchTabs({ selectedBranch, onBranchSelect }: BranchTabsProps) 
   
   const branches = [
     {
-      id: "stadium-31",
-      name: "Stadium Road 31",
-      location: "stadium road 31, Port Harcourt",
-      image: "/images/standium rd 31.png",
-      description: "Modern hotel with excellent facilities"
+      id: "evergreen",
+      name: "Evergreen",
+      location: "Evergreen, Port Harcourt",
+      image: "/images/Evergreen.png",
+      description: "Tranquil setting with premium amenities and personalized service"
     },
     {
       id: "garden-city",
@@ -29,11 +29,11 @@ export function BranchTabs({ selectedBranch, onBranchSelect }: BranchTabsProps) 
       description: "Luxury accommodation in the heart of Garden City"
     },
     {
-      id: "evergreen",
-      name: "Evergreen",
-      location: "Evergreen, Port Harcourt",
-      image: "/images/Evergreen.png",
-      description: "Tranquil setting with premium amenities and personalized service"
+      id: "stadium-31",
+      name: "Stadium Road 31",
+      location: "Stadium Road 31, Port Harcourt",
+      image: "/images/standium rd 31.png",
+      description: "Modern hotel with excellent facilities"
     }
   ];
 

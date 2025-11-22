@@ -160,7 +160,26 @@ const AdminDashboard = () => {
   
   // Handle navigation to admin routes
   const handleNavigation = (path: string) => {
-    navigate(path);
+    try {
+      console.log('🧭 Navigation triggered:', path);
+      console.log('📍 Current path:', location.pathname);
+      
+      // Prevent navigation to the same path
+      if (location.pathname === path) {
+        console.log('🔄 Same path navigation prevented');
+        return;
+      }
+      
+      // Force a small delay to ensure proper state cleanup
+      setTimeout(() => {
+        navigate(path, { replace: false });
+      }, 50);
+    } catch (error) {
+      console.error('🧭 Navigation error:', error);
+      // Fallback to window.location for critical navigation failures
+      console.log('🔄 Fallback to window.location');
+      window.location.href = path;
+    }
   };
   
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
@@ -307,7 +326,7 @@ const AdminDashboard = () => {
               { id: 'settings', label: 'Settings', icon: Settings },
             ].map((item) => (
               <Button
-                key={item.id}
+                key={`${item.id}-${activeTab}`}
                 variant="ghost"
                 className={`w-full justify-start ${!isSidebarOpen ? 'justify-center' : ''} ${
                   activeTab === item.id 

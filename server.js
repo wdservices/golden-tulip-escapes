@@ -335,9 +335,9 @@ app.get('/api/user-bookings/:userId', async (req, res) => {
             ...data,
             id: doc.id,
             branchName: branchData.name || 'Unknown Branch',
-            checkInDate: data.checkInDate?.toDate?.()?.toISOString() || data.checkInDate,
-            checkOutDate: data.checkOutDate?.toDate?.()?.toISOString() || data.checkOutDate,
-            bookingDate: data.bookingDate?.toDate?.()?.toISOString() || data.bookingDate,
+            checkInDate: (data.checkInDate?.toDate?.() || data.checkInDate)?.toISOString?.() || data.checkInDate,
+            checkOutDate: (data.checkOutDate?.toDate?.() || data.checkOutDate)?.toISOString?.() || data.checkOutDate,
+            bookingDate: (data.bookingDate?.toDate?.() || data.bookingDate)?.toISOString?.() || data.bookingDate,
           };
           
           allBookings.push(booking);
@@ -354,9 +354,11 @@ app.get('/api/user-bookings/:userId', async (req, res) => {
 
     // Sort bookings by check-in date (most recent first)
     allBookings.sort((a, b) => {
-      const dateA = new Date(a.checkInDate);
-      const dateB = new Date(b.checkInDate);
-      return dateB.getTime() - dateA.getTime();
+      const timeA = new Date(a.checkInDate).getTime();
+      const timeB = new Date(b.checkInDate).getTime();
+      const safeA = isNaN(timeA) ? 0 : timeA;
+      const safeB = isNaN(timeB) ? 0 : timeB;
+      return safeB - safeA;
     });
 
     // Calculate stats
@@ -368,8 +370,11 @@ app.get('/api/user-bookings/:userId', async (req, res) => {
     const totalNights = allBookings.reduce((total, booking) => {
       const checkIn = new Date(booking.checkInDate);
       const checkOut = new Date(booking.checkOutDate);
-      const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
-      return total + nights;
+      const tIn = checkIn.getTime();
+      const tOut = checkOut.getTime();
+      if (isNaN(tIn) || isNaN(tOut)) return total;
+      const nights = Math.ceil((tOut - tIn) / (1000 * 60 * 60 * 24));
+      return total + (isNaN(nights) || nights < 0 ? 0 : nights);
     }, 0);
 
     // Calculate loyalty points (assuming 10 points per night)
@@ -398,7 +403,11 @@ app.get('/api/user-bookings/:userId', async (req, res) => {
 
   } catch (error) {
     console.error('Error fetching user bookings:', error);
-    res.status(500).json({ error: 'Failed to fetch user bookings' });
+    if (process.env.NODE_ENV !== 'production') {
+      res.status(500).json({ error: 'Failed to fetch user bookings', details: (error && error.message) || String(error) });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch user bookings' });
+    }
   }
 });
 

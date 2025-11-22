@@ -93,19 +93,55 @@ const branches: Branch[] = [
         name: "Deluxe Room",
         description: "Elegant room with a king-size bed and city view",
         priceRange: "₦45,000 - ₦65,000",
-        capacity: 2
+        capacity: 2,
+        features: [
+          "Queen-size bed",
+          "City view",
+          "Free Wi-Fi",
+          "Concierge services",
+          "Air conditioning",
+          "TV",
+          "Mini Bar",
+          "Room Service"
+        ]
       },
       {
         name: "Executive Suite",
         description: "Spacious suite with separate living area and premium amenities",
         priceRange: "₦75,000 - ₦95,000",
-        capacity: 2
+        capacity: 2,
+        features: [
+          "Queen-size bed",
+          "City view",
+          "Free Wi-Fi",
+          "Concierge services",
+          "Air conditioning",
+          "TV",
+          "Mini Bar",
+          "Room Service",
+          "Balcony",
+          "Work Desk"
+        ]
       },
       {
         name: "Presidential Suite",
         description: "Luxurious suite with premium furnishings and panoramic views",
         priceRange: "₦150,000 - ₦200,000",
-        capacity: 4
+        capacity: 4,
+        features: [
+          "Queen-size bed",
+          "City view",
+          "Free Wi-Fi",
+          "Concierge services",
+          "Air conditioning",
+          "TV",
+          "Mini Bar",
+          "Room Service",
+          "Balcony",
+          "Work Desk",
+          "Jacuzzi",
+          "Butler Service"
+        ]
       }
     ],
     gallery: [hotelExterior, hotelLobby, luxurySuite, restaurant, pool, spa]
@@ -124,11 +160,9 @@ const branches: Branch[] = [
     checkOutTime: "12:00 PM",
     amenities: [
       "Free WiFi",
-      "Rooftop Pool",
       "Fitness Center",
-      "Rooftop Restaurant & Bar",
       "Spa & Wellness Center",
-      "24/7 Room Service",
+      "24 hours Room Service",
       "Business Center",
       "Free Parking"
     ],
@@ -140,10 +174,13 @@ const branches: Branch[] = [
         capacity: 2,
         image: "/images/stadium road 31 images/deluxe.webp",
         features: [
+          "Queen-size bed",
+          "City view",
+          "Free Wi-Fi",
+          "Concierge services",
           "Car hire",
           "Flat Tv",
           "Laundry and dry cleaning",
-          "Internet – Wifi",
           "Coffee and tea",
           "Air Condition",
           "Work Desk",
@@ -159,12 +196,15 @@ const branches: Branch[] = [
         capacity: 2,
         image: "/images/stadium road 31 images/executive deluxe.webp",
         features: [
+          "Queen-size bed",
+          "City view",
+          "Free Wi-Fi",
+          "Concierge services",
           "Car hire",
           "Refrigerator",
           "Safe",
           "Flat Tv",
           "Laundry and dry cleaning",
-          "Internet – Wifi",
           "Coffee and tea",
           "Swimming Pool",
           "Air Condition",
@@ -181,12 +221,15 @@ const branches: Branch[] = [
         capacity: 2,
         image: "/images/stadium road 31 images/executive twin.webp",
         features: [
+          "Queen-size bed",
+          "City view",
+          "Free Wi-Fi",
+          "Concierge services",
           "Car hire",
           "Refrigerator",
           "Safe",
           "Flat Tv",
           "Laundry and dry cleaning",
-          "Internet – Wifi",
           "Coffee and tea",
           "Air Condition",
           "Work Desk",
@@ -203,12 +246,15 @@ const branches: Branch[] = [
         capacity: 2,
         image: "/images/stadium road 31 images/super executive.webp",
         features: [
+          "Queen-size bed",
+          "City view",
+          "Free Wi-Fi",
+          "Concierge services",
           "Car hire",
           "Refrigerator",
           "Safe",
           "Flat Tv",
           "Laundry and dry cleaning",
-          "Internet – Wifi",
           "Coffee and tea",
           "Air Condition",
           "Work Desk",
@@ -225,12 +271,15 @@ const branches: Branch[] = [
         capacity: 3,
         image: "/images/stadium road 31 images/royal room.webp",
         features: [
+          "Queen-size bed",
+          "City view",
+          "Free Wi-Fi",
+          "Concierge services",
           "Car hire",
           "Refrigerator",
           "Safe",
           "Flat Tv",
           "Laundry and dry cleaning",
-          "Internet – Wifi",
           "Coffee and tea",
           "Air Condition",
           "Work Desk",
@@ -267,8 +316,7 @@ const branches: Branch[] = [
           "Brandy & Vodka",
           "Champagne & Sparkling Wines",
           "Outdoor Seating",
-          "Karaoke Session",
-          "Swimming"
+          "Karaoke Session"
         ]
       }
     ],
@@ -360,8 +408,8 @@ const branches: Branch[] = [
       checkIn: "2:00 PM",
       checkOut: "12:00 PM",
       frontDesk: "24/7",
-      restaurant: "6:30 AM – 9:30AM (Breakfast), 6:30 AM – 10:30AM (Breakfast at Weekends), 12PM - 3:30 PM (Lunch), 6PM – 10PM (Dinner)",
-      bar: "10:00 AM - 11:00 PM"
+      bar: "10:00 AM - 11:00 PM",
+      restaurant: "6:30 AM – 9:30AM (Breakfast), 6:30 AM – 10:30AM (Breakfast at Weekends), 12PM - 3:30 PM (Lunch), 6PM – 10PM (Dinner)"
     },
     paymentMethods: [
       "Cash (NGN, USD)",
@@ -482,10 +530,11 @@ const branches: Branch[] = [
         capacity: 2,
         image: "/images/garden city images/superior room.webp",
         features: [
-          "Size: 30 sqm",
           "Queen-size bed",
           "City view",
           "Free Wi-Fi",
+          "Concierge services",
+          "Size: 30 sqm",
           "Air conditioning",
           "Flat-screen TV",
           "Work desk",
@@ -498,12 +547,14 @@ const branches: Branch[] = [
         priceRange: "₦127,832 per night",
         capacity: 2,
         features: [
+          "Queen-size bed",
+          "City view",
+          "Free Wi-Fi",
+          "Concierge services",
           "Size: 40 sqm",
-          "King-size bed",
           "Premium view",
           "Mini bar",
           "Work desk",
-          "Free Wi-Fi",
           "Air conditioning"
         ]
       },
@@ -513,10 +564,13 @@ const branches: Branch[] = [
         priceRange: "₦147,850 per night",
         capacity: 2,
         features: [
+          "Queen-size bed",
+          "City view",
+          "Free Wi-Fi",
+          "Concierge services",
           "Size: 60 sqm",
           "Separate living area",
           "Premium amenities",
-          "Concierge service",
           "Executive lounge access",
           "Complimentary breakfast"
         ]
@@ -527,6 +581,10 @@ const branches: Branch[] = [
         priceRange: "₦168,909 per night",
         capacity: 2,
         features: [
+          "Queen-size bed",
+          "City view",
+          "Free Wi-Fi",
+          "Concierge services",
           "Size: 100 sqm",
           "Luxury living space",
           "Personal butler",
@@ -673,7 +731,8 @@ const branches: Branch[] = [
         features: [
           "Queen-size bed",
           "City view",
-          "Free High-speed uninterrupted Wi-Fi",
+          "Free Wi-Fi",
+          "Concierge services",
           "Air conditioning",
           "Flat-screen TV",
           "Work desk",
@@ -687,11 +746,13 @@ const branches: Branch[] = [
         capacity: 2,
         image: "/images/evergreen images/deluxe room.webp",
         features: [
-          "King-size bed",
+          "Queen-size bed",
+          "City view",
+          "Free Wi-Fi",
+          "Concierge services",
           "Premium view",
           "Mini bar",
           "Work desk",
-          "Free High-speed uninterrupted Wi-Fi",
           "Air conditioning"
         ]
       },
@@ -702,8 +763,11 @@ const branches: Branch[] = [
         capacity: 3,
         image: "/images/evergreen images/executive room.webp",
         features: [
+          "Queen-size bed",
+          "City view",
+          "Free Wi-Fi",
+          "Concierge services",
           "Premium amenities",
-          "Concierge service",
           "Premium furnishings",
           "Complimentary breakfast"
         ]

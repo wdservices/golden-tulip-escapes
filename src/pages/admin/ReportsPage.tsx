@@ -8,6 +8,7 @@ import { getBranches } from "@/services/branchService";
 import { useBookings } from "@/hooks/useBookings";
 import { useAuthUsers } from "@/hooks/useAuthUsers";
 import { formatCurrency } from "@/utils/currencyUtils";
+import { exportToCsv } from "@/lib/utils";
 
 import { DateRange } from "react-day-picker";
 import { addDays, format } from "date-fns";
@@ -110,6 +111,81 @@ export const ReportsPage = () => {
   const stats = calculateStats();
   const isLoading = bookingsLoading || usersLoading;
 
+  // Export reports data to CSV
+  const handleExport = () => {
+    try {
+      if (isLoading) {
+        console.warn('Cannot export while data is loading');
+        return;
+      }
+
+      // Get date range as string for export
+      const getDateRangeString = () => {
+        if (date?.from) {
+          if (date.to) {
+            return `${format(date.from, 'LLL dd, y')} - ${format(date.to, 'LLL dd, y')}`;
+          } else {
+            return format(date.from, 'LLL dd, y');
+          }
+        }
+        return 'All Time';
+      };
+
+      const exportData = {
+        summary: {
+          'Total Revenue': formatCurrency(stats.totalRevenue, 'NGN', 'en-NG'),
+          'Occupancy Rate': `${stats.occupancyRate.toFixed(1)}%`,
+          'Total Bookings': stats.totalBookings,
+          'Confirmed Bookings': stats.confirmedBookings,
+          'Pending Bookings': stats.pendingBookings,
+          'Cancelled Bookings': stats.cancelledBookings,
+          'Total Guests': stats.totalGuests,
+          'New Guests': stats.newGuests,
+          'Returning Guests': stats.returningGuests,
+          'Report Period': getDateRangeString(),
+          'Generated Date': new Date().toLocaleDateString(),
+          'Branch': currentBranchName || 'All Branches'
+        },
+        bookings: bookings.map(booking => ({
+          'Booking ID': booking.id,
+          'Guest Name': booking.guestName || 'N/A',
+          'Guest Email': booking.guestEmail || 'N/A',
+          'Guest Phone': booking.guestPhone || 'N/A',
+          'Branch': booking.branchName || 'N/A',
+          'Room Type': booking.roomType || 'N/A',
+          'Room Number': booking.roomNumber || 'N/A',
+          'Check-in Date': booking.checkInDate,
+          'Check-out Date': booking.checkOutDate,
+          'Status': booking.status,
+          'Payment Status': booking.paymentStatus,
+          'Total Amount': formatCurrency(booking.totalAmount || 0, 'NGN', 'en-NG'),
+          'Guests': booking.guests,
+          'Booking Date': booking.bookingDate,
+          'Special Requests': booking.specialRequests || 'N/A'
+        })),
+        guests: mergedUsers.map(user => ({
+          'User ID': user.id,
+          'Name': user.displayName || 'N/A',
+          'Email': user.email,
+          'Phone': user.phoneNumber || 'N/A',
+          'Role': user.role || 'client',
+          'Status': user.disabled ? 'Disabled' : 'Active',
+          'Created Date': user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A',
+          'Last Sign In': user.lastSignInTime ? new Date(user.lastSignInTime).toLocaleDateString() : 'N/A'
+        }))
+      };
+
+      // Export summary data
+      const summaryData = [exportData.summary];
+      exportToCsv(summaryData, `reports_summary_${new Date().toISOString().split('T')[0]}`);
+      
+      console.log('✅ Reports export completed successfully');
+    } catch (error) {
+      console.error('❌ Export failed:', error);
+      alert('Export failed. Please try again.');
+    }
+  };
+
   // Format date range for display
   const dateRangeString = date?.from ? (
     date.to ? (
@@ -177,7 +253,10 @@ export const ReportsPage = () => {
           <Button variant="outline" size="icon" className="ml-2 bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30">
             <Filter className="h-4 w-4" />
           </Button>
-          <Button className="ml-2 bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
+          <Button 
+            className="ml-2 bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300"
+            onClick={handleExport}
+          >
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>

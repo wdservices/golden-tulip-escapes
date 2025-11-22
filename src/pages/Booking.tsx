@@ -549,7 +549,10 @@ const Booking = () => {
                             <Users className="h-5 w-5 mr-3 text-amber-500" />
                             <span className="text-sm font-semibold text-gradient-gold">Guests</span>
                           </div>
-                          <p className="font-medium text-primary ml-8">{bookingData.adults} Adults, {bookingData.children} Children</p>
+                          <p className="font-medium text-primary ml-8">
+                            {bookingData.adults} {bookingData.adults === 1 ? 'Adult' : 'Adults'}
+                            {bookingData.children > 0 && `, ${bookingData.children} ${bookingData.children === 1 ? 'Child' : 'Children'}`}
+                          </p>
                         </div>
 
                         <div className="border-t border-amber-500/20 pt-6 space-y-4">

@@ -8,10 +8,10 @@ import { Header } from '@/components/Header';
 const corporateHalls = [
   {
     id: "anioma-hall",
-    name: "Anioma Hall",
+    name: "Anioma Restaurant",
     capacity: "100 - 200 guests",
     priceRange: "From ₦1,000,000 per day",
-    description: "A spacious hall perfect for large corporate gatherings and conferences.",
+    description: "A grand restaurant perfect for large corporate events, conferences, and celebrations. Features state-of-the-art facilities and elegant décor. Can also be arranged to hall standard for various events.",
     features: [
       "Professional meeting rooms",
       "Conference facilities",

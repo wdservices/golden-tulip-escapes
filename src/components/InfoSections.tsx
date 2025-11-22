@@ -30,7 +30,7 @@ const eventTypes = [
     ],
     venues: [
       {
-        name: "Anioma Hall",
+        name: "Anioma Restaurant",
         capacity: "100 - 200 guests",
         priceRange: "From ₦1,000,000 per day",
         features: [

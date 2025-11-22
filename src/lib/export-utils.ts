@@ -59,14 +59,17 @@ export function exportBookingsToCSV(bookings: Booking[]): string {
 /**
  * Escape CSV values to handle commas, quotes, and newlines
  */
-function escapeCSVValue(value: string): string {
+function escapeCSVValue(value: any): string {
+  // Convert value to string if it's not already
+  const stringValue = String(value || '');
+  
   // If the value contains commas, quotes, or newlines, wrap it in quotes
-  if (value.includes(",") || value.includes('"') || value.includes("\n")) {
+  if (stringValue.includes(",") || stringValue.includes('"') || stringValue.includes("\n")) {
     // Double up any quotes in the value
-    const escapedValue = value.replace(/"/g, '""');
+    const escapedValue = stringValue.replace(/"/g, '""');
     return `"${escapedValue}"`;
   }
-  return value;
+  return stringValue;
 }
 
 /**

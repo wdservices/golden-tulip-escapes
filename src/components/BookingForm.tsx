@@ -547,7 +547,7 @@ const BookingForm = ({ selectedBranch, showLocationDropdown = true, onBookingSuc
                   <div className="flex justify-between items-center py-2 border-b border-border">
                     <span className="text-muted-foreground">Guests:</span>
                     <span className="text-foreground font-medium">
-                      {formData.adults} Adults{formData.children > 0 && `, ${formData.children} Children`}
+                      {formData.adults} {formData.adults === 1 ? 'Adult' : 'Adults'}{formData.children > 0 && `, ${formData.children} ${formData.children === 1 ? 'Child' : 'Children'}`}
                     </span>
                   </div>
 

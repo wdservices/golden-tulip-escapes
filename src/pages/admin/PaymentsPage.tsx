@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getBranches } from "@/services/branchService";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { usePayments } from "@/hooks/usePayments";
+import { exportToCsv } from "@/lib/utils";
 
 type PaymentStatus = 'successful' | 'pending' | 'failed' | 'refunded';
 type PaymentMethod = 'paystack' | 'credit_card' | 'bank_transfer' | 'cash';
@@ -107,6 +108,38 @@ export const PaymentsPage = () => {
       .join(' ');
   };
 
+  // Export payments to CSV
+  const handleExport = () => {
+    try {
+      if (!payments || payments.length === 0) {
+        console.warn('No payments data to export');
+        return;
+      }
+      
+      const exportData = payments.map(payment => ({
+        'Transaction ID': payment.transactionId,
+        'Guest Name': payment.guestName,
+        'Guest Email': payment.customerEmail,
+        'Amount': formatCurrency(payment.amount),
+        'Currency': payment.currency,
+        'Date': new Date(payment.date).toLocaleDateString(),
+        'Status': payment.status.charAt(0).toUpperCase() + payment.status.slice(1),
+        'Method': formatMethod(payment.method),
+        'Channel': payment.channel,
+        'Paystack Transaction ID': payment.paystackTransactionId || 'N/A',
+        'Gateway Response': payment.gatewayResponse || 'N/A',
+        'Fees': formatCurrency(payment.fees),
+        'Receipt URL': payment.receiptUrl || 'N/A'
+      }));
+      
+      exportToCsv(exportData, `payments_export_${new Date().toISOString().split('T')[0]}`);
+      console.log('✅ Payments export completed successfully');
+    } catch (error) {
+      console.error('❌ Export failed:', error);
+      alert('Export failed. Please try again.');
+    }
+  };
+
   // Show loading state if data is still loading
   if (isLoading) {
     return (
@@ -159,7 +192,12 @@ export const PaymentsPage = () => {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm" className="bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30"
+            onClick={handleExport}
+          >
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
