@@ -20,7 +20,7 @@ export const BranchDining = ({ diningOptions }: BranchDiningProps) => {
               <Star className="h-5 w-5 text-primary" />
               <Star className="h-5 w-5 text-primary" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            <h2 className="text-4xl font-serif font-bold mb-6 text-golden-yellow drop-shadow-lg">
               Dining Options
             </h2>
           </div>

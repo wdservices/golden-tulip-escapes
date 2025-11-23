@@ -24,6 +24,7 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
   }> = [
     { name: "Home", href: "/", isRoute: true },
     { name: "Rooms", href: "#rooms", isRoute: false },
+    { name: "Gallery", href: "#gallery", isRoute: false },
     { name: "Dining", href: "#dining", isRoute: false },
     { name: "Events", href: "#events", isRoute: false },
     { name: "About", href: "#about", isRoute: false },

@@ -51,8 +51,8 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
 
   const branchInfo = {
     main: {
-      title: "GOLDEN TULIP EVO ROAD",
-      subtitle: "Head Branch • Government Reserved Area",
+      title: "Golden Tulip EVO Road",
+      subtitle: "Head Quarters • Government Reserved Area",
       description: "A premium 4-star hotel in the heart of Port Harcourt, offering modern rooms, fine dining, meeting halls, gym, spa services, and world class hospitality for business and leisure travelers."
     },
     waterlines: {
@@ -112,11 +112,11 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
       <div className="absolute inset-0 flex items-center justify-center z-10">
         <div className="container mx-auto px-4 sm:px-6 text-center text-white">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-4 leading-tight">
+            <h1 className="text-4xl font-serif font-bold mb-4 leading-tight">
               <span className="golden-yellow drop-shadow-lg">{currentBranch.title}</span>
             </h1>
 
-            <p className="text-lg sm:text-xl md:text-2xl mb-3 font-light text-white/90">
+            <p className="text-xl mb-3 font-light text-white/90">
               {currentBranch.subtitle}
             </p>
 

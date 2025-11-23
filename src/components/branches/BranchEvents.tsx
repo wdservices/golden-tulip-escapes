@@ -28,7 +28,7 @@ export const BranchEvents = ({ events }: BranchEventsProps) => {
               <Star className="h-5 w-5 text-amber-500" />
               <Star className="h-5 w-5 text-amber-500" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-serif font-bold mb-4 text-gradient-gold">
+            <h2 className="text-4xl font-serif font-bold mb-6 text-golden-yellow drop-shadow-lg">
               Events & Conferences
             </h2>
           </div>

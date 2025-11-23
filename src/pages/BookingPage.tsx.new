@@ -31,7 +31,7 @@ interface BookingFormData {
 
 // Mock Data
 const branches = [
-  { id: "main", name: "GRA Head Branch", location: "Government Reserved Area" },
+  { id: "main", name: "GRA Head Quarters", location: "Government Reserved Area" },
   { id: "waterlines", name: "Waterlines Branch", location: "Port Harcourt" },
   { id: "airforce", name: "Airforce Base", location: "Port Harcourt" },
   { id: "oyigbo", name: "Oyigbo Branch", location: "Rivers State" }

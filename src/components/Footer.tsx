@@ -11,7 +11,7 @@ export const Footer = () => {
 
   const branches = [
     {
-      name: "GOLDEN TULIP EVO ROAD",
+      name: "Golden Tulip EVO Road",
       address: "1c Evo Crescent Off Evo Road, GRA Phase II, Port Harcourt, Rivers State",
       phones: ["+234 905 777 7780", "+234 905 777 7782"],
       emails: ["reservations@goldentulipportharcourt.com", "fom@goldentulipportharcourt.com"],

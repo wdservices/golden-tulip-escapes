@@ -61,7 +61,7 @@ export const BookingForm = ({ selectedBranch, showLocationDropdown = true, onBoo
   ];
 
   const branches: Branch[] = [
-    { id: "evo-road", name: "GOLDEN TULIP EVO ROAD", location: "GRA Phase II, Port Harcourt" },
+    { id: "evo-road", name: "Golden Tulip EVO Road", location: "GRA Phase II, Port Harcourt" },
     { id: "waterlines", name: "Waterlines", location: "Port Harcourt" },
     { id: "airforce", name: "Airforce Base", location: "Port Harcourt" },
     { id: "oyigbo", name: "Oyigbo", location: "Rivers State" }

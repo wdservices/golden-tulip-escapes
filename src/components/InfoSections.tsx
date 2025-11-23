@@ -379,7 +379,7 @@ export const InfoSections = () => {
       <section id="dining" className="py-20 bg-gradient-to-b from-background to-royal-blue/5">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-serif font-bold mb-6 text-golden-yellow drop-shadow-lg">
+            <h2 className="text-4xl font-serif font-bold mb-6 text-golden-yellow drop-shadow-lg">
               Dining Options
             </h2>
             <p className="text-xl text-foreground/80 max-w-3xl mx-auto leading-relaxed">
@@ -477,7 +477,7 @@ export const InfoSections = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-royal-blue/10 to-transparent"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-serif font-bold mb-6 text-golden-yellow drop-shadow-lg">
+            <h2 className="text-4xl font-serif font-bold mb-6 text-golden-yellow drop-shadow-lg">
               Sanctuary of Serenity
             </h2>
             <p className="text-xl text-foreground/80 max-w-3xl mx-auto leading-relaxed">
@@ -571,7 +571,7 @@ export const InfoSections = () => {
       <section id="events" className="py-16 bg-gradient-to-br from-royal-blue/5 to-royal-blue/10">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-serif font-bold mb-4 text-golden-yellow drop-shadow-lg">
+            <h2 className="text-4xl font-serif font-bold mb-6 text-golden-yellow drop-shadow-lg">
               Events & Conferences
             </h2>
             <p className="text-lg text-foreground/80 max-w-3xl mx-auto">
@@ -629,7 +629,7 @@ export const InfoSections = () => {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-serif font-bold mb-4 text-golden-yellow drop-shadow-lg">
+            <h2 className="text-4xl font-serif font-bold mb-6 text-golden-yellow drop-shadow-lg">
               Hotel Amenities
             </h2>
             <p className="text-lg text-foreground/80 max-w-2xl mx-auto">

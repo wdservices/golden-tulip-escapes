@@ -9,6 +9,7 @@ import { BranchDining } from "@/components/branches/BranchDining";
 import { BranchSpa } from "@/components/branches/BranchSpa";
 import { BranchEvents } from "@/components/branches/BranchEvents";
 import { BranchPolicies } from "@/components/branches/BranchPolicies";
+import { BranchGallery } from "@/components/branches/BranchGallery";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Branch } from "@/types/branch";
@@ -94,6 +95,7 @@ export const BranchPage = () => {
       </div>
 
       <BranchRooms roomTypes={branch.roomTypes} branchId={branchId} />
+      <BranchGallery branch={branch} />
       <BranchDining diningOptions={branch.diningOptions} />
       <BranchSpa spaServices={branch.spaServices} />
       <BranchAmenities amenities={branch.amenities || []} />

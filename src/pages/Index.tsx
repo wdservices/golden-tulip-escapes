@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { BranchTabs } from "@/components/BranchTabs";
 import { InfoSections } from "@/components/InfoSections";
+import { Gallery } from "@/components/Gallery";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -48,6 +49,8 @@ const Index = () => {
           selectedBranch={activeBranch} 
           onBranchSelect={handleTabChange}
         />
+        
+        <Gallery />
         
         <InfoSections />
         

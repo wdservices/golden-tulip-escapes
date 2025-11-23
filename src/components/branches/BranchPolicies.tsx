@@ -16,7 +16,7 @@ export const BranchPolicies = ({ policies, paymentMethods, operatingHours }: Bra
     <section className="py-20 bg-muted/10" id="policies">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-4xl font-serif font-bold mb-6 text-golden-yellow drop-shadow-lg">
             Hotel Information
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
