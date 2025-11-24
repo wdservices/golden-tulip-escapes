@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DatabaseProvider } from "@/contexts/DatabaseContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ConditionalChatbot } from "@/components/chat/ConditionalChatbot";
 import { lazy, Suspense } from 'react';
 import Index from "./pages/Index";
@@ -24,6 +25,7 @@ import PublicRoomsPage from "./pages/RoomsPage";
 import CorporateHallsPage from "./pages/CorporateHallsPage";
 import { CorporateHallDetailPage } from "./pages/CorporateHallDetailPage";
 import AndroidPage from "./pages/AndroidPage";
+import { AndroidGalleryPage } from "./pages/AndroidGalleryPage";
 import { Button } from "@/components/ui/button";
 import { AdminPanel } from "./components/admin/AdminPanel";
 import FirebaseTest from "./pages/FirebaseTest";
@@ -92,8 +94,9 @@ const App = () => {
           >
             <AuthProvider>
               <DatabaseProvider>
-                <ConditionalChatbot />
-              <Routes>
+                <ThemeProvider>
+                  <ConditionalChatbot />
+                <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/firebase-test" element={<FirebaseTest />} />
@@ -101,6 +104,7 @@ const App = () => {
             {/* Alias to prevent 404s from legacy links */}
             <Route path="/booking" element={<Navigate to="/book" replace />} />
             <Route path="/android" element={<AndroidPage />} />
+            <Route path="/android/gallery/:branchId" element={<AndroidGalleryPage />} />
             <Route path="/branch/:branchId" element={<BranchPage />} />
             <Route path="/branches/:branchId" element={<BranchPage />} />
             <Route path="/branch/:branchId/room/:roomId" element={<RoomDetailPage />} />
@@ -176,6 +180,7 @@ const App = () => {
             {/* 404 - Keep this last */}
             <Route path="*" element={<NotFound />} />
               </Routes>
+                </ThemeProvider>
             </DatabaseProvider>
           </AuthProvider>
         </BrowserRouter>
