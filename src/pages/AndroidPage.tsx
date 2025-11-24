@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, Home, Calendar, MapPin, Building2, Users, FileText, Settings, LogOut, ChevronLeft, ChevronRight, Sun, Moon, Utensils, Sparkles } from 'lucide-react';
+import { Menu, Home, Calendar, MapPin, Building2, Users, FileText, LogOut, ChevronLeft, ChevronRight, Sun, Moon, Utensils, Sparkles, ArrowRight } from 'lucide-react';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -61,6 +61,13 @@ export const AndroidPage: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev === SLIDER_IMAGES.length - 1 ? 0 : prev + 1));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev === SLIDER_IMAGES.length - 1 ? 0 : prev + 1));
   };
@@ -70,58 +77,63 @@ export const AndroidPage: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${isDarkMode 
-      ? 'bg-gradient-to-br from-yellow-900 via-yellow-800 to-amber-900 text-yellow-100' 
-      : 'bg-white text-gray-800'
+    <div className={`min-h-screen transition-all duration-500 ${isDarkMode 
+      ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' 
+      : 'bg-gradient-to-br from-slate-50 via-white to-slate-50'
     }`}>
-      {/* Top App Bar */}
-      <div className={`sticky top-0 z-40 flex items-center justify-between px-4 py-3 border-b backdrop-blur supports-[backdrop-filter] shadow-sm transition-colors duration-300 ${
+      {/* Top App Bar - Glass Morphism */}
+      <div className={`sticky top-0 z-40 flex items-center justify-between px-6 py-4 backdrop-blur-xl border-b transition-all duration-300 ${
         isDarkMode 
-          ? 'bg-yellow-900/95 border-yellow-700' 
-          : 'bg-white/95 border-blue-100'
+          ? 'bg-slate-900/80 border-slate-800/50 shadow-lg shadow-slate-900/50' 
+          : 'bg-white/80 border-slate-200/50 shadow-lg shadow-slate-200/50'
       }`}>
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Open menu" className={`transition-colors duration-300 ${
-              isDarkMode 
-                ? 'hover:bg-yellow-800 text-yellow-300' 
-                : 'hover:bg-blue-100 text-blue-600'
-            }`}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              aria-label="Open menu" 
+              className={`rounded-full transition-all duration-300 hover:scale-105 ${
+                isDarkMode 
+                  ? 'hover:bg-slate-800 text-slate-300 hover:shadow-lg hover:shadow-blue-500/20' 
+                  : 'hover:bg-slate-100 text-slate-700 hover:shadow-lg hover:shadow-blue-500/20'
+              }`}
+            >
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className={`w-[85%] sm:max-w-sm transition-colors duration-300 ${
+          <SheetContent side="left" className={`w-[85%] sm:max-w-sm transition-all duration-300 ${
             isDarkMode 
-              ? 'bg-yellow-900 border-yellow-700 text-yellow-100' 
-              : 'bg-white'
+              ? 'bg-slate-900 border-slate-800' 
+              : 'bg-white border-slate-200'
           }`}>
             <SheetHeader>
-              <div className="flex items-center gap-3 mb-4">
-                <Avatar className={`h-12 w-12 border-2 ${
+              <div className="flex items-center gap-3 mb-6">
+                <Avatar className={`h-14 w-14 ring-2 ring-offset-2 transition-all duration-300 ${
                   isDarkMode 
-                    ? 'border-yellow-400' 
-                    : 'border-blue-400'
+                    ? 'ring-blue-500 ring-offset-slate-900' 
+                    : 'ring-blue-600 ring-offset-white'
                 }`}>
                   <AvatarImage src={currentUser?.photoURL || ''} alt={displayName} />
-                  <AvatarFallback className={`font-semibold ${
+                  <AvatarFallback className={`font-bold text-lg ${
                     isDarkMode 
-                      ? 'bg-yellow-800 text-yellow-200' 
-                      : 'bg-blue-100 text-blue-600'
+                      ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white' 
+                      : 'bg-gradient-to-br from-blue-500 to-purple-500 text-white'
                   }`}>
                     {displayName.slice(0, 1).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <SheetTitle className={`text-lg ${
+                  <SheetTitle className={`text-lg font-bold ${
                     isDarkMode 
-                      ? 'text-yellow-200' 
-                      : 'text-blue-800'
+                      ? 'text-slate-100' 
+                      : 'text-slate-900'
                   }`}>{displayName}</SheetTitle>
                   {email ? (
-                    <SheetDescription className={`text-xs ${
+                    <SheetDescription className={`text-sm ${
                       isDarkMode 
-                        ? 'text-yellow-300' 
-                        : 'text-blue-600'
+                        ? 'text-slate-400' 
+                        : 'text-slate-600'
                     }`}>{email}</SheetDescription>
                   ) : null}
                 </div>
@@ -130,24 +142,26 @@ export const AndroidPage: React.FC = () => {
             
             <div className="mt-6 space-y-6">
               {/* Quick Actions */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Button 
-                  className={`w-full justify-start transition-colors duration-300 ${
+                  className={`w-full justify-between group transition-all duration-300 ${
                     isDarkMode 
-                      ? 'bg-yellow-600 hover:bg-yellow-500 text-yellow-900' 
-                      : 'bg-blue-600 hover:bg-blue-700'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40' 
+                      : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40'
                   }`} 
                   onClick={() => navigate('/book')}
                 >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  Book Now
+                  <span className="flex items-center">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Book Now
+                  </span>
+                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Button>
                 <Button 
-                  variant="outline" 
-                  className={`w-full justify-start transition-colors duration-300 ${
+                  className={`w-full justify-start transition-all duration-300 ${
                     isDarkMode 
-                      ? 'border-yellow-400 text-yellow-300 hover:bg-yellow-800' 
-                      : 'border-blue-300 text-blue-600 hover:bg-blue-50'
+                      ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 shadow-lg shadow-slate-900/50 hover:shadow-xl hover:shadow-slate-900/60' 
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-900 shadow-md shadow-slate-300/50 hover:shadow-lg hover:shadow-slate-300/60'
                   }`} 
                   onClick={() => navigate('/')}
                 > 
@@ -160,10 +174,10 @@ export const AndroidPage: React.FC = () => {
 
               {/* Branch Links */}
               <div>
-                <div className={`text-sm font-semibold mb-3 flex items-center transition-colors duration-300 ${
+                <div className={`text-sm font-bold mb-3 flex items-center ${
                   isDarkMode 
-                    ? 'text-yellow-300' 
-                    : 'text-blue-600'
+                    ? 'text-slate-300' 
+                    : 'text-slate-700'
                 }`}>
                   <Building2 className="mr-2 h-4 w-4" />
                   Our Branches
@@ -175,24 +189,27 @@ export const AndroidPage: React.FC = () => {
                       <Link 
                         key={branch.id} 
                         to={to} 
-                        className={`flex items-center gap-3 rounded-lg border px-3 py-3 transition-all duration-300 ${
+                        className={`group flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-300 ${
                           isDarkMode 
-                            ? 'border-yellow-600 bg-yellow-800 hover:bg-yellow-700 hover:border-yellow-500' 
-                            : 'border bg-white hover:bg-blue-50 hover:border-blue-400'
+                            ? 'bg-slate-800/50 hover:bg-slate-700/50 shadow-md shadow-slate-900/50 hover:shadow-lg hover:shadow-blue-500/20' 
+                            : 'bg-slate-50 hover:bg-slate-100 shadow-sm shadow-slate-300/50 hover:shadow-md hover:shadow-blue-500/20'
                         }`}
                       >
-                        <div className={`h-8 w-8 rounded-full flex items-center justify-center transition-colors duration-300 ${
+                        <div className={`h-10 w-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${
                           isDarkMode 
-                            ? 'bg-yellow-700 text-yellow-300' 
-                            : 'bg-blue-100 text-blue-600'
+                            ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30' 
+                            : 'bg-gradient-to-br from-blue-500 to-purple-500 text-white shadow-md shadow-blue-500/30'
                         }`}>
-                          <MapPin className="h-4 w-4" />
+                          <MapPin className="h-5 w-5" />
                         </div>
-                        <span className={`text-sm font-medium transition-colors duration-300 ${
+                        <span className={`text-sm font-semibold flex-1 ${
                           isDarkMode 
-                            ? 'text-yellow-200' 
-                            : 'text-blue-800'
+                            ? 'text-slate-200' 
+                            : 'text-slate-800'
                         }`}>{branch.name}</span>
+                        <ArrowRight className={`h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 ${
+                          isDarkMode ? 'text-slate-400' : 'text-slate-500'
+                        }`} />
                       </Link>
                     );
                   })}
@@ -203,18 +220,18 @@ export const AndroidPage: React.FC = () => {
 
               {/* Navigation Links */}
               <div>
-                <div className={`text-sm font-semibold mb-3 transition-colors duration-300 ${
+                <div className={`text-sm font-bold mb-3 ${
                   isDarkMode 
-                    ? 'text-yellow-300' 
-                    : 'text-blue-600'
+                    ? 'text-slate-300' 
+                    : 'text-slate-700'
                 }`}>Quick Links</div>
                 <div className="space-y-2">
                   <Button 
                     variant="ghost" 
-                    className={`w-full justify-start transition-colors duration-300 ${
+                    className={`w-full justify-start transition-all duration-300 rounded-lg ${
                       isDarkMode 
-                        ? 'text-yellow-300 hover:bg-yellow-800 hover:text-yellow-200' 
-                        : 'text-blue-600 hover:bg-blue-50 hover:text-blue-700'
+                        ? 'text-slate-300 hover:bg-slate-800 hover:text-slate-100' 
+                        : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
                     }`} 
                     onClick={() => navigate('/rooms')}
                   >
@@ -223,10 +240,10 @@ export const AndroidPage: React.FC = () => {
                   </Button>
                   <Button 
                     variant="ghost" 
-                    className={`w-full justify-start transition-colors duration-300 ${
+                    className={`w-full justify-start transition-all duration-300 rounded-lg ${
                       isDarkMode 
-                        ? 'text-yellow-300 hover:bg-yellow-800 hover:text-yellow-200' 
-                        : 'text-blue-600 hover:bg-blue-50 hover:text-blue-700'
+                        ? 'text-slate-300 hover:bg-slate-800 hover:text-slate-100' 
+                        : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
                     }`} 
                     onClick={() => navigate('/dashboard')}
                   >
@@ -235,10 +252,10 @@ export const AndroidPage: React.FC = () => {
                   </Button>
                   <Button 
                     variant="ghost" 
-                    className={`w-full justify-start transition-colors duration-300 ${
+                    className={`w-full justify-start transition-all duration-300 rounded-lg ${
                       isDarkMode 
-                        ? 'text-yellow-300 hover:bg-yellow-800 hover:text-yellow-200' 
-                        : 'text-blue-600 hover:bg-blue-50 hover:text-blue-700'
+                        ? 'text-slate-300 hover:bg-slate-800 hover:text-slate-100' 
+                        : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
                     }`} 
                     onClick={() => navigate('/corporate-halls')}
                   >
@@ -253,11 +270,10 @@ export const AndroidPage: React.FC = () => {
               {/* Logout */}
               {currentUser && (
                 <Button 
-                  variant="outline" 
-                  className={`w-full justify-start transition-colors duration-300 ${
+                  className={`w-full justify-start transition-all duration-300 ${
                     isDarkMode 
-                      ? 'text-yellow-300 border-yellow-400 hover:bg-yellow-800 hover:text-yellow-200' 
-                      : 'text-blue-600 border-blue-300 hover:bg-blue-50 hover:text-blue-700'
+                      ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 shadow-md shadow-red-500/20 hover:shadow-lg hover:shadow-red-500/30' 
+                      : 'bg-red-50 text-red-600 hover:bg-red-100 shadow-sm shadow-red-300/30 hover:shadow-md hover:shadow-red-300/40'
                   }`} 
                   onClick={handleLogout}
                 >
@@ -274,10 +290,10 @@ export const AndroidPage: React.FC = () => {
           variant="ghost" 
           size="icon" 
           onClick={toggleDarkMode}
-          className={`transition-colors duration-300 ${
+          className={`rounded-full transition-all duration-300 hover:scale-105 ${
             isDarkMode 
-              ? 'hover:bg-yellow-800 text-yellow-300' 
-              : 'hover:bg-blue-100 text-blue-600'
+              ? 'hover:bg-slate-800 text-slate-300 hover:shadow-lg hover:shadow-yellow-500/20' 
+              : 'hover:bg-slate-100 text-slate-700 hover:shadow-lg hover:shadow-blue-500/20'
           }`}
         >
           {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -286,10 +302,10 @@ export const AndroidPage: React.FC = () => {
         <Button 
           onClick={() => navigate('/book')}
           size="sm"
-          className={`font-semibold transition-colors duration-300 ${
+          className={`font-bold rounded-full px-6 transition-all duration-300 hover:scale-105 ${
             isDarkMode 
-              ? 'bg-yellow-600 hover:bg-yellow-500 text-yellow-900' 
-              : 'bg-blue-600 hover:bg-blue-700'
+              ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-lg shadow-blue-500/40 hover:shadow-xl hover:shadow-blue-500/50' 
+              : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-lg shadow-blue-500/40 hover:shadow-xl hover:shadow-blue-500/50'
           }`}
         >
           Book
@@ -297,93 +313,158 @@ export const AndroidPage: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="p-4 space-y-6">
-        {/* Image Slider */}
-        <div className="rounded-2xl overflow-hidden border-2 border-border shadow-lg">
-          <div className="aspect-[16/9] relative">
-            <img 
-              src={SLIDER_IMAGES[currentSlide].src} 
-              alt={SLIDER_IMAGES[currentSlide].alt}
-              className="w-full h-full object-cover"
-            />
+      <div className="p-6 space-y-8 pb-24">
+        {/* Image Slider - Hero Section */}
+        <div className={`rounded-3xl overflow-hidden transition-all duration-300 ${
+          isDarkMode 
+            ? 'shadow-2xl shadow-blue-500/20' 
+            : 'shadow-2xl shadow-slate-300/50'
+        }`}>
+          <div className="aspect-[16/9] relative group">
+            {SLIDER_IMAGES.map((image, index) => (
+              <img 
+                key={index}
+                src={image.src} 
+                alt={image.alt}
+                className={`w-full h-full object-cover absolute inset-0 transition-all duration-700 ${
+                  index === currentSlide 
+                    ? 'opacity-100 scale-100' 
+                    : 'opacity-0 scale-105'
+                }`}
+              />
+            ))}
+            
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             
             {/* Navigation Arrows */}
             <button
               onClick={prevSlide}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+              className={`absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full backdrop-blur-sm transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 ${
+                isDarkMode 
+                  ? 'bg-slate-900/70 text-white hover:bg-slate-800/80 shadow-lg shadow-slate-900/50' 
+                  : 'bg-white/70 text-slate-900 hover:bg-white/90 shadow-lg shadow-slate-300/50'
+              }`}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5" />
             </button>
             <button
               onClick={nextSlide}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+              className={`absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full backdrop-blur-sm transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 ${
+                isDarkMode 
+                  ? 'bg-slate-900/70 text-white hover:bg-slate-800/80 shadow-lg shadow-slate-900/50' 
+                  : 'bg-white/70 text-slate-900 hover:bg-white/90 shadow-lg shadow-slate-300/50'
+              }`}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5" />
             </button>
 
-            {/* Image Counter */}
-            <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
-              {currentSlide + 1} / {SLIDER_IMAGES.length}
+            {/* Image Counter & Dots */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 backdrop-blur-sm bg-black/30 px-4 py-2 rounded-full">
+              {SLIDER_IMAGES.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    index === currentSlide 
+                      ? 'bg-white w-6' 
+                      : 'bg-white/50 hover:bg-white/75'
+                  }`}
+                />
+              ))}
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="px-4 py-6">
-          <h2 className="text-lg font-semibold mb-4 text-blue-800">Quick Actions</h2>
-          <div className="grid grid-cols-2 gap-3">
+        <div>
+          <h2 className={`text-xl font-bold mb-5 ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
+            Quick Actions
+          </h2>
+          <div className="grid grid-cols-2 gap-4">
             <Button 
               onClick={() => navigate('/book')}
-              className="h-24 flex-col gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className={`h-32 flex-col gap-3 rounded-2xl transition-all duration-300 hover:scale-105 group ${
+                isDarkMode 
+                  ? 'bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white shadow-xl shadow-blue-500/40 hover:shadow-2xl hover:shadow-blue-500/50' 
+                  : 'bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white shadow-xl shadow-blue-500/40 hover:shadow-2xl hover:shadow-blue-500/50'
+              }`}
             >
-              <Calendar className="h-6 w-6" />
-              <span className="text-sm font-medium">Book Room</span>
+              <Calendar className="h-8 w-8 transition-transform duration-300 group-hover:scale-110" />
+              <span className="text-sm font-bold">Book Room</span>
             </Button>
             <Button 
               onClick={() => navigate('/dining')}
-              className="h-24 flex-col gap-2 bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className={`h-32 flex-col gap-3 rounded-2xl transition-all duration-300 hover:scale-105 group ${
+                isDarkMode 
+                  ? 'bg-gradient-to-br from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-xl shadow-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/50' 
+                  : 'bg-gradient-to-br from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white shadow-xl shadow-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/50'
+              }`}
             >
-              <Utensils className="h-6 w-6" />
-              <span className="text-sm font-medium">Dining</span>
+              <Utensils className="h-8 w-8 transition-transform duration-300 group-hover:scale-110" />
+              <span className="text-sm font-bold">Dining</span>
             </Button>
             <Button 
               onClick={() => navigate('/events')}
-              className="h-24 flex-col gap-2 bg-blue-700 hover:bg-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className={`h-32 flex-col gap-3 rounded-2xl transition-all duration-300 hover:scale-105 group ${
+                isDarkMode 
+                  ? 'bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-xl shadow-purple-500/40 hover:shadow-2xl hover:shadow-purple-500/50' 
+                  : 'bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-xl shadow-purple-500/40 hover:shadow-2xl hover:shadow-purple-500/50'
+              }`}
             >
-              <Calendar className="h-6 w-6" />
-              <span className="text-sm font-medium">Events</span>
+              <Calendar className="h-8 w-8 transition-transform duration-300 group-hover:scale-110" />
+              <span className="text-sm font-bold">Events</span>
             </Button>
             <Button 
               onClick={() => navigate('/spa')}
-              className="h-24 flex-col gap-2 bg-yellow-600 hover:bg-yellow-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className={`h-32 flex-col gap-3 rounded-2xl transition-all duration-300 hover:scale-105 group ${
+                isDarkMode 
+                  ? 'bg-gradient-to-br from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-xl shadow-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/50' 
+                  : 'bg-gradient-to-br from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white shadow-xl shadow-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/50'
+              }`}
             >
-              <Sparkles className="h-6 w-6" />
-              <span className="text-sm font-medium">Spa</span>
+              <Sparkles className="h-8 w-8 transition-transform duration-300 group-hover:scale-110" />
+              <span className="text-sm font-bold">Spa</span>
             </Button>
           </div>
         </div>
 
         {/* Branch Cards Grid (2x2) Enhanced */}
         <div>
-          <h2 className="text-xl font-bold mb-4 text-blue-600">Explore Our Branches</h2>
+          <h2 className={`text-xl font-bold mb-5 ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
+            Explore Our Branches
+          </h2>
           <div className="grid grid-cols-2 gap-4">
-            {BRANCHES.map((branch, index) => {
+            {BRANCHES.map((branch) => {
               const to = `/android/gallery/${branch.id}`;
               
               return (
-                <Link key={branch.id} to={to}>
-                  <Card className={`h-36 bg-white border-2 border-blue-100 hover:border-blue-400 hover:shadow-lg transition-all duration-300 hover:scale-105 overflow-hidden`}>
-                    <CardContent className="p-0 h-full flex flex-col">
-                      <div className="h-24 w-full overflow-hidden">
+                <Link key={branch.id} to={to} className="group">
+                  <Card className={`h-40 overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105 ${
+                    isDarkMode 
+                      ? 'bg-slate-800/50 shadow-xl shadow-slate-900/50 hover:shadow-2xl hover:shadow-blue-500/30' 
+                      : 'bg-white shadow-lg shadow-slate-300/50 hover:shadow-xl hover:shadow-blue-500/30'
+                  }`}>
+                    <CardContent className="p-0 h-full flex flex-col relative">
+                      <div className="h-28 w-full overflow-hidden relative">
                         <img 
                           src={branch.image} 
                           alt={branch.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                       </div>
-                      <div className="flex-1 flex flex-col items-center justify-center p-2 text-center">
-                        <div className="text-xs text-blue-500 font-medium mb-1">Gallery</div>
-                        <div className="text-sm font-bold text-blue-800 leading-tight">{branch.name}</div>
+                      <div className={`flex-1 flex flex-col items-center justify-center p-3 text-center ${
+                        isDarkMode ? 'bg-slate-800/80' : 'bg-white'
+                      }`}>
+                        <div className={`text-xs font-bold mb-1 ${
+                          isDarkMode 
+                            ? 'text-blue-400' 
+                            : 'text-blue-600'
+                        }`}>Gallery</div>
+                        <div className={`text-sm font-bold leading-tight ${
+                          isDarkMode ? 'text-slate-100' : 'text-slate-900'
+                        }`}>{branch.name}</div>
                       </div>
                     </CardContent>
                   </Card>
@@ -394,69 +475,69 @@ export const AndroidPage: React.FC = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className={`rounded-lg border p-4 transition-all duration-300 ${
+        <div className="grid grid-cols-2 gap-4">
+          <div className={`rounded-2xl p-5 transition-all duration-300 hover:scale-105 ${
             isDarkMode 
-              ? 'bg-gradient-to-br from-yellow-800 to-yellow-700 border-yellow-600' 
-              : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200'
+              ? 'bg-gradient-to-br from-blue-900/50 to-blue-800/50 shadow-lg shadow-blue-900/50 hover:shadow-xl hover:shadow-blue-900/60' 
+              : 'bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg shadow-blue-200/50 hover:shadow-xl hover:shadow-blue-200/60'
           }`}>
-            <div className={`text-2xl font-bold transition-colors duration-300 ${
+            <div className={`text-3xl font-bold mb-1 ${
               isDarkMode 
-                ? 'text-yellow-100' 
-                : 'text-blue-800'
+                ? 'text-blue-300' 
+                : 'text-blue-700'
             }`}>4</div>
-            <div className={`text-sm transition-colors duration-300 ${
+            <div className={`text-sm font-medium ${
               isDarkMode 
-                ? 'text-yellow-300' 
-                : 'text-blue-600'
+                ? 'text-slate-400' 
+                : 'text-slate-600'
             }`}>Branches</div>
           </div>
-          <div className={`rounded-lg border p-4 transition-all duration-300 ${
+          <div className={`rounded-2xl p-5 transition-all duration-300 hover:scale-105 ${
             isDarkMode 
-              ? 'bg-gradient-to-br from-yellow-700 to-yellow-600 border-yellow-500' 
-              : 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200'
+              ? 'bg-gradient-to-br from-purple-900/50 to-purple-800/50 shadow-lg shadow-purple-900/50 hover:shadow-xl hover:shadow-purple-900/60' 
+              : 'bg-gradient-to-br from-purple-50 to-purple-100 shadow-lg shadow-purple-200/50 hover:shadow-xl hover:shadow-purple-200/60'
           }`}>
-            <div className={`text-2xl font-bold transition-colors duration-300 ${
+            <div className={`text-3xl font-bold mb-1 ${
               isDarkMode 
-                ? 'text-yellow-100' 
-                : 'text-yellow-800'
+                ? 'text-purple-300' 
+                : 'text-purple-700'
             }`}>24/7</div>
-            <div className={`text-sm transition-colors duration-300 ${
+            <div className={`text-sm font-medium ${
               isDarkMode 
-                ? 'text-yellow-300' 
-                : 'text-yellow-600'
+                ? 'text-slate-400' 
+                : 'text-slate-600'
             }`}>Service</div>
           </div>
-          <div className={`rounded-lg border p-4 transition-all duration-300 ${
+          <div className={`rounded-2xl p-5 transition-all duration-300 hover:scale-105 ${
             isDarkMode 
-              ? 'bg-gradient-to-br from-yellow-800 to-yellow-700 border-yellow-600' 
-              : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200'
+              ? 'bg-gradient-to-br from-emerald-900/50 to-emerald-800/50 shadow-lg shadow-emerald-900/50 hover:shadow-xl hover:shadow-emerald-900/60' 
+              : 'bg-gradient-to-br from-emerald-50 to-emerald-100 shadow-lg shadow-emerald-200/50 hover:shadow-xl hover:shadow-emerald-200/60'
           }`}>
-            <div className={`text-2xl font-bold transition-colors duration-300 ${
+            <div className={`text-3xl font-bold mb-1 ${
               isDarkMode 
-                ? 'text-yellow-100' 
-                : 'text-blue-800'
+                ? 'text-emerald-300' 
+                : 'text-emerald-700'
             }`}>500+</div>
-            <div className={`text-sm transition-colors duration-300 ${
+            <div className={`text-sm font-medium ${
               isDarkMode 
-                ? 'text-yellow-300' 
-                : 'text-blue-600'
+                ? 'text-slate-400' 
+                : 'text-slate-600'
             }`}>Rooms</div>
           </div>
-          <div className={`rounded-lg border p-4 transition-all duration-300 ${
+          <div className={`rounded-2xl p-5 transition-all duration-300 hover:scale-105 ${
             isDarkMode 
-              ? 'bg-gradient-to-br from-yellow-700 to-yellow-600 border-yellow-500' 
-              : 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200'
+              ? 'bg-gradient-to-br from-amber-900/50 to-amber-800/50 shadow-lg shadow-amber-900/50 hover:shadow-xl hover:shadow-amber-900/60' 
+              : 'bg-gradient-to-br from-amber-50 to-amber-100 shadow-lg shadow-amber-200/50 hover:shadow-xl hover:shadow-amber-200/60'
           }`}>
-            <div className={`text-2xl font-bold transition-colors duration-300 ${
+            <div className={`text-3xl font-bold mb-1 ${
               isDarkMode 
-                ? 'text-yellow-100' 
-                : 'text-yellow-800'
+                ? 'text-amber-300' 
+                : 'text-amber-700'
             }`}>★4.8</div>
-            <div className={`text-sm transition-colors duration-300 ${
+            <div className={`text-sm font-medium ${
               isDarkMode 
-                ? 'text-yellow-300' 
-                : 'text-yellow-600'
+                ? 'text-slate-400' 
+                : 'text-slate-600'
             }`}>Rating</div>
           </div>
         </div>
