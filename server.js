@@ -411,6 +411,66 @@ app.get('/api/user-bookings/:userId', async (req, res) => {
   }
 });
 
+// Set branch admin claims endpoint
+app.post('/api/auth/set-branch-admin-claims', async (req, res) => {
+  try {
+    const { userId, role, branchId } = req.body;
+
+    if (!userId || !role || !branchId) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: userId, role, and branchId are required' 
+      });
+    }
+
+    // Verify the request is from an authenticated user (check Authorization header)
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ 
+        error: 'Unauthorized: Bearer token required' 
+      });
+    }
+
+    const token = authHeader.split(' ')[1];
+    
+    try {
+      // Verify the token
+      const decodedToken = await getAuth().verifyIdToken(token);
+      
+      // Only allow hq-admins or the user themselves to set claims
+      if (decodedToken.uid !== userId && decodedToken.role !== 'hq-admin') {
+        return res.status(403).json({ 
+          error: 'Forbidden: Insufficient permissions' 
+        });
+      }
+    } catch (error) {
+      return res.status(401).json({ 
+        error: 'Invalid or expired token' 
+      });
+    }
+
+    // Set custom claims
+    await getAuth().setCustomUserClaims(userId, { 
+      role: role, 
+      branchId: branchId 
+    });
+
+    console.log(`Set branch admin claims for user ${userId}: role=${role}, branchId=${branchId}`);
+    
+    return res.status(200).json({ 
+      message: 'Branch admin claims set successfully',
+      role: role,
+      branchId: branchId
+    });
+
+  } catch (error) {
+    console.error('Error setting branch admin claims:', error);
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message 
+    });
+  }
+});
+
 const PORT = process.env.API_PORT || 3001;
 app.listen(PORT, () => {
   console.log(`API server running on port ${PORT}`);

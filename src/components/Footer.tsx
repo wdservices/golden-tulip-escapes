@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { MapPin, Phone, Mail, Facebook, Instagram, Twitter, MessageCircle, Lock } from "lucide-react";
 import { FeedbackForm } from "@/components/feedback/FeedbackForm";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { isAdmin } from '@/utils/auth';
@@ -135,9 +135,9 @@ export const Footer = () => {
                       <DialogTitle className="text-2xl font-bold text-amber-700 mb-2">
                         We'd Love Your Feedback
                       </DialogTitle>
-                      <p className="text-sm text-muted-foreground mb-6">
+                      <DialogDescription className="text-sm text-muted-foreground mb-6">
                         Your suggestions help us improve our services. Share your thoughts with us!
-                      </p>
+                      </DialogDescription>
                     </DialogHeader>
                     <FeedbackForm />
                   </DialogContent>
