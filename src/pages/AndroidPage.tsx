@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
 import { ChatbotFloatingButton } from '@/components/chat/ChatbotFloatingButton';
 import { Separator } from '@/components/ui/separator';
 
@@ -46,11 +45,18 @@ const SLIDER_IMAGES = [
 
 export const AndroidPage: React.FC = () => {
   const navigate = useNavigate();
-  const { currentUser, logout } = useAuth();
-  const { isDarkMode, toggleDarkMode } = useTheme();
+  const { currentUser, logout, isAuthenticated } = useAuth();
+  const [isDarkMode, setIsDarkMode] = useState(true); // Dark mode only for Android
   const displayName = currentUser?.name || currentUser?.displayName || 'Guest';
   const email = currentUser?.email || '';
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/auth', { state: { from: '/android' } });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleLogout = async () => {
     try {
@@ -75,6 +81,14 @@ export const AndroidPage: React.FC = () => {
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev === 0 ? SLIDER_IMAGES.length - 1 : prev - 1));
   };
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
+  if (!isAuthenticated) {
+    return null; // Will redirect
+  }
 
   return (
     <div className={`min-h-screen transition-all duration-500 ${isDarkMode 
@@ -215,7 +229,7 @@ export const AndroidPage: React.FC = () => {
                       ? 'bg-gradient-to-r from-yellow-600 to-blue-600 hover:from-yellow-500 hover:to-blue-500 text-white shadow-lg shadow-yellow-500/30 hover:shadow-xl hover:shadow-blue-500/40' 
                       : 'bg-gradient-to-r from-yellow-500 to-blue-500 hover:from-yellow-400 hover:to-blue-400 text-white shadow-lg shadow-yellow-500/30 hover:shadow-xl hover:shadow-blue-500/40'
                   }`} 
-                  onClick={() => navigate('/user-dashboard')}
+                  onClick={() => navigate('/dashboard')}
                 >
                   <span className="flex items-center">
                     <Users className="mr-2 h-4 w-4" />
@@ -354,7 +368,7 @@ export const AndroidPage: React.FC = () => {
               <span className="text-sm font-bold">Book Room</span>
             </Button>
             <Button 
-              onClick={() => navigate('/user-dashboard')}
+              onClick={() => navigate('/dashboard')}
               className={`h-32 flex-col gap-3 rounded-2xl transition-all duration-300 hover:scale-105 group ${
                 isDarkMode 
                   ? 'bg-gradient-to-br from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white shadow-xl shadow-yellow-500/40 hover:shadow-2xl hover:shadow-yellow-500/50' 
@@ -363,28 +377,6 @@ export const AndroidPage: React.FC = () => {
             >
               <Users className="h-8 w-8 transition-transform duration-300 group-hover:scale-110" />
               <span className="text-sm font-bold">My Dashboard</span>
-            </Button>
-            <Button 
-              onClick={() => navigate('/rooms')}
-              className={`h-32 flex-col gap-3 rounded-2xl transition-all duration-300 hover:scale-105 group ${
-                isDarkMode 
-                  ? 'bg-gradient-to-br from-blue-500 to-white/10 hover:from-blue-400 hover:to-white/20 text-white shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/40' 
-                  : 'bg-gradient-to-br from-blue-400 to-white hover:from-blue-300 hover:to-white text-blue-900 shadow-xl shadow-blue-300/40 hover:shadow-2xl hover:shadow-blue-300/50'
-              }`}
-            >
-              <Building2 className="h-8 w-8 transition-transform duration-300 group-hover:scale-110" />
-              <span className="text-sm font-bold">View Rooms</span>
-            </Button>
-            <Button 
-              onClick={() => navigate('/corporate-halls')}
-              className={`h-32 flex-col gap-3 rounded-2xl transition-all duration-300 hover:scale-105 group ${
-                isDarkMode 
-                  ? 'bg-gradient-to-br from-yellow-500 to-white/10 hover:from-yellow-400 hover:to-white/20 text-white shadow-xl shadow-yellow-500/30 hover:shadow-2xl hover:shadow-yellow-500/40' 
-                  : 'bg-gradient-to-br from-yellow-400 to-white hover:from-yellow-300 hover:to-white text-yellow-900 shadow-xl shadow-yellow-300/40 hover:shadow-2xl hover:shadow-yellow-300/50'
-              }`}
-            >
-              <FileText className="h-8 w-8 transition-transform duration-300 group-hover:scale-110" />
-              <span className="text-sm font-bold">Corporate Halls</span>
             </Button>
           </div>
         </div>
