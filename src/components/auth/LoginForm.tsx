@@ -81,7 +81,8 @@ export default function LoginForm() {
   const { login, register: registerUser, currentUser, userMeta } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
+  const rawFrom: any = (location.state as any)?.from;
+  const from = typeof rawFrom === 'string' ? rawFrom : rawFrom?.pathname || "/";
 
   const schema = isLogin ? loginSchema : registerSchema;
   const fields = isLogin ? loginFields : registerFields;
@@ -136,23 +137,24 @@ export default function LoginForm() {
   useEffect(() => {
     if (currentUser && !isLoading) {
       let targetPath = from;
-      if (userMeta.role === 'hq-admin' || userMeta.role === 'branch-admin') {
+      if (from && from.startsWith('/android')) {
+        if (userMeta.role === 'hq-admin' || userMeta.role === 'branch-admin') {
+          targetPath = '/admin';
+        } else {
+          targetPath = '/android';
+        }
+      } else if (userMeta.role === 'hq-admin' || userMeta.role === 'branch-admin') {
         targetPath = '/admin';
       } else if (currentUser.role === 'user') {
         targetPath = '/dashboard';
       }
 
       if (targetPath && targetPath !== '/auth') {
-        console.log('LoginForm: Navigating to:', targetPath, 'from:', from, 'userRole:', userMeta.role);
         navigate(targetPath, { replace: true });
       } else if (window.location.pathname === '/auth') {
-        // If still on /auth and no specific targetPath, default to dashboard for users
-        // or admin for admins if not already handled
         if (userMeta.role === 'hq-admin' || userMeta.role === 'branch-admin') {
-          console.log('LoginForm: Defaulting admin to /admin');
           navigate('/admin', { replace: true });
         } else if (currentUser.role === 'user') {
-          console.log('LoginForm: Defaulting user to /dashboard');
           navigate('/dashboard', { replace: true });
         }
       }
