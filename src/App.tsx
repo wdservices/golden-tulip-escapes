@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DatabaseProvider } from "@/contexts/DatabaseContext";
-import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ConditionalChatbot } from "@/components/chat/ConditionalChatbot";
 import { lazy, Suspense } from 'react';
 import Index from "./pages/Index";
@@ -94,8 +93,7 @@ const App = () => {
           >
             <AuthProvider>
               <DatabaseProvider>
-                <ThemeProvider>
-                  <ConditionalChatbot />
+                <ConditionalChatbot />
                 <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
@@ -180,7 +178,6 @@ const App = () => {
             {/* 404 - Keep this last */}
             <Route path="*" element={<NotFound />} />
               </Routes>
-                </ThemeProvider>
             </DatabaseProvider>
           </AuthProvider>
         </BrowserRouter>

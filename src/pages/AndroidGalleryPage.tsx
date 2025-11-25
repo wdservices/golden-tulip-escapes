@@ -14,45 +14,48 @@ const BRANCH_GALLERIES: Record<string, BranchGallery> = {
     id: 'evo-road',
     name: 'Golden Tulip EVO Road',
     images: [
-      '/images/evo-road-1.jpg',
-      '/images/evo-road-2.jpg',
-      '/images/evo-road-3.jpg',
-      '/images/evo-road-4.jpg'
+      '/images/hero section image/image (1).jpg',
+      '/images/hero section image/image (2).jpg',
+      '/images/hero section image/image (3).jpg',
+      '/images/hero section image/image (4).jpg',
+      '/images/hero section image/image (5).jpg',
+      '/images/hero section image/image (6).jpg'
     ],
-    description: 'Experience luxury accommodation at our flagship EVO Road location.'
+    description: 'Experience luxury accommodation at our flagship EVO Road location in the heart of Port Harcourt.'
   },
-  'airport': {
-    id: 'airport',
-    name: 'Golden Tulip Airport',
+  'garden-city': {
+    id: 'garden-city',
+    name: 'Golden Tulip Garden City',
     images: [
-      '/images/airport-1.jpg',
-      '/images/airport-2.jpg',
-      '/images/airport-3.jpg',
-      '/images/airport-4.jpg'
+      '/images/garden city images/standard room.webp',
+      '/images/garden city images/superior room.webp',
+      '/images/hero section image/image (1).jpg',
+      '/images/hero section image/image (3).jpg'
     ],
-    description: 'Conveniently located near the airport, perfect for travelers.'
+    description: 'Discover comfort and elegance at our Garden City location.'
   },
-  'kumasi': {
-    id: 'kumasi',
-    name: 'Golden Tulip Kumasi',
+  'stadium-31': {
+    id: 'stadium-31',
+    name: 'Golden Tulip Stadium 31',
     images: [
-      '/images/kumasi-1.jpg',
-      '/images/kumasi-2.jpg',
-      '/images/kumasi-3.jpg',
-      '/images/kumasi-4.jpg'
+      '/images/stadium road 31 images/deluxe.webp',
+      '/images/stadium road 31 images/executive deluxe.webp',
+      '/images/stadium road 31 images/executive twin.webp',
+      '/images/stadium road 31 images/royal room.webp',
+      '/images/stadium road 31 images/super executive.webp'
     ],
-    description: 'Discover the cultural heart of Ghana from our Kumasi location.'
+    description: 'Experience premium hospitality at our Stadium Road 31 location.'
   },
-  'takoradi': {
-    id: 'takoradi',
-    name: 'Golden Tulip Takoradi',
+  'evergreen': {
+    id: 'evergreen',
+    name: 'Golden Tulip Evergreen',
     images: [
-      '/images/takoradi-1.jpg',
-      '/images/takoradi-2.jpg',
-      '/images/takoradi-3.jpg',
-      '/images/takoradi-4.jpg'
+      '/images/evergreen images/standard room.webp',
+      '/images/evergreen images/deluxe room.webp',
+      '/images/evergreen images/executive room.webp',
+      '/images/evergreen images/superior room.webp'
     ],
-    description: 'Enjoy coastal luxury in Takoradi with stunning ocean views.'
+    description: 'Enjoy tranquility and comfort at our Evergreen location.'
   }
 };
 
