@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { getBranches } from "@/services/branchService";
@@ -42,7 +43,8 @@ import {
   Trash2,
   TrendingUp,
   LogOut, 
-  ArrowLeft
+  ArrowLeft,
+  MessageSquare
 } from "lucide-react";
 
 // Import components
@@ -56,6 +58,8 @@ import ClientActivity from "@/components/admin/ClientActivity";
 import { useAuthUsers } from "@/hooks/useAuthUsers";
 import { useCollection } from "@/hooks/useCollection";
 import { useBookings } from "@/hooks/useBookings";
+import { db } from "@/lib/firebase";
+import { collection, collectionGroup, getDocs, orderBy, query, limit } from "firebase/firestore";
 
 
 // We'll fetch real bookings from Firestore
@@ -66,12 +70,13 @@ import { useBookings } from "@/hooks/useBookings";
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
-  { id: 'bookings', label: 'Bookings', icon: Calendar },
   { id: 'rooms', label: 'Rooms & Facilities', icon: Bed },
   { id: 'clients', label: 'Clients', icon: Users },
-  { id: 'branches', label: 'Branches', icon: Building2 },
-  { id: 'reports', label: 'Reports & Analytics', icon: BarChart2 },
+  { id: 'bookings', label: 'Bookings', icon: Calendar },
   { id: 'payments', label: 'Payments & Finance', icon: CreditCard },
+  { id: 'reports', label: 'Reports & Analytics', icon: BarChart2 },
+  { id: 'feedback', label: 'Feedback', icon: MessageSquare },
+  { id: 'branches', label: 'Branches', icon: Building2 },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -125,6 +130,50 @@ const AdminDashboard = () => {
   
   // Only show loading for essential data to speed up initial render
   const dataLoading = usersLoading || bookingsLoading;
+
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [notifications, setNotifications] = useState<Array<{ id: string; type: string; title: string; description?: string; link: string }>>([]);
+
+  const loadNotifications = async () => {
+    setNotifLoading(true);
+    try {
+      const results: Array<{ id: string; type: string; title: string; description?: string; link: string }> = [];
+      try {
+        const fq = query(collection(db, "feedback"), orderBy("createdAt", "desc"), limit(5));
+        const fs = await getDocs(fq);
+        fs.docs.forEach(d => {
+          const dt: any = d.data();
+          results.push({ id: d.id, type: "feedback", title: dt.type || "Feedback", description: dt.message || "", link: "/admin/feedback" });
+        });
+      } catch (_) {
+        const fs = await getDocs(query(collection(db, "feedback"), limit(5)));
+        fs.docs.forEach(d => {
+          const dt: any = d.data();
+          results.push({ id: d.id, type: "feedback", title: dt.type || "Feedback", description: dt.message || "", link: "/admin/feedback" });
+        });
+      }
+      try {
+        const bq = query(collectionGroup(db, "bookings"), limit(5));
+        const bs = await getDocs(bq);
+        bs.docs.forEach(d => {
+          const dt: any = d.data();
+          results.push({ id: d.id, type: "booking", title: dt.guestName || "New Booking", description: dt.branchName || dt.roomType || "", link: "/admin/bookings" });
+        });
+      } catch (_) {}
+      try {
+        const pq = query(collectionGroup(db, "payments"), limit(5));
+        const ps = await getDocs(pq);
+        ps.docs.forEach(d => {
+          const dt: any = d.data();
+          results.push({ id: d.id, type: "payment", title: `${dt.amount || 0} ${dt.currency || ""}`.trim() || "Payment", description: dt.status || "", link: "/admin/payments" });
+        });
+      } catch (_) {}
+      setNotifications(results);
+    } finally {
+      setNotifLoading(false);
+    }
+  };
 
   // Fetch current branch name
   useEffect(() => {
@@ -317,11 +366,12 @@ const AdminDashboard = () => {
           <div className="px-4 space-y-1">
             {[
               { id: 'dashboard', label: 'Dashboard', icon: Home },
-              { id: 'bookings', label: 'Bookings', icon: Calendar },
               { id: 'rooms', label: 'Rooms', icon: Bed },
               { id: 'clients', label: 'Clients', icon: Users },
+              { id: 'bookings', label: 'Bookings', icon: Calendar },
               { id: 'payments', label: 'Payments', icon: CreditCard },
               { id: 'reports', label: 'Reports', icon: BarChart2 },
+              { id: 'feedback', label: 'Feedback', icon: MessageSquare },
               { id: 'branches', label: 'Branches', icon: Building2 },
               { id: 'settings', label: 'Settings', icon: Settings },
             ].map((item) => (
@@ -375,11 +425,34 @@ const AdminDashboard = () => {
                 </div>
               </h2>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon" className="relative text-yellow-400 hover:text-yellow-300 hover:bg-yellow-400/20">
+            <div className="flex items-center space-x-4 relative">
+              <Button variant="ghost" size="icon" className="relative text-yellow-400 hover:text-yellow-300 hover:bg-yellow-400/20" onClick={() => { setIsNotifOpen(v => !v); if (!notifications.length) loadNotifications(); }}>
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-400"></span>
               </Button>
+              {isNotifOpen && createPortal(
+                <div className="fixed right-6 top-16 w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-md p-3 z-[9999]">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-white/90">Notifications</span>
+                    <Button size="sm" variant="ghost" className="text-white/80" onClick={loadNotifications}>{notifLoading ? "Loading" : "Refresh"}</Button>
+                  </div>
+                  <div className="space-y-2 max-h-80 overflow-auto">
+                    {notifications.length === 0 ? (
+                      <div className="text-white/60 text-sm">No recent activity</div>
+                    ) : notifications.map(n => (
+                      <div key={n.id} className="flex items-start justify-between gap-2 bg-white/5 rounded p-2">
+                        <div>
+                          <div className="text-white text-sm">{n.type.toUpperCase()}</div>
+                          <div className="text-white/90 text-sm">{n.title}</div>
+                          {n.description ? <div className="text-white/60 text-xs">{n.description}</div> : null}
+                        </div>
+                        <Button size="sm" className="bg-yellow-500 text-white hover:bg-yellow-600" onClick={() => handleNavigation(n.link)}>View</Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>,
+                document.body
+              )}
               <Button variant="outline" className="flex items-center space-x-2 border-white/30 text-white hover:bg-white/10">
                 <div className="h-8 w-8 rounded-full bg-yellow-400/20 flex items-center justify-center">
                   <span className="text-sm font-medium text-yellow-300">AD</span>

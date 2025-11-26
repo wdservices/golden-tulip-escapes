@@ -138,7 +138,8 @@ export const UserDashboard = () => {
 
       try {
         // Create fetch request with timeout
-        const fetchRequest = fetch(`/api/user-bookings/${user.id}`);
+        const API_BASE_URL = (import.meta as any).env?.VITE_NEXT_PUBLIC_API_URL || (import.meta as any).env?.NEXT_PUBLIC_API_URL || '/api';
+        const fetchRequest = fetch(`${API_BASE_URL}/user-bookings/${user.id}`);
         
         // Race between fetch and timeout
         const response = await Promise.race([

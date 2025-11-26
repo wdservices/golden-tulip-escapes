@@ -174,7 +174,8 @@ export const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
     setIsProcessing(true);
 
     try {
-      const verifyResponse = await fetch('/api/verify-payment', {
+      const API_BASE_URL = (import.meta as any).env?.VITE_NEXT_PUBLIC_API_URL || (import.meta as any).env?.NEXT_PUBLIC_API_URL || '/api';
+      const verifyResponse = await fetch(`${API_BASE_URL}/verify-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

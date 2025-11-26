@@ -37,6 +37,7 @@ const ClientsPage = lazy(() => import("@/pages/admin/ClientsPage"));
 const MarketingPage = lazy(() => import("@/pages/admin/MarketingPage"));
 const PaymentsPage = lazy(() => import("@/pages/admin/PaymentsPage"));
 const ReportsPage = lazy(() => import("@/pages/admin/ReportsPage"));
+const FeedbackPage = lazy(() => import("@/pages/admin/FeedbackPage"));
 const BranchesPage = lazy(() => import("@/pages/admin/BranchesPage"));
 const SettingsPage = lazy(() => import("@/pages/admin/settings/SettingsPage"));
 const DashboardHome = lazy(() => import("@/pages/admin/DashboardHome"));
@@ -161,6 +162,11 @@ const App = () => {
               <Route path="reports" element={
                 <Suspense fallback={<LoadingFallback />}>
                   <ReportsPage />
+                </Suspense>
+              } />
+              <Route path="feedback" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <FeedbackPage />
                 </Suspense>
               } />
               <Route path="branches" element={

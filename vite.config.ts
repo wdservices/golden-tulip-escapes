@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => ({
         "font-src 'self' data: https://fonts.gstatic.com;",
         "frame-src 'self' https://webobook.com https://checkout.paystack.com https://golden-tulip-34749.firebaseapp.com https://*.firebaseapp.com https://accounts.google.com https://interfaces.zapier.com https://*.zapier.com https://kuula.co https://*.kuula.co https://tour.panoee.net https://*.panoee.net;",
         // Allow Firebase/Google endpoints for Firestore/Auth and dev sockets
-        "connect-src 'self' http://localhost:3001 https://api.paystack.co https://firestore.googleapis.com https://www.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://apis.google.com https://*.googleapis.com https://*.gstatic.com https://*.firebaseio.com https://*.firebase.com https://interfaces.zapier.com https://*.zapier.com https://kuula.co https://*.kuula.co https://tour.panoee.net https://*.panoee.net ws: wss:;"
+        "connect-src 'self' http://localhost:3001 http://localhost:3002 https://api.paystack.co https://firestore.googleapis.com https://www.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://apis.google.com https://*.googleapis.com https://*.gstatic.com https://*.firebaseio.com https://*.firebase.com https://interfaces.zapier.com https://*.zapier.com https://kuula.co https://*.kuula.co https://tour.panoee.net https://*.panoee.net ws: wss:;"
       ].join(' '),
     },
   },
