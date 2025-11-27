@@ -254,7 +254,7 @@ export const ReportsPage = () => {
             <Filter className="h-4 w-4" />
           </Button>
           <Button 
-            className="ml-2 bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300"
+            className="ml-2 bg-yellow-400 text-[hsl(var(--royal-blue-dark))] border-yellow-400 hover:bg-yellow-300"
             onClick={handleExport}
           >
             <Download className="mr-2 h-4 w-4" />
@@ -265,19 +265,19 @@ export const ReportsPage = () => {
 
       <Tabs defaultValue="revenue" onValueChange={(value) => setActiveTab(value as ReportType)}>
         <TabsList className="grid w-full grid-cols-4 bg-white/10 border-white/20">
-          <TabsTrigger value="revenue" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">
+          <TabsTrigger value="revenue" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">
             <NairaSign className="h-4 w-4 mr-2" />
             Revenue
           </TabsTrigger>
-          <TabsTrigger value="occupancy" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">
+          <TabsTrigger value="occupancy" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">
             <BarChart className="h-4 w-4 mr-2" />
             Occupancy
           </TabsTrigger>
-          <TabsTrigger value="bookings" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">
+          <TabsTrigger value="bookings" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">
             <Calendar className="h-4 w-4 mr-2" />
             Bookings
           </TabsTrigger>
-          <TabsTrigger value="guests" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">
+          <TabsTrigger value="guests" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">
             <Users className="h-4 w-4 mr-2" />
             Guests
           </TabsTrigger>

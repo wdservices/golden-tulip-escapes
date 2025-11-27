@@ -83,7 +83,7 @@ export const UserDashboard = () => {
       case 'failed':
         return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">Failed</Badge>;
       case 'refunded':
-        return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">Refunded</Badge>;
+        return <Badge className="bg-[hsl(var(--royal-blue)/0.1)] text-[hsl(var(--royal-blue))] border-[hsl(var(--royal-blue)/0.2)]">Refunded</Badge>;
       default:
         return <Badge className="bg-gray-500/10 text-gray-500 border-gray-500/20">Unknown</Badge>;
     }
@@ -457,7 +457,7 @@ export const UserDashboard = () => {
   const showSkeletons = isLoading && !profileData?.id;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
+    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--royal-blue-dark))] via-[hsl(var(--royal-blue))] to-[hsl(var(--royal-blue-light))]">
       <div className="container mx-auto px-4 py-8 animate-fade-in">
       {showWelcome && (
         <div className="mb-6 p-4 bg-gradient-to-r from-yellow-400/20 to-amber-500/20 border border-yellow-400/30 rounded-lg backdrop-blur-sm">
@@ -499,7 +499,7 @@ export const UserDashboard = () => {
                 <h1 className="text-2xl font-bold text-white">
                   {getGreeting()}, {profileData?.name || 'Guest'}
                 </h1>
-                <p className="text-blue-100">Here's what's happening with your bookings</p>
+                <p className="text-white">Here's what's happening with your bookings</p>
               </div>
             </>
           )}
@@ -591,11 +591,11 @@ export const UserDashboard = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="bg-white/10 backdrop-blur-md border-white/20">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900 text-blue-100 hover:text-white">Overview</TabsTrigger>
-          <TabsTrigger value="bookings" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900 text-blue-100 hover:text-white">My Bookings</TabsTrigger>
-          <TabsTrigger value="feedback" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900 text-blue-100 hover:text-white">Feedback</TabsTrigger>
-          <TabsTrigger value="profile" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900 text-blue-100 hover:text-white">Profile</TabsTrigger>
+          <TabsList className="bg-white/10 backdrop-blur-md border-white/20">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))] text-white">Overview</TabsTrigger>
+          <TabsTrigger value="bookings" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))] text-white">My Bookings</TabsTrigger>
+          <TabsTrigger value="feedback" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))] text-white">Feedback</TabsTrigger>
+          <TabsTrigger value="profile" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))] text-white">Profile</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -611,11 +611,11 @@ export const UserDashboard = () => {
                 {upcomingBookings.length > 0 ? (
                   <div className="space-y-4">
                     <p className="text-lg font-medium text-white">{upcomingBookings[0].branchName}</p>
-                    <p className="text-sm text-blue-200">
+                    <p className="text-sm text-white">
                       {format(new Date(upcomingBookings[0].checkInDate), 'MMM d, yyyy')} -{' '}
                       {format(new Date(upcomingBookings[0].checkOutDate), 'MMM d, yyyy')}
                     </p>
-                    <p className="text-sm text-blue-100">
+                    <p className="text-sm text-white">
                       {upcomingBookings[0].roomType} • {upcomingBookings[0].guests} {upcomingBookings[0].guests === 1 ? 'guest' : 'guests'}
                     </p>
                     <Button 
@@ -629,10 +629,10 @@ export const UserDashboard = () => {
                   </div>
                 ) : (
                   <div className="text-center py-6">
-                    <Clock className="h-8 w-8 mx-auto text-blue-300 mb-2" />
-                    <p className="text-blue-200">No upcoming stays</p>
+                    <Clock className="h-8 w-8 mx-auto text-white mb-2" />
+                    <p className="text-white">No upcoming stays</p>
                     <Button 
-                    className="mt-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-blue-900 hover:from-yellow-500 hover:to-amber-600 font-semibold" 
+                    className="mt-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-[hsl(var(--royal-blue-dark))] hover:from-yellow-500 hover:to-amber-600 font-semibold" 
                     onClick={() => navigate('/book')}
                   >
                     Book a Stay
@@ -654,7 +654,7 @@ export const UserDashboard = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-white">Member Since</p>
-                      <p className="text-sm text-blue-200">
+                      <p className="text-sm text-white">
                         {profileData?.joinDate ? format(new Date(profileData.joinDate), 'MMM d, yyyy') : '—'}
                       </p>
                     </div>
@@ -665,8 +665,8 @@ export const UserDashboard = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm text-blue-200">
+                    <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm text-white">
                       <span>Silver Tier</span>
                       <span>Gold Tier</span>
                     </div>
@@ -678,7 +678,7 @@ export const UserDashboard = () => {
                         }}
                       />
                     </div>
-                    <p className="text-xs text-blue-200 text-center">
+                    <p className="text-xs text-white text-center">
                       {bookingStats?.loyaltyPoints || 0} / 1000 points to Gold
                     </p>
                   </div>
@@ -688,7 +688,7 @@ export const UserDashboard = () => {
                 <div className="space-y-4">
                   <div>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-blue-200">Current Status</span>
+                      <span className="text-white">Current Status</span>
                       <span className="font-medium text-white">Gold Member</span>
                     </div>
                     <div className="w-full bg-white/20 rounded-full h-2.5">
@@ -697,7 +697,7 @@ export const UserDashboard = () => {
                         style={{ width: '75%' }}
                       ></div>
                     </div>
-                    <p className="text-xs text-blue-200 mt-1">
+                    <p className="text-xs text-white mt-1">
                       7,500 / 10,000 points to Platinum
                     </p>
                   </div>
@@ -706,15 +706,15 @@ export const UserDashboard = () => {
                     <ul className="space-y-2 text-sm">
                       <li className="flex items-center">
                         <CheckCircle className="h-4 w-4 text-yellow-400 mr-2" />
-                        <span className="text-blue-100">Free room upgrade when available</span>
+                        <span className="text-white">Free room upgrade when available</span>
                       </li>
                       <li className="flex items-center">
                         <CheckCircle className="h-4 w-4 text-yellow-400 mr-2" />
-                        <span className="text-blue-100">Late checkout until 2 PM</span>
+                        <span className="text-white">Late checkout until 2 PM</span>
                       </li>
                       <li className="flex items-center">
                         <CheckCircle className="h-4 w-4 text-yellow-400 mr-2" />
-                        <span className="text-blue-100">Welcome amenity at check-in</span>
+                        <span className="text-white">Welcome amenity at check-in</span>
                       </li>
                     </ul>
                   </div>
@@ -735,10 +735,10 @@ export const UserDashboard = () => {
                         <h3 className="font-medium text-white">{booking.branchName}</h3>
                         {getPaymentStatusBadge(booking.paymentStatus)}
                       </div>
-                      <p className="text-sm text-blue-200">
+                      <p className="text-sm text-white">
                         {format(new Date(booking.checkInDate), 'MMM d, yyyy')} - {format(new Date(booking.checkOutDate), 'MMM d, yyyy')}
                       </p>
-                      <p className="text-sm text-blue-100">
+                      <p className="text-sm text-white">
                         {booking.roomType} • {booking.guestCount} guests
                       </p>
                     </div>
@@ -765,11 +765,11 @@ export const UserDashboard = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <Calendar className="h-12 w-12 mx-auto text-blue-300 mb-4" />
+              <Calendar className="h-12 w-12 mx-auto text-white mb-4" />
               <h3 className="text-lg font-medium text-white">No upcoming stays</h3>
-              <p className="text-blue-200 mb-6">Your next adventure awaits!</p>
+              <p className="text-white mb-6">Your next adventure awaits!</p>
               <Button 
-                className="bg-gradient-to-r from-yellow-400 to-amber-500 text-blue-900 hover:from-yellow-500 hover:to-amber-600 font-medium"
+                className="bg-gradient-to-r from-yellow-400 to-amber-500 text-[hsl(var(--royal-blue-dark))] hover:from-yellow-500 hover:to-amber-600 font-medium"
                 onClick={() => {
                   if (!isAuthenticated) {
                     navigate("/auth", { state: { from: "/book" } });
@@ -795,10 +795,10 @@ export const UserDashboard = () => {
                         <h3 className="font-medium text-white">{booking.branchName}</h3>
                         {getPaymentStatusBadge(booking.paymentStatus)}
                       </div>
-                      <p className="text-sm text-blue-200">
+                      <p className="text-sm text-[hsl(var(--royal-blue-light))]">
                         {format(new Date(booking.checkInDate), 'MMM d, yyyy')} - {format(new Date(booking.checkOutDate), 'MMM d, yyyy')}
                       </p>
-                      <p className="text-sm text-blue-100">
+                      <p className="text-sm text-[hsl(var(--royal-blue-light))]">
                         {booking.roomType} • {booking.status} • ${booking.totalAmount}
                       </p>
                     </div>
@@ -816,11 +816,11 @@ export const UserDashboard = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <Clock className="h-12 w-12 mx-auto text-blue-300 mb-4" />
+              <Clock className="h-12 w-12 mx-auto text-white mb-4" />
               <h3 className="text-lg font-medium text-white">No past stays yet</h3>
-              <p className="text-blue-200">Your upcoming adventures will appear here</p>
+              <p className="text-white">Your upcoming adventures will appear here</p>
               <Button 
-                className="bg-gradient-to-r from-yellow-400 to-amber-500 text-blue-900 hover:from-yellow-500 hover:to-amber-600 font-medium"
+                className="bg-gradient-to-r from-yellow-400 to-amber-500 text-[hsl(var(--royal-blue-dark))] hover:from-yellow-500 hover:to-amber-600 font-medium"
                 onClick={() => {
                   if (!isAuthenticated) {
                     navigate("/auth", { state: { from: "/book" } });
@@ -842,7 +842,7 @@ export const UserDashboard = () => {
                 <MessageSquare className="h-5 w-5 text-yellow-400" />
                 Share Your Feedback
               </CardTitle>
-              <p className="text-sm text-blue-200 mt-1">
+              <p className="text-sm text-white mt-1">
                 We'd love to hear your feedback or help with any issues you're experiencing.
               </p>
             </CardHeader>
@@ -866,21 +866,21 @@ export const UserDashboard = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-blue-200">Full Name</p>
+                  <p className="text-sm text-white">Full Name</p>
                   <p className="font-medium text-white">{profileData?.name || 'Not available'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-blue-200">Email</p>
+                  <p className="text-sm text-white">Email</p>
                   <p className="font-medium text-white">{profileData?.email || 'Not available'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-blue-200">Member Since</p>
+                  <p className="text-sm text-white">Member Since</p>
                   <p className="font-medium text-white">
                     {safeFormatDate(profileData?.joinDate)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-blue-200">Last Login</p>
+                  <p className="text-sm text-white">Last Login</p>
                   <p className="font-medium text-white">
                     {safeFormatDate(profileData.lastLogin, 'MMM d, yyyy h:mm a')}
                   </p>

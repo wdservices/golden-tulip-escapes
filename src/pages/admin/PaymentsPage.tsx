@@ -80,7 +80,7 @@ export const PaymentsPage = () => {
       case 'failed':
         return 'bg-red-500/10 text-red-400 border-red-500/20';
       case 'refunded':
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+        return 'bg-[hsl(var(--royal-blue)/0.1)] text-[hsl(var(--royal-blue))] border-[hsl(var(--royal-blue)/0.2)]';
       default:
         return 'bg-gray-500/10 text-white border-gray-500/20';
     }
@@ -201,7 +201,7 @@ export const PaymentsPage = () => {
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
+          <Button className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] border-yellow-400 hover:bg-yellow-300">
             <Plus className="mr-2 h-4 w-4" />
             Record Payment
           </Button>

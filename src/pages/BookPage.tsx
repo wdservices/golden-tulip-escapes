@@ -24,7 +24,7 @@ export const BookPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--royal-blue-dark))] via-[hsl(var(--royal-blue))] to-[hsl(var(--royal-blue-light))] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <Button 
@@ -36,7 +36,7 @@ export const BookPage = () => {
             {location.key !== 'default' ? 'Go Back' : 'Back to Home'}
           </Button>
           <h1 className="text-3xl font-bold text-white mb-2">Book Your Stay</h1>
-          <p className="text-blue-100">Fill in the details below to reserve your room</p>
+          <p className="text-white/80">Fill in the details below to reserve your room</p>
         </div>
         
         <div className="bg-white/10 backdrop-blur-md border-white/20 border rounded-lg shadow-xl overflow-hidden">

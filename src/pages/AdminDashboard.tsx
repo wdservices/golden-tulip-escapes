@@ -348,7 +348,7 @@ const AdminDashboard = () => {
   console.log("🏢 AdminDashboard: Rendering main dashboard interface");
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
+    <div className="flex h-screen bg-gradient-to-br from-[hsl(var(--royal-blue-dark))] via-[hsl(var(--royal-blue))] to-[hsl(var(--royal-blue-light))]">
       {/* Sidebar */}
       <div className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-white/10 backdrop-blur-md border-r border-white/20 transition-all duration-300 ease-in-out`}>
         <div className="p-4 flex items-center justify-between">

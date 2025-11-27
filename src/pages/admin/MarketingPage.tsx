@@ -69,7 +69,7 @@ export const MarketingPage = () => {
       case 'draft':
         return 'bg-gray-500/20 text-gray-400 border-gray-400/30';
       case 'scheduled':
-        return 'bg-blue-500/20 text-blue-400 border-blue-400/30';
+        return 'bg-[hsl(var(--royal-blue)/0.2)] text-[hsl(var(--royal-blue))] border-[hsl(var(--royal-blue)/0.3)]';
       case 'sent':
         return 'bg-green-500/20 text-green-400 border-green-400/30';
       case 'failed':
@@ -114,7 +114,7 @@ export const MarketingPage = () => {
             </div>
           )}
         </div>
-        <Button className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
+        <Button className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] border-yellow-400 hover:bg-yellow-300">
           <Plus className="mr-2 h-4 w-4" />
           Create Campaign
         </Button>
@@ -123,10 +123,10 @@ export const MarketingPage = () => {
       <Tabs defaultValue="campaigns" onValueChange={setActiveTab}>
         <div className="flex items-center justify-between">
           <TabsList className="bg-white/10 border-white/20">
-            <TabsTrigger value="campaigns" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Campaigns</TabsTrigger>
-            <TabsTrigger value="templates" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Templates</TabsTrigger>
-            <TabsTrigger value="audience" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Audience</TabsTrigger>
-            <TabsTrigger value="analytics" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Analytics</TabsTrigger>
+            <TabsTrigger value="campaigns" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">Campaigns</TabsTrigger>
+            <TabsTrigger value="templates" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">Templates</TabsTrigger>
+            <TabsTrigger value="audience" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">Audience</TabsTrigger>
+            <TabsTrigger value="analytics" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">Analytics</TabsTrigger>
           </TabsList>
           
           {activeTab === "campaigns" && (

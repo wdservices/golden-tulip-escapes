@@ -324,7 +324,7 @@ export const BookingsPage = () => {
       case 'cancelled':
         return <XCircle className="h-4 w-4 text-red-500" />;
       case 'completed':
-        return <CheckCircle className="h-4 w-4 text-blue-500" />;
+        return <CheckCircle className="h-4 w-4 text-[hsl(var(--royal-blue))]" />;
       default:
         return <AlertCircle className="h-4 w-4 text-white/70" />;
     }
@@ -339,7 +339,7 @@ export const BookingsPage = () => {
       case 'cancelled':
         return 'bg-red-500/10 text-red-600 border-red-500/20';
       case 'completed':
-        return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
+        return 'bg-[hsl(var(--royal-blue)/0.1)] text-[hsl(var(--royal-blue))] border-[hsl(var(--royal-blue)/0.2)]';
       default:
         return 'bg-gray-500/10 text-white border-gray-500/20';
     }
@@ -461,7 +461,7 @@ export const BookingsPage = () => {
         <div className="flex gap-3">
           <Button 
             variant="outline" 
-            className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300 hover:text-blue-900 font-semibold"
+            className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] border-yellow-400 hover:bg-yellow-300 hover:text-[hsl(var(--royal-blue-dark))] font-semibold"
             onClick={() => {
                const csvData = exportBookingsToCSV(filteredBookings);
                downloadFile(csvData, 'bookings-export.csv', 'text/csv');
@@ -476,7 +476,7 @@ export const BookingsPage = () => {
           </Button>
           <Dialog open={showCreateBooking} onOpenChange={setShowCreateBooking}>
             <DialogTrigger asChild>
-              <Button className="bg-yellow-400 text-blue-900 hover:bg-yellow-300 hover:text-blue-900 font-semibold">
+              <Button className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] hover:bg-yellow-300 hover:text-[hsl(var(--royal-blue-dark))] font-semibold">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Booking
               </Button>
@@ -534,8 +534,8 @@ export const BookingsPage = () => {
                 <p className="text-sm font-medium text-white/70">Today's Check-outs</p>
                 <p className="text-2xl font-bold text-yellow-400">{todayCheckOuts.length}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-blue-400/20 flex items-center justify-center">
-                <Clock className="h-6 w-6 text-blue-400" />
+              <div className="h-12 w-12 rounded-full bg-[hsl(var(--royal-blue)/0.2)] flex items-center justify-center">
+                <Clock className="h-6 w-6 text-[hsl(var(--royal-blue))]" />
               </div>
             </div>
           </CardContent>
@@ -639,9 +639,9 @@ export const BookingsPage = () => {
 
       <Tabs defaultValue="all" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3 bg-white/10 backdrop-blur-md border-white/20">
-          <TabsTrigger value="all" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">All Bookings</TabsTrigger>
-          <TabsTrigger value="recent" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Recent</TabsTrigger>
-          <TabsTrigger value="today" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Today</TabsTrigger>
+          <TabsTrigger value="all" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">All Bookings</TabsTrigger>
+          <TabsTrigger value="recent" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">Recent</TabsTrigger>
+          <TabsTrigger value="today" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">Today</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-6">
@@ -685,7 +685,7 @@ export const BookingsPage = () => {
                     <Button
                       variant="outline"
                       size="icon"
-                      className="bg-white/5 border-white/20 text-white hover:bg-yellow-400 hover:text-blue-900"
+                      className="bg-white/5 border-white/20 text-white hover:bg-yellow-400 hover:text-[hsl(var(--royal-blue-dark))]"
                       onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                       disabled={currentPage === 1}
                     >
@@ -702,8 +702,8 @@ export const BookingsPage = () => {
                             onClick={() => setCurrentPage(pageNumber)}
                             className={`w-8 h-8 ${
                               currentPage === pageNumber 
-                                ? "bg-yellow-400 text-blue-900 hover:bg-yellow-300" 
-                                : "bg-white/5 border-white/20 text-white hover:bg-yellow-400 hover:text-blue-900"
+                                ? "bg-yellow-400 text-[hsl(var(--royal-blue-dark))] hover:bg-yellow-300" 
+                                : "bg-white/5 border-white/20 text-white hover:bg-yellow-400 hover:text-[hsl(var(--royal-blue-dark))]"
                             }`}
                           >
                             {pageNumber}
@@ -717,7 +717,7 @@ export const BookingsPage = () => {
                     <Button
                       variant="outline"
                       size="icon"
-                      className="bg-white/5 border-white/20 text-white hover:bg-yellow-400 hover:text-blue-900"
+                      className="bg-white/5 border-white/20 text-white hover:bg-yellow-400 hover:text-[hsl(var(--royal-blue-dark))]"
                       onClick={() => setCurrentPage((prev) => Math.min(prev + 1, Math.ceil(filteredBookings.length / itemsPerPage)))}
                       disabled={currentPage === Math.ceil(filteredBookings.length / itemsPerPage)}
                     >
@@ -823,7 +823,7 @@ export const BookingsPage = () => {
             <Card className="bg-white/10 backdrop-blur-md border-white/20">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2 text-yellow-400">
-                  <Clock className="h-5 w-5 text-blue-400" />
+                  <Clock className="h-5 w-5 text-[hsl(var(--royal-blue))]" />
                   <span>Today's Check-outs</span>
                 </CardTitle>
               </CardHeader>

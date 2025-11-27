@@ -22,7 +22,7 @@
     --primary-foreground: 0 0% 100%;
     --primary-glow: 45 100% 65%;   /* Lighter gold for effects */
 
-    --secondary: 220 100% 45%;     /* Royal Blue */
+    --secondary: 210 45% 19%;     /* Brand Blue #1D3649 */
     --secondary-foreground: 0 0% 100%;
 
     --luxury: 45 100% 50%;         /* Golden Yellow */
@@ -32,9 +32,9 @@
     --golden-yellow: 45 100% 50%;
     --golden-yellow-light: 45 100% 65%;
     --golden-yellow-dark: 45 100% 40%;
-    --royal-blue: 220 100% 45%;
-    --royal-blue-light: 220 100% 60%;
-    --royal-blue-dark: 220 100% 35%;
+    --royal-blue: 210 45% 19%;
+    --royal-blue-light: 210 45% 25%;
+    --royal-blue-dark: 210 45% 13%;
     --pure-white: 0 0% 100%;
     --off-white: 45 20% 98%;
 
@@ -59,8 +59,8 @@
 
     /* Golden Tulip Brand Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(45 100% 50%), hsl(45 100% 65%));
-    --gradient-luxury: linear-gradient(135deg, hsl(45 100% 50%), hsl(220 100% 45%));
-    --gradient-hero: linear-gradient(135deg, hsl(220 100% 45% / 0.9), hsl(45 100% 50% / 0.1));
+    --gradient-luxury: linear-gradient(135deg, hsl(45 100% 50%), hsl(var(--royal-blue)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--royal-blue) / 0.9), hsl(45 100% 50% / 0.1));
     --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(45 20% 98%));
 
     /* Shadows */
@@ -200,7 +200,7 @@
   }
 
   .text-gradient-blue-gold {
-    background: linear-gradient(135deg, hsl(220 100% 45%), hsl(45 100% 50%));
+    background: linear-gradient(135deg, hsl(var(--royal-blue)), hsl(45 100% 50%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -216,7 +216,7 @@
   }
 
   .booking-calendar .rdp-head_cell {
-    @apply text-blue-200;
+    color: hsl(var(--royal-blue-light));
   }
 
   .booking-calendar .rdp-day {
@@ -224,11 +224,13 @@
   }
 
   .booking-calendar .rdp-day_selected {
-    @apply bg-yellow-400 text-blue-900 hover:bg-yellow-300;
+    @apply bg-yellow-400 hover:bg-yellow-300;
+    color: hsl(var(--royal-blue-dark));
   }
 
   .booking-calendar .rdp-day_today {
-    @apply bg-blue-500/30 text-yellow-400;
+    background-color: hsl(var(--royal-blue) / 0.3);
+    @apply text-yellow-400;
   }
 
   .booking-calendar .rdp-nav_button {

@@ -14,7 +14,7 @@ export const AuthPage = () => {
   }, [navigate, setupNavigation]);
   
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-[hsl(var(--royal-blue-dark))] via-[hsl(var(--royal-blue))] to-[hsl(var(--royal-blue-light))]">
       <div className="mb-8 flex flex-col items-center">
         <img 
           src="/golden tulip logo.svg" 

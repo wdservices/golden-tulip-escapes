@@ -238,13 +238,13 @@ export const RoomDetailPage = () => {
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
                 {room.features?.map((feature, idx) => (
                   <li key={idx} className={`flex items-center gap-2 ${isEvoRoad ? 'text-slate-700' : 'text-muted-foreground'}`}>
-                    <Check className={`h-5 w-5 ${isEvoRoad ? 'text-blue-600' : 'text-primary'}`} />
+                    <Check className={`h-5 w-5 ${isEvoRoad ? 'text-[hsl(var(--royal-blue))]' : 'text-primary'}`} />
                     <span>{feature}</span>
                   </li>
                 ))}
               </ul>
               
-              <Button size="lg" className={`w-full md:w-auto shadow-md ${isEvoRoad ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}>
+              <Button size="lg" className={`w-full md:w-auto shadow-md ${isEvoRoad ? 'bg-[hsl(var(--royal-blue))] hover:bg-[hsl(var(--royal-blue-dark))] text-white' : ''}`}>
                 <Link to={`/book?branch=${branchId}&room=${roomId}`} className="flex items-center">
                   Book Now
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -252,11 +252,11 @@ export const RoomDetailPage = () => {
               </Button>
             </div>
             
-            <div className={`rounded-xl shadow-lg p-8 mb-8 ${isEvoRoad ? 'bg-white/90 backdrop-blur-sm border border-blue-100' : 'bg-card'}`}>
-              <h2 className={`text-2xl font-bold mb-4 ${isEvoRoad ? 'text-blue-900' : 'text-foreground'}`}>About {branch.name}</h2>
+            <div className={`rounded-xl shadow-lg p-8 mb-8 ${isEvoRoad ? 'bg-white/90 backdrop-blur-sm border border-[hsl(var(--royal-blue)/0.15)]' : 'bg-card'}`}>
+              <h2 className={`text-2xl font-bold mb-4 ${isEvoRoad ? 'text-[hsl(var(--royal-blue-dark))]' : 'text-foreground'}`}>About {branch.name}</h2>
               <p className={`mb-6 leading-relaxed ${isEvoRoad ? 'text-slate-700' : 'text-muted-foreground'}`}>{branch.description}</p>
               
-              <Button variant="outline" className={isEvoRoad ? 'border-blue-300 text-blue-700 hover:bg-blue-50' : ''} asChild>
+              <Button variant="outline" className={isEvoRoad ? 'border-[hsl(var(--royal-blue)/0.35)] text-[hsl(var(--royal-blue))] hover:bg-[hsl(var(--royal-blue)/0.05)]' : ''} asChild>
                 <Link to={`/branch/${branchId}`}>
                   View Branch Details
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -288,7 +288,7 @@ export const RoomDetailPage = () => {
                   <div className="flex items-start">
                     <MapPin className="h-5 w-5 text-blue-600 mr-3 mt-1" />
                     <div>
-                      <p className="font-semibold text-blue-900">{branch.location}</p>
+                      <p className="font-semibold text-[hsl(var(--royal-blue-dark))]">{branch.location}</p>
                       <p className="text-sm text-slate-600">{branch.address}</p>
                     </div>
                   </div>

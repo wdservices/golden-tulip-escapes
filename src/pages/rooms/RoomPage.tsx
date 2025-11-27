@@ -108,7 +108,7 @@ export default function RoomPage() {
             <span className="text-primary">Back to Rooms</span>
           </Button>
           <div className="text-primary font-serif text-xl">Golden Tulip</div>
-          <Button onClick={() => navigate('/book')} className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 transition-all duration-300">
+          <Button onClick={() => navigate('/book')} className="bg-gradient-to-r from-[hsl(var(--royal-blue))] to-[hsl(var(--royal-blue-dark))] hover:from-[hsl(var(--royal-blue-dark))] hover:to-[hsl(var(--royal-blue))] text-white px-6 transition-all duration-300">
             Book Now
           </Button>
         </div>
@@ -117,9 +117,8 @@ export default function RoomPage() {
       {/* 360° VR Room View */}
       <div className="relative w-full py-16 px-4 sm:px-8 md:px-12 lg:px-24 xl:px-32 2xl:px-40 bg-background">
         <div className="max-w-[100rem] mx-auto relative">
-          {/* Blue glow effect - toned down */}
-          <div className="absolute -inset-3 bg-gradient-to-r from-blue-500/20 via-blue-400/15 to-blue-500/20 rounded-3xl blur-3xl -z-10 group-hover:opacity-100 opacity-50 transition-all duration-700"></div>
-          <div className="absolute -inset-4 bg-gradient-to-r from-blue-600/10 via-blue-500/8 to-blue-600/10 rounded-3xl blur-xl -z-20 group-hover:opacity-100 opacity-30 transition-all duration-1000"></div>
+          <div className="absolute -inset-3 bg-gradient-to-r from-[hsl(var(--royal-blue)/0.2)] via-[hsl(var(--royal-blue-light)/0.15)] to-[hsl(var(--royal-blue)/0.2)] rounded-3xl blur-3xl -z-10 group-hover:opacity-100 opacity-50 transition-all duration-700"></div>
+          <div className="absolute -inset-4 bg-gradient-to-r from-[hsl(var(--royal-blue)/0.1)] via-[hsl(var(--royal-blue-light)/0.08)] to-[hsl(var(--royal-blue)/0.1)] rounded-3xl blur-xl -z-20 group-hover:opacity-100 opacity-30 transition-all duration-1000"></div>
           {/* Main container */}
           <div className="relative bg-[var(--gradient-card)] rounded-2xl p-2 shadow-2xl group border border-border/20">
             {/* Inner bezel */}
@@ -206,7 +205,7 @@ export default function RoomPage() {
           <div className="lg:col-span-2 space-y-12">
             {/* Description */}
             <div className="bg-background/50 backdrop-blur-sm border border-border/20 rounded-2xl p-8 shadow-sm hover:shadow-glow transition-all duration-300">
-              <h2 className="text-3xl font-bold text-blue-600 mb-6 text-center">Description</h2>
+              <h2 className="text-3xl font-bold text-[hsl(var(--royal-blue))] mb-6 text-center">Description</h2>
               <p className="text-muted-foreground leading-relaxed text-lg">
                 {room.longDescription || room.description}
               </p>
@@ -260,7 +259,7 @@ export default function RoomPage() {
                 </div>
               </div>
               
-              <Button onClick={() => navigate('/book')} className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-6 text-lg font-medium rounded-xl transition-all duration-500 hover:shadow-lg">
+              <Button onClick={() => navigate('/book')} className="w-full bg-gradient-to-r from-[hsl(var(--royal-blue))] to-[hsl(var(--royal-blue-dark))] hover:from-[hsl(var(--royal-blue-dark))] hover:to-[hsl(var(--royal-blue))] text-white py-6 text-lg font-medium rounded-xl transition-all duration-500 hover:shadow-lg">
                 Book Now
               </Button>
               
@@ -271,9 +270,9 @@ export default function RoomPage() {
               <div className="mt-8 pt-8 border-t border-border/20">
                 <h3 className="font-semibold text-xl text-foreground mb-6 text-center">Contact Information</h3>
                 <div className="space-y-4">
-                  <div className="p-4 bg-background/50 rounded-xl border border-border/10 hover:border-blue-500/20 transition-colors">
+                  <div className="p-4 bg-background/50 rounded-xl border border-border/10 hover:border-[hsl(var(--royal-blue)/0.2)] transition-colors">
                     <div className="flex items-start space-x-4">
-                      <div className="p-2 bg-blue-500/10 rounded-lg text-blue-600 flex-shrink-0">
+                      <div className="p-2 bg-[hsl(var(--royal-blue)/0.1)] rounded-lg text-[hsl(var(--royal-blue))] flex-shrink-0">
                         <Phone className="h-5 w-5" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -285,9 +284,9 @@ export default function RoomPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="p-4 bg-background/50 rounded-xl border border-border/10 hover:border-blue-500/20 transition-colors">
+                  <div className="p-4 bg-background/50 rounded-xl border border-border/10 hover:border-[hsl(var(--royal-blue)/0.2)] transition-colors">
                     <div className="flex items-start space-x-4">
-                      <div className="p-2 bg-blue-500/10 rounded-lg text-blue-600 flex-shrink-0">
+                      <div className="p-2 bg-[hsl(var(--royal-blue)/0.1)] rounded-lg text-[hsl(var(--royal-blue))] flex-shrink-0">
                         <Mail className="h-5 w-5" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -296,9 +295,9 @@ export default function RoomPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="p-4 bg-background/50 rounded-xl border border-border/10 hover:border-blue-500/20 transition-colors">
+                  <div className="p-4 bg-background/50 rounded-xl border border-border/10 hover:border-[hsl(var(--royal-blue)/0.2)] transition-colors">
                     <div className="flex items-start space-x-4">
-                      <div className="p-2 bg-blue-500/10 rounded-lg text-blue-600 flex-shrink-0">
+                      <div className="p-2 bg-[hsl(var(--royal-blue)/0.1)] rounded-lg text-[hsl(var(--royal-blue))] flex-shrink-0">
                         <Clock className="h-5 w-5" />
                       </div>
                       <div className="flex-1 min-w-0">

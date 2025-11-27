@@ -250,7 +250,7 @@ export const RoomForm = ({ branchId, room, onSuccess, onCancel }: RoomFormProps)
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading} className="bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30">
           Cancel
         </Button>
-        <Button type="submit" disabled={isLoading || !selectedBranchId} className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
+        <Button type="submit" disabled={isLoading || !selectedBranchId} className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] border-yellow-400 hover:bg-yellow-300">
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {room ? 'Update Room' : 'Add Room'}
         </Button>

@@ -235,7 +235,7 @@ const PricingManagement = () => {
             });
             setIsAddingRule(true);
           }}
-          className="flex items-center gap-2 bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300"
+          className="flex items-center gap-2 bg-yellow-400 text-[hsl(var(--royal-blue-dark))] border-yellow-400 hover:bg-yellow-300"
         >
           <Plus className="h-4 w-4" />
           Add Pricing Rule
@@ -244,11 +244,11 @@ const PricingManagement = () => {
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "rooms" | "spa")}>
         <TabsList className="grid w-full grid-cols-2 max-w-md mb-6 bg-white/10 border-white/20">
-          <TabsTrigger value="rooms" className="flex items-center gap-2 text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">
+          <TabsTrigger value="rooms" className="flex items-center gap-2 text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">
             <Hotel className="h-4 w-4" />
             Room Pricing
           </TabsTrigger>
-          <TabsTrigger value="spa" className="flex items-center gap-2 text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">
+          <TabsTrigger value="spa" className="flex items-center gap-2 text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">
             <Droplet className="h-4 w-4" />
             Spa Services
           </TabsTrigger>

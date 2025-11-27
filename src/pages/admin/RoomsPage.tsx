@@ -177,7 +177,7 @@ export const RoomsPage = () => {
             )}
           </div>
         </div>
-        <Button onClick={handleAddRoom} disabled={!selectedBranchId} className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
+        <Button onClick={handleAddRoom} disabled={!selectedBranchId} className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] border-yellow-400 hover:bg-yellow-300">
           <Plus className="mr-2 h-4 w-4" />
           Add Room
         </Button>
@@ -198,7 +198,7 @@ export const RoomsPage = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button variant="outline" size="sm" className="bg-white/5 border-white/20 text-white hover:bg-yellow-400 hover:text-blue-900">
+              <Button variant="outline" size="sm" className="bg-white/5 border-white/20 text-white hover:bg-yellow-400 hover:text-[hsl(var(--royal-blue-dark))]">
                 <Filter className="mr-2 h-4 w-4" />
                 Filter
               </Button>
@@ -256,7 +256,7 @@ export const RoomsPage = () => {
                       </TableCell>
                       <TableCell className="text-white/70">{room.roomCount || 1}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="mr-2 text-white hover:bg-yellow-400 hover:text-blue-900" onClick={() => handleEditRoom(room)}>
+                        <Button variant="ghost" size="sm" className="mr-2 text-white hover:bg-yellow-400 hover:text-[hsl(var(--royal-blue-dark))]" onClick={() => handleEditRoom(room)}>
                           <Edit className="h-4 w-4" />
                           <span className="sr-only">Edit</span>
                         </Button>

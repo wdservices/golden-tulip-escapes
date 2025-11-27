@@ -25,7 +25,7 @@ const statusColor = (s?: string) => {
     case "new":
       return "bg-yellow-400/20 text-yellow-300";
     case "in-progress":
-      return "bg-blue-400/20 text-blue-300";
+      return "bg-[hsl(var(--royal-blue)/0.2)] text-[hsl(var(--royal-blue))]";
     case "resolved":
       return "bg-green-400/20 text-green-300";
     default:
@@ -188,7 +188,7 @@ export default function FeedbackPage() {
                         <Badge className={statusColor(f.status)}>{(f.status || "new").toUpperCase()}</Badge>
                       </TableCell>
                       <TableCell className="space-x-2">
-                        <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700" disabled={updatingId === f.id} onClick={() => updateStatus(f.id, "in-progress")}>{updatingId === f.id ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}In Progress</Button>
+                        <Button size="sm" className="bg-[hsl(var(--royal-blue))] text-white hover:bg-[hsl(var(--royal-blue-dark))]" disabled={updatingId === f.id} onClick={() => updateStatus(f.id, "in-progress")}>{updatingId === f.id ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}In Progress</Button>
                         <Button size="sm" className="bg-green-600 text-white hover:bg-green-700" disabled={updatingId === f.id} onClick={() => updateStatus(f.id, "resolved")}>{updatingId === f.id ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}Resolve</Button>
                       </TableCell>
                     </TableRow>

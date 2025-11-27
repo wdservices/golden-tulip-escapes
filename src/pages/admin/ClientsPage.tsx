@@ -244,7 +244,7 @@ export const ClientsPage = () => {
           <Button 
             onClick={() => window.location.reload()} 
             variant="default"
-            className="bg-yellow-400 text-blue-900 hover:bg-yellow-300"
+            className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] hover:bg-yellow-300"
           >
             Retry
           </Button>
@@ -293,7 +293,7 @@ export const ClientsPage = () => {
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
+          <Button className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] border-yellow-400 hover:bg-yellow-300">
             <UserPlus className="mr-2 h-4 w-4" />
             Add Client
           </Button>
@@ -635,7 +635,7 @@ export const ClientsPage = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-400/30">
+                      <Badge variant="secondary" className="bg-[hsl(var(--royal-blue)/0.2)] text-[hsl(var(--royal-blue))] border-[hsl(var(--royal-blue)/0.3)]">
                         {client.bookingIds?.length || 0}
                       </Badge>
                     </TableCell>
@@ -648,7 +648,7 @@ export const ClientsPage = () => {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        className="text-white hover:bg-yellow-400 hover:text-blue-900"
+                        className="text-white hover:bg-yellow-400 hover:text-[hsl(var(--royal-blue-dark))]"
                         onClick={() => setSelectedClient(client)}
                       >
                         View Details

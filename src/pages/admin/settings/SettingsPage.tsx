@@ -207,11 +207,11 @@ export const SettingsPage = () => {
       <form onSubmit={handleSubmit}>
         <Tabs defaultValue="general" className="space-y-4">
           <TabsList className="bg-white/10 border-white/20">
-            <TabsTrigger value="general" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">General</TabsTrigger>
-            <TabsTrigger value="profile" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Profile</TabsTrigger>
-            <TabsTrigger value="notifications" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Notifications</TabsTrigger>
-            <TabsTrigger value="payment" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Payment</TabsTrigger>
-            <TabsTrigger value="data" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Data Management</TabsTrigger>
+            <TabsTrigger value="general" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">General</TabsTrigger>
+            <TabsTrigger value="profile" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">Profile</TabsTrigger>
+            <TabsTrigger value="notifications" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">Notifications</TabsTrigger>
+            <TabsTrigger value="payment" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">Payment</TabsTrigger>
+            <TabsTrigger value="data" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">Data Management</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general">
@@ -289,15 +289,15 @@ export const SettingsPage = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Current User Info */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="rounded-lg p-4 bg-[hsl(var(--royal-blue)/0.05)] border border-[hsl(var(--royal-blue)/0.2)]">
                   <div className="flex items-start gap-3">
-                    <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <Shield className="h-5 w-5 text-[hsl(var(--royal-blue))] mt-0.5" />
                     <div>
-                      <h4 className="font-medium text-blue-800">Current Admin Account</h4>
-                      <p className="text-sm text-blue-700 mt-1">
+                      <h4 className="font-medium text-[hsl(var(--royal-blue-dark))]">Current Admin Account</h4>
+                      <p className="text-sm text-[hsl(var(--royal-blue))] mt-1">
                         Email: <span className="font-mono">{currentUser?.email}</span>
                       </p>
-                      <p className="text-sm text-blue-700">
+                      <p className="text-sm text-[hsl(var(--royal-blue))]">
                         Branch: <span className="font-medium">{currentBranchName}</span>
                       </p>
                     </div>

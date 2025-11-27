@@ -70,8 +70,13 @@ export function AndroidGalleryPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Gallery Not Found</h1>
-          <Link to="/android" className="text-blue-600 hover:underline">
-            Back to Android App
+          <Link
+            to="/android"
+            aria-label="Back to Android App"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 border border-transparent hover:border-gray-200"
+          >
+            <span className="text-lg">&lt;</span>
+            <span className="font-medium">Back</span>
           </Link>
         </div>
       </div>
@@ -95,11 +100,14 @@ export function AndroidGalleryPage() {
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link to="/android" className="flex items-center text-gray-600 hover:text-gray-900">
-              <ChevronLeft className="w-5 h-5 mr-1" />
-              Back to Android App
+            <Link
+              to="/android"
+              aria-label="Back to Android App"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 border border-transparent hover:border-gray-200"
+            >
+              <span className="text-lg">&lt;</span>
+              <span className="font-medium">Back</span>
             </Link>
-            <h1 className="text-xl font-bold text-gray-900">{gallery.name}</h1>
             <div className="w-24"></div>
           </div>
         </div>

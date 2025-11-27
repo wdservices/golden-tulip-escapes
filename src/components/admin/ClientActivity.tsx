@@ -50,7 +50,7 @@ const getActivityIcon = (type: string) => {
     case 'signup':
       return <UserPlus className="h-4 w-4 text-green-500" />;
     case 'points_earned':
-      return <Award className="h-4 w-4 text-blue-500" />;
+      return <Award className="h-4 w-4 text-[hsl(var(--royal-blue))]" />;
     case 'points_redeemed':
       return <Award className="h-4 w-4 text-purple-500" />;
     case 'review':

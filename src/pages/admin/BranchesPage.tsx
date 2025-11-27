@@ -289,7 +289,7 @@ export const BranchesPage = () => {
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)} className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
+              <Button onClick={() => setIsDialogOpen(true)} className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] border-yellow-400 hover:bg-yellow-300">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Branch
               </Button>
@@ -371,7 +371,7 @@ export const BranchesPage = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="text-xs bg-blue-500/20 text-blue-400 border-blue-400/30">
+                    <Badge variant="outline" className="text-xs bg-[hsl(var(--royal-blue)/0.2)] text-[hsl(var(--royal-blue))] border-[hsl(var(--royal-blue)/0.3)]">
                       {branch.amenities?.length || 0} amenities
                     </Badge>
                   </TableCell>
@@ -385,7 +385,7 @@ export const BranchesPage = () => {
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="text-white hover:bg-yellow-400 hover:text-blue-900"
+                        className="text-white hover:bg-yellow-400 hover:text-[hsl(var(--royal-blue-dark))]"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleEditBranch(branch);
@@ -432,8 +432,8 @@ export const BranchesPage = () => {
               
               <Tabs defaultValue="details">
                 <TabsList className="grid w-full grid-cols-2 bg-white/10 border-white/20">
-                  <TabsTrigger value="details" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Branch Details</TabsTrigger>
-                  <TabsTrigger value="rooms" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Rooms</TabsTrigger>
+                  <TabsTrigger value="details" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">Branch Details</TabsTrigger>
+                  <TabsTrigger value="rooms" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">Rooms</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="details" className="space-y-4">
@@ -470,7 +470,7 @@ export const BranchesPage = () => {
                 <TabsContent value="rooms" className="space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-medium text-yellow-400">Rooms ({branchRooms.length})</h3>
-                    <Button onClick={() => handleAddRoom(selectedBranch)} className="bg-yellow-400 text-blue-900 border-yellow-400 hover:bg-yellow-300">
+                    <Button onClick={() => handleAddRoom(selectedBranch)} className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] border-yellow-400 hover:bg-yellow-300">
                       <Plus className="mr-2 h-4 w-4" />
                       Add Room
                     </Button>
@@ -511,12 +511,12 @@ export const BranchesPage = () => {
                             </div>
                             <div className="flex flex-wrap gap-1 mt-2">
                               {room.amenities.slice(0, 3).map((amenity, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs bg-blue-500/20 text-blue-400 border-blue-400/30">
+                                <Badge key={index} variant="secondary" className="text-xs bg-[hsl(var(--royal-blue)/0.2)] text-[hsl(var(--royal-blue))] border-[hsl(var(--royal-blue)/0.3)]">
                                   {amenity}
                                 </Badge>
                               ))}
                               {room.amenities.length > 3 && (
-                                <Badge variant="secondary" className="text-xs bg-blue-500/20 text-blue-400 border-blue-400/30">
+                                <Badge variant="secondary" className="text-xs bg-[hsl(var(--royal-blue)/0.2)] text-[hsl(var(--royal-blue))] border-[hsl(var(--royal-blue)/0.3)]">
                                   +{room.amenities.length - 3} more
                                 </Badge>
                               )}

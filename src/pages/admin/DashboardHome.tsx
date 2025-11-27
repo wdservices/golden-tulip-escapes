@@ -67,7 +67,7 @@ const DashboardHome = () => {
 
       <Tabs defaultValue="analytics" className="space-y-4">
         <TabsList className="bg-white/10 border-white/20">
-          <TabsTrigger value="analytics" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-blue-900">Analytics</TabsTrigger>
+          <TabsTrigger value="analytics" className="text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-[hsl(var(--royal-blue-dark))]">Analytics</TabsTrigger>
           <TabsTrigger value="reports" disabled className="text-white/50">
             Reports
           </TabsTrigger>

@@ -289,7 +289,7 @@ export default function LoginForm() {
 
         <Button
           type="submit"
-          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+          className="w-full bg-gradient-to-r from-[hsl(var(--royal-blue))] to-[hsl(var(--royal-blue-dark))] hover:from-[hsl(var(--royal-blue-light))] hover:to-[hsl(var(--royal-blue))] text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
           disabled={isLoading}
         >
           {isLoading ? (
@@ -310,7 +310,7 @@ export default function LoginForm() {
         <button
           type="button"
           onClick={toggleAuthMode}
-          className="font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors duration-200"
+          className="font-semibold text-[hsl(var(--royal-blue))] hover:text-[hsl(var(--royal-blue-light))] hover:underline transition-colors duration-200"
           disabled={isLoading}
         >
           {isLogin ? "Sign up" : "Sign in"}

@@ -84,11 +84,11 @@ export const AdminBookingForm = ({ onBookingSuccess, onCancel }: AdminBookingFor
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--royal-blue-dark))] via-[hsl(var(--royal-blue))] to-[hsl(var(--royal-blue-light))] p-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white">Create Booking for Client</h1>
-          <p className="text-blue-100">Book a room on behalf of a client</p>
+          <p className="text-white/80">Book a room on behalf of a client</p>
         </div>
 
         <div className="bg-white/10 backdrop-blur-md border-white/20 border rounded-lg shadow-xl p-8">
@@ -266,7 +266,7 @@ export const AdminBookingForm = ({ onBookingSuccess, onCancel }: AdminBookingFor
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="flex-1 bg-yellow-400 text-blue-900 hover:bg-yellow-300 font-semibold"
+                className="flex-1 bg-yellow-400 text-[hsl(var(--royal-blue-dark))] hover:bg-yellow-300 font-semibold"
               >
                 {isLoading ? (
                   <>
