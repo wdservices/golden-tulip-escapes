@@ -1,17 +1,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
+
 
 interface HeroSectionProps {
   activeBranch: string;
@@ -21,6 +14,7 @@ interface HeroSectionProps {
 export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const handleBookNowClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -49,6 +43,13 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
     { src: "/images/hero section image/image (6).jpg", alt: "Relaxation Area", title: "Ultimate Relaxation" }
   ];
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev === heroImages.length - 1 ? 0 : prev + 1));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const branchInfo = {
     main: {
       title: "Golden Tulip EVO Road",
@@ -75,38 +76,49 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
   const currentBranch = branchInfo[activeBranch as keyof typeof branchInfo] || branchInfo.main;
 
   return (
-    <section id="home" className="relative h-screen overflow-hidden flex items-center justify-center pt-20">
-      {/* Image Carousel */}
-      <Carousel
-        opts={{
-          align: "start",
-          loop: true,
-        }}
-        plugins={[
-          Autoplay({
-            delay: 5000,
-            stopOnInteraction: false,
-          }),
-        ]}
-        className="absolute inset-0 w-full h-full"
-      >
-        <CarouselContent className="h-full ml-0">
-          {heroImages.map((image, index) => (
-            <CarouselItem key={index} className="h-full pl-0">
-              <div className="relative h-full w-full">
-                <img
-                  src={image.src}
-                  alt={image.alt}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
-              </div>
-            </CarouselItem>
+    <section id="home" className="relative h-screen overflow-hidden flex items-center justify-center pt-0">
+      {/* Image Slider - Android style */}
+      <div className="absolute inset-0 w-full h-full relative group">
+        {heroImages.map((image, index) => (
+          <img
+            key={index}
+            src={image.src}
+            alt={image.alt}
+            className={`w-full h-full object-cover absolute inset-0 transition-all duration-700 ${
+              index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+            }`}
+          />
+        ))}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+        <button
+          onClick={() => setCurrentSlide((prev) => (prev === 0 ? heroImages.length - 1 : prev - 1))}
+          className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full backdrop-blur-sm transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 bg-white/70 text-slate-900 hover:bg-white/90 shadow-lg shadow-slate-300/50"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <button
+          onClick={() => setCurrentSlide((prev) => (prev === heroImages.length - 1 ? 0 : prev + 1))}
+          className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full backdrop-blur-sm transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 bg-white/70 text-slate-900 hover:bg-white/90 shadow-lg shadow-slate-300/50"
+          aria-label="Next slide"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 backdrop-blur-sm bg-black/30 px-4 py-2 rounded-full">
+          {heroImages.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                index === currentSlide ? 'bg-white w-6' : 'bg-white/50 hover:bg-white/75'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
           ))}
-        </CarouselContent>
-        <CarouselPrevious className="left-4 h-12 w-12 bg-background/20 backdrop-blur-sm border-primary/30 hover:bg-primary/90 hover:border-primary text-white" />
-        <CarouselNext className="right-4 h-10 w-10 md:h-12 md:w-12 bg-background/20 backdrop-blur-sm border-primary/30 hover:bg-primary/90 hover:border-primary text-white" />
-      </Carousel>
+        </div>
+      </div>
 
       {/* Hero Content */}
       <div className="absolute inset-0 flex items-center justify-center z-10">
