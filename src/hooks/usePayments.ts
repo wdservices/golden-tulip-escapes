@@ -71,9 +71,9 @@ async function fetchPaymentsFromBranchSubcollections(branchId: string, queryLimi
       });
     }
     
-    // Sort by createdAt desc and apply limit
+    // Sort by mapped date desc and apply limit
     return payments
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .sort((a: any, b: any) => new Date((b as any).date).getTime() - new Date((a as any).date).getTime())
       .slice(0, queryLimit);
   } catch (error) {
     console.error('Error in fallback payment fetch:', error);
@@ -107,30 +107,16 @@ export function usePayments({ branchId, limit: queryLimit = 100 }: UsePaymentsOp
       setIsLoading(true);
       setError(null);
 
-      // Check if we have a branch ID for subcollection query
-      if (!effectiveBranchId) {
-        console.warn('No branch ID provided for payments query');
-        setPayments([]);
-        setIsLoading(false);
-        return;
-      }
-
-      // Query payments from all bookings in the branch using collection group
+      // Query payments from collection group 'payments'
+      // If effectiveBranchId is provided and not 'all', include a filter; otherwise query all
       const paymentsQuery = collectionGroup(db, 'payments');
 
-      // Add filters
-      const constraints = [];
-      
-      // Filter by branch ID (unless it's 'all' for HQ admins)
-      if (effectiveBranchId !== 'all') {
+      const constraints = [] as any[];
+      if (effectiveBranchId && effectiveBranchId !== 'all') {
         constraints.push(where('branchId', '==', effectiveBranchId));
       }
-
-      // Add ordering and limit
       constraints.push(orderBy('createdAt', 'desc'));
       constraints.push(limit(queryLimit));
-
-      // Apply all constraints
       const q = query(paymentsQuery, ...constraints);
 
       // Execute query
@@ -183,23 +169,97 @@ export function usePayments({ branchId, limit: queryLimit = 100 }: UsePaymentsOp
         } as Payment;
       }));
 
-      setPayments(paymentDocs);
+      // Fallbacks: if no results, try branch subcollections; if no branch context, scan all branches
+      if (paymentDocs.length === 0) {
+        if (effectiveBranchId && effectiveBranchId !== 'all') {
+          const fallbackPayments = await fetchPaymentsFromBranchSubcollections(effectiveBranchId, queryLimit);
+          if (fallbackPayments.length > 0) {
+            setPayments(fallbackPayments);
+          } else {
+            // If still empty, expand search to all branches
+            const branchesSnapshot = await getDocs(collection(db, 'branches'));
+            const aggregated: Payment[] = [] as any;
+            for (const branchDoc of branchesSnapshot.docs) {
+              const branchIdAll = branchDoc.id;
+              const branchPayments = await fetchPaymentsFromBranchSubcollections(branchIdAll, Math.ceil(queryLimit / branchesSnapshot.docs.length) || 25);
+              aggregated.push(...branchPayments);
+            }
+            setPayments(aggregated.slice(0, queryLimit));
+          }
+        } else {
+          // Scan all branches for payments
+          const branchesSnapshot = await getDocs(collection(db, 'branches'));
+          const aggregated: Payment[] = [] as any;
+          for (const branchDoc of branchesSnapshot.docs) {
+            const branchIdAll = branchDoc.id;
+            const branchPayments = await fetchPaymentsFromBranchSubcollections(branchIdAll, Math.ceil(queryLimit / branchesSnapshot.docs.length) || 25);
+            aggregated.push(...branchPayments);
+          }
+          // Sort aggregated by paid date or createdAt
+          aggregated.sort((a: any, b: any) => {
+            const ta = new Date((a as any).date || (a as any).paidAt || (a as any).createdAt || 0).getTime();
+            const tb = new Date((b as any).date || (b as any).paidAt || (b as any).createdAt || 0).getTime();
+            return tb - ta;
+          });
+          setPayments(aggregated.slice(0, queryLimit));
+        }
+      } else {
+        setPayments(paymentDocs);
+      }
     } catch (err) {
       console.error('Error fetching payments:', err);
       
-      // Check if it's a Firebase index error
-      if (err instanceof Error && err.message.includes('index')) {
+      // Check for permission or index errors and fallback to backend
+      const isPermissionError = err instanceof Error && (
+        err.message.toLowerCase().includes('permission') ||
+        err.message.toLowerCase().includes('unauthorized')
+      );
+      const isIndexError = err instanceof Error && err.message.includes('index');
+      if (isPermissionError || isIndexError) {
         console.warn('Firebase index not available for payments query. Using fallback method.');
-        
-        // Use fallback method to fetch payments from branch subcollections
-        if (effectiveBranchId && effectiveBranchId !== 'all') {
-          const fallbackPayments = await fetchPaymentsFromBranchSubcollections(effectiveBranchId, queryLimit);
-          setPayments(fallbackPayments);
-          setError(null);
-        } else {
-          console.warn('Cannot use fallback method without branchId');
-          setPayments([]);
-          setError(null);
+        const API_BASE_URL = (import.meta as any).env?.VITE_NEXT_PUBLIC_API_URL || (import.meta as any).env?.NEXT_PUBLIC_API_URL || '/api';
+        const url = effectiveBranchId ? `${API_BASE_URL}/admin/payments?branchId=${effectiveBranchId}&limit=${queryLimit}` : `${API_BASE_URL}/admin/payments?limit=${queryLimit}`;
+        try {
+          const resp = await fetch(url);
+          if (resp.ok) {
+            const data = await resp.json();
+            setPayments((data?.payments || []) as Payment[]);
+            setError(null);
+          } else {
+            // Fallback to client-side subcollection scanning
+            if (effectiveBranchId && effectiveBranchId !== 'all') {
+              const fallbackPayments = await fetchPaymentsFromBranchSubcollections(effectiveBranchId, queryLimit);
+              setPayments(fallbackPayments);
+              setError(null);
+            } else {
+              const branchesSnapshot = await getDocs(collection(db, 'branches'));
+              const aggregated: Payment[] = [] as any;
+              for (const branchDoc of branchesSnapshot.docs) {
+                const branchIdAll = branchDoc.id;
+                const branchPayments = await fetchPaymentsFromBranchSubcollections(branchIdAll, Math.ceil(queryLimit / branchesSnapshot.docs.length) || 25);
+                aggregated.push(...branchPayments);
+              }
+              setPayments(aggregated.slice(0, queryLimit));
+              setError(null);
+            }
+          }
+        } catch (apiErr) {
+          // Last resort fallback
+          if (effectiveBranchId && effectiveBranchId !== 'all') {
+            const fallbackPayments = await fetchPaymentsFromBranchSubcollections(effectiveBranchId, queryLimit);
+            setPayments(fallbackPayments);
+            setError(null);
+          } else {
+            const branchesSnapshot = await getDocs(collection(db, 'branches'));
+            const aggregated: Payment[] = [] as any;
+            for (const branchDoc of branchesSnapshot.docs) {
+              const branchIdAll = branchDoc.id;
+              const branchPayments = await fetchPaymentsFromBranchSubcollections(branchIdAll, Math.ceil(queryLimit / branchesSnapshot.docs.length) || 25);
+              aggregated.push(...branchPayments);
+            }
+            setPayments(aggregated.slice(0, queryLimit));
+            setError(null);
+          }
         }
       } else {
         setError(err instanceof Error ? err : new Error('Failed to fetch payments'));

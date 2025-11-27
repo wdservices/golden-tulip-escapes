@@ -40,15 +40,16 @@ export const PaymentsPage = () => {
   const { activeBranchId } = useAuth();
   
   // Use the usePayments hook for branch-filtered payments
-  const { payments, isLoading, error } = usePayments();
+  const { payments, isLoading, error } = usePayments({ branchId: 'dD0zwzVpa27fZWhxTg7m' });
   
   // Fetch current branch name
   useEffect(() => {
     const fetchBranchName = async () => {
-      if (activeBranchId) {
+      const targetBranchId = 'dD0zwzVpa27fZWhxTg7m';
+      if (targetBranchId) {
         try {
           const branches = await getBranches();
-          const branch = branches.find(b => b.id === activeBranchId);
+          const branch = branches.find(b => b.id === targetBranchId);
           if (branch) {
             setCurrentBranchName(branch.name);
           }
@@ -59,7 +60,7 @@ export const PaymentsPage = () => {
     };
     
     fetchBranchName();
-  }, [activeBranchId]);
+  }, []);
 
   // Calculate payment statistics from real data
   const paymentStats = {

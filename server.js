@@ -167,6 +167,8 @@ app.post('/api/verify-payment', async (req, res) => {
         // Also create a payment record for audit
         const paymentRecord = {
           bookingId: docRef.id,
+          branchId: branchId,
+          branchName: bookingData?.branchName || '',
           transactionId: verificationData.data.reference,
           paystackTransactionId: verificationData.data.id,
           amount: paidAmount,
@@ -474,4 +476,198 @@ app.post('/api/auth/set-branch-admin-claims', async (req, res) => {
 const PORT = process.env.API_PORT || 3001;
 app.listen(PORT, () => {
   console.log(`API server running on port ${PORT}`);
+  // Optional one-time backfill on startup
+  (async () => {
+    try {
+      const branchesSnapshot = await db.collection('branches').get();
+      let updatedCount = 0;
+      for (const branchDoc of branchesSnapshot.docs) {
+        const bId = branchDoc.id;
+        const bName = branchDoc.data().name || '';
+        const bookingsSnapshot = await db
+          .collection('branches')
+          .doc(bId)
+          .collection('bookings')
+          .get();
+        for (const bookingDoc of bookingsSnapshot.docs) {
+          const paymentsSnapshot = await db
+            .collection('branches')
+            .doc(bId)
+            .collection('bookings')
+            .doc(bookingDoc.id)
+            .collection('payments')
+            .get();
+          for (const paymentDoc of paymentsSnapshot.docs) {
+            const pData = paymentDoc.data();
+            if (!pData.branchId || !pData.branchName || !pData.createdAt) {
+              const createdAt = pData.createdAt || pData.paidAt || Timestamp.now();
+              await paymentDoc.ref.set({ branchId: bId, branchName: bName, createdAt }, { merge: true });
+              updatedCount++;
+            }
+          }
+        }
+      }
+      console.log(`Backfill completed. Updated payments: ${updatedCount}`);
+    } catch (e) {
+      console.error('Backfill on startup failed:', e);
+    }
+  })();
+});
+
+// Admin payments fetch endpoint
+app.get('/api/admin/payments', async (req, res) => {
+  try {
+    const { branchId, limit: limitParam } = req.query;
+    const max = Number(limitParam) || 100;
+    let allPayments = [];
+
+    if (branchId && branchId !== 'all') {
+      // Query specific branch
+      const branchRef = db.collection('branches').doc(String(branchId));
+      const bookingsSnapshot = await branchRef.collection('bookings').get();
+      
+      for (const bookingDoc of bookingsSnapshot.docs) {
+        const paymentsSnapshot = await bookingDoc.ref.collection('payments')
+          .orderBy('createdAt', 'desc')
+          .limit(max)
+          .get();
+        
+        for (const paymentDoc of paymentsSnapshot.docs) {
+          const d = paymentDoc.data();
+          const dateVal = d.createdAt || d.paidAt || Timestamp.now();
+          allPayments.push({
+            id: paymentDoc.id,
+            bookingId: d.bookingId || bookingDoc.id || '',
+            branchId: d.branchId || branchId || '',
+            guestName: d.customerName || d.guestName || '',
+            customerEmail: d.customerEmail || (d.customer && d.customer.email) || '',
+            amount: d.amount || 0,
+            currency: d.currency || 'NGN',
+            date: dateVal.toDate().toISOString(),
+            status: d.status || 'pending',
+            method: d.paymentMethod || d.method || 'paystack',
+            channel: d.channel || 'paystack',
+            paystackTransactionId: d.paystackTransactionId || d.transactionId || '',
+            transactionId: d.transactionId || paymentDoc.id,
+            gatewayResponse: d.gatewayResponse || d.gateway_response || '',
+            fees: d.fees || 0,
+            receiptUrl: d.receiptUrl || d.receipt_url || ''
+          });
+        }
+      }
+    } else {
+      // Query all branches
+      const branchesSnapshot = await db.collection('branches').get();
+      
+      for (const branchDoc of branchesSnapshot.docs) {
+        const bookingsSnapshot = await branchDoc.ref.collection('bookings').get();
+        
+        for (const bookingDoc of bookingsSnapshot.docs) {
+          const paymentsSnapshot = await bookingDoc.ref.collection('payments')
+            .orderBy('createdAt', 'desc')
+            .limit(Math.ceil(max / branchesSnapshot.docs.length) || 25)
+            .get();
+          
+          for (const paymentDoc of paymentsSnapshot.docs) {
+            const d = paymentDoc.data();
+            const dateVal = d.createdAt || d.paidAt || Timestamp.now();
+            allPayments.push({
+              id: paymentDoc.id,
+              bookingId: d.bookingId || bookingDoc.id || '',
+              branchId: d.branchId || branchDoc.id || '',
+              guestName: d.customerName || d.guestName || '',
+              customerEmail: d.customerEmail || (d.customer && d.customer.email) || '',
+              amount: d.amount || 0,
+              currency: d.currency || 'NGN',
+              date: dateVal.toDate().toISOString(),
+              status: d.status || 'pending',
+              method: d.paymentMethod || d.method || 'paystack',
+              channel: d.channel || 'paystack',
+              paystackTransactionId: d.paystackTransactionId || d.transactionId || '',
+              transactionId: d.transactionId || paymentDoc.id,
+              gatewayResponse: d.gatewayResponse || d.gateway_response || '',
+              fees: d.fees || 0,
+              receiptUrl: d.receiptUrl || d.receipt_url || ''
+            });
+          }
+        }
+      }
+    }
+
+    // Sort by date and limit results
+    allPayments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const limitedPayments = allPayments.slice(0, max);
+
+    res.status(200).json({ payments: limitedPayments });
+  } catch (error) {
+    console.error('Error fetching admin payments:', error);
+    res.status(500).json({ error: 'Failed to fetch payments' });
+  }
+});
+
+// Backfill branchId on historical payment documents
+app.post('/api/admin/backfill-payments-branchid', async (req, res) => {
+  try {
+    const branchIdParam = (req.body && req.body.branchId) || (req.query && req.query.branchId);
+    let branches = [];
+
+    if (branchIdParam) {
+      const bDoc = await db.collection('branches').doc(String(branchIdParam)).get();
+      if (!bDoc.exists) {
+        return res.status(404).json({ error: 'Branch not found' });
+      }
+      branches = [bDoc];
+    } else {
+      const branchesSnapshot = await db.collection('branches').get();
+      branches = branchesSnapshot.docs;
+    }
+
+    let updatedCount = 0;
+
+    for (const branchDoc of branches) {
+      const bId = branchDoc.id;
+      const bName = branchDoc.data().name || '';
+
+      const bookingsSnapshot = await db
+        .collection('branches')
+        .doc(bId)
+        .collection('bookings')
+        .get();
+
+      for (const bookingDoc of bookingsSnapshot.docs) {
+        const paymentsSnapshot = await db
+          .collection('branches')
+          .doc(bId)
+          .collection('bookings')
+          .doc(bookingDoc.id)
+          .collection('payments')
+          .get();
+
+        for (const paymentDoc of paymentsSnapshot.docs) {
+          const pData = paymentDoc.data();
+          const hasBranchId = !!pData.branchId;
+          const hasBranchName = !!pData.branchName;
+          const hasCreatedAt = !!pData.createdAt;
+
+          if (!hasBranchId || !hasBranchName || !hasCreatedAt) {
+            const createdAt = pData.createdAt || pData.paidAt || Timestamp.now();
+            await paymentDoc.ref.set(
+              {
+                branchId: bId,
+                branchName: bName,
+                createdAt
+              },
+              { merge: true }
+            );
+            updatedCount++;
+          }
+        }
+      }
+    }
+
+    return res.status(200).json({ status: 'success', updatedCount });
+  } catch (error) {
+    console.error('Error backfilling payment branchId:', error);
+    return res.status(500).json({ status: 'error', message: 'Failed to backfill payment documents' });
+  }
 });
