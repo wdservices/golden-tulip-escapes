@@ -148,12 +148,11 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
               </Button>
             </div>
 
-            {/* Scroll Indicator */}
-            <div className="absolute bottom-8 sm:bottom-12 left-1/2 transform -translate-x-1/2 animate-bounce">
-              <div className="w-6 h-10 border-2 border-golden-yellow/70 rounded-full flex justify-center">
-                <div className="w-1 h-3 bg-golden-yellow rounded-full mt-2 animate-pulse"></div>
-              </div>
-            </div>
+
+
+
+
+
           </div>
         </div>
       </div>
