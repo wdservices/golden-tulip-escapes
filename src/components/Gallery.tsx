@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -6,7 +6,6 @@ interface GalleryImage {
   id: string;
   src: string;
   title: string;
-  description?: string;
   category?: string;
 }
 
@@ -20,59 +19,141 @@ interface GalleryProps {
 const defaultImages: GalleryImage[] = [
   {
     id: "1",
-    src: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop",
-    title: "Luxury Suite",
-    description: "Elegant and spacious suite with premium amenities",
-    category: "Rooms"
+    src: "/images/gallery/img (1).jpg",
+    title: "Hotel Image 1",
+    category: "Gallery"
   },
   {
     id: "2",
-    src: "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&h=600&fit=crop",
-    title: "Fine Dining Restaurant",
-    description: "Exquisite culinary experience in an elegant setting",
-    category: "Dining"
+    src: "/images/gallery/img (2).jpg",
+    title: "Hotel Image 2",
+    category: "Gallery"
   },
   {
     id: "3",
-    src: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=600&fit=crop",
-    title: "Swimming Pool",
-    description: "Relax and unwind in our pristine pool area",
-    category: "Facilities"
+    src: "/images/gallery/img (3).jpg",
+    title: "Hotel Image 3",
+    category: "Gallery"
   },
   {
     id: "4",
-    src: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&h=600&fit=crop",
-    title: "Spa & Wellness",
-    description: "Rejuvenating spa treatments and wellness services",
-    category: "Wellness"
+    src: "/images/gallery/img (4).jpg",
+    title: "Hotel Image 4",
+    category: "Gallery"
   },
   {
     id: "5",
-    src: "https://images.unsplash.com/photo-1596436889106-be35e843f974?w=800&h=600&fit=crop",
-    title: "Conference Hall",
-    description: "State-of-the-art facilities for business events",
-    category: "Events"
+    src: "/images/gallery/img (5).jpg",
+    title: "Hotel Image 5",
+    category: "Gallery"
   },
   {
     id: "6",
-    src: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&h=600&fit=crop",
-    title: "Hotel Lobby",
-    description: "Grand entrance with sophisticated design",
-    category: "Facilities"
+    src: "/images/gallery/img (6).jpg",
+    title: "Hotel Image 6",
+    category: "Gallery"
   },
   {
     id: "7",
-    src: "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=800&h=600&fit=crop",
-    title: "Garden View",
-    description: "Beautifully landscaped gardens and outdoor spaces",
-    category: "Exterior"
+    src: "/images/gallery/img (7).jpg",
+    title: "Hotel Image 7",
+    category: "Gallery"
   },
   {
     id: "8",
-    src: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&h=600&fit=crop",
-    title: "Executive Lounge",
-    description: "Exclusive lounge area for our premium guests",
-    category: "Facilities"
+    src: "/images/gallery/img (8).jpg",
+    title: "Hotel Image 8",
+    category: "Gallery"
+  },
+  {
+    id: "9",
+    src: "/images/gallery/img (9).jpg",
+    title: "Hotel Image 9",
+    category: "Gallery"
+  },
+  {
+    id: "10",
+    src: "/images/gallery/img (10).jpg",
+    title: "Hotel Image 10",
+    category: "Gallery"
+  },
+  {
+    id: "11",
+    src: "/images/gallery/img (11).jpg",
+    title: "Hotel Image 11",
+    category: "Gallery"
+  },
+  {
+    id: "12",
+    src: "/images/gallery/img (12).jpg",
+    title: "Hotel Image 12",
+    category: "Gallery"
+  },
+  {
+    id: "13",
+    src: "/images/gallery/img (13).jpg",
+    title: "Hotel Image 13",
+    category: "Gallery"
+  },
+  {
+    id: "14",
+    src: "/images/gallery/img (14).jpg",
+    title: "Hotel Image 14",
+    category: "Gallery"
+  },
+  {
+    id: "15",
+    src: "/images/gallery/img (15).jpg",
+    title: "Hotel Image 15",
+    category: "Gallery"
+  },
+  {
+    id: "16",
+    src: "/images/gallery/img (16).jpg",
+    title: "Hotel Image 16",
+    category: "Gallery"
+  },
+  {
+    id: "17",
+    src: "/images/gallery/img (17).jpg",
+    title: "Hotel Image 17",
+    category: "Gallery"
+  },
+  {
+    id: "18",
+    src: "/images/gallery/img (18).jpg",
+    title: "Hotel Image 18",
+    category: "Gallery"
+  },
+  {
+    id: "19",
+    src: "/images/gallery/img (19).jpg",
+    title: "Hotel Image 19",
+    category: "Gallery"
+  },
+  {
+    id: "20",
+    src: "/images/gallery/img (20).jpg",
+    title: "Hotel Image 20",
+    category: "Gallery"
+  },
+  {
+    id: "21",
+    src: "/images/gallery/img (21).jpg",
+    title: "Hotel Image 21",
+    category: "Gallery"
+  },
+  {
+    id: "22",
+    src: "/images/gallery/img (22).jpg",
+    title: "Hotel Image 22",
+    category: "Gallery"
+  },
+  {
+    id: "23",
+    src: "/images/gallery/spar2.jpg",
+    title: "Hotel Image 23",
+    category: "Gallery"
   }
 ];
 
@@ -84,10 +165,46 @@ export const Gallery = ({
 }: GalleryProps) => {
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showAllImages, setShowAllImages] = useState(false);
+  const [visibleImages, setVisibleImages] = useState(6);
+  const [displayedImages, setDisplayedImages] = useState(images.slice(0, visibleImages));
+
+  // Auto-rotate images every 20 seconds
+  useEffect(() => {
+    const rotationInterval = setInterval(() => {
+      setDisplayedImages(prevImages => {
+        if (prevImages.length <= 1) return prevImages;
+        
+        // Move the last image to the front (bottom to top rotation)
+        const newImages = [...prevImages];
+        const lastImage = newImages.pop()!;
+        newImages.unshift(lastImage);
+        
+        return newImages;
+      });
+    }, 20000); // 20 seconds
+
+    return () => clearInterval(rotationInterval);
+  }, []);
+
+  // Update displayed images when visibleImages changes
+  useEffect(() => {
+    setDisplayedImages(images.slice(0, visibleImages));
+  }, [visibleImages, images]);
 
   const openLightbox = (image: GalleryImage, index: number) => {
     setSelectedImage(image);
     setCurrentImageIndex(index);
+  };
+
+  const handleViewMore = () => {
+    setShowAllImages(true);
+    setVisibleImages(images.length);
+  };
+
+  const handleViewLess = () => {
+    setShowAllImages(false);
+    setVisibleImages(6);
   };
 
   const closeLightbox = () => {
@@ -130,7 +247,7 @@ export const Gallery = ({
           </div>
 
           <div className={`grid ${getGridColumns()} gap-6 md:gap-8`}>
-            {images.map((image, index) => (
+            {displayedImages.map((image, index) => (
               <div
                 key={image.id}
                 className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 cursor-pointer transform hover:scale-105"
@@ -147,10 +264,7 @@ export const Gallery = ({
                 </div>
                 
                 <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <h3 className="text-xl font-semibold mb-2">{image.title}</h3>
-                  {image.description && (
-                    <p className="text-sm text-white/90 line-clamp-2">{image.description}</p>
-                  )}
+                  <h3 className="text-xl font-semibold">{image.title}</h3>
                   {image.category && (
                     <span className="inline-block mt-2 px-3 py-1 bg-primary/80 text-xs font-medium rounded-full">
                       {image.category}
@@ -160,6 +274,19 @@ export const Gallery = ({
               </div>
             ))}
           </div>
+
+          {/* View More / View Less Button */}
+          {images.length > 6 && (
+            <div className="text-center mt-12">
+              <Button
+                onClick={showAllImages ? handleViewLess : handleViewMore}
+                variant="outline"
+                className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] border-yellow-400 hover:bg-yellow-300 hover:border-yellow-300 px-8 py-3 text-lg font-semibold"
+              >
+                {showAllImages ? "View Less" : "View More"}
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -206,10 +333,7 @@ export const Gallery = ({
               
               {/* Image info */}
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 rounded-b-lg">
-                <h3 className="text-2xl font-bold text-white mb-2">{selectedImage.title}</h3>
-                {selectedImage.description && (
-                  <p className="text-white/90">{selectedImage.description}</p>
-                )}
+                <h3 className="text-2xl font-bold text-white">{selectedImage.title}</h3>
                 {selectedImage.category && (
                   <span className="inline-block mt-2 px-3 py-1 bg-primary text-xs font-medium rounded-full text-white">
                     {selectedImage.category}

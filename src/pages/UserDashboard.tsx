@@ -321,10 +321,6 @@ export const UserDashboard = () => {
     // Check for welcome flag in URL
     if (searchParams.get('welcome') === 'true') {
       setShowWelcome(true);
-      toast({
-        title: "Success",
-        description: "Registration successful! Welcome to Golden Tulip Escapes!"
-      });
       // Handle redirection if not authenticated
       if (!isAuthenticated) {
         navigate('/auth', { 
@@ -425,22 +421,7 @@ export const UserDashboard = () => {
     }
   }, [searchParams]);
 
-  // Welcome Message Component
-  const WelcomeMessage = () => (
-    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-      <div className="flex">
-        <div className="flex-shrink-0">
-          <CheckCircle className="h-5 w-5 text-green-400" />
-        </div>
-        <div className="ml-3">
-          <h3 className="text-sm font-medium text-green-800">{getGreeting()}, {profileData?.name || 'there'}! Welcome to Golden Tulip Escapes!</h3>
-          <div className="mt-2 text-sm text-green-700">
-            <p>Your account has been created successfully. Start exploring our exclusive offers!</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  // Welcome Message Component removed
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -459,19 +440,6 @@ export const UserDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--royal-blue-dark))] via-[hsl(var(--royal-blue))] to-[hsl(var(--royal-blue-light))]">
       <div className="container mx-auto px-4 py-8 animate-fade-in">
-      {showWelcome && (
-        <div className="mb-6 p-4 bg-gradient-to-r from-yellow-400/20 to-amber-500/20 border border-yellow-400/30 rounded-lg backdrop-blur-sm">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <CheckCircle className="h-5 w-5 text-yellow-400" />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-white">Welcome to Golden Tulip Escapes!</h3>
-              <p className="mt-1 text-sm text-yellow-100">Your account has been created successfully.</p>
-            </div>
-          </div>
-        </div>
-      )}
       
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -505,7 +473,6 @@ export const UserDashboard = () => {
           )}
         </div>
         <div className="flex items-center space-x-4">
-          {showWelcome && !showSkeletons && <WelcomeMessage />}
           <Button 
             variant="outline" 
             onClick={handleLogout}
