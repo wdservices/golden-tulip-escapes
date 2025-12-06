@@ -26,7 +26,46 @@ if (getApps().length === 0) {
 // Initialize Firestore
 const db = getFirestore();
 
-app.post('/api/init-admin', async (req, res) => {
+// Create a router to handle routes
+const router = express.Router();
+
+// Helper to normalize Firestore Timestamp values into JS Dates
+const normalizeFirestoreDate = (value) => {
+  if (value && typeof value.toDate === 'function') {
+    return value.toDate();
+  }
+  return value;
+};
+
+// Fallback query when collection group indexes are missing
+const fetchUserBookingsByBranchFallback = async (userId) => {
+  const branchesSnapshot = await db.collection('branches').get();
+  if (branchesSnapshot.empty) {
+    return [];
+  }
+
+  const bookingSnapshots = await Promise.all(
+    branchesSnapshot.docs.map(branchDoc =>
+      branchDoc.ref.collection('bookings').where('userId', '==', userId).get()
+    )
+  );
+
+  const bookings = [];
+  bookingSnapshots.forEach(snapshot => {
+    snapshot.forEach(doc => {
+      bookings.push({ id: doc.id, ...doc.data() });
+    });
+  });
+
+  return bookings;
+};
+
+// Root route for health check
+router.get('/', (req, res) => {
+  res.status(200).json({ status: 'success', message: 'Golden Tulip API is running' });
+});
+
+router.post('/init-admin', async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -48,7 +87,7 @@ app.post('/api/init-admin', async (req, res) => {
 });
 
 // Payment verification endpoint
-app.post('/api/verify-payment', async (req, res) => {
+router.post('/verify-payment', async (req, res) => {
   try {
     const { reference, bookingData } = req.body;
 
@@ -198,476 +237,210 @@ app.post('/api/verify-payment', async (req, res) => {
             reference: verificationData.data.reference,
             amount: paidAmount,
             currency: verificationData.data.currency,
-            channel: verificationData.data.channel,
-            paid_at: verificationData.data.paid_at,
-            customer: verificationData.data.customer
+            transaction_date: verificationData.data.paid_at,
+            status: verificationData.data.status
           }
         });
 
       } catch (dbError) {
-        console.error('Database error while creating booking:', dbError);
+        console.error('Database error creating booking:', dbError);
+        // Note: Payment was successful but booking creation failed
         return res.status(500).json({ 
-          status: 'error', 
-          message: 'Payment verified but failed to create booking record',
+          status: 'partial_success',
+          message: 'Payment verified but booking creation failed. Please contact support.',
+          reference: verificationData.data.reference,
           error: dbError.message 
         });
       }
-
     } else {
-      // Payment failed or not successful
-      console.log('Payment verification failed:', verificationData);
-      
-      return res.status(400).json({ 
-        status: 'failed', 
-        message: verificationData.message || 'Payment verification failed',
-        data: verificationData.data 
+      return res.status(400).json({
+        status: 'failed',
+        message: 'Payment verification failed or payment was not successful',
+        data: verificationData.data
       });
     }
-
   } catch (error) {
-    console.error('Payment verification error:', error);
-    
+    console.error('Server error verifying payment:', error);
     return res.status(500).json({ 
       status: 'error', 
-      message: error.message || 'Payment verification failed',
-      error: error.toString()
-    });
-  }
-});
-
-// Paystack webhook endpoint
-app.post('/api/paystack/webhook', async (req, res) => {
-  try {
-    // Get the raw body for signature verification
-    const payload = JSON.stringify(req.body);
-    const signature = req.headers['x-paystack-signature'];
-
-    if (!signature) {
-      console.error('No Paystack signature found in webhook');
-      return res.status(400).json({ 
-        status: 'error', 
-        message: 'No signature found' 
-      });
-    }
-
-    // Verify the webhook signature
-    const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || process.env.VITE_PAYSTACK_SECRET_KEY;
-
-    const hash = crypto
-      .createHmac('sha512', PAYSTACK_SECRET_KEY)
-      .update(payload, 'utf8')
-      .digest('hex');
-
-    if (hash !== signature) {
-      console.error('Invalid Paystack webhook signature');
-      return res.status(400).json({ 
-        status: 'error', 
-        message: 'Invalid signature' 
-      });
-    }
-
-    const webhookEvent = req.body;
-    console.log('Received Paystack webhook:', webhookEvent.event, webhookEvent.data.reference);
-
-    // Handle different webhook events
-    if (webhookEvent.event === 'charge.success' && webhookEvent.data.status === 'success') {
-      // Process successful payment
-      console.log('Processing successful payment webhook:', webhookEvent.data.reference);
-      
-      return res.status(200).json({ 
-        status: 'success', 
-        message: 'Webhook processed successfully' 
-      });
-    }
-
-    return res.status(200).json({ 
-      status: 'success', 
-      message: 'Webhook received' 
-    });
-
-  } catch (error) {
-    console.error('Webhook processing error:', error);
-    
-    return res.status(500).json({ 
-      status: 'error', 
-      message: 'Webhook processing failed',
+      message: 'Internal server error during payment verification',
       error: error.message 
     });
   }
 });
 
-// User bookings endpoint
-app.get('/api/user-bookings/:userId', async (req, res) => {
-  console.log('User bookings API route hit.');
+// Route to fetch user bookings
+router.get('/user-bookings/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-
+    
     if (!userId) {
       return res.status(400).json({ error: 'User ID is required' });
     }
 
-    console.log('Fetching bookings for user:', userId);
+    console.log(`Fetching bookings for user: ${userId}`);
 
-    // Get all branches
-    console.log('Attempting to fetch all branches...');
-    const branchesSnapshot = await db.collection('branches').get();
-    console.log(`Fetched ${branchesSnapshot.docs.length} branches.`);
-    const allBookings = [];
-    const branchCount = {};
+    let rawBookings = [];
+    try {
+      const bookingsSnapshot = await db.collectionGroup('bookings')
+        .where('userId', '==', userId)
+        .get();
 
-    // Query each branch's bookings subcollection
-    for (const branchDoc of branchesSnapshot.docs) {
-      const branchId = branchDoc.id;
-      const branchData = branchDoc.data();
-      
-      try {
-        console.log(`Attempting to fetch bookings for branch ${branchId} and user ${userId}...`);
-        const bookingsSnapshot = await db
-          .collection('branches')
-          .doc(branchId)
-          .collection('bookings')
-          .where('userId', '==', userId)
-          .limit(20)
-          .get();
-        console.log(`Fetched ${bookingsSnapshot.docs.length} bookings for branch ${branchId}.`);
+      rawBookings = bookingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (queryError) {
+      const needsIndex = queryError && (
+        queryError.code === 9 ||
+        (typeof queryError.message === 'string' && queryError.message.includes('requires an index'))
+      );
 
-        bookingsSnapshot.forEach((doc) => {
-          const data = doc.data();
-          const booking = {
-            ...data,
-            id: doc.id,
-            branchName: branchData.name || 'Unknown Branch',
-            checkInDate: (data.checkInDate?.toDate?.() || data.checkInDate)?.toISOString?.() || data.checkInDate,
-            checkOutDate: (data.checkOutDate?.toDate?.() || data.checkOutDate)?.toISOString?.() || data.checkOutDate,
-            bookingDate: (data.bookingDate?.toDate?.() || data.bookingDate)?.toISOString?.() || data.bookingDate,
-          };
-          
-          allBookings.push(booking);
-
-          // Count branch usage
-          if (branchData.name) {
-            branchCount[branchData.name] = (branchCount[branchData.name] || 0) + 1;
-          }
-        });
-      } catch (error) {
-        console.error(`Error fetching bookings for branch ${branchId}:`, error);
+      if (needsIndex) {
+        console.warn('Collection group query for user bookings requires an index. Falling back to per-branch scan.');
+        rawBookings = await fetchUserBookingsByBranchFallback(userId);
+      } else {
+        throw queryError;
       }
     }
 
-    // Sort bookings by check-in date (most recent first)
-    allBookings.sort((a, b) => {
-      const timeA = new Date(a.checkInDate).getTime();
-      const timeB = new Date(b.checkInDate).getTime();
-      const safeA = isNaN(timeA) ? 0 : timeA;
-      const safeB = isNaN(timeB) ? 0 : timeB;
-      return safeB - safeA;
+    const bookings = [];
+    let totalNights = 0;
+    let upcomingBookings = 0;
+    let pastBookings = 0;
+    const branchCounts = {};
+
+    rawBookings.forEach(rawBooking => {
+      const booking = { ...rawBooking };
+      
+      // Convert Timestamps to Dates/Strings
+      booking.checkInDate = normalizeFirestoreDate(booking.checkInDate);
+      booking.checkOutDate = normalizeFirestoreDate(booking.checkOutDate);
+      booking.createdAt = normalizeFirestoreDate(booking.createdAt);
+      booking.updatedAt = normalizeFirestoreDate(booking.updatedAt);
+      
+      bookings.push(booking);
+
+      // Calculate stats
+      if (booking.nights) totalNights += booking.nights;
+      
+      if (booking.branchName) {
+        branchCounts[booking.branchName] = (branchCounts[booking.branchName] || 0) + 1;
+      }
+
+      const now = new Date();
+      const checkOut = new Date(booking.checkOutDate);
+      if (checkOut >= now) {
+        upcomingBookings++;
+      } else {
+        pastBookings++;
+      }
     });
 
-    // Calculate stats
-    const now = new Date();
-    const pastBookings = allBookings.filter(booking => new Date(booking.checkOutDate) < now);
-    const upcomingBookings = allBookings.filter(booking => new Date(booking.checkInDate) > now);
-    
-    // Calculate total nights
-    const totalNights = allBookings.reduce((total, booking) => {
-      const checkIn = new Date(booking.checkInDate);
-      const checkOut = new Date(booking.checkOutDate);
-      const tIn = checkIn.getTime();
-      const tOut = checkOut.getTime();
-      if (isNaN(tIn) || isNaN(tOut)) return total;
-      const nights = Math.ceil((tOut - tIn) / (1000 * 60 * 60 * 24));
-      return total + (isNaN(nights) || nights < 0 ? 0 : nights);
-    }, 0);
+    bookings.sort((a, b) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime;
+    });
 
-    // Calculate loyalty points (assuming 10 points per night)
-    const loyaltyPoints = totalNights * 10;
-
-    // Find favorite branch
-    const favoriteBranch = Object.keys(branchCount).length > 0 
-      ? Object.keys(branchCount).reduce((a, b) => branchCount[a] > branchCount[b] ? a : b)
-      : 'No bookings yet';
+    // Determine favorite branch
+    let favoriteBranch = 'No bookings yet';
+    let maxCount = 0;
+    Object.entries(branchCounts).forEach(([branch, count]) => {
+      if (count > maxCount) {
+        maxCount = count;
+        favoriteBranch = branch;
+      }
+    });
 
     const stats = {
-      totalBookings: allBookings.length,
+      totalBookings: bookings.length,
       totalNights,
-      pastBookings: pastBookings.length,
-      upcomingBookings: upcomingBookings.length,
-      loyaltyPoints,
-      favoriteBranch,
+      loyaltyPoints: 100 + totalNights,
+      upcomingBookings,
+      pastBookings,
+      favoriteBranch
     };
 
-    console.log('User booking stats:', stats);
-
-    res.status(200).json({
-      bookings: allBookings.slice(0, 10), // Return latest 10 bookings
-      stats,
+    return res.status(200).json({ 
+      status: 'success', 
+      bookings,
+      stats
     });
 
   } catch (error) {
     console.error('Error fetching user bookings:', error);
-    if (process.env.NODE_ENV !== 'production') {
-      res.status(500).json({ error: 'Failed to fetch user bookings', details: (error && error.message) || String(error) });
-    } else {
-      res.status(500).json({ error: 'Failed to fetch user bookings' });
-    }
-  }
-});
-
-// Set branch admin claims endpoint
-app.post('/api/auth/set-branch-admin-claims', async (req, res) => {
-  try {
-    const { userId, role, branchId } = req.body;
-
-    if (!userId || !role || !branchId) {
-      return res.status(400).json({ 
-        error: 'Missing required fields: userId, role, and branchId are required' 
-      });
-    }
-
-    // Verify the request is from an authenticated user (check Authorization header)
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ 
-        error: 'Unauthorized: Bearer token required' 
-      });
-    }
-
-    const token = authHeader.split(' ')[1];
-    
-    try {
-      // Verify the token
-      const decodedToken = await getAuth().verifyIdToken(token);
-      
-      // Only allow hq-admins or the user themselves to set claims
-      if (decodedToken.uid !== userId && decodedToken.role !== 'hq-admin') {
-        return res.status(403).json({ 
-          error: 'Forbidden: Insufficient permissions' 
-        });
-      }
-    } catch (error) {
-      return res.status(401).json({ 
-        error: 'Invalid or expired token' 
-      });
-    }
-
-    // Set custom claims
-    await getAuth().setCustomUserClaims(userId, { 
-      role: role, 
-      branchId: branchId 
-    });
-
-    console.log(`Set branch admin claims for user ${userId}: role=${role}, branchId=${branchId}`);
-    
-    return res.status(200).json({ 
-      message: 'Branch admin claims set successfully',
-      role: role,
-      branchId: branchId
-    });
-
-  } catch (error) {
-    console.error('Error setting branch admin claims:', error);
     return res.status(500).json({ 
-      error: 'Internal server error',
-      details: error.message 
+      status: 'error', 
+      message: 'Internal server error fetching bookings',
+      error: error.message 
     });
   }
 });
 
-const PORT = process.env.API_PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`API server running on port ${PORT}`);
-  // Optional one-time backfill on startup
-  (async () => {
+// Route to fetch payments (admin)
+router.get('/admin/payments', async (req, res) => {
+  try {
+    const { branchId, limit: queryLimit } = req.query;
+    const limitVal = parseInt(queryLimit) || 100;
+
+    console.log(`Fetching admin payments. Branch: ${branchId || 'All'}, Limit: ${limitVal}`);
+
+    let snapshot;
     try {
-      const branchesSnapshot = await db.collection('branches').get();
-      let updatedCount = 0;
-      for (const branchDoc of branchesSnapshot.docs) {
-        const bId = branchDoc.id;
-        const bName = branchDoc.data().name || '';
-        const bookingsSnapshot = await db
-          .collection('branches')
-          .doc(bId)
-          .collection('bookings')
-          .get();
-        for (const bookingDoc of bookingsSnapshot.docs) {
-          const paymentsSnapshot = await db
-            .collection('branches')
-            .doc(bId)
-            .collection('bookings')
-            .doc(bookingDoc.id)
-            .collection('payments')
-            .get();
-          for (const paymentDoc of paymentsSnapshot.docs) {
-            const pData = paymentDoc.data();
-            if (!pData.branchId || !pData.branchName || !pData.createdAt) {
-              const createdAt = pData.createdAt || pData.paidAt || Timestamp.now();
-              await paymentDoc.ref.set({ branchId: bId, branchName: bName, createdAt }, { merge: true });
-              updatedCount++;
-            }
-          }
-        }
+      let query = db.collectionGroup('payments');
+      if (branchId && branchId !== 'all') {
+        query = query.where('branchId', '==', branchId);
       }
-      console.log(`Backfill completed. Updated payments: ${updatedCount}`);
+      query = query.orderBy('createdAt', 'desc').limit(limitVal);
+      snapshot = await query.get();
     } catch (e) {
-      console.error('Backfill on startup failed:', e);
-    }
-  })();
-});
-
-// Admin payments fetch endpoint
-app.get('/api/admin/payments', async (req, res) => {
-  try {
-    const { branchId, limit: limitParam } = req.query;
-    const max = Number(limitParam) || 100;
-    let allPayments = [];
-
-    if (branchId && branchId !== 'all') {
-      // Query specific branch
-      const branchRef = db.collection('branches').doc(String(branchId));
-      const bookingsSnapshot = await branchRef.collection('bookings').get();
-      
-      for (const bookingDoc of bookingsSnapshot.docs) {
-        const paymentsSnapshot = await bookingDoc.ref.collection('payments')
-          .orderBy('createdAt', 'desc')
-          .limit(max)
-          .get();
-        
-        for (const paymentDoc of paymentsSnapshot.docs) {
-          const d = paymentDoc.data();
-          const dateVal = d.createdAt || d.paidAt || Timestamp.now();
-          allPayments.push({
-            id: paymentDoc.id,
-            bookingId: d.bookingId || bookingDoc.id || '',
-            branchId: d.branchId || branchId || '',
-            guestName: d.customerName || d.guestName || '',
-            customerEmail: d.customerEmail || (d.customer && d.customer.email) || '',
-            amount: d.amount || 0,
-            currency: d.currency || 'NGN',
-            date: dateVal.toDate().toISOString(),
-            status: d.status || 'pending',
-            method: d.paymentMethod || d.method || 'paystack',
-            channel: d.channel || 'paystack',
-            paystackTransactionId: d.paystackTransactionId || d.transactionId || '',
-            transactionId: d.transactionId || paymentDoc.id,
-            gatewayResponse: d.gatewayResponse || d.gateway_response || '',
-            fees: d.fees || 0,
-            receiptUrl: d.receiptUrl || d.receipt_url || ''
-          });
+      const needsIndex = (e && (e.code === 9 || (typeof e.message === 'string' && e.message.includes('requires an index'))));
+      if (needsIndex) {
+        let query = db.collectionGroup('payments');
+        if (branchId && branchId !== 'all') {
+          query = query.where('branchId', '==', branchId);
         }
-      }
-    } else {
-      // Query all branches
-      const branchesSnapshot = await db.collection('branches').get();
-      
-      for (const branchDoc of branchesSnapshot.docs) {
-        const bookingsSnapshot = await branchDoc.ref.collection('bookings').get();
-        
-        for (const bookingDoc of bookingsSnapshot.docs) {
-          const paymentsSnapshot = await bookingDoc.ref.collection('payments')
-            .orderBy('createdAt', 'desc')
-            .limit(Math.ceil(max / branchesSnapshot.docs.length) || 25)
-            .get();
-          
-          for (const paymentDoc of paymentsSnapshot.docs) {
-            const d = paymentDoc.data();
-            const dateVal = d.createdAt || d.paidAt || Timestamp.now();
-            allPayments.push({
-              id: paymentDoc.id,
-              bookingId: d.bookingId || bookingDoc.id || '',
-              branchId: d.branchId || branchDoc.id || '',
-              guestName: d.customerName || d.guestName || '',
-              customerEmail: d.customerEmail || (d.customer && d.customer.email) || '',
-              amount: d.amount || 0,
-              currency: d.currency || 'NGN',
-              date: dateVal.toDate().toISOString(),
-              status: d.status || 'pending',
-              method: d.paymentMethod || d.method || 'paystack',
-              channel: d.channel || 'paystack',
-              paystackTransactionId: d.paystackTransactionId || d.transactionId || '',
-              transactionId: d.transactionId || paymentDoc.id,
-              gatewayResponse: d.gatewayResponse || d.gateway_response || '',
-              fees: d.fees || 0,
-              receiptUrl: d.receiptUrl || d.receipt_url || ''
-            });
-          }
-        }
+        snapshot = await query.limit(limitVal).get();
+      } else {
+        throw e;
       }
     }
+    const payments = [];
 
-    // Sort by date and limit results
-    allPayments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const limitedPayments = allPayments.slice(0, max);
+    snapshot.forEach(doc => {
+      const payment = { id: doc.id, ...doc.data() };
+      
+      // Convert Timestamps
+      if (payment.createdAt && payment.createdAt.toDate) payment.createdAt = payment.createdAt.toDate();
+      if (payment.paidAt && payment.paidAt.toDate) payment.paidAt = payment.paidAt.toDate();
+      
+      payments.push(payment);
+    });
 
-    res.status(200).json({ payments: limitedPayments });
+    payments.sort((a, b) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime;
+    });
+
+    return res.status(200).json({
+      status: 'success',
+      data: payments
+    });
+
   } catch (error) {
-    console.error('Error fetching admin payments:', error);
-    res.status(500).json({ error: 'Failed to fetch payments' });
+    console.error('Error fetching payments:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Internal server error fetching payments',
+      error: error.message
+    });
   }
 });
 
-// Backfill branchId on historical payment documents
-app.post('/api/admin/backfill-payments-branchid', async (req, res) => {
-  try {
-    const branchIdParam = (req.body && req.body.branchId) || (req.query && req.query.branchId);
-    let branches = [];
+// Mount the router on both root and /api paths to handle different cPanel configurations
+app.use('/', router);
+app.use('/api', router);
 
-    if (branchIdParam) {
-      const bDoc = await db.collection('branches').doc(String(branchIdParam)).get();
-      if (!bDoc.exists) {
-        return res.status(404).json({ error: 'Branch not found' });
-      }
-      branches = [bDoc];
-    } else {
-      const branchesSnapshot = await db.collection('branches').get();
-      branches = branchesSnapshot.docs;
-    }
-
-    let updatedCount = 0;
-
-    for (const branchDoc of branches) {
-      const bId = branchDoc.id;
-      const bName = branchDoc.data().name || '';
-
-      const bookingsSnapshot = await db
-        .collection('branches')
-        .doc(bId)
-        .collection('bookings')
-        .get();
-
-      for (const bookingDoc of bookingsSnapshot.docs) {
-        const paymentsSnapshot = await db
-          .collection('branches')
-          .doc(bId)
-          .collection('bookings')
-          .doc(bookingDoc.id)
-          .collection('payments')
-          .get();
-
-        for (const paymentDoc of paymentsSnapshot.docs) {
-          const pData = paymentDoc.data();
-          const hasBranchId = !!pData.branchId;
-          const hasBranchName = !!pData.branchName;
-          const hasCreatedAt = !!pData.createdAt;
-
-          if (!hasBranchId || !hasBranchName || !hasCreatedAt) {
-            const createdAt = pData.createdAt || pData.paidAt || Timestamp.now();
-            await paymentDoc.ref.set(
-              {
-                branchId: bId,
-                branchName: bName,
-                createdAt
-              },
-              { merge: true }
-            );
-            updatedCount++;
-          }
-        }
-      }
-    }
-
-    return res.status(200).json({ status: 'success', updatedCount });
-  } catch (error) {
-    console.error('Error backfilling payment branchId:', error);
-    return res.status(500).json({ status: 'error', message: 'Failed to backfill payment documents' });
-  }
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

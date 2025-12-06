@@ -506,7 +506,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       // Call your backend API endpoint that uses Firebase Admin SDK to set custom claims
-      const API_BASE_URL = (import.meta as any).env?.VITE_NEXT_PUBLIC_API_URL || (import.meta as any).env?.NEXT_PUBLIC_API_URL || '/api';
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://rivotels.com/api';
       const response = await fetch(`${API_BASE_URL}/auth/set-custom-claims`, {
         method: 'POST',
         headers: {

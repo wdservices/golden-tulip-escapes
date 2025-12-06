@@ -35,12 +35,12 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
   
   // Hero images for carousel
   const heroImages = [
-    { src: "/images/hero section image/image (1).jpg", alt: "Luxury Hotel Room", title: "Elegant Accommodations" },
-    { src: "/images/hero section image/image (2).jpg", alt: "Hotel Exterior View", title: "Stunning Architecture" },
-    { src: "/images/hero section image/image (3).jpg", alt: "Luxury Suite", title: "Premium Comfort" },
-    { src: "/images/hero section image/image (4).jpg", alt: "Hotel Lobby", title: "Sophisticated Elegance" },
-    { src: "/images/hero section image/image (5).jpg", alt: "Dining Area", title: "Exquisite Cuisine" },
-    { src: "/images/hero section image/image (6).jpg", alt: "Relaxation Area", title: "Ultimate Relaxation" }
+    { src: "/images/evo road carousel image/img (1).jpg", alt: "Evo Road exterior night lights", title: "Evo Road Radiance" },
+    { src: "/images/evo road carousel image/img (2).jpg", alt: "Evo Road lobby interior", title: "Grand Arrival" },
+    { src: "/images/evo road carousel image/img (3).jpg", alt: "Premium suite interior", title: "Signature Suites" },
+    { src: "/images/evo road carousel image/img (4).jpg", alt: "Dining experience at Evo Road", title: "Curated Dining" },
+    { src: "/images/evo road carousel image/img (5).jpg", alt: "Pool terrace at Evo Road", title: "Poolside Serenity" },
+    { src: "/images/evo road carousel image/img (6).jpg", alt: "Executive meeting space", title: "Executive Spaces" }
   ];
 
   useEffect(() => {

@@ -154,6 +154,36 @@ const defaultImages: GalleryImage[] = [
     src: "/images/gallery/spar2.jpg",
     title: "Hotel Image 23",
     category: "Gallery"
+  },
+  {
+    id: "24",
+    src: "/images/gallery/IMG_7822.JPG",
+    title: "Palm Courtyard",
+    category: "Gallery"
+  },
+  {
+    id: "25",
+    src: "/images/gallery/1764979633.png",
+    title: "Lobby Reception",
+    category: "Gallery"
+  },
+  {
+    id: "26",
+    src: "/images/gallery/IMG_2650.jpg",
+    title: "Outdoor Lounge",
+    category: "Gallery"
+  },
+  {
+    id: "27",
+    src: "/images/gallery/IMG_2652.jpg",
+    title: "Pool Terrace",
+    category: "Gallery"
+  },
+  {
+    id: "28",
+    src: "/images/gallery/IMG_2661.jpg",
+    title: "Executive Dining",
+    category: "Gallery"
   }
 ];
 
