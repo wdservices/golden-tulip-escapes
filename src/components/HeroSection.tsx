@@ -35,7 +35,6 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
   
   // Hero images for carousel
   const heroImages = [
-    { src: "/images/evo road carousel image/img (1).jpg", alt: "Evo Road exterior night lights", title: "Evo Road Radiance" },
     { src: "/images/evo road carousel image/img (2).jpg", alt: "Evo Road lobby interior", title: "Grand Arrival" },
     { src: "/images/evo road carousel image/img (3).jpg", alt: "Premium suite interior", title: "Signature Suites" },
     { src: "/images/evo road carousel image/img (4).jpg", alt: "Dining experience at Evo Road", title: "Curated Dining" },

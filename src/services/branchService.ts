@@ -144,7 +144,14 @@ const branches: Branch[] = [
         ]
       }
     ],
-    gallery: [hotelExterior, hotelLobby, luxurySuite, restaurant, pool, spa]
+    gallery: [
+      "/images/evo road carousel image/img (1).jpg",
+      "/images/evo road carousel image/img (2).jpg",
+      "/images/evo road carousel image/img (3).jpg",
+      "/images/evo road carousel image/img (4).jpg",
+      "/images/evo road carousel image/img (5).jpg",
+      "/images/evo road carousel image/img (6).jpg"
+    ]
   },
   {
     id: "stadium-31",
@@ -423,7 +430,24 @@ const branches: Branch[] = [
       "Smoking: Not allowed in the room only at designated areas only",
       "ID: Valid photo ID required at check-in"
     ],
-    gallery: [hotelLobby, pool, luxurySuite, restaurant, spa, hotelExterior]
+    gallery: [
+      "/images/stadium road 31 images/DJI_0055.jpg",
+      "/images/stadium road 31 images/DJI_0059.jpg",
+      "/images/stadium road 31 images/DSC_6132.jpg",
+      "/images/stadium road 31 images/DSC_6133.jpg",
+      "/images/stadium road 31 images/DSC_6136.jpg",
+      "/images/stadium road 31 images/IMG20251204133623.jpg",
+      "/images/stadium road 31 images/deluxe.webp",
+      "/images/stadium road 31 images/executive deluxe.webp",
+      "/images/stadium road 31 images/executive twin.webp",
+      "/images/stadium road 31 images/photo_5882013989284725202_y.jpg",
+      "/images/stadium road 31 images/photo_5882013989284725203_y.jpg",
+      "/images/stadium road 31 images/photo_5882013989284725214_y.jpg",
+      "/images/stadium road 31 images/photo_5882013989284725215_y.jpg",
+      "/images/stadium road 31 images/photo_5882013989284725217_y.jpg",
+      "/images/stadium road 31 images/royal room.webp",
+      "/images/stadium road 31 images/super executive.webp"
+    ]
   },
   {
     id: "garden-city",
@@ -654,7 +678,17 @@ const branches: Branch[] = [
       "Smoking: Designated areas only",
       "ID: Valid photo ID required at check-in"
     ],
-    gallery: [luxurySuite, hotelLobby, hotelExterior, restaurant, pool, spa]
+    gallery: [
+      "/images/garden city images/1670228609DSC_1161885e.jpg",
+      "/images/garden city images/1670229580IMG_20221017_134430f145.jpg",
+      "/images/garden city images/1670229725DSC_1226db1c.jpg",
+      "/images/garden city images/1670229726DSC_126464ce.jpg",
+      "/images/garden city images/1670229758DSC_11795be1.jpg",
+      "/images/garden city images/1670229802DSC_11800acb.jpg",
+      "/images/garden city images/1670229841DSC_119048ca.jpg",
+      "/images/garden city images/standard room.webp",
+      "/images/garden city images/superior room.webp"
+    ]
   },
   {
     id: "evergreen",
@@ -827,7 +861,20 @@ const branches: Branch[] = [
       "Smoking: Designated areas only",
       "ID: Valid photo ID required at check-in"
     ],
-    gallery: [restaurant, pool, spa, hotelExterior, hotelLobby, luxurySuite]
+    gallery: [
+      "/images/evergreen images/1657261654_MG_08321550.png",
+      "/images/evergreen images/1657261754_MG_09408be7.png",
+      "/images/evergreen images/1657261754_MG_07943951.png",
+      "/images/evergreen images/1657261935_MG_0754caaf.png",
+      "/images/evergreen images/1657262150_MG_06919ced.png",
+      "/images/evergreen images/1657262150_MG_0708215b.png",
+      "/images/evergreen images/1657262151_MG_08206ecc.png",
+      "/images/evergreen images/1657262151_MG_08401164.png",
+      "/images/evergreen images/deluxe room.webp",
+      "/images/evergreen images/executive room.webp",
+      "/images/evergreen images/standard room.webp",
+      "/images/evergreen images/superior room.webp"
+    ]
   }
 ];
 

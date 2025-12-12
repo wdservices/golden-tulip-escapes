@@ -9,9 +9,10 @@ import { toast } from "sonner";
 interface HeaderProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  onOpenGallery?: () => void;
 }
 
-export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
+export const Header = ({ activeTab, onTabChange, onOpenGallery }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -80,7 +81,19 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
                   </Link>
                 ) : (
                   <button
-                    onClick={() => scrollToSection(item.href)}
+                    onClick={() => {
+                      if (item.name === 'Gallery') {
+                        if (location.pathname !== '/') {
+                          window.location.href = '/#gallery';
+                        } else if (onOpenGallery) {
+                          onOpenGallery();
+                        } else {
+                          scrollToSection(item.href);
+                        }
+                      } else {
+                        scrollToSection(item.href);
+                      }
+                    }}
                     className="px-4 py-2 rounded-lg text-white hover:text-primary transition-all duration-300 font-medium"
                   >
                     {item.name}
@@ -140,7 +153,17 @@ export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
                   <button
                     key={item.name}
                     onClick={() => {
-                      scrollToSection(item.href);
+                      if (item.name === 'Gallery') {
+                        if (location.pathname !== '/') {
+                          window.location.href = '/#gallery';
+                        } else if (onOpenGallery) {
+                          onOpenGallery();
+                        } else {
+                          scrollToSection(item.href);
+                        }
+                      } else {
+                        scrollToSection(item.href);
+                      }
                       setIsMenuOpen(false);
                     }}
                     className="block w-full text-left px-4 py-3 text-white hover:text-primary hover:bg-white/10 transition-all duration-300 font-medium rounded-lg mx-2"

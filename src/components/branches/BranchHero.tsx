@@ -25,6 +25,12 @@ export const BranchHero = ({ branch }: BranchHeroProps) => {
       "/images/stadium road 31 images/carousel image/IMG20251204133813.jpg",
       "/images/stadium road 31 images/carousel image/IMG20251204133857.jpg",
     ],
+    "evergreen": [
+      "/images/evergreen images/deluxe room.webp",
+      "/images/evergreen images/executive room.webp",
+      "/images/evergreen images/standard room.webp",
+      "/images/evergreen images/superior room.webp",
+    ],
   }), []);
 
   const carouselImages = branchCarousels[branch.id] || [];

@@ -8,6 +8,16 @@ interface BranchGalleryProps {
 export const BranchGallery = ({ branch }: BranchGalleryProps) => {
   // Generate gallery images based on branch data
   const generateBranchGallery = () => {
+    if (branch.gallery && branch.gallery.length > 0) {
+      return branch.gallery.map((src, index) => ({
+        id: `${branch.id}-gallery-${index}`,
+        src,
+        title: `${branch.name} Experience`,
+        description: branch.description,
+        category: "Gallery"
+      }));
+    }
+
     const baseImages = [
       {
         id: `${branch.id}-exterior`,
@@ -37,7 +47,7 @@ export const BranchGallery = ({ branch }: BranchGalleryProps) => {
       id: `${branch.id}-dining-${index}`,
       src: "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&h=600&fit=crop",
       title: dining.name,
-      description: dining.description || `Fine dining experience at ${branch.fullName}`,
+      description: `Cuisine: ${dining.cuisine}`,
       category: "Dining"
     })) || [];
 
@@ -54,8 +64,8 @@ export const BranchGallery = ({ branch }: BranchGalleryProps) => {
     const eventImages = branch.events?.slice(0, 2).map((event, index) => ({
       id: `${branch.id}-event-${index}`,
       src: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&h=600&fit=crop",
-      title: event.name,
-      description: event.description || `Event facilities at ${branch.fullName}`,
+      title: event.type,
+      description: `Capacity: ${event.capacity}`,
       category: "Events"
     })) || [];
 

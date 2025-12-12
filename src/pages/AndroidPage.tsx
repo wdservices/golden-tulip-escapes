@@ -14,17 +14,17 @@ const BRANCHES = [
   { 
     id: 'evo-road', 
     name: 'Evo Road',
-    image: '/images/hero section image/image (1).jpg'
+    image: '/images/evo road carousel image/img (2).jpg'
   },
   { 
     id: 'garden-city', 
     name: 'Garden City',
-    image: '/images/garden city images/superior room.webp'
+    image: '/images/garden city images/carousel image/IMG20251204143022.jpg'
   },
   { 
     id: 'stadium-31', 
     name: 'Stadium 31',
-    image: '/images/stadium road 31 images/deluxe.webp'
+    image: '/images/stadium road 31 images/carousel image/IMG20251204133623.jpg'
   },
   { 
     id: 'evergreen', 
@@ -35,12 +35,10 @@ const BRANCHES = [
 
 // Image slider data for main page
 const SLIDER_IMAGES = [
-  { src: '/images/hero section image/image (1).jpg', alt: 'Luxury Hotel Room' },
-  { src: '/images/hero section image/image (2).jpg', alt: 'Hotel Exterior View' },
-  { src: '/images/hero section image/image (3).jpg', alt: 'Luxury Suite' },
-  { src: '/images/hero section image/image (4).jpg', alt: 'Hotel Lobby' },
-  { src: '/images/hero section image/image (5).jpg', alt: 'Dining Area' },
-  { src: '/images/hero section image/image (6).jpg', alt: 'Relaxation Area' }
+  { src: '/images/evo road carousel image/img (2).jpg', alt: 'Evo Road – Grand Arrival' },
+  { src: '/images/garden city images/carousel image/IMG20251204143022.jpg', alt: 'Garden City – Suite Interior' },
+  { src: '/images/stadium road 31 images/carousel image/IMG20251204133623.jpg', alt: 'Stadium Road 31 – Lobby' },
+  { src: '/images/evergreen images/standard room.webp', alt: 'Evergreen – Standard Room' }
 ];
 
 export const AndroidPage: React.FC = () => {

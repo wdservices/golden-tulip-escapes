@@ -1,19 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { BranchTabs } from "@/components/BranchTabs";
 import { InfoSections } from "@/components/InfoSections";
-import { Gallery } from "@/components/Gallery";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
 
 const Index = () => {
   // Don't set main as the default active tab
   const [activeBranch, setActiveBranch] = useState<string | null>(null);
   const [showFullAbout, setShowFullAbout] = useState(false);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("Wellness");
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+
+  const location = useLocation();
+  useEffect(() => {
+    if (location.hash === '#gallery') {
+      setIsGalleryOpen(true);
+    }
+  }, [location.hash]);
 
   const handleTabChange = (branch: string) => {
     // If clicking on main branch, reset the active tab
@@ -37,7 +48,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header activeTab={activeBranch || ''} onTabChange={handleTabChange} />
+      <Header activeTab={activeBranch || ''} onTabChange={handleTabChange} onOpenGallery={() => setIsGalleryOpen(true)} />
       
       <main>
         <HeroSection 
@@ -49,8 +60,147 @@ const Index = () => {
           selectedBranch={activeBranch} 
           onBranchSelect={handleTabChange}
         />
-        
-        <Gallery />
+
+        <section className="py-12">
+          <div className="container mx-auto px-4 text-center">
+            <Dialog open={isGalleryOpen} onOpenChange={setIsGalleryOpen}>
+              <DialogTrigger asChild>
+                <Button className="btn-luxury" size="lg" onClick={() => setIsGalleryOpen(true)}>Pictures Gallery</Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-6xl w-[95vw] h-[80vh] sm:h-[75vh]">
+                <DialogHeader>
+                  <DialogTitle>Pictures Gallery</DialogTitle>
+                </DialogHeader>
+                <div className="h-full overflow-y-auto space-y-6 pr-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 pb-2 sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 py-2">
+                    {[
+                      { key: "Wellness", thumb: "/images/gallery/wellness/spar2.jpg" },
+                      { key: "Rooms", thumb: "/images/gallery/rooms/img (2).jpg" },
+                      { key: "Catering", thumb: "/images/gallery/catering/61940181_XXL.jpg" },
+                      { key: "Meetings", thumb: "/images/gallery/meetings/73066312_XXL.jpg" },
+                      { key: "Facilities", thumb: "/images/gallery/facility/6429175_XXL.jpg" },
+                      { key: "Other pictures", thumb: "/images/gallery/others/61940047_XXL.jpg" },
+                    ].map(({ key, thumb }) => (
+                      <button
+                        key={key}
+                        onClick={() => setSelectedCategory(key)}
+                        className={`w-full text-left rounded-xl border ${selectedCategory === key ? "border-primary ring-1 ring-primary/30" : "border-border"} bg-card hover:border-primary/60 hover:ring-1 hover:ring-primary/20 transition-colors shadow-sm hover:shadow-md`}
+                      >
+                        <img src={thumb} alt={key} className="w-full h-20 object-cover rounded-t-xl" />
+                        <div className="px-2 py-1 text-xs font-medium">{key}</div>
+                      </button>
+                    ))}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">{selectedCategory}</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {(
+                        selectedCategory === "Wellness" ? [
+                          "/images/gallery/wellness/spar2.jpg"
+                        ] : selectedCategory === "Rooms" ? [
+                          "/images/gallery/rooms/img (2).jpg",
+                          "/images/gallery/rooms/img (3).jpg",
+                          "/images/gallery/rooms/img (4).jpg",
+                          "/images/gallery/rooms/img (5).jpg",
+                          "/images/gallery/rooms/img (6).jpg",
+                          "/images/gallery/rooms/img (7).jpg",
+                          "/images/gallery/rooms/img (8).jpg",
+                          "/images/gallery/rooms/img (9).jpg",
+                          "/images/gallery/rooms/img (10).jpg",
+                          "/images/gallery/rooms/img (12).jpg",
+                          "/images/gallery/rooms/img (13).jpg",
+                          "/images/gallery/rooms/img (14).jpg",
+                          "/images/gallery/rooms/img (15).jpg",
+                          "/images/gallery/rooms/img (16).jpg",
+                          "/images/gallery/rooms/img (17).jpg",
+                          "/images/gallery/rooms/img (18).jpg",
+                          "/images/gallery/rooms/img (19).jpg",
+                          "/images/gallery/rooms/img (20).jpg",
+                          "/images/gallery/rooms/img (22).jpg",
+                        ] : selectedCategory === "Catering" ? [
+                          "/images/gallery/catering/61940181_XXL.jpg",
+                          "/images/gallery/catering/61940891_XXL.jpg",
+                          "/images/gallery/catering/61941477_XXL.jpg",
+                          "/images/gallery/catering/6429151_XXL.jpg",
+                          "/images/gallery/catering/6429155_XXL.jpg",
+                          "/images/gallery/catering/6429161_XXL.jpg",
+                          "/images/gallery/catering/6429179_XXL.jpg",
+                          "/images/gallery/catering/73067586_XXL.jpg",
+                          "/images/gallery/catering/73067764_XXL.jpg",
+                          "/images/gallery/catering/73088759_XXL.jpg",
+                          "/images/gallery/catering/73171504_XXL.jpg",
+                          "/images/gallery/catering/73171526_XXL.jpg",
+                          "/images/gallery/catering/73171552_XXL.jpg",
+                          "/images/gallery/catering/73171558_XXL.jpg",
+                          "/images/gallery/catering/83649324_XXL.jpg",
+                          "/images/gallery/catering/83649328_XXL.jpg",
+                          "/images/gallery/catering/83649330_XXL.jpg",
+                          "/images/gallery/catering/83649350_XXL.jpg",
+                          "/images/gallery/catering/IMG_7822.JPG",
+                        ] : selectedCategory === "Meetings" ? [
+                          "/images/gallery/meetings/73066312_XXL.jpg",
+                          "/images/gallery/meetings/73066320_XXL.jpg",
+                          "/images/gallery/meetings/73066322_XXL.jpg",
+                          "/images/gallery/meetings/73066326_XXL.jpg",
+                          "/images/gallery/meetings/73066328_XXL.jpg",
+                          "/images/gallery/meetings/73066336_XXL.jpg",
+                          "/images/gallery/meetings/73066338_XXL.jpg",
+                          "/images/gallery/meetings/73066348_XXL.jpg",
+                          "/images/gallery/meetings/73066366_XXL.jpg",
+                          "/images/gallery/meetings/73066372_XXL.jpg",
+                          "/images/gallery/meetings/73066384_XXL.jpg",
+                          "/images/gallery/meetings/73066394_XXL.jpg",
+                          "/images/gallery/meetings/73066398_XXL.jpg",
+                          "/images/gallery/meetings/73171590_XXL.jpg",
+                          "/images/gallery/meetings/73171592_XXL.jpg",
+                          "/images/gallery/meetings/73171598_XXL.jpg",
+                        ] : selectedCategory === "Facilities" ? [
+                          "/images/gallery/facility/6429175_XXL.jpg",
+                          "/images/gallery/facility/6429187_XXL.jpg",
+                        ] : [
+                          "/images/gallery/others/1764979633.png",
+                          "/images/gallery/others/61940047_XXL.jpg",
+                          "/images/gallery/others/61993873_XXL.jpg",
+                          "/images/gallery/others/6429153_XXL.jpg",
+                          "/images/gallery/others/6429169_XXL.jpg",
+                          "/images/gallery/others/6429177_XXL.jpg",
+                          "/images/gallery/others/6429189_XXL.jpg",
+                          "/images/gallery/others/6467642_XXL.jpg",
+                          "/images/gallery/others/6467760_XXL.jpg",
+                          "/images/gallery/others/73066230_XXL.jpg",
+                          "/images/gallery/others/73067466_XXL.jpg",
+                          "/images/gallery/others/73067470_XXL.jpg",
+                          "/images/gallery/others/73067760_XXL.jpg",
+                          "/images/gallery/others/73088757_XXL.jpg",
+                          "/images/gallery/others/IMG_2650.jpg",
+                          "/images/gallery/others/IMG_2652.jpg",
+                          "/images/gallery/others/IMG_2661.jpg",
+                          "/images/gallery/others/img (11).jpg",
+                          "/images/gallery/others/img (21).jpg",
+                        ]
+                      ).map((src) => (
+                        <button key={src} onClick={() => setLightboxSrc(src)} className="group relative overflow-hidden rounded-2xl shadow-sm hover:shadow-lg">
+                          <img src={src} alt={selectedCategory} className="w-full h-48 sm:h-64 object-cover rounded-2xl transition-transform duration-300 group-hover:scale-105" />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={!!lightboxSrc} onOpenChange={(open) => setLightboxSrc(open ? lightboxSrc : null)}>
+              <DialogContent className="max-w-4xl w-[95vw] bg-transparent border-none shadow-none p-0">
+                <div className="relative w-full">
+                  {lightboxSrc && (
+                    <img src={lightboxSrc} alt="Preview" className="w-full h-auto max-h-[80vh] object-contain rounded-2xl shadow-2xl" />
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </section>
         
         <InfoSections />
         

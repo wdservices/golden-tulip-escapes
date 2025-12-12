@@ -1,69 +1,21 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-interface BranchGallery {
-  id: string;
-  name: string;
-  images: string[];
-  description: string;
-}
-
-const BRANCH_GALLERIES: Record<string, BranchGallery> = {
-  'evo-road': {
-    id: 'evo-road',
-    name: 'Golden Tulip EVO Road',
-    images: [
-      '/images/hero section image/image (1).jpg',
-      '/images/hero section image/image (2).jpg',
-      '/images/hero section image/image (3).jpg',
-      '/images/hero section image/image (4).jpg',
-      '/images/hero section image/image (5).jpg',
-      '/images/hero section image/image (6).jpg'
-    ],
-    description: 'Experience luxury accommodation at our flagship EVO Road location in the heart of Port Harcourt.'
-  },
-  'garden-city': {
-    id: 'garden-city',
-    name: 'Golden Tulip Garden City',
-    images: [
-      '/images/garden city images/standard room.webp',
-      '/images/garden city images/superior room.webp',
-      '/images/hero section image/image (1).jpg',
-      '/images/hero section image/image (3).jpg'
-    ],
-    description: 'Discover comfort and elegance at our Garden City location.'
-  },
-  'stadium-31': {
-    id: 'stadium-31',
-    name: 'Golden Tulip Stadium 31',
-    images: [
-      '/images/stadium road 31 images/deluxe.webp',
-      '/images/stadium road 31 images/executive deluxe.webp',
-      '/images/stadium road 31 images/executive twin.webp',
-      '/images/stadium road 31 images/royal room.webp',
-      '/images/stadium road 31 images/super executive.webp'
-    ],
-    description: 'Experience premium hospitality at our Stadium Road 31 location.'
-  },
-  'evergreen': {
-    id: 'evergreen',
-    name: 'Golden Tulip Evergreen',
-    images: [
-      '/images/evergreen images/standard room.webp',
-      '/images/evergreen images/deluxe room.webp',
-      '/images/evergreen images/executive room.webp',
-      '/images/evergreen images/superior room.webp'
-    ],
-    description: 'Enjoy tranquility and comfort at our Evergreen location.'
-  }
-};
+import { getBranchById } from '@/services/branchService';
 
 export function AndroidGalleryPage() {
   const { branchId } = useParams<{ branchId: string }>();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
-  const gallery = branchId ? BRANCH_GALLERIES[branchId] : null;
+
+  const branch = useMemo(() => (branchId ? getBranchById(branchId) : undefined), [branchId]);
+  const gallery = branch
+    ? {
+        id: branch.id!,
+        name: branch.fullName || branch.name,
+        images: (branch.gallery && branch.gallery.length > 0) ? branch.gallery : [],
+        description: branch.description || ''
+      }
+    : null;
   
   if (!gallery) {
     return (
@@ -156,7 +108,9 @@ export function AndroidGalleryPage() {
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
                   className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                    index === currentImageIndex ? 'border-blue-500' : 'border-gray-300 hover:border-gray-400'
+                    index === currentImageIndex 
+                      ? 'border-[hsl(var(--royal-blue))]' 
+                      : 'border-gray-300 hover:border-[hsl(var(--royal-blue-light))]'
                   }`}
                 >
                   <img
@@ -176,7 +130,7 @@ export function AndroidGalleryPage() {
         <div className="mt-8 text-center">
           <button
             onClick={handleBooking}
-            className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            className="bg-[hsl(var(--royal-blue))] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[hsl(var(--royal-blue-light))] transition-colors"
           >
             Book This Room
           </button>

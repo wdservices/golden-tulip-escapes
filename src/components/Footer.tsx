@@ -198,6 +198,9 @@ export const Footer = () => {
               © 2024 Golden Tulip Hotels. All rights reserved.
             </p>
             <div className="flex space-x-6">
+              <a href="https://bwtng.live" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-golden-yellow text-sm transition-colors duration-300">
+                Website developed by Bluewaves Technologies — www.bwtng.live
+              </a>
               <a href="/privacy" className="text-white/60 hover:text-golden-yellow text-sm transition-colors duration-300">
                 Privacy Policy
               </a>
