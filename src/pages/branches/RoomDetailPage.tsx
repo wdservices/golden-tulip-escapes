@@ -110,7 +110,7 @@ export const RoomDetailPage = () => {
               allow="xr-spatial-tracking; gyroscope; accelerometer" 
               allowFullScreen 
               scrolling="no" 
-              src="https://kuula.co/share/collection/7HphP?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+              src="https://kuula.co/share/collection/7HphP?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=-1"
               className="w-full h-full object-cover"
             />
           ) : room.name.toLowerCase() === 'deluxe room' ? (
@@ -121,7 +121,7 @@ export const RoomDetailPage = () => {
               allow="xr-spatial-tracking; gyroscope; accelerometer" 
               allowFullScreen 
               scrolling="no" 
-              src="https://kuula.co/share/collection/7HphX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+              src="https://kuula.co/share/collection/7HphX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
               className="w-full h-full object-cover"
             />
           ) : room.name.toLowerCase() === 'executive deluxe room' ? (
@@ -132,7 +132,7 @@ export const RoomDetailPage = () => {
               allow="xr-spatial-tracking; gyroscope; accelerometer" 
               allowFullScreen 
               scrolling="no" 
-              src="https://kuula.co/share/collection/7Hph1?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+              src="https://kuula.co/share/collection/7Hph1?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=-1"
               className="w-full h-full object-cover"
             />
           ) : room.name.toLowerCase() === 'executive twin room' ? (
@@ -143,7 +143,7 @@ export const RoomDetailPage = () => {
               allow="xr-spatial-tracking; gyroscope; accelerometer" 
               allowFullScreen 
               scrolling="no" 
-              src="https://kuula.co/share/collection/7Hphd?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+              src="https://kuula.co/share/collection/7Hphd?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=-1"
               className="w-full h-full object-cover"
             />
           ) : room.name.toLowerCase() === 'royal suites room' ? (
@@ -154,7 +154,7 @@ export const RoomDetailPage = () => {
               allow="xr-spatial-tracking; gyroscope; accelerometer" 
               allowFullScreen 
               scrolling="no" 
-              src="https://kuula.co/share/collection/7HphC?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+              src="https://kuula.co/share/collection/7HphC?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=-1"
               className="w-full h-full object-cover"
             />
           ) : room.name.toLowerCase() === 'standard room' ? (
@@ -176,7 +176,18 @@ export const RoomDetailPage = () => {
               allow="xr-spatial-tracking; gyroscope; accelerometer" 
               allowFullScreen 
               scrolling="no" 
-              src="https://kuula.co/share/collection/7HpLm?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
+              src="https://kuula.co/share/collection/7HDWq?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=1"
+              className="w-full h-full object-cover"
+            />
+          ) : room.name.toLowerCase() === 'junior suite' ? (
+            <iframe 
+              width="100%" 
+              height="640" 
+              frameBorder="0" 
+              allow="xr-spatial-tracking; gyroscope; accelerometer" 
+              allowFullScreen 
+              scrolling="no" 
+              src="https://kuula.co/share/collection/7HDWP?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1&alpha=0.60"
               className="w-full h-full object-cover"
             />
           ) : room.name.toLowerCase() === 'deluxe suite' ? (
@@ -198,12 +209,12 @@ export const RoomDetailPage = () => {
             />
           )}
         </div>
-        <div className={`absolute bottom-0 left-0 w-full bg-gradient-to-t ${isEvoRoad ? 'from-blue-900/90 to-transparent' : 'from-black/90 to-transparent'} p-6`}>
+        <div className={`absolute bottom-0 left-0 w-full bg-gradient-to-t ${isEvoRoad ? 'from-blue-900/90 to-transparent' : 'from-black/90 to-transparent'} p-6 pointer-events-none`}>
           <div className="container mx-auto">
             <Button 
               variant="outline" 
               size="sm" 
-              className={`mb-4 text-white ${isEvoRoad ? 'border-blue-200/30 bg-blue-800/40 hover:bg-blue-700/60' : 'border-white/30 bg-black/40 hover:bg-black/60'}`}
+              className={`mb-4 text-white pointer-events-auto ${isEvoRoad ? 'border-blue-200/30 bg-blue-800/40 hover:bg-blue-700/60' : 'border-white/30 bg-black/40 hover:bg-black/60'}`}
               onClick={() => navigate(`/branch/${branchId}`)}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />

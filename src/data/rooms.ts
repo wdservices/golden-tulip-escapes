@@ -139,7 +139,7 @@ export const roomTypes: RoomType[] = [
       '/images/deluxe room suite.png',
       '/images/deluxe room suite.png'
     ],
-    vrTourUrl: 'https://webobook.com/public/deluxe-room-vr-tour'
+    vrTourUrl: 'https://kuula.co/share/collection/7HphX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1'
   },
   {
     id: 'premium-diplomatic-suite',

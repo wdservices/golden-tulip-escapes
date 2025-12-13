@@ -587,6 +587,7 @@ const branches: Branch[] = [
         description: "Luxurious suites with separate living area.",
         priceRange: "₦147,850 per night",
         capacity: 2,
+        image: "/images/garden city images/junior room.jpg",
         features: [
           "Queen-size bed",
           "City view",
@@ -604,6 +605,7 @@ const branches: Branch[] = [
         description: "Ultimate luxury with premium furnishings.",
         priceRange: "₦168,909 per night",
         capacity: 2,
+        image: "/images/garden city images/executive room.jpg",
         features: [
           "Queen-size bed",
           "City view",
