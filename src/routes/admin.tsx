@@ -15,6 +15,7 @@ const PaymentsPage = lazy(() => import("@/pages/admin/PaymentsPage"));
 const ReportsPage = lazy(() => import("@/pages/admin/ReportsPage"));
 const BranchesPage = lazy(() => import("@/pages/admin/BranchesPage"));
 const SettingsPage = lazy(() => import("@/pages/admin/settings/SettingsPage"));
+const DocumentationPage = lazy(() => import("@/pages/admin/DocumentationPage"));
 
 // Loading component for Suspense fallback
 const LoadingFallback = () => (
@@ -67,6 +68,10 @@ export const adminRouter = createBrowserRouter([
       {
         path: "settings",
         element: <Suspense fallback={<LoadingFallback />}><SettingsPage /></Suspense>,
+      },
+      {
+        path: "documentation",
+        element: <Suspense fallback={<LoadingFallback />}><DocumentationPage /></Suspense>,
       },
       {
         path: "test",

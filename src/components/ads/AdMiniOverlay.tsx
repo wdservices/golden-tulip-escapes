@@ -116,12 +116,16 @@ export const AdMiniOverlay = () => {
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
-              className="relative w-full max-w-6xl bg-white rounded-xl overflow-hidden shadow-2xl border-2 border-yellow-400 flex flex-col md:flex-row h-[80vh]"
-              onClick={(e) => e.stopPropagation()}
-            >
+              className="relative w-full max-w-4xl bg-white rounded-xl overflow-hidden shadow-2xl border-2 border-yellow-400 flex flex-col md:flex-row h-[60vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
               <button
-                onClick={handleCloseFullAd}
-                className="absolute top-2 right-2 z-10 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCloseFullAd();
+                }}
+                className="absolute top-2 right-2 z-[60] p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors cursor-pointer"
+                aria-label="Close Ad"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
               </button>

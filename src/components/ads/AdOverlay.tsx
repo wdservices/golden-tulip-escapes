@@ -4,11 +4,17 @@ import { useAd } from "@/contexts/AdContext";
 import { getProxiedUrl } from "@/utils/imageUtils";
 
 export const AdOverlay = () => {
-  const { ads, showMainAd, setShowMainAd, currentAdIndex } = useAd();
+  const { ads, showMainAd, setShowMainAd, setShowMiniAd, currentAdIndex } = useAd();
   
   console.log("AdOverlay: Rendering with ads:", ads, "showMainAd:", showMainAd);
   
   const currentAd = ads[currentAdIndex];
+
+  const handleClose = () => {
+    setShowMainAd(false);
+    // Ensure mini overlay shows up when manually closed
+    setTimeout(() => setShowMiniAd(true), 500);
+  };
   
   // Calculate duration in seconds (min 10s, max 20s, 5s per ad)
   const duration = Math.min(Math.max(10, ads.length * 5), 20);
@@ -26,14 +32,14 @@ export const AdOverlay = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="relative w-full max-w-6xl bg-white rounded-xl overflow-hidden shadow-2xl border-2 border-yellow-400 h-[80vh]"
+            className="relative w-full max-w-4xl bg-white rounded-xl overflow-hidden shadow-2xl border-2 border-yellow-400 h-[60vh]"
             style={{
               boxShadow: "0 0 20px 5px rgba(234, 179, 8, 0.6), 0 0 40px 10px rgba(234, 179, 8, 0.3)" // Glowing border effect
             }}
           >
             <button
-              onClick={() => setShowMainAd(false)}
-              className="absolute top-2 right-2 z-10 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
+              onClick={handleClose}
+              className="absolute top-2 right-2 z-50 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>

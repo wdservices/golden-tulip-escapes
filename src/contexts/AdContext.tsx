@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { useDatabase } from './DatabaseContext';
+import { collection, onSnapshot, query } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface AdData {
   id?: string;
@@ -29,47 +31,41 @@ export const AdProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [showMiniAd, setShowMiniAd] = useState(false);
 
   useEffect(() => {
-    const fetchAds = async () => {
-      try {
-        console.log("AdProvider: Fetching ads...");
-        const adsData = await queryDocuments<AdData>("ads");
-        console.log("AdProvider: Raw ads data:", adsData);
-        const activeAds = adsData.filter(ad => ad.isActive && ad.imageUrl);
-        console.log("AdProvider: Active ads found:", activeAds);
-        
-        if (activeAds.length > 0) {
-          setAds(activeAds);
-          // Show main ad immediately when ads are loaded
-          setShowMainAd(true);
-          console.log("AdProvider: Main ad shown");
-        } else {
-          console.log("AdProvider: No active ads found, using test ad");
-          // Fallback test ad for development
-          const testAd = {
-            title: "Welcome to Golden Tulip!",
-            imageUrl: "https://via.placeholder.com/1200x800/FFD700/000000?text=Golden+Tulip",
-            text: "Experience luxury hospitality in Port Harcourt",
-            isActive: true
-          };
-          setAds([testAd]);
-          setShowMainAd(true);
-        }
-      } catch (error) {
-        console.error("AdProvider: Error fetching ads:", error);
-        // Fallback on error
-         const testAd = {
-           title: "Welcome to Golden Tulip!",
-           imageUrl: "https://via.placeholder.com/1200x800/FFD700/000000?text=Golden+Tulip",
-           text: "Experience luxury hospitality in Port Harcourt",
-           isActive: true
-         };
-        setAds([testAd]);
-        setShowMainAd(true);
+    // Real-time listener
+    const q = query(collection(db, "ads"));
+    
+    console.log("AdProvider: Setting up real-time listener...");
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const adsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AdData));
+      // console.log("AdProvider: Real-time ads update:", adsData);
+      
+      const activeAds = adsData.filter(ad => ad.isActive && ad.imageUrl);
+      console.log("AdProvider: Active ads found:", activeAds.length);
+      
+      if (activeAds.length > 0) {
+        setAds((prevAds) => {
+          // If we previously had no ads, and now we do, show the main ad
+          if (prevAds.length === 0) {
+            setShowMainAd(true);
+          }
+          return activeAds;
+        });
+      } else {
+        console.log("AdProvider: No active ads found, disabling ads");
+        setAds([]);
+        setShowMainAd(false);
+        setShowMiniAd(false);
       }
-    };
+    }, (error) => {
+      console.error("AdProvider: Error in real-time listener:", error);
+      setAds([]);
+      setShowMainAd(false);
+      setShowMiniAd(false);
+    });
 
-    fetchAds();
-  }, [queryDocuments]);
+    return () => unsubscribe();
+  }, []);
 
   // Handle ad rotation
   useEffect(() => {

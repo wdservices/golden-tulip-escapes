@@ -45,7 +45,8 @@ import {
   LogOut, 
   ArrowLeft,
   MessageSquare,
-  Megaphone
+  Megaphone,
+  BookOpen
 } from "lucide-react";
 
 // Import components
@@ -376,6 +377,7 @@ const AdminDashboard = () => {
               { id: 'feedback', label: 'Feedback', icon: MessageSquare },
               { id: 'branches', label: 'Branches', icon: Building2 },
               { id: 'ads', label: 'Ads', icon: Megaphone },
+              { id: 'documentation', label: 'Documentation', icon: BookOpen },
               { id: 'settings', label: 'Settings', icon: Settings },
             ].map((item) => (
               <Button
