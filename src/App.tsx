@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DatabaseProvider } from "@/contexts/DatabaseContext";
+import { AdProvider } from "@/contexts/AdContext";
 import { ConditionalChatbot } from "@/components/chat/ConditionalChatbot";
 import { lazy, Suspense } from 'react';
 import Index from "./pages/Index";
@@ -41,6 +42,7 @@ const FeedbackPage = lazy(() => import("@/pages/admin/FeedbackPage"));
 const BranchesPage = lazy(() => import("@/pages/admin/BranchesPage"));
 const SettingsPage = lazy(() => import("@/pages/admin/settings/SettingsPage"));
 const DashboardHome = lazy(() => import("@/pages/admin/DashboardHome"));
+const AdsPage = lazy(() => import("@/pages/admin/AdsPageNew"));
 
 // Loading component for Suspense fallback
 const LoadingFallback = () => (
@@ -94,8 +96,9 @@ const App = () => {
           >
             <AuthProvider>
               <DatabaseProvider>
-                <ConditionalChatbot />
-                <Routes>
+                <AdProvider>
+                  <ConditionalChatbot />
+                  <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/firebase-test" element={<FirebaseTest />} />
@@ -174,6 +177,11 @@ const App = () => {
                   <BranchesPage />
                 </Suspense>
               } />
+              <Route path="ads" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <AdsPage />
+                </Suspense>
+              } />
               <Route path="settings/*" element={
                 <Suspense fallback={<LoadingFallback />}>
                   <SettingsPage />
@@ -184,7 +192,8 @@ const App = () => {
             {/* 404 - Keep this last */}
             <Route path="*" element={<NotFound />} />
               </Routes>
-            </DatabaseProvider>
+                </AdProvider>
+              </DatabaseProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

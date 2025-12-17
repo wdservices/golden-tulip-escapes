@@ -44,7 +44,8 @@ import {
   TrendingUp,
   LogOut, 
   ArrowLeft,
-  MessageSquare
+  MessageSquare,
+  Megaphone
 } from "lucide-react";
 
 // Import components
@@ -77,6 +78,7 @@ const navItems = [
   { id: 'reports', label: 'Reports & Analytics', icon: BarChart2 },
   { id: 'feedback', label: 'Feedback', icon: MessageSquare },
   { id: 'branches', label: 'Branches', icon: Building2 },
+  { id: 'ads', label: 'Ads', icon: Megaphone },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -373,6 +375,7 @@ const AdminDashboard = () => {
               { id: 'reports', label: 'Reports', icon: BarChart2 },
               { id: 'feedback', label: 'Feedback', icon: MessageSquare },
               { id: 'branches', label: 'Branches', icon: Building2 },
+              { id: 'ads', label: 'Ads', icon: Megaphone },
               { id: 'settings', label: 'Settings', icon: Settings },
             ].map((item) => (
               <Button

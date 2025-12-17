@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, X } from "lucide-react";
+import { AdOverlay } from "@/components/ads/AdOverlay";
+import { AdMiniOverlay } from "@/components/ads/AdMiniOverlay";
 
 const Index = () => {
   // Don't set main as the default active tab
@@ -48,6 +50,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <AdOverlay />
+      <AdMiniOverlay />
       <Header activeTab={activeBranch || ''} onTabChange={handleTabChange} onOpenGallery={() => setIsGalleryOpen(true)} />
       
       <main>
@@ -442,6 +446,8 @@ const Index = () => {
       </main>
       
       <Footer />
+      <AdOverlay />
+      <AdMiniOverlay />
     </div>
   );
 };
