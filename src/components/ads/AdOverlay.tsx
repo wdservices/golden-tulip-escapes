@@ -32,7 +32,7 @@ export const AdOverlay = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="relative w-full max-w-4xl bg-white rounded-xl overflow-hidden shadow-2xl border-2 border-yellow-400 h-[60vh]"
+            className="relative w-full max-w-4xl bg-white rounded-xl shadow-2xl border-2 border-yellow-400 max-h-[90vh] sm:max-h-[80vh] md:h-[60vh] overflow-y-auto md:overflow-hidden"
             style={{
               boxShadow: "0 0 20px 5px rgba(234, 179, 8, 0.6), 0 0 40px 10px rgba(234, 179, 8, 0.3)" // Glowing border effect
             }}
@@ -49,28 +49,28 @@ export const AdOverlay = () => {
                 key={currentAd.id || currentAdIndex}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.5 }}
-                className="flex flex-col md:flex-row w-full h-full"
-              >
-                {/* Left Side: Content */}
-                <div className="w-full md:w-1/3 p-6 md:p-8 flex flex-col justify-center bg-gradient-to-br from-white to-gray-50 overflow-y-auto">
-                  {currentAd.title && (
-                    <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 drop-shadow-sm text-left">
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.5 }}
+              className="flex flex-col-reverse md:flex-row w-full md:h-full"
+            >
+              {/* Left Side: Content */}
+              <div className="w-full md:w-[55%] p-6 md:p-8 flex flex-col justify-start md:justify-center bg-gradient-to-br from-white to-gray-50 overflow-visible md:overflow-y-auto">
+                {currentAd.title && (
+                    <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-2 md:mb-4 drop-shadow-sm text-left">
                       {currentAd.title}
                     </h2>
                   )}
                   
                   {currentAd.text && (
-                    <div className="text-lg text-gray-700 leading-relaxed text-left">
+                    <div className="text-base md:text-lg text-gray-700 leading-relaxed text-left">
                       <p>{currentAd.text}</p>
                     </div>
                   )}
-                </div>
+              </div>
 
-                {/* Right Side: Image with Blur Background */}
-                <div className="w-full md:w-2/3 relative h-full flex items-center justify-center overflow-hidden bg-gray-900">
-                  {/* Blurred Background Layer */}
+              {/* Right Side: Image with Blur Background */}
+              <div className="w-full md:w-[45%] relative h-[40vh] md:h-full flex items-center justify-center overflow-hidden bg-gray-900 shrink-0">
+                {/* Blurred Background Layer */}
                   <div 
                     className="absolute inset-0 z-0"
                     style={{
@@ -86,7 +86,7 @@ export const AdOverlay = () => {
                   <img 
                     src={getProxiedUrl(currentAd.imageUrl)} 
                     alt={currentAd.title || "Special Offer"} 
-                    className="relative z-10 w-full h-full object-contain p-4"
+                    className="relative z-10 w-full h-full object-contain p-2 md:p-4"
                     onError={(e) => {
                       console.error("AdOverlay: Image failed to load:", currentAd.imageUrl);
                       // Fallback to a placeholder

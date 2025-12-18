@@ -48,7 +48,7 @@ export const AdMiniOverlay = () => {
                 ease: "easeInOut"
               }
             }}
-            className="fixed bottom-6 left-6 z-[99] cursor-pointer group"
+            className="fixed bottom-4 left-4 z-[99] cursor-pointer group sm:bottom-6 sm:left-6"
             onClick={handleMiniAdClick}
           >
             {/* Pulse/Glow Effect Background */}
@@ -65,7 +65,7 @@ export const AdMiniOverlay = () => {
               }}
             />
 
-            <div className="relative w-28 h-28 bg-black rounded-xl overflow-hidden border-2 border-yellow-400 shadow-2xl transition-transform transform group-hover:scale-105">
+            <div className="relative w-20 h-20 sm:w-28 sm:h-28 bg-black rounded-xl overflow-hidden border-2 border-yellow-400 shadow-2xl transition-transform transform group-hover:scale-105">
               <img
                 src={getProxiedUrl(ad.imageUrl)}
                 alt={ad.title || "Ad"}
@@ -89,12 +89,12 @@ export const AdMiniOverlay = () => {
                 }}
               />
 
-              <div className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-1.5 backdrop-blur-sm hover:bg-yellow-500 hover:text-black transition-colors">
-                <Maximize2 className="h-4 w-4" />
+              <div className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-1 backdrop-blur-sm hover:bg-yellow-500 hover:text-black transition-colors sm:p-1.5">
+                <Maximize2 className="h-3 w-3 sm:h-4 sm:w-4" />
               </div>
               
               {/* Badge */}
-              <div className="absolute bottom-0 left-0 right-0 bg-yellow-500 text-black text-[10px] font-extrabold text-center py-1 uppercase tracking-widest shadow-sm">
+              <div className="absolute bottom-0 left-0 right-0 bg-yellow-500 text-black text-[8px] sm:text-[10px] font-extrabold text-center py-0.5 sm:py-1 uppercase tracking-widest shadow-sm">
                 View Offer
               </div>
             </div>
@@ -116,9 +116,9 @@ export const AdMiniOverlay = () => {
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
-              className="relative w-full max-w-4xl bg-white rounded-xl overflow-hidden shadow-2xl border-2 border-yellow-400 flex flex-col md:flex-row h-[60vh]"
-            onClick={(e) => e.stopPropagation()}
-          >
+              className="relative w-full max-w-4xl bg-white rounded-xl shadow-2xl border-2 border-yellow-400 flex flex-col-reverse md:flex-row max-h-[90vh] sm:max-h-[80vh] md:h-[60vh] overflow-y-auto md:overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -131,22 +131,22 @@ export const AdMiniOverlay = () => {
               </button>
               
               {/* Left Side: Content */}
-              <div className="w-full md:w-1/3 p-6 md:p-8 flex flex-col justify-center bg-gradient-to-br from-white to-gray-50 overflow-y-auto">
+              <div className="w-full md:w-[55%] p-6 md:p-8 flex flex-col justify-start md:justify-center bg-gradient-to-br from-white to-gray-50 overflow-visible md:overflow-y-auto">
                 {ad.title && (
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 drop-shadow-sm text-left">
+                  <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-2 md:mb-4 drop-shadow-sm text-left">
                     {ad.title}
                   </h2>
                 )}
                 
                 {ad.text && (
-                  <div className="text-lg text-gray-700 leading-relaxed text-left">
+                  <div className="text-base md:text-lg text-gray-700 leading-relaxed text-left">
                     <p>{ad.text}</p>
                   </div>
                 )}
               </div>
 
               {/* Right Side: Image with Blur Background */}
-              <div className="w-full md:w-2/3 relative h-full flex items-center justify-center overflow-hidden bg-gray-900">
+              <div className="w-full md:w-[45%] relative h-[40vh] md:h-full flex items-center justify-center overflow-hidden bg-gray-900 shrink-0">
                 {/* Blurred Background Layer */}
                 <div 
                   className="absolute inset-0 z-0"
@@ -163,7 +163,7 @@ export const AdMiniOverlay = () => {
                 <img
                   src={getProxiedUrl(ad.imageUrl)}
                   alt={ad.title || "Special Offer"}
-                  className="relative z-10 w-full h-full object-contain p-4"
+                  className="relative z-10 w-full h-full object-contain p-2 md:p-4"
                   onError={(e) => {
                     console.error("AdMiniOverlay Full: Image failed to load:", ad.imageUrl);
                     const target = e.target as HTMLImageElement;
