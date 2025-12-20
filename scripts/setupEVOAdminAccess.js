@@ -18,7 +18,7 @@ async function setupEVOAdminAccess() {
     console.log('🔧 Setting up admin access for EVO Road branch...');
     
     // EVO Road branch ID where the booking was made
-    const evoBranchId = 'AS5mYsGNnvA4cxLIPL3W';
+    const evoBranchId = 'URcvGkmbfrOFInlOS4I9';
     
     // Admin email to set up (you can change this to your preferred admin email)
     const adminEmail = 'hello.goldentulip@gmail.com';

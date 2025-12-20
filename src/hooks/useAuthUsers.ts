@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { getAuth, User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
 import { useDatabase } from '../contexts/DatabaseContext';
-import { getFirestore, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { useAuth } from '../contexts/AuthContext';
+import { handleFirebaseError, retryWithBackoff, checkNetworkConnectivity } from '../utils/firebaseErrorHandler';
 
 interface AuthUser extends FirebaseUser {
   metadata: {
@@ -24,37 +25,65 @@ interface UserData {
   createdAt: Date;
   updatedAt: Date;
   bookingIds?: string[];
+  branchId?: string;
   [key: string]: any;
 }
 
-export const useAuthUsers = () => {
+export const useAuthUsers = (branchId?: string, refreshKey?: number) => {
   const [authUsers, setAuthUsers] = useState<AuthUser[]>([]);
   const [firestoreUsers, setFirestoreUsers] = useState<UserData[]>([]);
   const [mergedUsers, setMergedUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const { queryDocuments } = useDatabase();
+  const { db, queryDocuments } = useDatabase();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
-    const fetchAllUsers = async () => {
+    const fetchUsers = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        const auth = getAuth();
-        const db = getFirestore();
+        // Check if user is admin
+        if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'branch-admin' && currentUser.role !== 'hq-admin')) {
+          console.warn('useAuthUsers - User is not admin, cannot fetch all users');
+          setLoading(false);
+          setFirestoreUsers([]);
+          setMergedUsers([]);
+          return;
+        }
         
-        // Fetch all users from Firestore 'users' collection
-        const usersCollection = collection(db, 'users');
-        // Order by creation date, most recent first, limit for performance
-        const usersQuery = query(usersCollection, orderBy('createdAt', 'desc'), limit(200));
-        const usersSnapshot = await getDocs(usersQuery);
+        // Check network connectivity first
+        const isConnected = await checkNetworkConnectivity();
+        if (!isConnected) {
+          throw new Error('Network connection failed. Please check your internet connection.');
+        }
         
-        const fetchedUsers: UserData[] = usersSnapshot.docs.map(doc => {
-          const data = doc.data();
+        console.log('useAuthUsers - Fetching users...');
+        console.log('useAuthUsers - branchId parameter:', branchId);
+        
+        // Use DatabaseContext to query users
+        const usersSnapshot = await retryWithBackoff(async () => {
+          return await queryDocuments('users', []);
+        }, 3, 1000);
+        
+        console.log('useAuthUsers - Raw users snapshot:', usersSnapshot);
+        
+        // Process users data
+        let allUsers = usersSnapshot.map((user: any) => {
+          const data = user;
+          console.log('Fetched user document:', {
+            id: user.id,
+            data: data,
+            branchId: data.branchId,
+            email: data.email,
+            displayName: data.displayName || data.name,
+            role: data.role
+          });
+          
           return {
-            id: doc.id,
-            uid: doc.id,
+            id: user.id,
+            uid: user.id,
             email: data.email || '',
             displayName: data.displayName || data.name || '',
             phoneNumber: data.phoneNumber || '',
@@ -62,6 +91,7 @@ export const useAuthUsers = () => {
             emailVerified: data.emailVerified || false,
             status: data.status || 'active',
             role: data.role || 'user',
+            branchId: data.branchId,
             lastSignInAt: data.lastSignInAt?.toDate ? data.lastSignInAt.toDate() : 
                          (data.lastSignInAt instanceof Date ? data.lastSignInAt : null),
             createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : 
@@ -72,23 +102,30 @@ export const useAuthUsers = () => {
             ...data // Include any additional fields
           };
         });
-        setFirestoreUsers(fetchedUsers);
-        setMergedUsers(fetchedUsers); // For now, just use Firestore users directly
         
-        // Listen for auth state changes to get current user info
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-          if (user) {
-            setAuthUsers([user as AuthUser]);
-          } else {
-            setAuthUsers([]);
-          }
-        });
+        console.log('All users processed:', allUsers.length, 'users');
+        console.log('User IDs:', allUsers.map(u => ({ id: u.id, email: u.email, displayName: u.displayName })));
         
+        // Apply client-side branch filtering if branchId is provided
+        let filteredUsers = allUsers;
+        if (branchId) {
+          filteredUsers = allUsers.filter(user => user.branchId === branchId);
+          console.log('useAuthUsers - Client-side branch filtering applied:', { 
+            totalUsers: allUsers.length, 
+            filteredUsers: filteredUsers.length, 
+            branchId: branchId 
+          });
+        }
+        
+        console.log('Total users fetched:', filteredUsers.length);
+        setFirestoreUsers(filteredUsers);
+        setMergedUsers(filteredUsers);
         setLoading(false);
-        return unsubscribe;
         
       } catch (err) {
+        const errorInfo = handleFirebaseError(err, 'Fetching users');
         console.error('Error fetching users:', err);
+        console.error('Error details:', errorInfo);
         setError(err as Error);
         setLoading(false);
         setFirestoreUsers([]);
@@ -96,21 +133,23 @@ export const useAuthUsers = () => {
       }
     };
 
-    let unsubscribe: (() => void) | undefined;
-    
-    fetchAllUsers().then(unsub => {
-      unsubscribe = unsub;
+    // Listen for auth state changes
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setAuthUsers([user as AuthUser]);
+      } else {
+        setAuthUsers([]);
+      }
+      
+      // Fetch users when auth state changes
+      fetchUsers();
     });
 
-    // Cleanup function
     return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
+      unsubscribe();
     };
-  }, []);
-
-
+  }, [branchId, currentUser, queryDocuments, refreshKey]);
 
   return { 
     authUsers, 

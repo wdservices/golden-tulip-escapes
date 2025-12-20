@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Filter, Edit, Trash2, AlertCircle, Building } from "lucide-react";
+import { Search, Plus, Filter, Edit, Trash2, AlertCircle, Building, ToggleLeft, ToggleRight } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDatabase } from "@/contexts/DatabaseContext";
@@ -40,7 +40,7 @@ export const RoomsPage = () => {
   const [selectedBranchId, setSelectedBranchId] = useState<string>("");
   const [currentBranchName, setCurrentBranchName] = useState<string>("");
   
-  const { queryDocuments, deleteDocument } = useDatabase();
+  const { queryDocuments, deleteDocument, updateDocument } = useDatabase();
   const { branches, isLoading: branchesLoading, error: branchesError } = useBranches();
   const { activeBranchId } = useAuth();
   
@@ -116,6 +116,22 @@ export const RoomsPage = () => {
         console.error('Error deleting room:', error);
         toast.error("Failed to delete room");
       }
+    }
+  };
+
+  const handleToggleRoomAvailability = async (room: Room) => {
+    try {
+      const newAvailability = !room.availability;
+      await updateDocument(`branches/${selectedBranchId}/rooms`, room.id!, { availability: newAvailability });
+      
+      // Refresh rooms list
+      const updatedRooms = await queryDocuments<Room>(`branches/${selectedBranchId}/rooms`, []);
+      setRooms(updatedRooms);
+      
+      toast.success(`Room ${newAvailability ? 'enabled' : 'disabled'} successfully`);
+    } catch (error) {
+      console.error('Error toggling room availability:', error);
+      toast.error("Failed to toggle room availability");
     }
   };
 
@@ -259,6 +275,10 @@ export const RoomsPage = () => {
                         <Button variant="ghost" size="sm" className="mr-2 text-white hover:bg-yellow-400 hover:text-[hsl(var(--royal-blue-dark))]" onClick={() => handleEditRoom(room)}>
                           <Edit className="h-4 w-4" />
                           <span className="sr-only">Edit</span>
+                        </Button>
+                        <Button variant="ghost" size="sm" className="mr-2 text-white hover:bg-blue-400 hover:text-white" onClick={() => handleToggleRoomAvailability(room)}>
+                          {room.availability ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+                          <span className="sr-only">{room.availability ? 'Disable' : 'Enable'}</span>
                         </Button>
                         <Button variant="ghost" size="sm" className="text-white hover:bg-red-400 hover:text-white" onClick={() => handleDeleteRoom(room.id!)}>
                           <Trash2 className="h-4 w-4" />

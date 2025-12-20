@@ -4,12 +4,13 @@ import { db } from '@/lib/firebase';
 import { Booking } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { handleFirebaseError, retryWithBackoff } from '@/utils/firebaseErrorHandler';
-import { getDatabaseBranchId } from '@/config/branchMappings';
+import { getDatabaseBranchId, getStaticBranchId } from '@/config/branchMappings';
 
 export const useBookings = (branchId?: string) => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refetchCounter, setRefetchCounter] = useState(0);
   const { userMeta, activeBranchId } = useAuth();
 
   // Use provided branchId or fall back to activeBranchId from context
@@ -21,63 +22,65 @@ export const useBookings = (branchId?: string) => {
         setIsLoading(true);
         setError(null);
         
-        // Create a query to get bookings from branch subcollections
-        let q;
+        // Determine paths to query
+        const pathsToQuery = new Set<string>();
+        let isAllBranches = false;
         
-        // Query bookings for the specific branch from subcollection
-        if (effectiveBranchId && effectiveBranchId !== 'all') {
+        if (effectiveBranchId === 'all') {
+          isAllBranches = true;
+        } else if (effectiveBranchId) {
           const databaseBranchId = getDatabaseBranchId(effectiveBranchId);
-          q = query(
-            collection(db, "branches", databaseBranchId, "bookings"),
-            limit(100) // Limit to 100 most recent bookings for performance
-          );
-        } else if (effectiveBranchId === 'all') {
-          // For HQ admins with 'all' access, use collection group to get bookings from all branches
-          q = query(
-            collectionGroup(db, "bookings"),
-            limit(100) // Limit to 100 most recent bookings for performance
-          );
+          pathsToQuery.add(databaseBranchId);
+          
+          if (effectiveBranchId !== databaseBranchId) {
+            pathsToQuery.add(effectiveBranchId);
+          }
+          const staticBranchId = getStaticBranchId(effectiveBranchId);
+          if (staticBranchId === 'evo-road') {
+            pathsToQuery.add('AS5mYsGNnvA4cxLIPL3W');
+            pathsToQuery.add('evo-road');
+            pathsToQuery.add('URcvGkmbfrOFInlOS4I9');
+          }
         } else {
-          // If no branch ID, we can't query subcollections, so return empty
           console.warn('No branch ID provided for bookings query');
           setBookings([]);
           setIsLoading(false);
           return;
         }
 
-        let querySnapshot;
-        try {
-          querySnapshot = await retryWithBackoff(() => getDocs(q), 2, 1000);
-        } catch (indexError: any) {
-          // If the query fails due to missing index, try a simpler query
-          if (indexError?.code === 'failed-precondition' && indexError?.message?.includes('index')) {
-            console.warn('Composite index not available, falling back to simple query');
-            
-            // Fallback to a simpler query without orderBy to avoid index requirement
-            if (effectiveBranchId && effectiveBranchId !== 'all') {
-              const databaseBranchId = getDatabaseBranchId(effectiveBranchId);
-              q = query(
-                collection(db, "branches", databaseBranchId, "bookings"),
-                limit(150) // Limit fallback query for performance
-              );
-            } else if (effectiveBranchId === 'all') {
-              // For HQ admins with 'all' access, use collection group fallback
-              q = query(
-                collectionGroup(db, "bookings"),
-                limit(150) // Limit fallback query for performance
-              );
-            } else {
-              // No fallback for missing branch ID since we can't query subcollections
-              throw new Error('Branch ID is required for querying bookings');
+        let allDocs: any[] = [];
+
+        if (isAllBranches) {
+          const q = query(
+            collectionGroup(db, "bookings"),
+            limit(100)
+          );
+          const snapshot = await retryWithBackoff(() => getDocs(q), 2, 1000);
+          allDocs = snapshot.docs;
+        } else {
+          // Fetch from all identified paths in parallel
+          const promises = Array.from(pathsToQuery).map(async (branchId) => {
+            const q = query(
+              collection(db, "branches", branchId, "bookings"),
+              limit(100)
+            );
+            try {
+              const snapshot = await retryWithBackoff(() => getDocs(q), 2, 1000);
+              return snapshot.docs;
+            } catch (e) {
+              console.warn(`Failed to fetch bookings for path ${branchId}:`, e);
+              return [];
             }
-            
-            querySnapshot = await retryWithBackoff(() => getDocs(q), 2, 1000);
-          } else {
-            throw indexError;
-          }
+          });
+          
+          const results = await Promise.all(promises);
+          allDocs = results.flat();
         }
         
-        const bookingsData = querySnapshot.docs.map(doc => {
+        // Deduplicate docs by ID
+        const uniqueDocs = Array.from(new Map(allDocs.map(d => [d.id, d])).values());
+        
+        const bookingsData = uniqueDocs.map(doc => {
           const data = doc.data();
           
           // Convert Firestore Timestamps to JavaScript Dates
@@ -108,7 +111,7 @@ export const useBookings = (branchId?: string) => {
     };
 
     fetchBookings();
-  }, [effectiveBranchId, userMeta]);
+  }, [effectiveBranchId, userMeta, refetchCounter]);
 
   return {
     bookings,
@@ -116,7 +119,7 @@ export const useBookings = (branchId?: string) => {
     error,
     refetch: () => {
       setIsLoading(true);
-      // This will trigger the useEffect to run again
+      setRefetchCounter(prev => prev + 1);
     }
   };
 };

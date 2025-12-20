@@ -24,7 +24,7 @@ async function fetchLatestEVOBookings() {
     console.log('🔍 Fetching latest bookings for EVO Road branch...');
     
     // EVO Road branch ID from our test data
-    const evoBranchId = 'AS5mYsGNnvA4cxLIPL3W';
+    const evoBranchId = 'URcvGkmbfrOFInlOS4I9';
     
     // Fetch all bookings from EVO Road branch
     const bookingsSnapshot = await db

@@ -329,27 +329,28 @@ export const BranchForm = ({ branch, onSuccess, onCancel }: BranchFormProps) => 
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="name">Branch Name *</Label>
+          <Label htmlFor="name" className="text-white">Branch Name *</Label>
           <Input
             id="name"
             value={formData.name}
             onChange={(e) => setFormData({...formData, name: e.target.value})}
+            className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-yellow-400"
             required
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="status">Status *</Label>
+          <Label htmlFor="status" className="text-white">Status *</Label>
           <Select
             value={formData.status}
             onValueChange={(value: BranchStatusType) => setFormData({...formData, status: value})}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-white/5 border-white/20 text-white">
               <SelectValue placeholder="Select branch status" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white/10 backdrop-blur-md border-white/20">
               {branchStatuses.map((status) => (
-                <SelectItem key={status.value} value={status.value}>
+                <SelectItem key={status.value} value={status.value} className="text-white hover:bg-yellow-400/20">
                   {status.label}
                 </SelectItem>
               ))}
@@ -358,52 +359,56 @@ export const BranchForm = ({ branch, onSuccess, onCancel }: BranchFormProps) => 
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="address">Address *</Label>
+          <Label htmlFor="address" className="text-white">Address *</Label>
           <Input
             id="address"
             value={formData.address}
             onChange={(e) => setFormData({...formData, address: e.target.value})}
+            className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-yellow-400"
             required
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="location">Location *</Label>
+          <Label htmlFor="location" className="text-white">Location *</Label>
           <Input
             id="location"
             value={formData.location}
             onChange={(e) => setFormData({...formData, location: e.target.value})}
+            className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-yellow-400"
             required
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email">Email *</Label>
+          <Label htmlFor="email" className="text-white">Email *</Label>
           <Input
             id="email"
             type="email"
             value={formData.email}
             onChange={(e) => setFormData({...formData, email: e.target.value})}
+            className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-yellow-400"
             required
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone *</Label>
+          <Label htmlFor="phone" className="text-white">Phone *</Label>
           <Input
             id="phone"
             value={formData.phone}
             onChange={(e) => setFormData({...formData, phone: e.target.value})}
+            className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-yellow-400"
             required
           />
         </div>
       </div>
 
       <div className="flex justify-end space-x-4">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading} className="bg-white/5 border-white/20 text-white hover:bg-yellow-400 hover:text-[hsl(var(--royal-blue-dark))]">
           Cancel
         </Button>
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading} className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] border-yellow-400 hover:bg-yellow-300">
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {branch ? 'Update Branch' : 'Add Branch'}
         </Button>

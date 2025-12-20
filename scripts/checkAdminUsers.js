@@ -89,7 +89,7 @@ async function checkAdminUsers() {
     
     // Check EVO Road branch specific
     console.log('\n🎯 Checking EVO Road branch users...');
-    const evoBranchId = 'AS5mYsGNnvA4cxLIPL3W';
+    const evoBranchId = 'URcvGkmbfrOFInlOS4I9';
     const evoUsersSnapshot = await db
       .collection('users')
       .where('branch', '==', evoBranchId)

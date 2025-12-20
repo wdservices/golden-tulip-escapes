@@ -25,7 +25,7 @@ async function verifyEVOAdminAccess() {
     
     // Test user: hello.goldentulip@gmail.com (now HQ admin)
     const adminEmail = 'hello.goldentulip@gmail.com';
-    const evoBranchId = 'AS5mYsGNnvA4cxLIPL3W';
+    const evoBranchId = 'URcvGkmbfrOFInlOS4I9';
     
     console.log(`\n👤 Testing admin access for: ${adminEmail}`);
     

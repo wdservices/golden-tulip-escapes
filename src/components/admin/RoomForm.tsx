@@ -141,10 +141,10 @@ export const RoomForm = ({ branchId, room, onSuccess, onCancel }: RoomFormProps)
           <Select
             value={selectedBranchId}
             onValueChange={setSelectedBranchId}
-            disabled={branchesLoading || !!branchId}
+            disabled={isLoading || !!branchId}
           >
             <SelectTrigger className="bg-white/5 border-white/20 text-white">
-              <SelectValue placeholder={branchesLoading ? "Loading branches..." : "Select branch"} />
+              <SelectValue placeholder={isLoading ? "Loading branches..." : "Select branch"} />
             </SelectTrigger>
             <SelectContent className="bg-white/10 backdrop-blur-md border-white/20">
               {branches?.map((branch) => (

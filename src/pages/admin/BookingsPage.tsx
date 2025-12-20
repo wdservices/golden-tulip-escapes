@@ -42,6 +42,7 @@ import {
 import { db } from "@/lib/firebase";
 import { exportBookingsToCSV, downloadFile } from "@/lib/export-utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBranches } from "@/hooks/useBranches";
 import { Booking, BookingStatus } from "@/types/booking";
 import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
@@ -50,8 +51,7 @@ import { BookingDetailsDialog } from "@/components/admin/BookingDetailsDialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useCollection } from "@/hooks/useCollection";
 import { getBranches } from "@/services/branchService";
-import { useBranches } from "@/hooks/useBranches";
-import { getDatabaseBranchId } from "@/config/branchMappings";
+import { getDatabaseBranchId, getStaticBranchId } from "@/config/branchMappings";
 import { AdminBookingForm } from "@/components/admin/AdminBookingForm";
 
 import { BookingsTable } from "@/components/bookings/BookingsTable";
@@ -72,7 +72,7 @@ export const BookingsPage = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [showCreateBooking, setShowCreateBooking] = useState(false);
   const [currentBranchName, setCurrentBranchName] = useState<string>("");
-  const { currentUser, activeBranchId } = useAuth();
+  const { currentUser, activeBranchId, setActiveBranchId } = useAuth();
   const { toast } = useToast();
   const bookingsCollection = useCollection<Booking>("bookings");
   
@@ -133,9 +133,12 @@ export const BookingsPage = () => {
           return;
         }
 
+        // Convert static branch ID to database ID for the query
+        const databaseBranchId = getDatabaseBranchId(targetBranchId);
+
         // Query branch subcollection
         const q = query(
-          collection(db, "branches", targetBranchId, "bookings"),
+          collection(db, "branches", databaseBranchId, "bookings"),
           orderBy("checkInDate", "desc") // Most recent first
         );
 
@@ -212,64 +215,85 @@ export const BookingsPage = () => {
       // Convert static branch ID to database ID
       const databaseBranchId = getDatabaseBranchId(targetBranchId);
 
-      // Query branch subcollection
-      const q = query(
-        collection(db, "branches", databaseBranchId, "bookings"),
-        orderBy("checkInDate", "desc")
-      );
+      // Query multiple paths to ensure we catch all bookings (legacy, static, and new database IDs)
+      const pathsToQuery = new Set<string>();
+      pathsToQuery.add(databaseBranchId);
+      if (targetBranchId !== databaseBranchId) {
+        pathsToQuery.add(targetBranchId);
+      }
+      // Explicitly check legacy/alternate IDs for known branches
+      const staticBranchId = getStaticBranchId(targetBranchId);
+      if (staticBranchId === 'evo-road') {
+        pathsToQuery.add('AS5mYsGNnvA4cxLIPL3W');
+        pathsToQuery.add('evo-road'); // Ensure static is added
+        pathsToQuery.add('URcvGkmbfrOFInlOS4I9'); // Ensure database ID is added
+      }
 
+      console.log("Querying bookings from paths:", Array.from(pathsToQuery));
+
+      const unsubscribers: (() => void)[] = [];
+      const bookingsMap = new Map<string, Booking[]>();
       let initialized = false;
       let previousIds = new Set<string>();
 
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const bookingsData = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as Booking[];
-        setBookings(bookingsData);
+      pathsToQuery.forEach(branchId => {
+        const q = query(
+          collection(db, "branches", branchId, "bookings"),
+          orderBy("checkInDate", "desc")
+        );
 
-        // Track new docs after initial load to notify
-        const currentIds = new Set(bookingsData.map(b => b.id));
-        if (initialized) {
-          for (const id of currentIds) {
-            if (!previousIds.has(id)) {
-              const newBooking = bookingsData.find(b => b.id === id);
-              toast({
-                title: "New booking received",
-                description: newBooking?.guestName ? `${newBooking.guestName} just booked.` : `Booking #${id.slice(0,8)} added.`,
-              });
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          const branchBookings = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as Booking[];
+          bookingsMap.set(branchId, branchBookings);
+
+          // Merge all bookings from different paths
+          const allBookings = Array.from(bookingsMap.values()).flat();
+          
+          // Deduplicate by ID
+          const uniqueBookings = Array.from(new Map(allBookings.map(b => [b.id, b])).values());
+          
+          // Sort by checkInDate desc
+          uniqueBookings.sort((a, b) => {
+            const dateA = a.checkInDate?.toDate ? a.checkInDate.toDate() : new Date(a.checkInDate);
+            const dateB = b.checkInDate?.toDate ? b.checkInDate.toDate() : new Date(b.checkInDate);
+            return dateB.getTime() - dateA.getTime();
+          });
+
+          setBookings(uniqueBookings);
+
+          // Track new docs after initial load to notify
+          const currentIds = new Set(uniqueBookings.map(b => b.id));
+          if (initialized) {
+            for (const id of currentIds) {
+              if (!previousIds.has(id)) {
+                const newBooking = uniqueBookings.find(b => b.id === id);
+                toast({
+                  title: "New booking received",
+                  description: newBooking?.guestName ? `${newBooking.guestName} just booked.` : `Booking #${id.slice(0,8)} added.`,
+                });
+              }
             }
           }
-        }
-        previousIds = currentIds;
-        if (!initialized) {
-          initialized = true;
-          setIsLoading(false);
-          if (bookingsData.length > 0) {
-            toast({
-              title: "Bookings loaded",
-              description: `${bookingsData.length} bookings retrieved successfully.`,
-            });
+          previousIds = currentIds;
+          
+          // Set initialized to true after first successful fetch from ANY path
+          if (!initialized) {
+            initialized = true;
+            setIsLoading(false);
           }
-        }
-      }, (err) => {
-        console.error("Error listening to bookings:", err);
-        setIsLoading(false);
-        if (err.message && err.message.includes("permission")) {
-          setError("You don't have permission to access bookings. Please contact an administrator.");
-          toast({
-            variant: "destructive",
-            title: "Permission denied",
-            description: "You don't have sufficient permissions to view bookings.",
-          });
-        } else {
-          setError("Failed to load bookings. Please try again later.");
-          toast({
-            variant: "destructive",
-            title: "Error loading bookings",
-            description: err.message || "An unexpected error occurred.",
-          });
-        }
+        }, (err) => {
+          console.warn(`Error listening to bookings for path ${branchId}:`, err);
+          // Don't fail completely if one path fails, unless all fail
+          // But we'll let the other paths continue
+        });
+        
+        unsubscribers.push(unsubscribe);
       });
 
-      return () => unsubscribe();
+      return () => {
+        unsubscribers.forEach(u => u());
+      };
+
     } catch (e) {
       console.error(e);
       setIsLoading(false);
@@ -860,6 +884,13 @@ export const BookingsPage = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Booking Details Dialog */}
+      <BookingDetailsDialog 
+        booking={selectedBooking}
+        open={showBookingDetails}
+        onOpenChange={setShowBookingDetails}
+      />
     </div>
   );
 };

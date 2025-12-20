@@ -22,6 +22,7 @@ import {
   Users
 } from "lucide-react";
 import { getPaystackPaymentData, getBranchPaymentConfig } from "@/config/paymentConfig";
+import { getDatabaseBranchId } from "@/config/branchMappings";
 
 // Simple currency formatter to avoid import issues
 const formatCurrency = (amount: number, currency: string = 'NGN', locale?: string): string => {
@@ -188,7 +189,7 @@ export const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
             guestName: bookingData.guestName,
             guestEmail: bookingData.guestEmail,
             guestPhone: bookingData.guestPhone,
-            branchId: bookingData.branchId,
+            branchId: getDatabaseBranchId(bookingData.branchId),
             branchName: bookingData.branchName,
             roomId: bookingData.roomType,
             roomType: bookingData.roomType,

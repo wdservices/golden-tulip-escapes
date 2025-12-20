@@ -28,7 +28,7 @@ async function createTestBookingForClient() {
     const clientEmail = 'spellz49@gmail.com';
     
     // Use the correct branch ID from the debug output
-    const branchId = 'AS5mYsGNnvA4cxLIPL3W';
+    const branchId = 'URcvGkmbfrOFInlOS4I9';
     const bookingData = {
       userId: clientId,
       email: clientEmail,

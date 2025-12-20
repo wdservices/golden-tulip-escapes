@@ -190,10 +190,9 @@ export const CorporateHallDetailPage = () => {
             </div>
           )}
           
-          {/* Wedding Hall 360° Viewer - using the same code from wedding popup */}
+          {/* 360° Virtual Tour - using the hall's specific Kuula embed URL */}
           <div className="h-full relative">
             <iframe 
-              id="evrFramePopup" 
               width="100%" 
               height="100%" 
               style={{ 
@@ -206,8 +205,8 @@ export const CorporateHallDetailPage = () => {
               loading="lazy"
               scrolling="no"
               frameBorder="0" 
-              src="https://kuula.co/share/collection/7HvmX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
-              title="360° Virtual Tour of Golden Tulip Hotel"
+              src={hall.kuulaEmbedUrl}
+              title={`360° Virtual Tour of ${hall.name}`}
               className="absolute inset-0 w-full h-full"
               onLoad={() => setIframeLoaded(true)}
             />

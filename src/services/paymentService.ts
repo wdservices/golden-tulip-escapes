@@ -42,7 +42,7 @@ export interface PaymentRecord {
 }
 
 class PaymentService {
-  private readonly PAYSTACK_SECRET_KEY = import.meta.env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_SECRET_KEY;
+  private readonly PAYSTACK_SECRET_KEY = import.meta.env.PAYSTACK_SECRET_KEY || (typeof process !== 'undefined' ? process.env.PAYSTACK_SECRET_KEY : undefined);
 
   /**
    * Verify payment with Paystack

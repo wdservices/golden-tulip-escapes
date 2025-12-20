@@ -24,7 +24,7 @@ async function testBookingStatusUpdate() {
     console.log('🧪 Testing booking status update functionality...');
     
     // Get the branch ID and booking ID from our test data
-    const branchId = 'AS5mYsGNnvA4cxLIPL3W';
+    const branchId = 'URcvGkmbfrOFInlOS4I9';
     
     // Get the most recent booking
     const bookingsSnapshot = await db

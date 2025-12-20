@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Download, CreditCard, DollarSign, Building, Loader2, CheckCircle, XCircle, Plus, Banknote } from "lucide-react";
+import { Search, Filter, Download, CreditCard, DollarSign, Building, Loader2, CheckCircle, XCircle, Plus, Banknote, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getBranches } from "@/services/branchService";
 import { formatCurrency } from "@/utils/currencyUtils";
 import { usePayments } from "@/hooks/usePayments";
 import { exportToCsv } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type PaymentStatus = 'successful' | 'pending' | 'failed' | 'refunded';
 type PaymentMethod = 'paystack' | 'credit_card' | 'bank_transfer' | 'cash';
@@ -40,16 +41,15 @@ export const PaymentsPage = () => {
   const { activeBranchId } = useAuth();
   
   // Use the usePayments hook for branch-filtered payments
-  const { payments, isLoading, error } = usePayments({ branchId: 'dD0zwzVpa27fZWhxTg7m' });
+  const { payments, isLoading, error, refetch } = usePayments({ branchId: activeBranchId });
   
   // Fetch current branch name
   useEffect(() => {
     const fetchBranchName = async () => {
-      const targetBranchId = 'dD0zwzVpa27fZWhxTg7m';
-      if (targetBranchId) {
+      if (activeBranchId) {
         try {
           const branches = await getBranches();
-          const branch = branches.find(b => b.id === targetBranchId);
+          const branch = branches.find(b => b.id === activeBranchId);
           if (branch) {
             setCurrentBranchName(branch.name);
           }
@@ -60,7 +60,7 @@ export const PaymentsPage = () => {
     };
     
     fetchBranchName();
-  }, []);
+  }, [activeBranchId]);
 
   // Calculate payment statistics from real data
   const paymentStats = {
@@ -197,6 +197,16 @@ export const PaymentsPage = () => {
             variant="outline" 
             size="sm" 
             className="bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30"
+            onClick={refetch}
+            disabled={isLoading}
+          >
+            <Loader2 className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="bg-white/5 border-white/20 text-white hover:bg-yellow-400/10 hover:text-yellow-300 hover:border-yellow-400/30"
             onClick={handleExport}
           >
             <Download className="mr-2 h-4 w-4" />
@@ -251,6 +261,23 @@ export const PaymentsPage = () => {
             <p className="text-xs text-white/70">Requires attention</p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Debug Info */}
+      <div className="bg-white/5 border border-white/20 rounded-lg p-4">
+        <div className="flex items-center justify-between text-sm">
+          <div className="text-white/70">
+            <span className="font-medium text-white">Branch:</span> {currentBranchName || activeBranchId || 'All Branches'}
+          </div>
+          <div className="text-white/70">
+            <span className="font-medium text-white">Total Payments:</span> {payments.length}
+          </div>
+          {error && (
+            <div className="text-red-400 text-xs">
+              Error: {error.message}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Search and Filter */}

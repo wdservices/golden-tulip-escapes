@@ -68,8 +68,8 @@ async function checkCurrentAdmin() {
     }
     
     // Check the branch where the booking was created
-    console.log('\n🏢 Checking branch AS5mYsGNnvA4cxLIPL3W (where booking was created):');
-    const branchDoc = await getDoc(doc(db, 'branches', 'AS5mYsGNnvA4cxLIPL3W'));
+    console.log('\n🏢 Checking branch URcvGkmbfrOFInlOS4I9 (where booking was created):');
+    const branchDoc = await getDoc(doc(db, 'branches', 'URcvGkmbfrOFInlOS4I9'));
     if (branchDoc.exists()) {
       const branchData = branchDoc.data();
       console.log('✅ Branch found:');
@@ -81,8 +81,8 @@ async function checkCurrentAdmin() {
     }
     
     // Check bookings in this branch
-    console.log('\n📋 Checking bookings in branch AS5mYsGNnvA4cxLIPL3W:');
-    const bookingsSnapshot = await getDocs(collection(db, 'branches', 'AS5mYsGNnvA4cxLIPL3W', 'bookings'));
+    console.log('\n📋 Checking bookings in branch URcvGkmbfrOFInlOS4I9:');
+    const bookingsSnapshot = await getDocs(collection(db, 'branches', 'URcvGkmbfrOFInlOS4I9', 'bookings'));
     console.log(`   Found ${bookingsSnapshot.size} bookings`);
     
     bookingsSnapshot.forEach((doc) => {

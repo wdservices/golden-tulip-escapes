@@ -24,7 +24,7 @@ async function fixEVOBranchAdmin() {
     console.log('🔧 Fixing EVO Road branch admin configuration...');
     
     // Our test EVO Road branch ID from createTestBookingForClient.js
-    const testEVOBranchId = 'AS5mYsGNnvA4cxLIPL3W';
+    const testEVOBranchId = 'URcvGkmbfrOFInlOS4I9';
     
     // Check if there's an admin user for the correct EVO branch
     console.log('\n🔍 Checking for EVO Road admin with correct branch ID...');
@@ -34,7 +34,7 @@ async function fixEVOBranchAdmin() {
       .get();
     
     if (evoAdminQuery.empty) {
-      console.log('❌ No admin found for EVO Road branch (ID: AS5mYsGNnvA4cxLIPL3W)');
+      console.log('❌ No admin found for EVO Road branch (ID: URcvGkmbfrOFInlOS4I9)');
       
       // Check if hello.goldentulip@gmail.com exists and promote it
       console.log('\n🎯 Checking hello.goldentulip@gmail.com for promotion...');
@@ -128,7 +128,7 @@ async function fixEVOBranchAdmin() {
     console.log('\n📋 Summary:');
     console.log('   ✅ hello.goldentulip@gmail.com promoted to HQ admin');
     console.log('   ✅ Can access all branches including EVO Road');
-    console.log('   ✅ Bookings exist in EVO Road branch (AS5mYsGNnvA4cxLIPL3W)');
+    console.log('   ✅ Bookings exist in EVO Road branch (URcvGkmbfrOFInlOS4I9)');
     console.log('   ✅ Admin dashboard should now display bookings');
     
   } catch (error) {

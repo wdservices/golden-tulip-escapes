@@ -3,6 +3,7 @@ import { collection, collectionGroup, query, where, orderBy, limit, getDocs, get
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Payment } from '@/types';
+import { getDatabaseBranchId, getStaticBranchId } from '@/config/branchMappings';
 
 // Fallback function to fetch payments from branch subcollections directly
 async function fetchPaymentsFromBranchSubcollections(branchId: string, queryLimit: number): Promise<Payment[]> {
@@ -107,105 +108,140 @@ export function usePayments({ branchId, limit: queryLimit = 100 }: UsePaymentsOp
       setIsLoading(true);
       setError(null);
 
-      // Query payments from collection group 'payments'
-      // If effectiveBranchId is provided and not 'all', include a filter; otherwise query all
-      const paymentsQuery = collectionGroup(db, 'payments');
-
-      const constraints = [] as any[];
+      // Primary method: Use branch subcollections directly (most reliable)
       if (effectiveBranchId && effectiveBranchId !== 'all') {
-        constraints.push(where('branchId', '==', effectiveBranchId));
-      }
-      constraints.push(orderBy('createdAt', 'desc'));
-      constraints.push(limit(queryLimit));
-      const q = query(paymentsQuery, ...constraints);
-
-      // Execute query
-      const querySnapshot = await getDocs(q);
-
-      // Process results and map to UI expectations
-      const paymentDocs = await Promise.all(querySnapshot.docs.map(async (doc) => {
-        const paymentData = doc.data();
+        // Determine paths to query
+        const pathsToQuery = new Set<string>();
+        const databaseBranchId = getDatabaseBranchId(effectiveBranchId);
+        pathsToQuery.add(databaseBranchId);
         
-        // Try to get guest name from multiple sources
-        let guestName = paymentData.customer?.customer_name || paymentData.customer?.name || 'Unknown Guest';
-        let customerEmail = paymentData.customer?.email || 'N/A';
-        
-        // If guest name is still "Unknown Guest", try to fetch booking data
-        if (guestName === 'Unknown Guest' && paymentData.bookingId) {
-          try {
-            const bookingDoc = await getDoc(
-              doc(db, 'branches', paymentData.branchId, 'bookings', paymentData.bookingId)
-            );
-            
-            if (bookingDoc.exists()) {
-              const bookingData = bookingDoc.data() as { guestName?: string; customerEmail?: string };
-              guestName = bookingData.guestName || guestName;
-              customerEmail = bookingData.customerEmail || customerEmail;
-            }
-          } catch (bookingError) {
-            console.warn(`Failed to fetch booking data for payment ${doc.id}:`, bookingError);
-          }
+        if (effectiveBranchId !== databaseBranchId) {
+          pathsToQuery.add(effectiveBranchId);
         }
-        
-        // Map the payment data to match the UI expectations
-        return {
-          id: doc.id,
-          transactionId: paymentData.transactionId || doc.id,
-          guestName: guestName,
-          customerEmail: customerEmail,
-          amount: paymentData.amount || 0,
-          currency: paymentData.currency || 'NGN',
-          date: paymentData.createdAt?._seconds ? new Date(paymentData.createdAt._seconds * 1000).toISOString() : 
-                paymentData.paidAt?._seconds ? new Date(paymentData.paidAt._seconds * 1000).toISOString() : 
-                new Date().toISOString(),
-          status: paymentData.status || 'pending',
-          method: paymentData.paymentMethod || paymentData.method || 'paystack',
-          channel: paymentData.channel || paymentData.paymentMethod || 'paystack',
-          paystackTransactionId: paymentData.paystackTransactionId || paymentData.transactionId,
-          fees: paymentData.fees || 0,
-          receiptUrl: paymentData.receiptUrl || paymentData.receipt_url,
-          gatewayResponse: paymentData.gatewayResponse || paymentData.gateway_response,
-          ...paymentData
-        } as Payment;
-      }));
+        const staticBranchId = getStaticBranchId(effectiveBranchId);
+        if (staticBranchId === 'evo-road') {
+          pathsToQuery.add('AS5mYsGNnvA4cxLIPL3W');
+          pathsToQuery.add('evo-road');
+          pathsToQuery.add('URcvGkmbfrOFInlOS4I9');
+        }
 
-      // Fallbacks: if no results, try branch subcollections; if no branch context, scan all branches
-      if (paymentDocs.length === 0) {
+        // Fetch from all paths in parallel
+        const promises = Array.from(pathsToQuery).map(id => 
+          fetchPaymentsFromBranchSubcollections(id, queryLimit)
+        );
+        
+        const results = await Promise.all(promises);
+        const allPayments = results.flat();
+
+        if (allPayments.length > 0) {
+          // Deduplicate by ID
+          const uniquePayments = Array.from(new Map(allPayments.map(p => [p.id, p])).values());
+          
+          // Sort by date desc
+          uniquePayments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          
+          setPayments(uniquePayments.slice(0, queryLimit));
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Secondary method: Try collection group query (requires proper Firestore indexes)
+      try {
+        const paymentsQuery = collectionGroup(db, 'payments');
+        const constraints = [] as any[];
+        
         if (effectiveBranchId && effectiveBranchId !== 'all') {
-          const fallbackPayments = await fetchPaymentsFromBranchSubcollections(effectiveBranchId, queryLimit);
-          if (fallbackPayments.length > 0) {
-            setPayments(fallbackPayments);
-          } else {
-            // If still empty, expand search to all branches
-            const branchesSnapshot = await getDocs(collection(db, 'branches'));
-            const aggregated: Payment[] = [] as any;
-            for (const branchDoc of branchesSnapshot.docs) {
-              const branchIdAll = branchDoc.id;
-              const branchPayments = await fetchPaymentsFromBranchSubcollections(branchIdAll, Math.ceil(queryLimit / branchesSnapshot.docs.length) || 25);
-              aggregated.push(...branchPayments);
-            }
-            setPayments(aggregated.slice(0, queryLimit));
-          }
-        } else {
-          // Scan all branches for payments
-          const branchesSnapshot = await getDocs(collection(db, 'branches'));
-          const aggregated: Payment[] = [] as any;
-          for (const branchDoc of branchesSnapshot.docs) {
-            const branchIdAll = branchDoc.id;
-            const branchPayments = await fetchPaymentsFromBranchSubcollections(branchIdAll, Math.ceil(queryLimit / branchesSnapshot.docs.length) || 25);
-            aggregated.push(...branchPayments);
-          }
-          // Sort aggregated by paid date or createdAt
-          aggregated.sort((a: any, b: any) => {
-            const ta = new Date((a as any).date || (a as any).paidAt || (a as any).createdAt || 0).getTime();
-            const tb = new Date((b as any).date || (b as any).paidAt || (b as any).createdAt || 0).getTime();
-            return tb - ta;
-          });
-          setPayments(aggregated.slice(0, queryLimit));
+          // Convert static branch ID to database ID for the filter
+          const databaseBranchId = getDatabaseBranchId(effectiveBranchId);
+          constraints.push(where('branchId', '==', databaseBranchId));
         }
-      } else {
-        setPayments(paymentDocs);
+        constraints.push(orderBy('createdAt', 'desc'));
+        constraints.push(limit(queryLimit));
+        
+        const q = query(paymentsQuery, ...constraints);
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const paymentDocs = await Promise.all(querySnapshot.docs.map(async (doc) => {
+            const paymentData = doc.data();
+            
+            // Try to get guest name from multiple sources
+            let guestName = paymentData.customer?.customer_name || paymentData.customer?.name || 'Unknown Guest';
+            let customerEmail = paymentData.customer?.email || 'N/A';
+            
+            // If guest name is still "Unknown Guest", try to fetch booking data
+            if (guestName === 'Unknown Guest' && paymentData.bookingId) {
+              try {
+                // Convert payment's branchId to database ID for the booking lookup
+                const bookingBranchId = getDatabaseBranchId(paymentData.branchId);
+                const bookingDoc = await getDoc(
+                  doc(db, 'branches', bookingBranchId, 'bookings', paymentData.bookingId)
+                );
+                
+                if (bookingDoc.exists()) {
+                  const bookingData = bookingDoc.data() as { guestName?: string; customerEmail?: string };
+                  guestName = bookingData.guestName || guestName;
+                  customerEmail = bookingData.customerEmail || customerEmail;
+                }
+              } catch (bookingError) {
+                console.warn(`Failed to fetch booking data for payment ${doc.id}:`, bookingError);
+              }
+            }
+            
+            // Map the payment data to match the UI expectations
+            return {
+              id: doc.id,
+              transactionId: paymentData.transactionId || doc.id,
+              guestName: guestName,
+              customerEmail: customerEmail,
+              amount: paymentData.amount || 0,
+              currency: paymentData.currency || 'NGN',
+              date: paymentData.createdAt?._seconds ? new Date(paymentData.createdAt._seconds * 1000).toISOString() : 
+                    paymentData.paidAt?._seconds ? new Date(paymentData.paidAt._seconds * 1000).toISOString() : 
+                    new Date().toISOString(),
+              status: paymentData.status || 'pending',
+              method: paymentData.paymentMethod || paymentData.method || 'paystack',
+              channel: paymentData.channel || paymentData.paymentMethod || 'paystack',
+              paystackTransactionId: paymentData.paystackTransactionId || paymentData.transactionId,
+              fees: paymentData.fees || 0,
+              receiptUrl: paymentData.receiptUrl || paymentData.receipt_url,
+              gatewayResponse: paymentData.gatewayResponse || paymentData.gateway_response,
+              ...paymentData
+            } as Payment;
+          }));
+          
+          if (paymentDocs.length > 0) {
+            setPayments(paymentDocs);
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch (collectionGroupError) {
+        console.warn('Collection group query failed, using fallback methods:', collectionGroupError);
       }
+
+      // Tertiary method: Scan all branches if no specific branch or previous methods failed
+      const branchesSnapshot = await getDocs(collection(db, 'branches'));
+      const aggregated: Payment[] = [] as any;
+      
+      for (const branchDoc of branchesSnapshot.docs) {
+        const branchId = branchDoc.id;
+        // Only scan branches that match our filter or scan all if no filter
+        if (!effectiveBranchId || effectiveBranchId === 'all' || effectiveBranchId === branchId) {
+          const branchPayments = await fetchPaymentsFromBranchSubcollections(branchId, Math.ceil(queryLimit / branchesSnapshot.docs.length) || 25);
+          aggregated.push(...branchPayments);
+        }
+      }
+      
+      // Sort by date and apply limit
+      aggregated.sort((a: any, b: any) => {
+        const ta = new Date((a as any).date || (a as any).paidAt || (a as any).createdAt || 0).getTime();
+        const tb = new Date((b as any).date || (b as any).paidAt || (b as any).createdAt || 0).getTime();
+        return tb - ta;
+      });
+      
+      setPayments(aggregated.slice(0, queryLimit));
     } catch (err) {
       console.error('Error fetching payments:', err);
       

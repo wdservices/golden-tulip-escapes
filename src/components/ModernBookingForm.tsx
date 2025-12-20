@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { getDatabaseBranchId } from "@/config/branchMappings";
 // Removed incorrect Booking import to avoid type conflict
 interface ModernBookingFormProps {
   selectedBranch?: string;
@@ -247,8 +248,10 @@ export const ModernBookingForm = ({ selectedBranch, showLocationDropdown = true,
        };
 
       // Write to Firestore
-      const docRef = await addDoc(collection(db, 'branches', bookingData.branchId, 'bookings'), {
+      const databaseBranchId = getDatabaseBranchId(bookingData.branchId);
+      const docRef = await addDoc(collection(db, 'branches', databaseBranchId, 'bookings'), {
         ...newBooking,
+        branchId: databaseBranchId, // Ensure stored branchId is the database ID
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });

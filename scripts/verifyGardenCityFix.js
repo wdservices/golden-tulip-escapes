@@ -15,13 +15,13 @@ const auth = getAuth();
 // Import the branch mappings (simulate the frontend logic)
 const BRANCH_ID_MAPPINGS = {
   "evo-road": {
-    "databaseId": "AS5mYsGNnvA4cxLIPL3W",
+    "databaseId": "URcvGkmbfrOFInlOS4I9",
     "staticId": "evo-road",
     "name": "GOLDEN TULIP EVO ROAD ",
     "location": "Port Harcourt, Nigeria"
   },
   "evergreen": {
-    "databaseId": "PoqhCkWH04tMKmZTehVi",
+    "databaseId": "5vkOc2peS2tAoTyHcmQp",
     "staticId": "evergreen",
     "name": "GOLDEN TULIP EVERGREEN",
     "location": "Port Harcourt, Nigeria"
@@ -33,7 +33,7 @@ const BRANCH_ID_MAPPINGS = {
     "location": "Port Harcourt, Nigeria"
   },
   "garden-city": {
-    "databaseId": "dD0zwzVpa27fZWhxTg7m",
+    "databaseId": "RYoG3qsKFIiy9REDFRbq",
     "staticId": "garden-city",
     "name": "GOLDEN TULIP GARDEN CITY ",
     "location": "Port Harcourt, Nigeria"
@@ -63,7 +63,7 @@ async function verifyGardenCityFix() {
       console.log(`   Branch Name: ${customClaims.branchName || 'Not set'}`);
       console.log(`   Admin: ${customClaims.admin || false}`);
       
-      if (customClaims.role === 'branch-admin' && customClaims.branch === 'dD0zwzVpa27fZWhxTg7m') {
+      if (customClaims.role === 'branch-admin' && customClaims.branch === 'RYoG3qsKFIiy9REDFRbq') {
         console.log('✅ Admin permissions are correctly configured');
       } else {
         console.log('❌ Admin permissions need to be fixed');
@@ -82,7 +82,7 @@ async function verifyGardenCityFix() {
     console.log(`   Static ID: ${staticBranchId}`);
     console.log(`   Database ID: ${databaseBranchId}`);
     
-    if (databaseBranchId === 'dD0zwzVpa27fZWhxTg7m') {
+    if (databaseBranchId === 'RYoG3qsKFIiy9REDFRbq') {
       console.log('✅ Branch ID mapping is working correctly');
     } else {
       console.log('❌ Branch ID mapping is incorrect');

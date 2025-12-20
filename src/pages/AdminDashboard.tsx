@@ -3,6 +3,9 @@ import { createPortal } from "react-dom";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { getBranches } from "@/services/branchService";
+import { getDoc, doc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { getBranchFromEmail } from "@/services/adminEmailService";
 import { clearBookingData } from "@/utils/clearDatabase";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,7 +63,6 @@ import ClientActivity from "@/components/admin/ClientActivity";
 import { useAuthUsers } from "@/hooks/useAuthUsers";
 import { useCollection } from "@/hooks/useCollection";
 import { useBookings } from "@/hooks/useBookings";
-import { db } from "@/lib/firebase";
 import { collection, collectionGroup, getDocs, orderBy, query, limit } from "firebase/firestore";
 
 
@@ -188,15 +190,64 @@ const AdminDashboard = () => {
           const branches = await getBranches();
           console.log("Available branches:", branches);
           console.log("Branch IDs:", branches.map(b => b.id));
-          const branch = branches.find(b => b.id === activeBranchId);
+          let branch = branches.find(b => b.id === activeBranchId);
           console.log("Found branch:", branch);
-          if (branch) {
-            console.log("Setting currentBranchName to:", branch.name);
-            setCurrentBranchName(branch.name);
-          } else {
-            console.warn("No branch found for activeBranchId:", activeBranchId);
-            setCurrentBranchName("");
+
+          // Fallback: try Firestore branch document directly if not found in merged list
+          if (!branch) {
+            try {
+              const branchDoc = await getDoc(doc(db, "branches", activeBranchId));
+              if (branchDoc.exists()) {
+                const data: any = branchDoc.data();
+                branch = {
+                  id: activeBranchId,
+                  name: data.name || data.fullName || "Unknown Branch",
+                  fullName: data.fullName || data.name || "Unknown Branch",
+                  logo: data.logo || ""
+                } as any;
+                console.log("Resolved branch from Firestore document:", branch);
+              }
+            } catch (firestoreError) {
+              console.warn("Could not resolve branch from Firestore document:", firestoreError);
+            }
           }
+
+          // Fallback: use email-based mapping to get slug and then lookup in static branches
+          if (!branch && currentUser?.email) {
+            try {
+              const emailInfo = await getBranchFromEmail(currentUser.email);
+              if (emailInfo?.branchId) {
+                const slugBranch = branches.find(b => b.id === emailInfo.branchId);
+                if (slugBranch) {
+                  branch = slugBranch as any;
+                  console.log("Resolved branch via email-based slug:", branch);
+                }
+              }
+            } catch (emailMapError) {
+              console.warn("Email-based branch mapping failed:", emailMapError);
+            }
+          }
+
+          // Final fallback mapping for known legacy Firestore IDs
+          if (!branch) {
+            const legacyMap: Record<string, string> = {
+              // Evo Road legacy IDs observed during migration
+              "AS5mYsGNnvA4cxLIPL3W": "Evo Road",
+              // Add more legacy IDs here if discovered
+            };
+            const fallbackName = legacyMap[activeBranchId] || "";
+            if (fallbackName) {
+              setCurrentBranchName(fallbackName);
+              console.log("Using legacy fallback branch name:", fallbackName);
+            } else {
+              console.warn("No branch found for activeBranchId:", activeBranchId);
+              setCurrentBranchName("");
+            }
+            return;
+          }
+
+          console.log("Setting currentBranchName to:", branch.fullName || branch.name);
+          setCurrentBranchName(branch.fullName || branch.name);
         } catch (error) {
           console.error("Error fetching branch name:", error);
           setCurrentBranchName("");
