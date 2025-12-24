@@ -25,7 +25,7 @@ const corporateHalls = [
     id: "anioma-hall",
     name: "Anioma Restaurant",
     capacity: 500,
-    priceRange: "₦150,000 - ₦300,000",
+    priceRange: "From ₦1,000,000 per day",
     description: "A grand restaurant perfect for large corporate events, conferences, and celebrations. Features state-of-the-art facilities and elegant décor. Can also be arranged to hall standard for various events.",
     features: ["Air Conditioning", "Free WiFi", "Parking", "Catering Service", "Sound System", "Projector", "Stage"],
     location: "Ground Floor, Main Building",
@@ -36,7 +36,7 @@ const corporateHalls = [
     id: "abuja-hall",
     name: "Abuja Hall",
     capacity: 300,
-    priceRange: "₦100,000 - ₦200,000",
+    priceRange: "From ₦750,000 per day",
     description: "An elegant mid-sized hall ideal for corporate meetings, seminars, and private functions. Modern amenities with professional ambiance.",
     features: ["Air Conditioning", "Free WiFi", "Parking", "Sound System", "Projector", "Catering Service"],
     location: "First Floor, East Wing",
@@ -47,7 +47,7 @@ const corporateHalls = [
     id: "lagos-hall",
     name: "Lagos Hall",
     capacity: 200,
-    priceRange: "₦80,000 - ₦150,000",
+    priceRange: "From ₦400,000 per day",
     description: "A sophisticated smaller hall perfect for intimate corporate gatherings, board meetings, and executive events.",
     features: ["Air Conditioning", "Free WiFi", "Parking", "Sound System", "Projector"],
     location: "Second Floor, West Wing",
@@ -58,7 +58,7 @@ const corporateHalls = [
     id: "kano-hall",
     name: "Kano Hall",
     capacity: 150,
-    priceRange: "₦60,000 - ₦120,000",
+    priceRange: "From ₦300,000 per day",
     description: "A cozy and professional space designed for small to medium corporate events, training sessions, and workshops.",
     features: ["Air Conditioning", "Free WiFi", "Sound System", "Projector"],
     location: "First Floor, Central Wing",
@@ -91,7 +91,7 @@ const corporateHalls = [
     id: "rivers-hall-boardroom",
     name: "Rivers Hall - Boardroom",
     capacity: 25,
-    priceRange: "₦400,000 per day",
+    priceRange: "From ₦400,000 per day",
     description: "An executive boardroom designed for high-level discussions and strategic planning with premium amenities.",
     features: ["Air Conditioning", "Free WiFi", "Parking", "Sound System", "Projector", "Catering Service", "Executive Seating"],
     location: "Executive Floor, Premium Wing",
@@ -102,22 +102,11 @@ const corporateHalls = [
     id: "the-pavilion-event-centre",
     name: "The Pavilion/ Event Centre",
     capacity: 300,
-    priceRange: "₦3,000,000 per day",
+    priceRange: "From ₦3,000,000 per day",
     description: "Our largest venue, suitable for grand corporate events, exhibitions, and large-scale conferences with world-class facilities.",
     features: ["Air Conditioning", "Free WiFi", "Parking", "Catering Service", "Sound System", "Projector", "Stage", "VIP Lounge", "Exhibition Space", "Multiple Breakout Rooms"],
     location: "Ground Floor, Grand Wing",
     size: "5,000 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16"
-  },
-  {
-    id: "rivers-hall-boardroom",
-    name: "Rivers Hall - Boardroom",
-    capacity: 25,
-    priceRange: "₦400,000 per day",
-    description: "An executive boardroom designed for high-level discussions and strategic planning. Features premium furnishings and advanced technology.",
-    features: ["Air Conditioning", "Free WiFi", "Parking", "Sound System", "Projector", "Executive Seating", "Conference Phone"],
-    location: "Executive Floor, North Tower",
-    size: "800 sq ft",
     kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16"
   },
   {
@@ -130,17 +119,6 @@ const corporateHalls = [
     location: "Garden Terrace, West Wing",
     size: "3,000 sq ft",
     kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16"
-  },
-  {
-    id: "the-pavilion-event-centre",
-    name: "The Pavilion/ Event Centre",
-    capacity: 300,
-    priceRange: "₦3,000,000 per day",
-    description: "Our largest venue, suitable for grand corporate events, exhibitions, and large-scale conferences. Features premium facilities and elegant design.",
-    features: ["Air Conditioning", "Free WiFi", "Parking", "Catering Service", "Sound System", "Projector", "Stage", "VIP Lounge", "Exhibition Space", "Multiple Breakout Rooms"],
-    location: "Main Event Complex, Central Building",
-    size: "8,000 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.53"
   }
 ];
 
