@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,13 @@ import { Bed, Utensils, Waves, Calendar, Globe, Car, Dumbbell, Shield, Coffee, T
 import luxurySuite from "@/assets/luxury-suite.jpg";
 import restaurant from "@/assets/restaurant.jpg";
 import { EventDetailsDialog } from "@/components/events/EventDetailsDialog";
-import { roomTypes } from '@/data/rooms';
+import { roomTypes as staticRoomTypes } from '@/data/rooms';
+import { db } from "@/lib/firebase";
+import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { RoomType } from "@/types/room";
+
+// Evo Road Branch ID
+const EVO_ROAD_BRANCH_ID = "URcvGkmbfrOFInlOS4I9";
 
 // Event data
 const eventTypes = [
@@ -321,6 +327,50 @@ export const InfoSections = () => {
   ];
   
   const [showAllAmenities, setShowAllAmenities] = useState(false);
+  const [roomTypes, setRoomTypes] = useState<RoomType[]>(staticRoomTypes);
+
+  useEffect(() => {
+    const fetchRoomPrices = async () => {
+      try {
+        const roomsRef = collection(db, "branches", EVO_ROAD_BRANCH_ID, "rooms");
+        const roomsSnap = await getDocs(roomsRef);
+        
+        if (!roomsSnap.empty) {
+            const priceMap = new Map<string, number>();
+            roomsSnap.forEach(doc => {
+                const data = doc.data();
+                if (data.type && data.pricePerNight) {
+                    priceMap.set(data.type, Number(data.pricePerNight));
+                }
+            });
+
+            const updatedRooms = staticRoomTypes.map(staticRoom => {
+              // Check for direct match or mapped match
+              let dbPrice = priceMap.get(staticRoom.id);
+              
+              // Handle 'deluxe' mismatch (DB has 'deluxe', static has 'deluxe-room')
+              if (dbPrice === undefined && staticRoom.id === 'deluxe-room') {
+                  dbPrice = priceMap.get('deluxe');
+              }
+
+              if (dbPrice !== undefined) {
+                return {
+                  ...staticRoom,
+                  price: dbPrice,
+                };
+              }
+              return staticRoom;
+            });
+            
+            setRoomTypes(updatedRooms);
+        }
+      } catch (error) {
+        console.error("Error fetching room prices:", error);
+      }
+    };
+
+    fetchRoomPrices();
+  }, []);
 
   return (
     <div className="space-y-16">

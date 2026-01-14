@@ -253,7 +253,7 @@ export function usePayments({ branchId, limit: queryLimit = 100 }: UsePaymentsOp
       const isIndexError = err instanceof Error && err.message.includes('index');
       if (isPermissionError || isIndexError) {
         console.warn('Firebase index not available for payments query. Using fallback method.');
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://rivotels.com/api';
+        const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
         const url = effectiveBranchId ? `${API_BASE_URL}/admin/payments?branchId=${effectiveBranchId}&limit=${queryLimit}` : `${API_BASE_URL}/admin/payments?limit=${queryLimit}`;
         try {
           const resp = await fetch(url);

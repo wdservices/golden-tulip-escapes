@@ -137,76 +137,96 @@ export const UserDashboard = () => {
       };
 
       try {
-        // Create fetch request with timeout
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://rivotels.com/api';
+        const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
         const fetchRequest = fetch(`${API_BASE_URL}/user-bookings/${user.id}`);
-        
-        // Race between fetch and timeout
         const response = await Promise.race([
           fetchRequest,
           timeoutPromise
         ]) as Response;
-        
         if (response.ok) {
-          // Check if response is actually JSON
           const contentType = response.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {
             const data = await response.json();
             bookings = data.bookings || [];
-            
-            // Map API stats to dashboard stats format
             stats = {
-              totalBookings: data.stats.totalBookings || 0,
-              totalNights: data.stats.totalNights || 0,
-              loyaltyPoints: data.stats.loyaltyPoints || 0,
-              upcomingTrips: data.stats.upcomingBookings || 0,
-              pastTrips: data.stats.pastBookings || 0
+              totalBookings: data.stats?.totalBookings || 0,
+              totalNights: data.stats?.totalNights || 0,
+              loyaltyPoints: data.stats?.loyaltyPoints || 0,
+              upcomingTrips: data.stats?.upcomingBookings || 0,
+              pastTrips: data.stats?.pastBookings || 0
             };
-
-            // Set favorite branch
-            if (data.stats.favoriteBranch && data.stats.favoriteBranch !== 'No bookings yet') {
+            if (data.stats?.favoriteBranch && data.stats.favoriteBranch !== 'No bookings yet') {
               branchCount[data.stats.favoriteBranch] = 1;
             }
           } else {
-            // Response is not JSON (likely HTML error page)
             const textResponse = await response.text();
             console.error('API returned non-JSON response:', textResponse.substring(0, 200));
             throw new Error('Server returned an invalid response format');
           }
         } else {
-          // Handle HTTP error responses
           const errorText = await response.text();
           console.error(`API request failed with status ${response.status}:`, errorText.substring(0, 200));
           throw new Error(`API request failed: ${response.status} ${response.statusText}`);
         }
-
       } catch (error) {
+        try {
+          const fallbackBase = '/api';
+          const response = await Promise.race([
+            fetch(`${fallbackBase}/user-bookings/${user.id}`),
+            timeoutPromise
+          ]) as Response;
+          if (response.ok) {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+              const data = await response.json();
+              bookings = data.bookings || [];
+              stats = {
+                totalBookings: data.stats?.totalBookings || 0,
+                totalNights: data.stats?.totalNights || 0,
+                loyaltyPoints: data.stats?.loyaltyPoints || 0,
+                upcomingTrips: data.stats?.upcomingBookings || 0,
+                pastTrips: data.stats?.pastBookings || 0
+              };
+              if (data.stats?.favoriteBranch && data.stats.favoriteBranch !== 'No bookings yet') {
+                branchCount[data.stats.favoriteBranch] = 1;
+              }
+            } else {
+              const textResponse = await response.text();
+              console.error('API returned non-JSON response:', textResponse.substring(0, 200));
+              throw new Error('Server returned an invalid response format');
+            }
+          } else {
+            const errorText = await response.text();
+            console.error(`API request failed with status ${response.status}:`, errorText.substring(0, 200));
+            throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+          }
+        } catch (fallbackErr) {
         console.error('Error fetching booking data from API:', error);
         
         // Provide user-friendly error messages with toast notifications
-        if (error instanceof Error) {
-          if (error.message === 'Request timeout') {
+        if (fallbackErr instanceof Error) {
+          if (fallbackErr.message === 'Request timeout') {
             console.error('API request timed out after 10 seconds');
             toast({
               title: "Connection Timeout",
               description: "The request took too long to complete. Please check your internet connection and try again.",
               variant: "destructive"
             });
-          } else if (error.message.includes('invalid response format')) {
+          } else if (fallbackErr.message.includes('invalid response format')) {
             console.error('Server returned an error page instead of data');
             toast({
               title: "Server Error",
               description: "The server encountered an error. Please try refreshing the page or contact support if the issue persists.",
               variant: "destructive"
             });
-          } else if (error.message.includes('Failed to fetch')) {
+          } else if (fallbackErr.message.includes('Failed to fetch')) {
             console.error('Network error - check if the API server is running');
             toast({
               title: "Connection Error",
               description: "Unable to connect to the server. Please check your internet connection and try again.",
               variant: "destructive"
             });
-          } else if (error.message.includes('API request failed')) {
+          } else if (fallbackErr.message.includes('API request failed')) {
             toast({
               title: "Data Loading Error",
               description: "Failed to load your booking data. Please try refreshing the page.",
@@ -230,6 +250,7 @@ export const UserDashboard = () => {
         }
         
         // Keep default values if there's an error
+        }
       }
       
       // Calculate favorite branch

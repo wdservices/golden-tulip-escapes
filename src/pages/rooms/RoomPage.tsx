@@ -5,6 +5,8 @@ import { Bed, Users, Ruler, ArrowLeft, MapPin, Clock, Calendar, User, Phone, Mai
 import { roomTypes } from '../../data/rooms';
 import type { RoomType } from '../../types/room';
 import { ThreeSixtyViewer } from '@/components/ThreeSixtyViewer';
+import { db } from "@/lib/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 // Amenity icon mapping
 const amenityIcons: Record<string, JSX.Element> = {
@@ -17,17 +19,86 @@ const amenityIcons: Record<string, JSX.Element> = {
 };
 
 export default function RoomPage() {
-  const { id } = useParams<{ id: string }>();
+  const { branchId, id } = useParams<{ branchId: string; id: string }>();
   const navigate = useNavigate();
   const [room, setRoom] = useState<RoomType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentImage, setCurrentImage] = useState(0);
 
   useEffect(() => {
-    const selectedRoom = roomTypes.find(r => r.id === id) || null;
-    setRoom(selectedRoom);
-    setIsLoading(false);
-  }, [id]);
+    const fetchRoomData = async () => {
+      let selectedRoom = roomTypes.find(r => r.id === id) || null;
+      
+      if (selectedRoom && branchId) {
+        try {
+          // Map URL id to DB type with multiple variations
+          const roomIdVariations = [
+            id,
+            id?.replace(/-/g, ' '),
+            id?.replace(/-/g, ''),
+            id?.split('-')[0]
+          ];
+          
+          let dbType = id;
+          
+          // Handle specific room type mappings
+          if (id === 'deluxe-room' || id === 'deluxe') {
+            dbType = 'deluxe';
+          } else if (id === 'standard-room' || id === 'standard') {
+            dbType = 'standard-room';
+          } else if (id === 'superior-room' || id === 'superior') {
+            dbType = 'superior-room';
+          } else if (id === 'junior-suite' || id === 'junior') {
+            dbType = 'junior-suite';
+          } else if (id === 'executive-suite' || id === 'executive') {
+            dbType = 'executive-suite';
+          }
+
+          const roomsRef = collection(db, "branches", branchId, "rooms");
+          
+          // Try to find the room using different variations
+          let querySnapshot = null;
+          
+          // First try the direct mapping
+          const q = query(roomsRef, where("type", "==", dbType));
+          querySnapshot = await getDocs(q);
+          
+          // If not found, try other variations
+          if (querySnapshot.empty) {
+            for (const variation of roomIdVariations) {
+              const qVar = query(roomsRef, where("type", "==", variation));
+              const varSnapshot = await getDocs(qVar);
+              if (!varSnapshot.empty) {
+                querySnapshot = varSnapshot;
+                console.log("RoomPage: Found room using variation:", variation);
+                break;
+              }
+            }
+          }
+
+          if (!querySnapshot.empty) {
+            const docData = querySnapshot.docs[0].data();
+            if (docData.pricePerNight) {
+              selectedRoom = {
+                ...selectedRoom,
+                price: Number(docData.pricePerNight)
+              };
+              console.log("RoomPage: Updated room price:", selectedRoom.name, "->", `₦${Number(docData.pricePerNight).toLocaleString()}`);
+            }
+          } else {
+            console.log("RoomPage: No room found in Firestore for type:", dbType, "or variations:", roomIdVariations);
+          }
+        } catch (error) {
+          console.error("Error fetching room price:", error);
+        }
+      }
+
+      setRoom(selectedRoom);
+      setIsLoading(false);
+    };
+
+    fetchRoomData();
+  }, [id, branchId]);
 
   // Device motion script for Panoee VR/AR functionality
   useEffect(() => {

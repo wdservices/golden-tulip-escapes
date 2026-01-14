@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import luxurySuite from "@/assets/luxury-suite.jpg";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 interface BranchRoomsProps {
   roomTypes?: Branch["roomTypes"];
@@ -11,8 +13,91 @@ interface BranchRoomsProps {
 }
 
 export const BranchRooms = ({ roomTypes = [], branchId }: BranchRoomsProps) => {
-  // Use branch-specific room types instead of generic room data
-  const roomsToDisplay = roomTypes;
+  const [roomsToDisplay, setRoomsToDisplay] = useState(roomTypes);
+
+  useEffect(() => {
+    const fetchRoomPrices = async () => {
+      if (!branchId || roomTypes.length === 0) return;
+
+      // Map URL branch IDs to Firestore branch IDs
+      const branchIdMapping: { [key: string]: string } = {
+        "stadium-31": "UShvwSYpMNpuNaS32MxZ",
+        "evo-road": "URcvGkmbfrOFInlOS4I9",
+        "evergreen": "5vkOc2peS2tAoTyHcmQp",
+        "garden-city": "RYoG3qsKFIiy9REDFRbq",
+        // Add other branch mappings as needed
+      };
+
+      const firestoreBranchId = branchIdMapping[branchId] || branchId;
+      
+      console.log("BranchRooms: Fetching prices for branch:", branchId, "-> Firestore ID:", firestoreBranchId);
+
+      try {
+        const roomsRef = collection(db, "branches", firestoreBranchId, "rooms");
+        const roomsSnap = await getDocs(roomsRef);
+        
+        if (!roomsSnap.empty) {
+          const priceMap = new Map<string, number>();
+          roomsSnap.forEach(doc => {
+            const data = doc.data() as { type?: string; pricePerNight?: number | string };
+            if (data.type && data.pricePerNight !== undefined) {
+              const price = Number(data.pricePerNight);
+              const existing = priceMap.get(data.type);
+              if (Number.isFinite(price) && (existing === undefined || price > existing)) {
+                priceMap.set(data.type, price);
+              }
+            }
+          });
+          
+          console.log("BranchRooms: Found prices in DB:", Array.from(priceMap.entries()));
+
+          const updatedRooms = roomTypes.map(staticRoom => {
+            let dbPrice = priceMap.get(staticRoom.name?.toLowerCase());
+            
+            console.log("BranchRooms: Looking for price for room:", staticRoom.name, "-> Found:", dbPrice);
+            
+            // Handle ID mapping for different naming conventions
+            if (dbPrice === undefined) {
+              // Try different variations of the room name
+              const roomNameVariations = [
+                staticRoom.name?.toLowerCase(),
+                staticRoom.name?.toLowerCase().replace(/\s+/g, '-'),
+                staticRoom.name?.toLowerCase().replace(/\s+/g, ''),
+                staticRoom.name?.toLowerCase().split(' ')[0]
+              ];
+              
+              for (const variation of roomNameVariations) {
+                if (priceMap.has(variation)) {
+                  dbPrice = priceMap.get(variation);
+                  console.log("BranchRooms: Found price using variation:", variation, "-> Price:", dbPrice);
+                  break;
+                }
+              }
+            }
+
+            if (dbPrice !== undefined) {
+              const updatedRoom = {
+                ...staticRoom,
+                priceRange: `₦${dbPrice.toLocaleString()}`,
+              };
+              console.log("BranchRooms: Updated room price:", staticRoom.name, "->", updatedRoom.priceRange);
+              return updatedRoom;
+            }
+            return staticRoom;
+          });
+          
+          setRoomsToDisplay(updatedRooms);
+          console.log("BranchRooms: Final rooms to display:", updatedRooms.map(r => ({name: r.name, priceRange: r.priceRange})));
+        } else {
+          console.log("BranchRooms: No rooms found in Firestore for branch:", firestoreBranchId);
+        }
+      } catch (error) {
+        console.error("Error fetching room prices for branch:", error);
+      }
+    };
+
+    fetchRoomPrices();
+  }, [branchId, roomTypes]);
 
   return (
     <section className="py-16" id="rooms">
