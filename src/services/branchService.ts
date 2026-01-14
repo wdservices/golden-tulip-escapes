@@ -270,31 +270,6 @@ const branches: Branch[] = [
           "Access with card",
           "Well Trained Security Guard"
         ]
-      },
-      {
-        name: "Royal Suites Room",
-        description: "Pamper yourself in our well sized Royal Suite. Your nights will be enjoyable with inour nice laid king Beds. Have your meetings or leisure with family and friends in a cossy and relaxed atmosphere. Nice furniture access to pool and gym, Free Wifi, Breakfast, etc",
-        priceRange: "₦161,000",
-        capacity: 3,
-        image: "/images/stadium road 31 images/royal room.webp",
-        features: [
-          "Queen-size bed",
-          "City view",
-          "Free Wi-Fi",
-          "Concierge services",
-          "Car hire",
-          "Refrigerator",
-          "Safe",
-          "Flat Tv",
-          "Laundry and dry cleaning",
-          "Coffee and tea",
-          "Air Condition",
-          "Work Desk",
-          "Swimming Pool",
-          "Room service available 24hrs",
-          "Access with card",
-          "Well Trained Security Guard"
-        ]
       }
     ],
     diningOptions: [
@@ -882,6 +857,10 @@ const branches: Branch[] = [
 
 export const getBranchById = (id: string): Branch | undefined => {
   return branches.find(branch => branch.id === id);
+};
+
+export const getBranchBySlug = (slug: string): Branch | undefined => {
+  return branches.find(branch => branch.id === slug);
 };
 
 export const getAllBranches = (): Branch[] => {

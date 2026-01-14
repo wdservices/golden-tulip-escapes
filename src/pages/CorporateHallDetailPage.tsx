@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { useCorporateHalls } from "@/hooks/useCorporateHalls";
 
 // Corporate halls data
 const corporateHalls = [
@@ -145,7 +146,43 @@ export const CorporateHallDetailPage = () => {
   const [activeTab, setActiveTab] = useState("");
   const [iframeLoaded, setIframeLoaded] = useState(false);
   
+  const { halls: corporateHalls = [], loading, error } = useCorporateHalls();
   const hall = corporateHalls.find(h => h.id === hallId);
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header activeTab={activeTab} onTabChange={setActiveTab} />
+        <main className="pt-20">
+          <div className="container mx-auto px-4 py-16">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-lg text-muted-foreground">Loading hall details...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header activeTab={activeTab} onTabChange={setActiveTab} />
+        <main className="pt-20">
+          <div className="container mx-auto px-4 py-16">
+            <div className="text-center">
+              <div className="text-red-500 text-xl mb-4">⚠️ Error Loading Hall</div>
+              <p className="text-lg text-muted-foreground mb-4">{error}</p>
+              <p className="text-sm text-muted-foreground">
+                Please try refreshing the page or contact support if the problem persists.
+              </p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
   
   if (!hall) {
     return <Navigate to="/corporate-halls" replace />;

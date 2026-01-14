@@ -175,7 +175,7 @@ export const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
     setIsProcessing(true);
 
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://rivotels.com/api';
+      const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
       const verifyResponse = await fetch(`${API_BASE_URL}/verify-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

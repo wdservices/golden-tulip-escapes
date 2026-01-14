@@ -61,22 +61,22 @@ rules_version = '2';
        allow create: if request.auth != null && isAdmin(); 
      } 
      
-     // Branches collection rules 
-     match /branches/{branchId} { 
-       // Allow read access to all authenticated users 
-       allow read: if request.auth != null; 
+     // Branches collection rules - UPDATED FOR PUBLIC ACCESS
+     match /branches/{branchId} {
+       // Allow read access to ALL users (including unauthenticated) for public website
+       allow read: if true;
        
-       // Only allow admins to create, update, or delete branches 
-       allow create, update, delete: if isAdmin(); 
+       // Only allow admins to create, update, or delete branches
+       allow create, update, delete: if isAdmin();
        
-       // Nested rooms collection 
-       match /rooms/{roomId} { 
-         // Allow read access to all authenticated users 
-         allow read: if request.auth != null; 
+       // Nested rooms collection - UPDATED FOR PUBLIC ACCESS
+       match /rooms/{roomId} {
+         // Allow read access to ALL users (including unauthenticated) for public website
+         allow read: if true;
          
-         // Only allow admins to manage rooms 
-         allow create, update, delete: if isAdmin(); 
-       } 
+         // Only allow admins to manage rooms
+         allow create, update, delete: if isAdmin();
+       }
      } 
      
      // Bookings collection rules 

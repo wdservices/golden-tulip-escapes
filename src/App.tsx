@@ -26,6 +26,8 @@ import CorporateHallsPage from "./pages/CorporateHallsPage";
 import { CorporateHallDetailPage } from "./pages/CorporateHallDetailPage";
 import AndroidPage from "./pages/AndroidPage";
 import { AndroidGalleryPage } from "./pages/AndroidGalleryPage";
+import IOSPage from "./pages/IOSPage";
+import { IOSGalleryPage } from "./pages/IOSGalleryPage";
 import { Button } from "@/components/ui/button";
 import { AdminPanel } from "./components/admin/AdminPanel";
 import FirebaseTest from "./pages/FirebaseTest";

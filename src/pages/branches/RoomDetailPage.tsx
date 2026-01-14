@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Bed, Users, ArrowLeft, Check, Star, ArrowRight, Phone, Mail, MapPin } from 'lucide-react';
 import { getBranchById } from '@/services/branchService';
 import { Branch } from '@/types/branch';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 export const RoomDetailPage = () => {
   const { branchId, roomId } = useParams<{ branchId: string; roomId: string }>();
@@ -14,41 +16,132 @@ export const RoomDetailPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!branchId || !roomId) {
-      setError('Missing branch or room information');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const branchData = getBranchById(branchId);
-      if (!branchData) {
-        setError('Branch not found');
-        navigate('/404', { replace: true });
+    const fetchRoomData = async () => {
+      if (!branchId || !roomId) {
+        setError('Missing branch or room information');
+        setIsLoading(false);
         return;
       }
 
-      setBranch(branchData);
+      try {
+        const branchData = getBranchById(branchId);
+        if (!branchData) {
+          setError('Branch not found');
+          navigate('/404', { replace: true });
+          return;
+        }
 
-      // Find the room by its URL-friendly name using branch-specific room data
-      const decodedRoomId = roomId.replace(/-/g, ' ');
-      const roomData = branchData.roomTypes?.find(
-        (r) => r.name.toLowerCase() === decodedRoomId.toLowerCase()
-      );
+        setBranch(branchData);
 
-      if (!roomData) {
-        setError('Room not found');
-        navigate(`/branch/${branchId}`, { replace: true });
-        return;
+        // Find the room by its URL-friendly name using branch-specific room data
+        const decodedRoomId = roomId.replace(/-/g, ' ');
+        const roomData = branchData.roomTypes?.find(
+          (r) => r.name.toLowerCase() === decodedRoomId.toLowerCase()
+        );
+
+        if (!roomData) {
+          setError('Room not found');
+          navigate(`/branch/${branchId}`, { replace: true });
+          return;
+        }
+
+        // Fetch price from Firestore
+        let roomWithPrice = roomData;
+        try {
+          // Map room name to DB type with multiple variations
+          const roomNameVariations = [
+            decodedRoomId.toLowerCase(),
+            decodedRoomId.toLowerCase().replace(/\s+/g, '-'),
+            decodedRoomId.toLowerCase().replace(/\s+/g, ''),
+            decodedRoomId.toLowerCase().split(' ')[0]
+          ];
+          
+          let dbType = decodedRoomId.toLowerCase();
+          
+          // Handle specific room type mappings
+          if (decodedRoomId.toLowerCase() === 'deluxe room') {
+            dbType = 'deluxe';
+          } else if (decodedRoomId.toLowerCase() === 'standard room') {
+            dbType = 'standard-room';
+          } else if (decodedRoomId.toLowerCase() === 'superior room') {
+            dbType = 'superior-room';
+          } else if (decodedRoomId.toLowerCase() === 'junior suite') {
+            dbType = 'junior-suite';
+          } else if (decodedRoomId.toLowerCase() === 'executive suite') {
+            dbType = 'executive-suite';
+          }
+
+          // Map URL branch IDs to Firestore branch IDs
+          const branchIdMapping: { [key: string]: string } = {
+            "stadium-31": "UShvwSYpMNpuNaS32MxZ",
+            "evo-road": "URcvGkmbfrOFInlOS4I9",
+            "evergreen": "5vkOc2peS2tAoTyHcmQp",
+            "garden-city": "RYoG3qsKFIiy9REDFRbq",
+            // Add other branch mappings as needed
+          };
+
+          const firestoreBranchId = branchIdMapping[branchId] || branchId;
+
+          const roomsRef = collection(db, "branches", firestoreBranchId, "rooms");
+          
+          // Try to find the room using different name variations
+          let querySnapshot = null;
+          
+          // First try the direct mapping
+          const q = query(roomsRef, where("type", "==", dbType));
+          querySnapshot = await getDocs(q);
+          
+          // If not found, try other variations
+          if (querySnapshot.empty) {
+            for (const variation of roomNameVariations) {
+              const qVar = query(roomsRef, where("type", "==", variation));
+              const varSnapshot = await getDocs(qVar);
+              if (!varSnapshot.empty) {
+                querySnapshot = varSnapshot;
+                console.log("RoomDetailPage: Found room using variation:", variation);
+                break;
+              }
+            }
+          }
+
+          if (!querySnapshot.empty) {
+            let bestDocData: { pricePerNight?: number | string } | null = null;
+            let bestPrice = -Infinity;
+            querySnapshot.forEach(doc => {
+              const data = doc.data() as { pricePerNight?: number | string };
+              if (data.pricePerNight !== undefined) {
+                const price = Number(data.pricePerNight);
+                if (Number.isFinite(price) && price > bestPrice) {
+                  bestPrice = price;
+                  bestDocData = data;
+                }
+              }
+            });
+
+            if (bestDocData && bestPrice > -Infinity) {
+              roomWithPrice = {
+                ...roomData,
+                priceRange: `₦${bestPrice.toLocaleString()}`
+              };
+              console.log("RoomDetailPage: Updated room price:", roomData.name, "->", roomWithPrice.priceRange);
+            }
+          } else {
+            console.log("RoomDetailPage: No room found in Firestore for type:", dbType, "or variations:", roomNameVariations);
+          }
+        } catch (error) {
+          console.error('Error fetching room price from Firestore:', error);
+        }
+
+        setRoom(roomWithPrice);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load room information');
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      setRoom(roomData);
-    } catch (err) {
-      console.error('Error fetching data:', err);
-      setError('Failed to load room information');
-    } finally {
-      setIsLoading(false);
-    }
+    fetchRoomData();
   }, [branchId, roomId, navigate]);
 
   if (isLoading) {
@@ -136,17 +229,6 @@ export const RoomDetailPage = () => {
               className="w-full h-full object-cover"
             />
           ) : room.name.toLowerCase() === 'executive twin room' ? (
-            <iframe 
-              width="100%" 
-              height="640" 
-              frameBorder="0" 
-              allow="xr-spatial-tracking; gyroscope; accelerometer" 
-              allowFullScreen 
-              scrolling="no" 
-              src="https://kuula.co/share/collection/7Hphd?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=-1"
-              className="w-full h-full object-cover"
-            />
-          ) : room.name.toLowerCase() === 'royal suites room' ? (
             <iframe 
               width="100%" 
               height="640" 

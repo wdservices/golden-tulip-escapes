@@ -4,119 +4,46 @@ import { CalendarIcon, Users, DollarSign, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Header } from '@/components/Header';
-
-const corporateHalls = [
-  {
-    id: "anioma-hall",
-    name: "Anioma Restaurant",
-    capacity: "100 - 200 guests",
-    priceRange: "From ₦1,000,000 per day",
-    description: "A grand restaurant perfect for large corporate events, conferences, and celebrations. Features state-of-the-art facilities and elegant décor. Can also be arranged to hall standard for various events.",
-    features: [
-      "Professional meeting rooms",
-      "Conference facilities",
-      "Catering services",
-      "Audio/Visual equipment",
-      "Dedicated event coordinator",
-      "High-speed Wi-Fi",
-      "Projector & screen",
-      "Microphone & sound system",
-      "Whiteboard & flip charts"
-    ]
-  },
-  {
-    id: "abuja-hall",
-    name: "Abuja Hall",
-    capacity: "80 - 150 guests",
-    priceRange: "From ₦750,000 per day",
-    description: "Ideal for medium-sized seminars and workshops, offering a comfortable and productive environment.",
-    features: [
-      "Professional meeting rooms",
-      "Conference facilities",
-      "Catering services",
-      "Audio/Visual equipment",
-      "Dedicated event coordinator",
-      "High-speed Wi-Fi",
-      "Projector & screen",
-      "Microphone & sound system",
-      "Whiteboard & flip charts"
-    ]
-  },
-  {
-    id: "lagos-hall",
-    name: "Lagos Hall",
-    capacity: "30 - 40 guests",
-    priceRange: "From ₦400,000 per day",
-    description: "A versatile space suitable for intimate business meetings and training sessions.",
-    features: [
-      "Professional meeting rooms",
-      "Conference facilities",
-      "Catering services",
-      "Audio/Visual equipment",
-      "Dedicated event coordinator",
-      "High-speed Wi-Fi",
-      "Projector & screen",
-      "Microphone & sound system",
-      "Whiteboard & flip charts"
-    ]
-  },
-  {
-    id: "rivers-hall-boardroom",
-    name: "Rivers Hall - Boardroom",
-    capacity: "18 - 25 guests",
-    priceRange: "From ₦400,000 per day",
-    description: "An executive boardroom designed for high-level discussions and strategic planning.",
-    features: [
-      "Professional meeting rooms",
-      "Conference facilities",
-      "Catering services",
-      "Audio/Visual equipment",
-      "Dedicated event coordinator",
-      "High-speed Wi-Fi",
-      "Projector & screen",
-      "Microphone & sound system",
-      "Whiteboard & flip charts"
-    ]
-  },
-  {
-    id: "kano-hall",
-    name: "Kano Hall",
-    capacity: "18 - 25 guests",
-    priceRange: "From ₦300,000 per day",
-    description: "A compact yet functional hall for smaller meetings and presentations.",
-    features: [
-      "Professional meeting rooms",
-      "Conference facilities",
-      "Catering services",
-      "Audio/Visual equipment",
-      "Dedicated event coordinator",
-      "High-speed Wi-Fi",
-      "Projector & screen",
-      "Microphone & sound system",
-      "Whiteboard & flip charts"
-    ]
-  },
-  {
-    id: "the-pavilion-event-centre",
-    name: "The Pavilion/ Event Centre",
-    capacity: "100 - 300 guests",
-    priceRange: "From ₦3,000,000 per day",
-    description: "Our largest venue, suitable for grand corporate events, exhibitions, and large-scale conferences.",
-    features: [
-      "Professional meeting rooms",
-      "Conference facilities",
-      "Catering services",
-      "Audio/Visual equipment",
-      "Dedicated event coordinator",
-      "High-speed Wi-Fi",
-      "Projector & screen",
-      "Microphone & sound system",
-      "Whiteboard & flip charts"
-    ]
-  }
-];
+import { useCorporateHalls } from '@/hooks/useCorporateHalls';
 
 const CorporateHallsPage: React.FC = () => {
+  const { halls: corporateHalls, loading, error } = useCorporateHalls();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header activeTab="" onTabChange={() => {}} />
+        <main className="pt-20">
+          <div className="container mx-auto px-4 py-16">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-lg text-muted-foreground">Loading corporate halls...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header activeTab="" onTabChange={() => {}} />
+        <main className="pt-20">
+          <div className="container mx-auto px-4 py-16">
+            <div className="text-center">
+              <div className="text-red-500 text-xl mb-4">⚠️ Error Loading Halls</div>
+              <p className="text-lg text-muted-foreground mb-4">{error}</p>
+              <p className="text-sm text-muted-foreground">
+                Please try refreshing the page or contact support if the problem persists.
+              </p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header activeTab="" onTabChange={() => {}} />

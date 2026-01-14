@@ -6,8 +6,13 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { createRequire } from 'module';
 import crypto from 'crypto';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const require = createRequire(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 dotenv.config();
 
 const app = express();
@@ -60,11 +65,17 @@ const fetchUserBookingsByBranchFallback = async (userId) => {
   return bookings;
 };
 
-// Root route for health check
 router.get('/', (req, res) => {
-  res.status(200).json({ status: 'success', message: 'Golden Tulip API is running' });
+  res.status(200).type('html').send('<!doctype html><html><head><title>API OK</title></head><body>Golden Tulip API is running</body></html>');
 });
 
+router.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  });
+});
 router.post('/init-admin', async (req, res) => {
   try {
     const { email } = req.body;
@@ -270,6 +281,9 @@ router.post('/verify-payment', async (req, res) => {
 });
 
 // Route to fetch user bookings
+router.get('/user-bookings', (req, res) => {
+  res.status(400).json({ error: 'User ID is required. Use /user-bookings/:userId' });
+});
 router.get('/user-bookings/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
