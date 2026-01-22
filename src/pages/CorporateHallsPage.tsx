@@ -25,7 +25,7 @@ const CorporateHallsPage: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (error && corporateHalls.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <Header activeTab="" onTabChange={() => {}} />

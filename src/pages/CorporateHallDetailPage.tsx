@@ -20,8 +20,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useCorporateHalls } from "@/hooks/useCorporateHalls";
 
-// Corporate halls data
-const corporateHalls = [
+const staticCorporateHalls = [
   {
     id: "anioma-hall",
     name: "Anioma Restaurant",
@@ -148,6 +147,7 @@ export const CorporateHallDetailPage = () => {
   
   const { halls: corporateHalls = [], loading, error } = useCorporateHalls();
   const hall = corporateHalls.find(h => h.id === hallId);
+  const embedUrl = hall?.kuulaEmbedUrl || staticCorporateHalls.find(h => h.id === hallId)?.kuulaEmbedUrl || "https://kuula.co/share/collection/7HpmX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1";
   
   if (loading) {
     return (
@@ -165,7 +165,7 @@ export const CorporateHallDetailPage = () => {
     );
   }
   
-  if (error) {
+  if (error && !hall && corporateHalls.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <Header activeTab={activeTab} onTabChange={setActiveTab} />
@@ -220,7 +220,7 @@ export const CorporateHallDetailPage = () => {
               loading="lazy"
               scrolling="no"
               frameBorder="0" 
-              src={hall.kuulaEmbedUrl}
+              src={embedUrl}
               title={`360° Virtual Tour of ${hall.name}`}
               className="absolute inset-0 w-full h-full"
               onLoad={() => setIframeLoaded(true)}
