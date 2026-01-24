@@ -66,28 +66,6 @@ const staticCorporateHalls = [
     kuulaEmbedUrl: "https://kuula.co/share/collection/7Hpmq?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
   },
   {
-    id: "port-harcourt-hall",
-    name: "Port Harcourt Hall",
-    capacity: 400,
-    priceRange: "₦120,000 - ₦250,000",
-    description: "A versatile large hall suitable for conferences, product launches, and major corporate celebrations with premium facilities.",
-    features: ["Air Conditioning", "Free WiFi", "Parking", "Catering Service", "Sound System", "Projector", "Stage", "VIP Lounge"],
-    location: "Ground Floor, South Wing",
-    size: "2,200 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16"
-  },
-  {
-    id: "kaduna-hall",
-    name: "Kaduna Hall",
-    capacity: 250,
-    priceRange: "₦90,000 - ₦180,000",
-    description: "A modern hall with flexible seating arrangements, perfect for corporate training, seminars, and medium-sized events.",
-    features: ["Air Conditioning", "Free WiFi", "Parking", "Sound System", "Projector", "Catering Service"],
-    location: "Second Floor, North Wing",
-    size: "1,500 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16"
-  },
-  {
     id: "rivers-hall-boardroom",
     name: "Rivers Hall - Boardroom",
     capacity: 25,
@@ -107,9 +85,9 @@ const staticCorporateHalls = [
     features: ["Air Conditioning", "Free WiFi", "Parking", "Catering Service", "Sound System", "Projector", "Stage", "VIP Lounge", "Exhibition Space", "Multiple Breakout Rooms"],
     location: "Ground Floor, Grand Wing",
     size: "5,000 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16"
+    kuulaEmbedUrl: "https://kuula.co/share/collection/7HvmX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
   },
-  {
+    {
     id: "the-marquee",
     name: "The Marquee",
     capacity: 100,
@@ -118,7 +96,7 @@ const staticCorporateHalls = [
     features: ["Air Conditioning", "Free WiFi", "Parking", "Catering Service", "Sound System", "Projector", "Outdoor Access", "Garden View"],
     location: "Garden Terrace, West Wing",
     size: "3,000 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16"
+    kuulaEmbedUrl: ""
   }
 ];
 
@@ -147,7 +125,8 @@ export const CorporateHallDetailPage = () => {
   
   const { halls: corporateHalls = [], loading, error } = useCorporateHalls();
   const hall = corporateHalls.find(h => h.id === hallId);
-  const embedUrl = hall?.kuulaEmbedUrl || staticCorporateHalls.find(h => h.id === hallId)?.kuulaEmbedUrl || "https://kuula.co/share/collection/7HpmX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1";
+  const hallData = hall || staticCorporateHalls.find(h => h.id === hallId);
+  const embedUrl = hallData?.kuulaEmbedUrl;
   
   if (loading) {
     return (
@@ -207,24 +186,30 @@ export const CorporateHallDetailPage = () => {
           
           {/* 360° Virtual Tour - using the hall's specific Kuula embed URL */}
           <div className="h-full relative">
-            <iframe 
-              width="100%" 
-              height="100%" 
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                border: 'none', 
-                maxWidth: '100%' 
-              }}  
-              allow="xr-spatial-tracking; gyroscope; accelerometer; fullscreen" 
-              loading="lazy"
-              scrolling="no"
-              frameBorder="0" 
-              src={embedUrl}
-              title={`360° Virtual Tour of ${hall.name}`}
-              className="absolute inset-0 w-full h-full"
-              onLoad={() => setIframeLoaded(true)}
-            />
+            {embedUrl ? (
+              <iframe 
+                width="100%" 
+                height="100%" 
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  border: 'none', 
+                  maxWidth: '100%' 
+                }}  
+                allow="xr-spatial-tracking; gyroscope; accelerometer; fullscreen" 
+                loading="lazy"
+                scrolling="no"
+                frameBorder="0" 
+                src={embedUrl}
+                title={`360° Virtual Tour of ${hall.name}`}
+                className="absolute inset-0 w-full h-full"
+                onLoad={() => setIframeLoaded(true)}
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
+                 {/* 360 View disabled/unavailable */}
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
           </div>
         </div>
