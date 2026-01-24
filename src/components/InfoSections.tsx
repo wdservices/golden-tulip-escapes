@@ -239,11 +239,7 @@ export const InfoSections = () => {
   const [showAllSpaServices, setShowAllSpaServices] = useState(false);
   
   const handleOpenDialog = (event: any) => {
-    if (event.id === "corporate") {
-      window.location.href = `/corporate-halls`;
-    } else {
-      setSelectedEvent(event.id);
-    }
+    setSelectedEvent(event.id);
   };
 
   const handleCloseDialog = () => {

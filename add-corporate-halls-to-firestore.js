@@ -66,30 +66,6 @@ const corporateHallsData = [
     type: "hall"
   },
   {
-    id: "port-harcourt-hall",
-    name: "Port Harcourt Hall",
-    capacity: 400,
-    priceRange: "₦120,000 - ₦250,000",
-    description: "A versatile large hall suitable for conferences, product launches, and major corporate celebrations with premium facilities.",
-    features: ["Air Conditioning", "Free WiFi", "Parking", "Catering Service", "Sound System", "Projector", "Stage", "VIP Lounge"],
-    location: "Ground Floor, South Wing",
-    size: "2,200 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16",
-    type: "hall"
-  },
-  {
-    id: "kaduna-hall",
-    name: "Kaduna Hall",
-    capacity: 250,
-    priceRange: "₦90,000 - ₦180,000",
-    description: "A modern hall with flexible seating arrangements, perfect for corporate training, seminars, and medium-sized events.",
-    features: ["Air Conditioning", "Free WiFi", "Parking", "Sound System", "Projector", "Catering Service"],
-    location: "Second Floor, North Wing",
-    size: "1,500 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16",
-    type: "hall"
-  },
-  {
     id: "rivers-hall-boardroom",
     name: "Rivers Hall - Boardroom",
     capacity: 25,
@@ -110,7 +86,7 @@ const corporateHallsData = [
     features: ["Air Conditioning", "Free WiFi", "Parking", "Catering Service", "Sound System", "Projector", "Stage", "VIP Lounge", "Exhibition Space", "Multiple Breakout Rooms"],
     location: "Ground Floor, Grand Wing",
     size: "5,000 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16",
+    kuulaEmbedUrl: "https://kuula.co/share/collection/7HvmX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1",
     type: "hall"
   },
   {
@@ -122,7 +98,7 @@ const corporateHallsData = [
     features: ["Air Conditioning", "Free WiFi", "Parking", "Catering Service", "Sound System", "Projector", "Outdoor Access", "Garden View"],
     location: "Garden Terrace, West Wing",
     size: "3,000 sq ft",
-    kuulaEmbedUrl: "https://kuula.co/share/collection/7l5Kb?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1&chromeless=0&autorotate=0.16",
+    kuulaEmbedUrl: "",
     type: "hall"
   }
 ];
