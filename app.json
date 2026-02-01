@@ -4,6 +4,9 @@
       "eas": {
         "projectId": "dc3afe84-7e66-456f-81d4-3609f4c7b802"
       }
+    },
+    "android": {
+      "package": "com.wdservices.vite_react_shadcn_ts"
     }
   }
 }
