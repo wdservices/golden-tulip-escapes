@@ -1,0 +1,246 @@
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, ActivityIndicator, Alert, ScrollView, Modal } from 'react-native';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
+import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
+import { auth, db } from '../firebaseConfig';
+import { LinearGradient } from 'expo-linear-gradient';
+import { X } from 'lucide-react-native';
+
+export default function LoginScreen() {
+  const [isLogin, setIsLogin] = useState(true);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Forgot Password State
+  const [resetModalVisible, setResetModalVisible] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [isResetSent, setIsResetSent] = useState(false);
+
+  const handleSubmit = async () => {
+    if (isLogin) {
+      if (!email || !password) return Alert.alert('Error', 'Please fill in all fields');
+    } else {
+      if (!name || !email || !phone || !password) return Alert.alert('Error', 'Please fill in all fields');
+    }
+
+    setLoading(true);
+    try {
+      if (isLogin) {
+        // Login Logic
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        // Register Logic
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Update Profile
+        await updateProfile(user, { displayName: name });
+
+        // Save to Firestore
+        await setDoc(doc(db, 'users', user.uid), {
+          id: user.uid,
+          name: name,
+          email: email,
+          phone: phone,
+          photoURL: user.photoURL || null,
+          role: 'user',
+          joinDate: new Date().toISOString(),
+          lastLogin: new Date().toISOString(),
+          preferences: {}
+        });
+      }
+    } catch (error) {
+      Alert.alert(isLogin ? 'Login Failed' : 'Registration Failed', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!resetEmail) {
+      return Alert.alert('Error', 'Please enter your email address');
+    }
+    
+    setResetLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, resetEmail);
+      Alert.alert(
+        'Check your email', 
+        'A password reset link has been sent to ' + resetEmail,
+        [{ text: 'OK', onPress: () => setResetModalVisible(false) }]
+      );
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  return (
+    <ImageBackground 
+      source={{ uri: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070&auto=format&fit=crop' }} 
+      style={styles.background}
+    >
+      <LinearGradient colors={['rgba(29, 54, 73, 0.7)', 'rgba(29, 54, 73, 0.95)']} style={styles.gradient}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Golden Tulip</Text>
+            <Text style={styles.subtitle}>Luxury Accommodation</Text>
+          </View>
+
+          <View style={styles.formContainer}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+              <View style={styles.form}>
+                <Text style={styles.welcome}>{isLogin ? 'Welcome Back' : 'Create Account'}</Text>
+                <Text style={styles.instruction}>
+                  {isLogin ? 'Enter your credentials to sign in' : 'Fill in the details to get started'}
+                </Text>
+
+                {!isLogin && (
+                  <>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Full Name"
+                      placeholderTextColor="#94a3b8"
+                      value={name}
+                      onChangeText={setName}
+                      autoCapitalize="words"
+                    />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Phone Number"
+                      placeholderTextColor="#94a3b8"
+                      value={phone}
+                      onChangeText={setPhone}
+                      keyboardType="phone-pad"
+                    />
+                  </>
+                )}
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Email"
+                  placeholderTextColor="#94a3b8"
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Password"
+                  placeholderTextColor="#94a3b8"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                />
+
+                {isLogin && (
+                  <TouchableOpacity 
+                    style={styles.forgotPassContainer} 
+                    onPress={() => {
+                      setResetEmail(email); // Pre-fill if they typed it
+                      setResetModalVisible(true);
+                      setIsResetSent(false); // Ensure we start in input mode
+                    }}
+                  >
+                    <Text style={styles.forgotPassText}>Forgot Password?</Text>
+                  </TouchableOpacity>
+                )}
+
+                <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
+                  {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{isLogin ? 'Sign In' : 'Sign Up'}</Text>}
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+
+        {/* Forgot Password Modal */}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={resetModalVisible}
+          onRequestClose={() => setResetModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Reset Password</Text>
+                <TouchableOpacity onPress={() => setResetModalVisible(false)}>
+                  <X size={24} color="#fff" />
+                </TouchableOpacity>
+              </View>
+              
+              <Text style={styles.modalText}>
+                Enter your email address and we'll send you a link to reset your password.
+              </Text>
+              
+              <Text style={[styles.modalText, { fontSize: 13, color: '#94a3b8', fontStyle: 'italic', marginTop: -10 }]}>
+                Note: If you don't see the email, please check your spam folder.
+              </Text>
+
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your email"
+                placeholderTextColor="#94a3b8"
+                value={resetEmail}
+                onChangeText={setResetEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+
+              <TouchableOpacity 
+                style={styles.button} 
+                onPress={handlePasswordReset}
+                disabled={resetLoading}
+              >
+                {resetLoading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Send Reset Link</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+      </LinearGradient>
+    </ImageBackground>
+  );
+}
+
+const styles = StyleSheet.create({
+  background: { flex: 1 },
+  gradient: { flex: 1, justifyContent: 'center' },
+  container: { flex: 1, justifyContent: 'space-between', paddingVertical: 60 },
+  header: { alignItems: 'center', marginTop: 40 },
+  title: { fontSize: 36, fontWeight: 'bold', color: '#fff', letterSpacing: 1 },
+  subtitle: { fontSize: 16, color: '#e2e8f0', marginTop: 5 },
+  formContainer: { paddingHorizontal: 20 },
+  scrollContent: { paddingBottom: 20 },
+  form: { backgroundColor: 'rgba(255,255,255,0.05)', padding: 24, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  authToggle: { flexDirection: 'row', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 12, padding: 4, marginBottom: 24 },
+  toggleOption: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 10 },
+  toggleActive: { backgroundColor: '#C5A059' },
+  toggleOptionText: { color: '#94a3b8', fontWeight: '600' },
+  toggleActiveText: { color: '#fff', fontWeight: 'bold' },
+  welcome: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 8 },
+  instruction: { fontSize: 14, color: '#cbd5e1', marginBottom: 24 },
+  input: { backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 12, padding: 16, color: '#fff', marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  button: { backgroundColor: '#C5A059', padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 8 },
+  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  toggleButton: { marginTop: 20, alignItems: 'center' },
+  toggleText: { color: '#C5A059', fontSize: 14, fontWeight: '600' },
+  forgotPassContainer: { alignSelf: 'flex-end', marginBottom: 16 },
+  forgotPassText: { color: '#C5A059', fontSize: 14 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+  modalContent: { backgroundColor: '#1D3649', width: '100%', padding: 24, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
+  modalText: { color: '#cbd5e1', marginBottom: 20, lineHeight: 20 }
+});
