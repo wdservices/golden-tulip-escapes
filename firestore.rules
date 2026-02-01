@@ -6,7 +6,13 @@ rules_version = '2';
        allow read: if request.auth != null; 
      } 
      
-     // Ads collection rules
+     // Sunday Brunch Attendance rules
+    match /sunday_brunch_attendance/{attendanceId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Ads collection rules
      match /ads/{adId} {
        // Allow anyone (even unauthenticated) to read ads to display on the landing page
        allow read: if true;
@@ -58,8 +64,8 @@ rules_version = '2';
                     (isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'phone', 'preferences', 'lastLogin', 'email', 'displayName', 'photoURL'])); 
        
        // Allow admins to create user documents (for user management) 
-       allow create: if request.auth != null && isAdmin(); 
-     } 
+      allow create: if request.auth != null && (request.auth.uid == userId || isAdmin()); 
+    } 
      
      // Branches collection rules - UPDATED FOR PUBLIC ACCESS
      match /branches/{branchId} {

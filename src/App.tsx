@@ -45,6 +45,7 @@ const BranchesPage = lazy(() => import("@/pages/admin/BranchesPage"));
 const SettingsPage = lazy(() => import("@/pages/admin/settings/SettingsPage"));
 const DashboardHome = lazy(() => import("@/pages/admin/DashboardHome"));
 const AdsPage = lazy(() => import("@/pages/admin/AdsPageNew"));
+const SundayBrunchPage = lazy(() => import("@/pages/admin/SundayBrunchPage"));
 
 // Loading component for Suspense fallback
 const LoadingFallback = () => (
@@ -182,6 +183,11 @@ const App = () => {
               <Route path="ads" element={
                 <Suspense fallback={<LoadingFallback />}>
                   <AdsPage />
+                </Suspense>
+              } />
+              <Route path="sunday-brunch" element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <SundayBrunchPage />
                 </Suspense>
               } />
               <Route path="settings/*" element={
