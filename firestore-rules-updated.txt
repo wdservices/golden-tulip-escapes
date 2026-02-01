@@ -6,6 +6,26 @@ service cloud.firestore {
       allow read: if request.auth != null;
     }
     
+    // Sunday Brunch Attendance rules
+    match /sunday_brunch_attendance/{attendanceId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Sunday Brunch Redemptions rules
+    match /sunday_brunch_redemptions/{redemptionId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+    
+    // Brunch Config rules (for persistent Event ID)
+    match /brunch_config/{configId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
     // Ads collection rules
     match /ads/{adId} {
       // Allow anyone (even unauthenticated) to read ads to display on the landing page
@@ -18,47 +38,48 @@ service cloud.firestore {
     // Feedback collection rules
     match /feedback/{feedbackId} {
       // Allow anyone to submit feedback
-      allow create: if request.resource.data.keys().hasAll(['type', 'message']) &&
-                    (request.resource.data.type == 'suggestion' ||
-                     request.resource.data.type == 'complaint') &&
-                    request.resource.data.message is string &&
-                    request.resource.data.message.size() > 0 &&
+      allow create: if request.resource.data.keys().hasAll(['type', 'message']) && 
+                    (request.resource.data.type == 'suggestion' || 
+                     request.resource.data.type == 'complaint') && 
+                    request.resource.data.message is string && 
+                    request.resource.data.message.size() > 0 && 
                     request.resource.data.message.size() <= 2000;
     }
     
     // Sessions collection rules
     match /sessions/{sessionId} {
       // Allow users to create their own sessions
-      allow create: if request.auth != null &&
-                    request.auth.uid == request.resource.data.userId &&
+      allow create: if request.auth != null && 
+                    request.auth.uid == request.resource.data.userId && 
                     request.resource.data.status == 'active';
       
       // Allow users to update only their own sessions
-      allow update: if request.auth != null &&
-                    request.auth.uid == resource.data.userId &&
+      allow update: if request.auth != null && 
+                    request.auth.uid == resource.data.userId && 
                     request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'logoutTime']);
       
       // Allow users to read their own sessions
-      allow read: if request.auth != null &&
-                  (request.auth.uid == resource.data.userId ||
-                   (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+      allow read: if request.auth != null && 
+                  (request.auth.uid == resource.data.userId || 
+                   (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) && 
                     get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
     }
     
     // Users collection rules
     match /users/{userId} {
       // Allow users to read their own profile and admins to read any profile
-      allow read: if request.auth != null &&
-                  (request.auth.uid == userId ||
+      allow read: if request.auth != null && 
+                  (request.auth.uid == userId || 
                    isAdmin());
       
       // Allow users to update their own profile and admins to update any profile
-      allow update: if request.auth != null &&
-                   (request.auth.uid == userId || isAdmin()) &&
+      allow update: if request.auth != null && 
+                   (request.auth.uid == userId || isAdmin()) && 
                    (isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'phone', 'preferences', 'lastLogin', 'email', 'displayName', 'photoURL']));
       
-      // Allow admins to create user documents (for user management)
-      allow create: if request.auth != null && isAdmin();
+      // Allow users to create their own profile (registration) and admins to create any profile
+      allow create: if request.auth != null && 
+                   (request.auth.uid == userId || isAdmin());
     }
     
     // Branches collection rules - UPDATED FOR PUBLIC ACCESS
@@ -82,34 +103,34 @@ service cloud.firestore {
     // Bookings collection rules
     match /bookings/{bookingId} {
       // Allow users to read their own bookings and admins to read all bookings
-      allow read: if request.auth != null &&
-                 (request.auth.uid == resource.data.userId ||
-                  (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+      allow read: if request.auth != null && 
+                 (request.auth.uid == resource.data.userId || 
+                  (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) && 
                    get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
       
       // Allow authenticated users to create bookings and admins to manage all bookings
-      allow create: if request.auth != null &&
-                   (request.auth.uid == request.resource.data.userId ||
-                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+      allow create: if request.auth != null && 
+                   (request.auth.uid == request.resource.data.userId || 
+                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) && 
                      get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
       
       // Allow users to update their own bookings and admins to update any booking
-      allow update: if request.auth != null &&
-                   (request.auth.uid == resource.data.userId ||
-                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+      allow update: if request.auth != null && 
+                   (request.auth.uid == resource.data.userId || 
+                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) && 
                      get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
       
       // Allow users to delete their own bookings and admins to delete any booking
-      allow delete: if request.auth != null &&
-                   (request.auth.uid == resource.data.userId ||
-                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+      allow delete: if request.auth != null && 
+                   (request.auth.uid == resource.data.userId || 
+                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) && 
                      get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
     }
     
     // Helper function to check if user is admin
     function isAdmin() {
-      return request.auth != null &&
-             exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) && 
              get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true;
     }
   }

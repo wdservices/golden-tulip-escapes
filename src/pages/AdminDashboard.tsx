@@ -49,7 +49,8 @@ import {
   ArrowLeft,
   MessageSquare,
   Megaphone,
-  BookOpen
+  BookOpen,
+  QrCode
 } from "lucide-react";
 
 // Import components
@@ -74,14 +75,16 @@ import { collection, collectionGroup, getDocs, orderBy, query, limit } from "fir
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
-  { id: 'rooms', label: 'Rooms & Facilities', icon: Bed },
+  { id: 'rooms', label: 'Rooms', icon: Bed },
   { id: 'clients', label: 'Clients', icon: Users },
   { id: 'bookings', label: 'Bookings', icon: Calendar },
-  { id: 'payments', label: 'Payments & Finance', icon: CreditCard },
-  { id: 'reports', label: 'Reports & Analytics', icon: BarChart2 },
+  { id: 'payments', label: 'Payments', icon: CreditCard },
+  { id: 'reports', label: 'Reports', icon: BarChart2 },
   { id: 'feedback', label: 'Feedback', icon: MessageSquare },
   { id: 'branches', label: 'Branches', icon: Building2 },
   { id: 'ads', label: 'Ads', icon: Megaphone },
+  { id: 'sunday-brunch', label: 'Sunday Brunch', icon: QrCode },
+  { id: 'documentation', label: 'Documentation', icon: BookOpen },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -404,8 +407,8 @@ const AdminDashboard = () => {
   return (
     <div className="flex h-screen bg-gradient-to-br from-[hsl(var(--royal-blue-dark))] via-[hsl(var(--royal-blue))] to-[hsl(var(--royal-blue-light))]">
       {/* Sidebar */}
-      <div className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-white/10 backdrop-blur-md border-r border-white/20 transition-all duration-300 ease-in-out`}>
-        <div className="p-4 flex items-center justify-between">
+      <div className={`${isSidebarOpen ? 'w-64' : 'w-20'} flex flex-col h-full bg-white/10 backdrop-blur-md border-r border-white/20 transition-all duration-300 ease-in-out`}>
+        <div className="p-4 flex items-center justify-between shrink-0">
           {isSidebarOpen && <h1 className="text-xl font-bold text-white">Golden Tulip</h1>}
           <Button 
             variant="ghost" 
@@ -416,21 +419,9 @@ const AdminDashboard = () => {
             {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
-        <nav className="mt-6">
-          <div className="px-4 space-y-1">
-            {[
-              { id: 'dashboard', label: 'Dashboard', icon: Home },
-              { id: 'rooms', label: 'Rooms', icon: Bed },
-              { id: 'clients', label: 'Clients', icon: Users },
-              { id: 'bookings', label: 'Bookings', icon: Calendar },
-              { id: 'payments', label: 'Payments', icon: CreditCard },
-              { id: 'reports', label: 'Reports', icon: BarChart2 },
-              { id: 'feedback', label: 'Feedback', icon: MessageSquare },
-              { id: 'branches', label: 'Branches', icon: Building2 },
-              { id: 'ads', label: 'Ads', icon: Megaphone },
-              { id: 'documentation', label: 'Documentation', icon: BookOpen },
-              { id: 'settings', label: 'Settings', icon: Settings },
-            ].map((item) => (
+        <nav className="mt-6 flex-1 overflow-y-auto custom-scrollbar">
+          <div className="px-4 space-y-1 pb-4">
+            {navItems.map((item) => (
               <Button
                 key={`${item.id}-${activeTab}`}
                 variant="ghost"
@@ -448,7 +439,7 @@ const AdminDashboard = () => {
           </div>
           
           {/* Exit Button */}
-          <div className="mt-auto p-4 border-t border-white/20">
+          <div className="mt-auto p-4 border-t border-white/20 shrink-0">
             <Button 
               variant="ghost" 
               className="w-full justify-start text-red-300 hover:bg-yellow-400/10 hover:text-yellow-300"
