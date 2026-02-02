@@ -52,6 +52,7 @@
         {
           "android": {
             "usesCleartextTraffic": true,
+            "gradlePluginVersion": "8.10.1",
             "packagingOptions": {
               "pickFirst": [
                 "**/libc++_shared.so"
