@@ -82,6 +82,18 @@ export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: B
     return lines.join("\n");
   };
 
+  const formatDate = (date: any) => {
+    if (!date) return "N/A";
+    try {
+      if (date instanceof Timestamp) return format(date.toDate(), "MMM dd, yyyy");
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return "Invalid Date";
+      return format(d, "MMM dd, yyyy");
+    } catch (e) {
+      return "Error";
+    }
+  };
+
   const handleCopyEmailContent = async () => {
     if (!emailBooking) return;
 
@@ -227,16 +239,10 @@ export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: B
                   <TableCell className="text-white">{booking.branchName}</TableCell>
                   <TableCell className="capitalize text-white">{booking.roomType}</TableCell>
                   <TableCell className="text-white">
-                    {booking.checkInDate instanceof Timestamp 
-                      ? format(booking.checkInDate.toDate(), "MMM dd, yyyy")
-                      : format(new Date(booking.checkInDate), "MMM dd, yyyy")
-                    }
+                    {formatDate(booking.checkInDate)}
                   </TableCell>
                   <TableCell className="text-white">
-                    {booking.checkOutDate instanceof Timestamp 
-                      ? format(booking.checkOutDate.toDate(), "MMM dd, yyyy")
-                      : format(new Date(booking.checkOutDate), "MMM dd, yyyy")
-                    }
+                    {formatDate(booking.checkOutDate)}
                   </TableCell>
                   <TableCell>
                     <Badge
