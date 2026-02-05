@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, ActivityIndicator, Alert, ScrollView, Modal } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, ActivityIndicator, Alert, ScrollView, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
 import { LinearGradient } from 'expo-linear-gradient';
-import { X } from 'lucide-react-native';
+import { X, Eye, EyeOff } from 'lucide-react-native';
 
 export default function LoginScreen() {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,6 +13,7 @@ export default function LoginScreen() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Forgot Password State
   const [resetModalVisible, setResetModalVisible] = useState(false);
@@ -86,14 +87,18 @@ export default function LoginScreen() {
       style={styles.background}
     >
       <LinearGradient colors={['rgba(29, 54, 73, 0.7)', 'rgba(29, 54, 73, 0.95)']} style={styles.gradient}>
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Golden Tulip</Text>
-            <Text style={styles.subtitle}>Luxury Accommodation</Text>
-          </View>
+        <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <ScrollView 
+            contentContainerStyle={styles.mainScrollView}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.header}>
+              <Text style={styles.title}>Golden Tulip</Text>
+              <Text style={styles.subtitle}>Luxury Accommodation</Text>
+            </View>
 
-          <View style={styles.formContainer}>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+            <View style={styles.formContainer}>
               <View style={styles.form}>
                 <Text style={styles.welcome}>{isLogin ? 'Welcome Back' : 'Create Account'}</Text>
                 <Text style={styles.instruction}>
@@ -130,22 +135,27 @@ export default function LoginScreen() {
                   autoCapitalize="none"
                   keyboardType="email-address"
                 />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Password"
-                  placeholderTextColor="#94a3b8"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                />
+                <View style={styles.inputRow}>
+                  <TextInput
+                    style={styles.inputField}
+                    placeholder="Password"
+                    placeholderTextColor="#94a3b8"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                  />
+                  <TouchableOpacity style={styles.inputIconButton} onPress={() => setShowPassword(prev => !prev)}>
+                    {showPassword ? <EyeOff size={20} color="#94a3b8" /> : <Eye size={20} color="#94a3b8" />}
+                  </TouchableOpacity>
+                </View>
 
                 {isLogin && (
                   <TouchableOpacity 
                     style={styles.forgotPassContainer} 
                     onPress={() => {
-                      setResetEmail(email); // Pre-fill if they typed it
+                      setResetEmail(email);
                       setResetModalVisible(true);
-                      setIsResetSent(false); // Ensure we start in input mode
+                      setIsResetSent(false);
                     }}
                   >
                     <Text style={styles.forgotPassText}>Forgot Password?</Text>
@@ -156,9 +166,9 @@ export default function LoginScreen() {
                   {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{isLogin ? 'Sign In' : 'Sign Up'}</Text>}
                 </TouchableOpacity>
               </View>
-            </ScrollView>
-          </View>
-        </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
 
         {/* Forgot Password Modal */}
         <Modal
@@ -217,8 +227,9 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   background: { flex: 1 },
   gradient: { flex: 1, justifyContent: 'center' },
-  container: { flex: 1, justifyContent: 'space-between', paddingVertical: 60 },
-  header: { alignItems: 'center', marginTop: 40 },
+  container: { flex: 1 },
+  mainScrollView: { flexGrow: 1, justifyContent: 'center', paddingVertical: 60 },
+  header: { alignItems: 'center', marginBottom: 30 },
   title: { fontSize: 36, fontWeight: 'bold', color: '#fff', letterSpacing: 1 },
   subtitle: { fontSize: 16, color: '#e2e8f0', marginTop: 5 },
   formContainer: { paddingHorizontal: 20 },
@@ -232,6 +243,9 @@ const styles = StyleSheet.create({
   welcome: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 8 },
   instruction: { fontSize: 14, color: '#cbd5e1', marginBottom: 24 },
   input: { backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 12, padding: 16, color: '#fff', marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  inputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  inputField: { flex: 1, padding: 16, color: '#fff' },
+  inputIconButton: { paddingHorizontal: 16, paddingVertical: 12 },
   button: { backgroundColor: '#C5A059', padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 8 },
   buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
   toggleButton: { marginTop: 20, alignItems: 'center' },

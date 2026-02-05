@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, query, where, onSnapshot, orderBy, Timestamp, getDocs, doc, updateDoc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, orderBy, Timestamp, getDocs, doc, updateDoc, collectionGroup } from "firebase/firestore";
 import { format, subDays, isToday, isYesterday } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -69,7 +69,8 @@ export const BookingsPage = () => {
   const [showBookingDetails, setShowBookingDetails] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  type BookingWithMeta = Booking & { __isRoot?: boolean; __branchPathId?: string };
+  const [bookings, setBookings] = useState<BookingWithMeta[]>([]);
   const [showCreateBooking, setShowCreateBooking] = useState(false);
   const [currentBranchName, setCurrentBranchName] = useState<string>("");
   const { currentUser, activeBranchId, setActiveBranchId } = useAuth();
@@ -98,207 +99,206 @@ export const BookingsPage = () => {
     fetchBranchName();
   }, [activeBranchId]);
 
-  // Fetch bookings from Firestore
+  const resolveDate = (value: any) => {
+    if (!value) return undefined;
+    if (value?.toDate) return value.toDate();
+    if (value instanceof Date) return value;
+    const parsed = new Date(value);
+    return isNaN(parsed.getTime()) ? undefined : parsed;
+  };
+
+  const normalizeBooking = (data: any, id: string, isRoot: boolean, branchPathId?: string): BookingWithMeta => {
+    const rawBranchId = data.branchId || branchPathId || "";
+    const normalizedBranchId = rawBranchId ? getDatabaseBranchId(rawBranchId) : rawBranchId;
+    const checkInDate = resolveDate(data.checkInDate ?? data.checkIn);
+    const checkOutDate = resolveDate(data.checkOutDate ?? data.checkOut);
+    const createdAt = resolveDate(data.createdAt ?? data.bookingDate);
+    const bookingDate = resolveDate(data.bookingDate ?? data.createdAt);
+    const adults = Number(data.adults ?? 0);
+    const children = Number(data.children ?? 0);
+    const computedGuests = adults + children;
+    return {
+      id,
+      ...data,
+      branchId: normalizedBranchId,
+      roomType: data.roomType ?? data.roomTypeName ?? data.roomTypeId,
+      totalAmount: data.totalAmount ?? data.totalPrice ?? data.amount ?? 0,
+      guestName: data.guestName ?? data.guest ?? data.fullName,
+      guestEmail: data.guestEmail ?? data.email,
+      guestPhone: data.guestPhone ?? data.phone,
+      guests: data.guests ?? (computedGuests || data.adults || 0),
+      checkInDate: checkInDate ? Timestamp.fromDate(checkInDate) : data.checkInDate,
+      checkOutDate: checkOutDate ? Timestamp.fromDate(checkOutDate) : data.checkOutDate,
+      createdAt: createdAt ? Timestamp.fromDate(createdAt) : data.createdAt,
+      bookingDate: bookingDate ? Timestamp.fromDate(bookingDate) : data.bookingDate,
+      __isRoot: isRoot,
+      __branchPathId: branchPathId
+    } as BookingWithMeta;
+  };
+
+  // Consolidated fetch bookings effect
   useEffect(() => {
+    let unsubscribe: () => void;
+    
     const fetchBookings = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        
-        // Check if user is authenticated
+
         if (!currentUser) {
           setError("You must be logged in to view bookings.");
           setIsLoading(false);
           return;
         }
-        
+
         // Determine which branch to query
         let targetBranchId = activeBranchId;
-        
-        // For branch admins, use their assigned branch
-        if (currentUser.role === 'branch-admin' && currentUser.branch) {
+        if (currentUser?.branch && currentUser.role !== 'admin') {
           targetBranchId = currentUser.branch;
         }
-        // For HQ admins, use the selected branch or first available branch
-        else if (currentUser.role === 'hq-admin' || currentUser.role === 'admin') {
-          if (!targetBranchId && branchesData.length > 0) {
-            targetBranchId = branchesData[0].id;
-            setActiveBranchId(targetBranchId);
-          }
-        }
 
+        // Default to all if not specified (for admins)
         if (!targetBranchId) {
-          setError("No branch available. Please check your account permissions or contact support.");
+           if (currentUser.role === 'admin' || currentUser.role === 'hq-admin') {
+             targetBranchId = 'all';
+           } else {
+             setError("No branch selected. Please select a branch to view bookings.");
+             setIsLoading(false);
+             return;
+           }
+        }
+
+        console.log("Fetching bookings for branch:", targetBranchId);
+
+        const bookingsMap = new Map<string, BookingWithMeta[]>();
+        
+        const updateBookings = () => {
+          const allBookings = Array.from(bookingsMap.values()).flat();
+          // Deduplicate by ID
+          const uniqueBookings = Array.from(new Map(allBookings.map(b => [b.id, b])).values());
+          
+          // Sort by createdAt desc to ensure all bookings (including mobile) are ordered correctly
+          uniqueBookings.sort((a, b) => {
+            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+            return dateB.getTime() - dateA.getTime();
+          });
+          
+          setBookings(uniqueBookings);
           setIsLoading(false);
-          return;
-        }
+        };
 
-        // Convert static branch ID to database ID for the query
-        const databaseBranchId = getDatabaseBranchId(targetBranchId);
+        if (targetBranchId === 'all') {
+            // Query all bookings across the entire database using collectionGroup
+            // We sort by createdAt because mobile app bookings use 'checkIn' instead of 'checkInDate',
+            // and sorting by a missing field excludes the document in Firestore.
+            const q = query(
+              collectionGroup(db, "bookings"),
+              orderBy("createdAt", "desc")
+            );
 
-        // Query branch subcollection
-        const q = query(
-          collection(db, "branches", databaseBranchId, "bookings"),
-          orderBy("checkInDate", "desc") // Most recent first
-        );
+            unsubscribe = onSnapshot(q, (snapshot) => {
+              const allBookings = snapshot.docs.map(d => normalizeBooking(d.data(), d.id, true));
+              bookingsMap.set('all', allBookings);
+              updateBookings();
+            }, (err) => {
+              console.error("Error fetching all bookings:", err);
+              // Fallback to no sort if createdAt is missing for some reason
+              if (err.code === 'failed-precondition' || err.message.includes('index')) {
+                 console.warn("Index missing for createdAt, trying without sort");
+                 const qNoSort = query(collectionGroup(db, "bookings"));
+                 onSnapshot(qNoSort, (snapshot) => {
+                    const allBookings = snapshot.docs.map(d => normalizeBooking(d.data(), d.id, true));
+                    bookingsMap.set('all', allBookings);
+                    updateBookings();
+                 });
+              } else {
+                 setError("Failed to load bookings. Please try again.");
+                 setIsLoading(false);
+              }
+            });
+            
+          } else {
+            // Specific branch query
+            const databaseBranchId = getDatabaseBranchId(targetBranchId);
+            const unsubscribers: (() => void)[] = [];
 
-        const querySnapshot = await getDocs(q);
-        const bookingsData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Booking[];
+            // 1. Query branch subcollection
+            const branchPaths = new Set<string>();
+            branchPaths.add(databaseBranchId);
+            if (targetBranchId !== databaseBranchId) branchPaths.add(targetBranchId);
+            
+            // Legacy/Static mapping checks
+            const staticBranchId = getStaticBranchId(targetBranchId);
+            if (staticBranchId === 'evo-road') {
+               branchPaths.add('AS5mYsGNnvA4cxLIPL3W');
+               branchPaths.add('evo-road');
+               branchPaths.add('URcvGkmbfrOFInlOS4I9');
+            }
 
-        setBookings(bookingsData);
-        
-        // Show success toast if data loaded successfully
-        if (bookingsData.length > 0) {
-          toast({
-            title: "Bookings loaded",
-            description: `${bookingsData.length} bookings retrieved successfully.`,
-          });
-        } else {
-          toast({
-            title: "No bookings found",
-            description: "No booking records match your criteria.",
-          });
-        }
+            branchPaths.forEach(path => {
+              // Use createdAt for sorting to be safe
+              const q = query(
+                collection(db, "branches", path, "bookings"),
+                orderBy("createdAt", "desc")
+              );
+              
+              unsubscribers.push(onSnapshot(q, (snapshot) => {
+                const branchBookings = snapshot.docs.map(d => normalizeBooking(d.data(), d.id, false, path));
+                bookingsMap.set(`branch_${path}`, branchBookings);
+                updateBookings();
+              }, (err) => {
+                console.warn(`Error on branch path ${path}:`, err);
+              }));
+            });
+
+            // 2. Query root collection filtered by branchId
+            const rootBranchIds = Array.from(branchPaths);
+            const rootConstraints: any[] = [];
+            if (rootBranchIds.length === 1) {
+              rootConstraints.push(where("branchId", "==", rootBranchIds[0]));
+            } else {
+              rootConstraints.push(where("branchId", "in", rootBranchIds));
+            }
+            
+            // Add orderBy to root query as well - use createdAt
+            const rootQuery = query(collection(db, "bookings"), ...rootConstraints, orderBy("createdAt", "desc"));
+            
+            unsubscribers.push(onSnapshot(rootQuery, (snapshot) => {
+              const rootBookings = snapshot.docs.map(d => normalizeBooking(d.data(), d.id, true));
+              bookingsMap.set('root', rootBookings);
+              updateBookings();
+            }, (err) => {
+               console.warn("Error on root query:", err);
+               // If index missing, try without sort
+               if (err.message.includes('index')) {
+                  const rootQueryNoSort = query(collection(db, "bookings"), ...rootConstraints);
+                  unsubscribers.push(onSnapshot(rootQueryNoSort, (snap) => {
+                     const rootBookings = snap.docs.map(d => normalizeBooking(d.data(), d.id, true));
+                     bookingsMap.set('root', rootBookings);
+                     updateBookings();
+                  }));
+               }
+            }));
+
+            unsubscribe = () => {
+              unsubscribers.forEach(u => u());
+            };
+          }
+
       } catch (err: any) {
-        console.error("Error fetching bookings:", err);
-        
-        // Handle Firebase permission errors specifically
-        if (err.message && err.message.includes("permission")) {
-          setError("You don't have permission to access bookings. Please contact an administrator.");
-          toast({
-            variant: "destructive",
-            title: "Permission denied",
-            description: "You don't have sufficient permissions to view bookings.",
-          });
-        } else {
-          setError("Failed to load bookings. Please try again later.");
-          toast({
-            variant: "destructive",
-            title: "Error loading bookings",
-            description: err.message || "An unexpected error occurred.",
-          });
-        }
-      } finally {
+        console.error("Error in fetchBookings:", err);
+        setError("An unexpected error occurred.");
         setIsLoading(false);
       }
     };
 
     fetchBookings();
-  }, [currentUser, toast]);
-  useEffect(() => {
-    // realtime listener for bookings collection with optional branch filter
-    try {
-      setIsLoading(true);
-      setError(null);
 
-      if (!currentUser) {
-        setError("You must be logged in to view bookings.");
-        setIsLoading(false);
-        return;
-      }
-
-      // Determine which branch to query
-      let targetBranchId = activeBranchId;
-      if (currentUser?.branch && currentUser.role !== 'admin') {
-        targetBranchId = currentUser.branch;
-      }
-
-      if (!targetBranchId) {
-        setError("No branch selected. Please select a branch to view bookings.");
-        setIsLoading(false);
-        return;
-      }
-
-      // Convert static branch ID to database ID
-      const databaseBranchId = getDatabaseBranchId(targetBranchId);
-
-      // Query multiple paths to ensure we catch all bookings (legacy, static, and new database IDs)
-      const pathsToQuery = new Set<string>();
-      pathsToQuery.add(databaseBranchId);
-      if (targetBranchId !== databaseBranchId) {
-        pathsToQuery.add(targetBranchId);
-      }
-      // Explicitly check legacy/alternate IDs for known branches
-      const staticBranchId = getStaticBranchId(targetBranchId);
-      if (staticBranchId === 'evo-road') {
-        pathsToQuery.add('AS5mYsGNnvA4cxLIPL3W');
-        pathsToQuery.add('evo-road'); // Ensure static is added
-        pathsToQuery.add('URcvGkmbfrOFInlOS4I9'); // Ensure database ID is added
-      }
-
-      console.log("Querying bookings from paths:", Array.from(pathsToQuery));
-
-      const unsubscribers: (() => void)[] = [];
-      const bookingsMap = new Map<string, Booking[]>();
-      let initialized = false;
-      let previousIds = new Set<string>();
-
-      pathsToQuery.forEach(branchId => {
-        const q = query(
-          collection(db, "branches", branchId, "bookings"),
-          orderBy("checkInDate", "desc")
-        );
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-          const branchBookings = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as Booking[];
-          bookingsMap.set(branchId, branchBookings);
-
-          // Merge all bookings from different paths
-          const allBookings = Array.from(bookingsMap.values()).flat();
-          
-          // Deduplicate by ID
-          const uniqueBookings = Array.from(new Map(allBookings.map(b => [b.id, b])).values());
-          
-          // Sort by checkInDate desc
-          uniqueBookings.sort((a, b) => {
-            const dateA = a.checkInDate?.toDate ? a.checkInDate.toDate() : new Date(a.checkInDate);
-            const dateB = b.checkInDate?.toDate ? b.checkInDate.toDate() : new Date(b.checkInDate);
-            return dateB.getTime() - dateA.getTime();
-          });
-
-          setBookings(uniqueBookings);
-
-          // Track new docs after initial load to notify
-          const currentIds = new Set(uniqueBookings.map(b => b.id));
-          if (initialized) {
-            for (const id of currentIds) {
-              if (!previousIds.has(id)) {
-                const newBooking = uniqueBookings.find(b => b.id === id);
-                toast({
-                  title: "New booking received",
-                  description: newBooking?.guestName ? `${newBooking.guestName} just booked.` : `Booking #${id.slice(0,8)} added.`,
-                });
-              }
-            }
-          }
-          previousIds = currentIds;
-          
-          // Set initialized to true after first successful fetch from ANY path
-          if (!initialized) {
-            initialized = true;
-            setIsLoading(false);
-          }
-        }, (err) => {
-          console.warn(`Error listening to bookings for path ${branchId}:`, err);
-          // Don't fail completely if one path fails, unless all fail
-          // But we'll let the other paths continue
-        });
-        
-        unsubscribers.push(unsubscribe);
-      });
-
-      return () => {
-        unsubscribers.forEach(u => u());
-      };
-
-    } catch (e) {
-      console.error(e);
-      setIsLoading(false);
-    }
-  }, [currentUser, toast]);
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [currentUser, activeBranchId, toast]);
 
   // Filter bookings based on search and filters
   const filteredBookings = bookings.filter(booking => {
@@ -312,29 +312,32 @@ export const BookingsPage = () => {
     const matchesBranch = branchFilter === "all" || booking.branchId === branchFilter;
     const matchesRoomType = roomTypeFilter === "all" || booking.roomType === roomTypeFilter;
     
+    const checkIn = resolveDate(booking.checkInDate);
+    const checkOut = resolveDate(booking.checkOutDate);
     const matchesDate = !dateRange || 
       !dateRange.from || 
       !dateRange.to || 
-      (booking.checkInDate.toDate() >= dateRange.from && 
-       booking.checkOutDate.toDate() <= dateRange.to);
+      (checkIn && checkOut && checkIn >= dateRange.from && checkOut <= dateRange.to);
 
     return matchesSearch && matchesStatus && matchesBranch && matchesRoomType && matchesDate;
   });
 
   // Get recent bookings (last 7 days)
   const recentBookings = bookings.filter(booking => {
-    const bookingDate = (booking.bookingDate || booking.createdAt)?.toDate() || new Date();
+    const bookingDate = resolveDate(booking.bookingDate || booking.createdAt) || new Date();
     const sevenDaysAgo = subDays(new Date(), 7);
     return bookingDate >= sevenDaysAgo;
   });
 
   // Get today's check-ins and check-outs
-  const todayCheckIns = bookings.filter(booking => 
-    isToday(booking.checkInDate.toDate())
-  );
-  const todayCheckOuts = bookings.filter(booking => 
-    isToday(booking.checkOutDate.toDate())
-  );
+  const todayCheckIns = bookings.filter(booking => {
+    const checkIn = resolveDate(booking.checkInDate);
+    return checkIn ? isToday(checkIn) : false;
+  });
+  const todayCheckOuts = bookings.filter(booking => {
+    const checkOut = resolveDate(booking.checkOutDate);
+    return checkOut ? isToday(checkOut) : false;
+  });
 
   // Get unique branches for filter - use proper branch data from useBranches hook
   const branches = branchesData || [];
@@ -390,12 +393,16 @@ export const BookingsPage = () => {
     try {
       // Find the booking in our local state to get the branchId
       const booking = bookings.find(b => b.id === bookingId);
-      if (!booking || !booking.branchId) {
-        throw new Error('Booking not found or missing branch information');
+      if (!booking) {
+        throw new Error('Booking not found');
+      }
+      if (!booking.__isRoot && !booking.branchId) {
+        throw new Error('Booking missing branch information');
       }
       
-      // Get reference to the booking document in the correct branch subcollection
-      const bookingRef = doc(db, "branches", booking.branchId, "bookings", bookingId);
+      const bookingRef = booking.__isRoot
+        ? doc(db, "bookings", bookingId)
+        : doc(db, "branches", booking.__branchPathId || booking.branchId, "bookings", bookingId);
       
       // Update the status field
       await updateDoc(bookingRef, {

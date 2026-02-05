@@ -6,6 +6,9 @@ import { Calendar } from 'react-native-calendars';
 import { addDoc, collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
 import { usePaystack } from '../paystackWrapper';
 import { db, auth } from '../firebaseConfig';
+import { WebView } from 'react-native-webview';
+
+const PAYSTACK_PUBLIC_KEY = "pk_live_5b8a1cc5108ee14b78f38c309af069f46f59ac83";
 
 const CustomPicker = ({ visible, onClose, title, data, onSelect, selectedValue }) => {
   return (
@@ -114,6 +117,8 @@ export default function BookingScreen({ navigation }) {
   const [showRoomPicker, setShowRoomPicker] = useState(false);
   const [showCheckInPicker, setShowCheckInPicker] = useState(false);
   const [showCheckOutPicker, setShowCheckOutPicker] = useState(false);
+  const [showPaystackModal, setShowPaystackModal] = useState(false);
+  const [paystackPayload, setPaystackPayload] = useState(null);
   
   const { popup } = usePaystack();
 
@@ -209,6 +214,56 @@ export default function BookingScreen({ navigation }) {
 
   const totalPrice = calculateTotal();
 
+  const buildPaystackHtml = (payload) => `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body>
+        <div id="paystack"></div>
+        <script src="https://js.paystack.co/v1/inline.js"></script>
+        <script>
+          const payload = ${JSON.stringify(payload)};
+          const startPaystack = () => {
+            if (!window.PaystackPop) {
+              setTimeout(startPaystack, 100);
+              return;
+            }
+            const config = {
+              key: payload.key,
+              email: payload.email,
+              amount: payload.amount,
+              currency: payload.currency,
+              ref: payload.reference,
+              metadata: payload.metadata
+            };
+            if (payload.channels && payload.channels.length) {
+              config.channels = payload.channels;
+            }
+            if (payload.subaccount) {
+              config.subaccount = payload.subaccount;
+            }
+            if (payload.bearer) {
+              config.bearer = payload.bearer;
+            }
+            const handler = window.PaystackPop.setup({
+              ...config,
+              callback: function(response) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'success', response }));
+              },
+              onClose: function() {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'cancel' }));
+              }
+            });
+            handler.openIframe();
+          };
+          document.addEventListener('DOMContentLoaded', startPaystack);
+        </script>
+      </body>
+    </html>
+  `;
+
   const handleSubmit = () => {
     if (!formData.branchId || !formData.roomTypeId || !formData.checkIn || !formData.checkOut || !formData.firstName || !formData.lastName || !formData.phone) {
       return Alert.alert('Missing Fields', 'Please fill in all required fields marked with *');
@@ -218,11 +273,39 @@ export default function BookingScreen({ navigation }) {
       return Alert.alert('Error', 'Invalid total price.');
     }
 
+    const reference = `hoteleasy_mobile_${Date.now()}`;
+    const paymentData = {
+      key: PAYSTACK_PUBLIC_KEY,
+      channels: ['card', 'bank', 'ussd', 'qr', 'mobile_money'],
+      amount: Math.round(totalPrice * 100),
+      email: formData.email,
+      reference,
+      currency: 'NGN',
+      subaccount: BRANCH_PAYMENT_CONFIG[formData.branchId]?.subaccount,
+      bearer: BRANCH_PAYMENT_CONFIG[formData.branchId]?.subaccount ? 'subaccount' : undefined,
+      metadata: {
+        custom_fields: [
+          { display_name: "Guest Name", variable_name: "guest_name", value: `${formData.firstName} ${formData.lastName}` },
+          { display_name: "Mobile Number", variable_name: "mobile_number", value: formData.phone },
+          { display_name: "Room Type", variable_name: "room_type", value: formData.roomTypeName },
+          { display_name: "Branch", variable_name: "branch", value: formData.branchName },
+          { display_name: "Check-in Date", variable_name: "checkin_date", value: formData.checkIn },
+          { display_name: "Check-out Date", variable_name: "checkout_date", value: formData.checkOut }
+        ]
+      }
+    };
+
+    if (Platform.OS !== 'web') {
+      setPaystackPayload(paymentData);
+      setShowPaystackModal(true);
+      return;
+    }
+
     popup.checkout({
       channels: ['card', 'bank', 'ussd', 'qr', 'mobile_money'],
       amount: totalPrice,
       email: formData.email,
-      reference: `hoteleasy_mobile_${Date.now()}`,
+      reference,
       subaccount: BRANCH_PAYMENT_CONFIG[formData.branchId]?.subaccount,
       metadata: {
         custom_fields: [
@@ -264,7 +347,7 @@ export default function BookingScreen({ navigation }) {
         children: parseInt(formData.children),
         specialRequests: formData.specialRequests,
         totalPrice: totalPrice,
-        status: 'pending',
+        status: 'confirmed',
         paymentStatus: 'paid',
         paymentRef: reference,
         platform: 'mobile_app',
@@ -507,6 +590,49 @@ export default function BookingScreen({ navigation }) {
         onSelect={(date) => updateField('checkOut', date)}
       />
 
+      <Modal visible={showPaystackModal} animationType="slide" onRequestClose={() => setShowPaystackModal(false)}>
+        <View style={styles.paystackContainer}>
+          <View style={styles.paystackHeader}>
+            <Text style={styles.paystackTitle}>Paystack Payment</Text>
+            <TouchableOpacity onPress={() => setShowPaystackModal(false)}>
+              <X size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          <WebView
+            originWhitelist={['*']}
+            source={{ html: paystackPayload ? buildPaystackHtml(paystackPayload) : '' }}
+            onMessage={(event) => {
+              try {
+                const data = JSON.parse(event.nativeEvent.data);
+                if (data?.type === 'success') {
+                  setShowPaystackModal(false);
+                  const response = data.response || {};
+                  processBooking({
+                    reference: response.reference,
+                    status: response.status,
+                    transaction: response.trans,
+                    transactionRef: response
+                  });
+                } else if (data?.type === 'cancel') {
+                  setShowPaystackModal(false);
+                  Alert.alert('Payment Cancelled', 'You cancelled the payment.');
+                }
+              } catch (error) {
+                setShowPaystackModal(false);
+                Alert.alert('Payment Error', 'Unable to complete payment. Please try again.');
+              }
+            }}
+            javaScriptEnabled
+            domStorageEnabled
+            startInLoadingState
+            renderLoading={() => (
+              <View style={styles.paystackLoading}>
+                <ActivityIndicator color="#C5A059" size="large" />
+              </View>
+            )}
+          />
+        </View>
+      </Modal>
 
     </SafeAreaView>
   );
@@ -548,5 +674,9 @@ const styles = StyleSheet.create({
   optionSelected: { backgroundColor: 'rgba(197, 160, 89, 0.1)' },
   optionText: { color: '#fff', fontSize: 16 },
   optionTextSelected: { color: '#C5A059', fontWeight: 'bold' },
-  optionSubText: { color: '#94a3b8', fontSize: 14 }
+  optionSubText: { color: '#94a3b8', fontSize: 14 },
+  paystackContainer: { flex: 1, backgroundColor: '#0f172a' },
+  paystackHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: '#162b3b' },
+  paystackTitle: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  paystackLoading: { flex: 1, justifyContent: 'center', alignItems: 'center' }
 });

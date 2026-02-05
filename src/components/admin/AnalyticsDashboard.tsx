@@ -1,6 +1,6 @@
 import { Line, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, TrendingUp, Users, DollarSign, Home, Bed, Building } from 'lucide-react';
+import { Calendar, TrendingUp, Users, DollarSign, Home, Bed, Building, Clock } from 'lucide-react';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import {
   Chart as ChartJS,
@@ -73,9 +73,22 @@ export const AnalyticsDashboard = () => {
   // Get real booking data from Firestore
   const { bookings, isLoading: bookingsLoading, error: bookingsError } = useBookings();
 
+  const resolveDate = (value: unknown) => {
+    if (!value) return null;
+    if (value instanceof Date) return value;
+    if (typeof value === 'object' && (value as { toDate?: () => Date }).toDate) {
+      return (value as { toDate: () => Date }).toDate();
+    }
+    const date = new Date(value as string | number);
+    return Number.isNaN(date.getTime()) ? null : date;
+  };
+
   // Process data for charts
   const filteredBookings = bookings.filter(
-    booking => booking.checkInDate >= startOfDay(dateRange.from) && booking.checkInDate <= endOfDay(dateRange.to)
+    booking => {
+      const checkIn = resolveDate(booking.checkInDate);
+      return checkIn ? checkIn >= startOfDay(dateRange.from) && checkIn <= endOfDay(dateRange.to) : false;
+    }
   );
 
   // Revenue by day
@@ -119,6 +132,18 @@ export const AnalyticsDashboard = () => {
   const averageGuests = filteredBookings.length > 0 
     ? Math.round(filteredBookings.reduce((sum, b) => sum + (b.guestCount || 0), 0) / filteredBookings.length * 10) / 10 
     : 0;
+
+  const recentBookings = bookings
+    .map(booking => ({
+      ...booking,
+      __recentDate: resolveDate(booking.bookingDate || booking.createdAt || booking.checkInDate)
+    }))
+    .filter(booking => {
+      if (!booking.__recentDate) return false;
+      return booking.__recentDate >= subDays(new Date(), 7);
+    })
+    .sort((a, b) => (b.__recentDate?.getTime() || 0) - (a.__recentDate?.getTime() || 0))
+    .slice(0, 6);
 
   // Chart data
   const revenueData = {
@@ -473,6 +498,64 @@ export const AnalyticsDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-yellow-400" />
+            <CardTitle className="text-white">Recent Bookings</CardTitle>
+          </div>
+          <Button
+            variant="outline"
+            className="border-white/30 text-white hover:bg-white/10"
+            onClick={() => {
+              window.location.href = "/admin/bookings";
+            }}
+          >
+            View All
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {recentBookings.length === 0 ? (
+            <div className="text-white/70">No recent bookings in the last 7 days</div>
+          ) : (
+            <div className="space-y-3">
+              {recentBookings.map((booking) => (
+                <div
+                  key={booking.id}
+                  className="flex items-center justify-between rounded-lg border border-white/20 bg-white/5 px-4 py-3"
+                >
+                  <div>
+                    <div className="text-white font-medium">
+                      {booking.guestName || booking.guest || booking.fullName || "Guest"}
+                    </div>
+                    <div className="text-sm text-white/70">
+                      {booking.branchName || "Branch"} • {booking.roomType || "Room"}
+                    </div>
+                    {booking.__recentDate ? (
+                      <div className="text-xs text-white/60">
+                        {format(booking.__recentDate, "MMM d, yyyy")}
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="text-right">
+                    <div className="text-yellow-400 font-semibold">
+                      {new Intl.NumberFormat('en-NG', {
+                        style: 'currency',
+                        currency: 'NGN',
+                        maximumFractionDigits: 0
+                      }).format(booking.totalAmount || 0)}
+                    </div>
+                    <div className="text-xs text-white/70">
+                      {booking.status || "pending"}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
