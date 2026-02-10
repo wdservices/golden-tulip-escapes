@@ -153,7 +153,7 @@ const BookingForm = ({ selectedBranch, showLocationDropdown = true, onBookingSuc
 
     const pricePerNight = parseInt(selectedRoom.price.replace(/[₦,]/g, ''));
     const nights = Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24));
-    return pricePerNight * nights * formData.guests;
+    return pricePerNight * (nights || 1);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

@@ -126,6 +126,33 @@ service cloud.firestore {
                     (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) && 
                      get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
     }
+
+    // Branch bookings collection rules
+    match /branches/{branchId}/bookings/{bookingId} {
+      // Allow users to read their own bookings and admins to read all bookings
+      allow read: if request.auth != null && 
+                 (request.auth.uid == resource.data.userId || 
+                  (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) && 
+                   get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
+      
+      // Allow authenticated users to create bookings and admins to manage all bookings
+      allow create: if request.auth != null && 
+                   (request.auth.uid == request.resource.data.userId || 
+                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) && 
+                     get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
+      
+      // Allow users to update their own bookings and admins to update any booking
+      allow update: if request.auth != null && 
+                   (request.auth.uid == resource.data.userId || 
+                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) && 
+                     get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
+      
+      // Allow users to delete their own bookings and admins to delete any booking
+      allow delete: if request.auth != null && 
+                   (request.auth.uid == resource.data.userId || 
+                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) && 
+                     get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
+    }
     
     // Helper function to check if user is admin
     function isAdmin() {

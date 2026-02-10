@@ -14,9 +14,10 @@ import ProfileScreen from './screens/ProfileScreen';
 import MyBookingsScreen from './screens/MyBookingsScreen';
 import BrunchAttendanceScreen from './screens/BrunchAttendanceScreen';
 import BranchDetailsScreen from './screens/BranchDetailsScreen';
+import ContactsScreen from './screens/ContactsScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ActivityIndicator, View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { Home, Calendar, QrCode, LogOut, Menu, User, BookOpen, Coffee } from 'lucide-react-native';
+import { Home, Calendar, QrCode, LogOut, Menu, User, BookOpen, Coffee, Phone } from 'lucide-react-native';
 import { PaystackProvider } from './paystackWrapper';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -116,6 +117,14 @@ function DrawerNavigator() {
         options={{
           title: 'Sunday Brunch',
           drawerIcon: ({ color }) => <Coffee size={22} color={color} />
+        }}
+      />
+      <Drawer.Screen 
+        name="Contacts" 
+        component={ContactsScreen} 
+        options={{
+          title: 'Contact Details',
+          drawerIcon: ({ color }) => <Phone size={22} color={color} />
         }}
       />
     </Drawer.Navigator>
