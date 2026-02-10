@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft } from 'lucide-react-native';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, collectionGroup, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
 
 export default function MyBookingsScreen({ navigation }) {
@@ -19,27 +19,49 @@ export default function MyBookingsScreen({ navigation }) {
       return;
     }
     try {
-      const q = query(
-        collection(db, 'bookings'),
-        where('userId', '==', auth.currentUser.uid)
-      );
-      const querySnapshot = await getDocs(q);
-      const bookingsList = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      // Sort client-side to avoid index requirement issues
-      bookingsList.sort((a, b) => {
-        const getDate = (date) => {
-          if (!date) return 0;
-          if (date.seconds) return date.seconds * 1000;
-          return new Date(date).getTime() || 0;
-        };
-        return getDate(b.createdAt) - getDate(a.createdAt);
+      const uid = auth.currentUser.uid;
+      const email = auth.currentUser.email || '';
+
+      const rootByUid = await getDocs(query(collection(db, 'bookings'), where('userId', '==', uid)));
+      const rootByEmail = email ? await getDocs(query(collection(db, 'bookings'), where('email', '==', email))) : { docs: [] };
+      const cgByEmail = email ? await getDocs(query(collectionGroup(db, 'bookings'), where('guestEmail', '==', email))) : { docs: [] };
+      const cgByUid = await getDocs(query(collectionGroup(db, 'bookings'), where('userId', '==', uid)));
+
+      const raw = [];
+      for (const d of rootByUid.docs) raw.push({ id: d.id, ...d.data() });
+      for (const d of rootByEmail.docs) raw.push({ id: d.id, ...d.data() });
+      for (const d of cgByEmail.docs) raw.push({ id: d.id, ...d.data() });
+      for (const d of cgByUid.docs) raw.push({ id: d.id, ...d.data() });
+
+      const seen = new Set();
+      const normalized = raw.map(b => {
+        const branchName = b.branchName || '';
+        const roomTypeName = b.roomTypeName || b.roomType || '';
+        const checkIn = b.checkIn || b.checkInDate || null;
+        const checkOut = b.checkOut || b.checkOutDate || null;
+        const totalPrice = Number(b.totalPrice || b.totalAmount || 0);
+        const status = b.status || 'confirmed';
+        const createdAt = b.createdAt || b.bookingDate || b.checkInDate || b.checkIn || null;
+        const key = `${b.id}:${b.branchId || ''}`;
+        return { id: b.id, branchName, roomTypeName, checkIn, checkOut, totalPrice, status, createdAt, branchId: b.branchId || '' };
+      }).filter(b => {
+        const k = `${b.id}:${b.branchId}`;
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
       });
-      
-      setBookings(bookingsList);
+
+      normalized.sort((a, b) => {
+        const toMs = (v) => {
+          if (!v) return 0;
+          if (v.seconds) return v.seconds * 1000;
+          const t = new Date(v).getTime();
+          return isNaN(t) ? 0 : t;
+        };
+        return toMs(b.createdAt) - toMs(a.createdAt);
+      });
+
+      setBookings(normalized);
     } catch (error) {
       console.error('Error fetching bookings:', error);
     } finally {
