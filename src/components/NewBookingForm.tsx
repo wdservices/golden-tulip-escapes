@@ -105,6 +105,15 @@ export const NewBookingForm = ({
     setFormData(prev => ({ ...prev, roomType: "" }));
   }, [formData.location]);
 
+  const isPresidentialRoom = (roomId: string) => {
+    const selectedRoom = roomTypes.find(room => room.id === roomId);
+    const roomName = selectedRoom?.name || "";
+    return roomId.toLowerCase().includes("presidential") || roomName.toLowerCase().includes("presidential");
+  };
+
+  const maxAdults = 2;
+  const maxChildren = isPresidentialRoom(formData.roomType) ? 2 : 1;
+
   const calculateTotal = (): number => {
     const selectedRoom = roomTypes.find(room => room.id === formData.roomType);
     if (!selectedRoom || !formData.checkIn || !formData.checkOut) return 0;
@@ -113,8 +122,7 @@ export const NewBookingForm = ({
     const checkOutDate = new Date(formData.checkOut);
     const pricePerNight = selectedRoom.price;
     const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
-    const totalGuests = formData.adults + formData.children;
-    return pricePerNight * nights * totalGuests;
+    return pricePerNight * (nights || 1);
   };
 
   const totalPrice = calculateTotal();
@@ -320,7 +328,15 @@ export const NewBookingForm = ({
                     </Label>
                     <Select 
                       value={formData.roomType} 
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, roomType: value }))}
+                      onValueChange={(value) => {
+                        const isPresidential = isPresidentialRoom(value);
+                        setFormData(prev => ({
+                          ...prev,
+                          roomType: value,
+                          adults: maxAdults,
+                          children: isPresidential ? 2 : 1
+                        }));
+                      }}
                       disabled={!formData.location || roomsLoading}
                     >
                       <SelectTrigger className="h-12 bg-white/90 border-white/30 text-black focus:ring-yellow-400 focus:border-yellow-400">
@@ -421,32 +437,45 @@ export const NewBookingForm = ({
                       <Label htmlFor="adults" className="text-sm font-medium text-white">
                         Adults *
                       </Label>
-                      <Input
-                        id="adults"
-                        name="adults"
-                        type="number"
-                        min="1"
-                        max="10"
-                        value={formData.adults}
-                        onChange={handleInputChange}
-                        required
-                        className="h-12 bg-white/90 border-white/30 text-black focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
-                      />
+                      <Select
+                        value={formData.adults.toString()}
+                        onValueChange={(value) =>
+                          setFormData(prev => ({ ...prev, adults: Math.min(parseInt(value), maxAdults) }))
+                        }
+                      >
+                        <SelectTrigger className="h-12 bg-white/90 border-white/30 text-black focus:ring-yellow-400 focus:border-yellow-400">
+                          <SelectValue placeholder="Select adults" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white/95 backdrop-blur-md border-white/30 shadow-xl">
+                          {[1, 2].map((num) => (
+                            <SelectItem key={num} value={num.toString()} className="text-black hover:bg-yellow-400/20 focus:bg-yellow-400/30">
+                              {num} {num === 1 ? 'Adult' : 'Adults'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="children" className="text-sm font-medium text-white">
                         Children
                       </Label>
-                      <Input
-                        id="children"
-                        name="children"
-                        type="number"
-                        min="0"
-                        max="10"
-                        value={formData.children}
-                        onChange={handleInputChange}
-                        className="h-12 bg-white/90 border-white/30 text-black focus:ring-yellow-400 focus:border-yellow-400 focus:bg-white"
-                      />
+                      <Select
+                        value={formData.children.toString()}
+                        onValueChange={(value) =>
+                          setFormData(prev => ({ ...prev, children: Math.min(parseInt(value), maxChildren) }))
+                        }
+                      >
+                        <SelectTrigger className="h-12 bg-white/90 border-white/30 text-black focus:ring-yellow-400 focus:border-yellow-400">
+                          <SelectValue placeholder="Select children" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white/95 backdrop-blur-md border-white/30 shadow-xl">
+                          {Array.from({ length: maxChildren + 1 }, (_, index) => index).map((num) => (
+                            <SelectItem key={num} value={num.toString()} className="text-black hover:bg-yellow-400/20 focus:bg-yellow-400/30">
+                              {num} {num === 1 ? 'Child' : 'Children'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>

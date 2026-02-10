@@ -450,9 +450,17 @@ router.get('/admin/payments', async (req, res) => {
   }
 });
 
+// Serve static files from dist directory
+app.use(express.static(path.join(__dirname, 'dist')));
+
 // Mount the router on both root and /api paths to handle different cPanel configurations
 app.use('/', router);
 app.use('/api', router);
+
+// Handle SPA routing - serve index.html for all other routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

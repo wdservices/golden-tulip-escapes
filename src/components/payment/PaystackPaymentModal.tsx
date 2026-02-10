@@ -121,7 +121,7 @@ export const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
   const { currentUser } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paystackLoaded, setPaystackLoaded] = useState(false);
-  const totalAmount = bookingData.roomPrice * bookingData.nights * (bookingData.adults + bookingData.children);
+  const totalAmount = bookingData.roomPrice * (bookingData.nights || 1);
 
   // Load Paystack script
   useEffect(() => {
@@ -363,7 +363,10 @@ export const PaystackPaymentModal: React.FC<PaystackPaymentModalProps> = ({
                   </div>
                   <div className="flex items-center text-white/70">
                     <Users className="h-4 w-4 mr-2" />
-                    <span>Guests: {bookingData.adults + bookingData.children}</span>
+                    <span>
+                      Guests: {bookingData.adults} {bookingData.adults === 1 ? "Adult" : "Adults"}
+                      {bookingData.children > 0 && `, ${bookingData.children} ${bookingData.children === 1 ? "Child" : "Children"}`}
+                    </span>
                   </div>
                 </div>
               </div>

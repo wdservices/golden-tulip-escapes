@@ -117,6 +117,8 @@ export default function BookingScreen({ navigation }) {
   const [showRoomPicker, setShowRoomPicker] = useState(false);
   const [showCheckInPicker, setShowCheckInPicker] = useState(false);
   const [showCheckOutPicker, setShowCheckOutPicker] = useState(false);
+  const [showAdultsPicker, setShowAdultsPicker] = useState(false);
+  const [showChildrenPicker, setShowChildrenPicker] = useState(false);
   const [showPaystackModal, setShowPaystackModal] = useState(false);
   const [paystackPayload, setPaystackPayload] = useState(null);
   
@@ -213,6 +215,21 @@ export default function BookingScreen({ navigation }) {
   };
 
   const totalPrice = calculateTotal();
+
+  const isPresidentialRoom = () => {
+    const roomName = formData.roomTypeName || "";
+    const roomId = formData.roomTypeId || "";
+    return roomId.toLowerCase().includes("presidential") || roomName.toLowerCase().includes("presidential");
+  };
+
+  const maxAdults = 2;
+  const maxChildren = isPresidentialRoom() ? 2 : 1;
+
+  const adultOptions = [1, 2].map((num) => ({ id: num.toString(), name: `${num} ${num === 1 ? 'Adult' : 'Adults'}` }));
+  const childOptions = Array.from({ length: maxChildren + 1 }, (_, index) => index).map((num) => ({
+    id: num.toString(),
+    name: `${num} ${num === 1 ? 'Child' : 'Children'}`
+  }));
 
   const buildPaystackHtml = (payload) => `
     <!DOCTYPE html>
@@ -495,25 +512,17 @@ export default function BookingScreen({ navigation }) {
           <View style={styles.row}>
             <View style={styles.halfInput}>
               <Text style={styles.label}>Adults</Text>
-              <TextInput 
-                style={styles.input} 
-                value={formData.adults}
-                onChangeText={t => updateField('adults', t)}
-                keyboardType="numeric"
-                placeholder="1"
-                placeholderTextColor="#64748b"
-              />
+              <TouchableOpacity style={styles.selectBtn} onPress={() => setShowAdultsPicker(true)}>
+                <Text style={styles.selectText}>{formData.adults} {parseInt(formData.adults) === 1 ? 'Adult' : 'Adults'}</Text>
+                <ChevronDown size={20} color="#94a3b8" />
+              </TouchableOpacity>
             </View>
             <View style={styles.halfInput}>
               <Text style={styles.label}>Children</Text>
-              <TextInput 
-                style={styles.input} 
-                value={formData.children}
-                onChangeText={t => updateField('children', t)}
-                keyboardType="numeric"
-                placeholder="0"
-                placeholderTextColor="#64748b"
-              />
+              <TouchableOpacity style={styles.selectBtn} onPress={() => setShowChildrenPicker(true)}>
+                <Text style={styles.selectText}>{formData.children} {parseInt(formData.children) === 1 ? 'Child' : 'Children'}</Text>
+                <ChevronDown size={20} color="#94a3b8" />
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -567,8 +576,40 @@ export default function BookingScreen({ navigation }) {
         data={rooms}
         selectedValue={formData.roomTypeId}
         onSelect={(item) => {
-          setFormData(prev => ({ ...prev, roomTypeId: item.id, roomTypeName: item.name, roomPrice: item.price }));
+          const isPresidential = item.id?.toLowerCase().includes("presidential") || item.name?.toLowerCase().includes("presidential");
+          setFormData(prev => ({
+            ...prev,
+            roomTypeId: item.id,
+            roomTypeName: item.name,
+            roomPrice: item.price,
+            adults: '2',
+            children: isPresidential ? '2' : '1'
+          }));
           setShowRoomPicker(false);
+        }}
+      />
+
+      <CustomPicker
+        visible={showAdultsPicker}
+        onClose={() => setShowAdultsPicker(false)}
+        title="Select Adults"
+        data={adultOptions}
+        selectedValue={formData.adults}
+        onSelect={(item) => {
+          setFormData(prev => ({ ...prev, adults: item.id }));
+          setShowAdultsPicker(false);
+        }}
+      />
+
+      <CustomPicker
+        visible={showChildrenPicker}
+        onClose={() => setShowChildrenPicker(false)}
+        title="Select Children"
+        data={childOptions}
+        selectedValue={formData.children}
+        onSelect={(item) => {
+          setFormData(prev => ({ ...prev, children: item.id }));
+          setShowChildrenPicker(false);
         }}
       />
 

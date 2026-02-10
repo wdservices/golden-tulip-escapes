@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, query, where, onSnapshot, orderBy, Timestamp, getDocs, doc, updateDoc, collectionGroup } from "firebase/firestore";
+import { collection, query, where, onSnapshot, orderBy, Timestamp, getDocs, doc, updateDoc, collectionGroup, deleteDoc } from "firebase/firestore";
 import { format, subDays, isToday, isYesterday } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useCollection } from "@/hooks/useCollection";
 import { getBranches } from "@/services/branchService";
 import { getDatabaseBranchId, getStaticBranchId } from "@/config/branchMappings";
+import { getBranchName } from "@/config/paymentConfig";
 import { AdminBookingForm } from "@/components/admin/AdminBookingForm";
 
 import { BookingsTable } from "@/components/bookings/BookingsTable";
@@ -110,6 +111,8 @@ export const BookingsPage = () => {
   const normalizeBooking = (data: any, id: string, isRoot: boolean, branchPathId?: string): BookingWithMeta => {
     const rawBranchId = data.branchId || branchPathId || "";
     const normalizedBranchId = rawBranchId ? getDatabaseBranchId(rawBranchId) : rawBranchId;
+    const staticBranchId = normalizedBranchId ? getStaticBranchId(normalizedBranchId) : normalizedBranchId;
+    const resolvedBranchName = data.branchName ?? (staticBranchId ? getBranchName(staticBranchId) : undefined);
     const checkInDate = resolveDate(data.checkInDate ?? data.checkIn);
     const checkOutDate = resolveDate(data.checkOutDate ?? data.checkOut);
     const createdAt = resolveDate(data.createdAt ?? data.bookingDate);
@@ -121,6 +124,7 @@ export const BookingsPage = () => {
       id,
       ...data,
       branchId: normalizedBranchId,
+      branchName: resolvedBranchName,
       roomType: data.roomType ?? data.roomTypeName ?? data.roomTypeId,
       totalAmount: data.totalAmount ?? data.totalPrice ?? data.amount ?? 0,
       guestName: data.guestName ?? data.guest ?? data.fullName,
@@ -454,6 +458,33 @@ export const BookingsPage = () => {
     updateBookingStatus(bookingId, newStatus);
   };
 
+  const handleDeleteBooking = async (booking: BookingWithMeta) => {
+    const firstConfirm = window.confirm("Are you sure you want to delete this booking?");
+    if (!firstConfirm) return;
+    const secondConfirm = window.confirm("This action cannot be undone. Delete the booking now?");
+    if (!secondConfirm) return;
+
+    try {
+      if (booking.__isRoot) {
+        await deleteDoc(doc(db, "bookings", booking.id));
+      } else {
+        const branchId = getDatabaseBranchId(booking.__branchPathId || booking.branchId || "");
+        await deleteDoc(doc(db, "branches", branchId, "bookings", booking.id));
+      }
+      toast({
+        title: "Booking deleted",
+        description: "The booking has been removed successfully.",
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to delete booking.";
+      toast({
+        variant: "destructive",
+        title: "Delete failed",
+        description: message,
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -686,6 +717,7 @@ export const BookingsPage = () => {
                   setShowBookingDetails(true);
                 }} 
                 onStatusChange={handleStatusChange} 
+                onDelete={handleDeleteBooking}
               />
               {filteredBookings.length > 0 && (
                 <div className="flex items-center justify-between p-4 border-t border-white/20">

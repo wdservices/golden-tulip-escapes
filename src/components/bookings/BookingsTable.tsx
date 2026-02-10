@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarDays, Check, Copy, Filter, Mail as MailIcon, MoreHorizontal, Search } from "lucide-react";
+import { CalendarDays, Check, Copy, Filter, Mail as MailIcon, MoreHorizontal, Search, Trash2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,13 +17,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/utils/currencyUtils";
 
 interface BookingsTableProps {
-  bookings: Booking[];
+  bookings: (Booking & { __isRoot?: boolean; __branchPathId?: string })[];
   isLoading: boolean;
   onEdit: (booking: Booking) => void;
   onStatusChange: (bookingId: string, status: BookingStatus) => void;
+  onDelete: (booking: Booking & { __isRoot?: boolean; __branchPathId?: string }) => void;
 }
 
-export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: BookingsTableProps) {
+export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange, onDelete }: BookingsTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">("all");
   const [dateRange, setDateRange] = useState<{
@@ -113,6 +114,39 @@ export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: B
     const body = encodeURIComponent(buildEmailContent(emailBooking));
     const recipient = emailBooking.guestEmail || "";
     window.open(`mailto:${recipient}?subject=${subject}&body=${body}`);
+  };
+
+  const handleDownloadEmailPdf = () => {
+    if (!emailBooking) return;
+    const content = buildEmailContent(emailBooking);
+    const w = window.open("", "_blank", "noopener,noreferrer,width=800,height=900");
+    if (!w) return;
+    const html = `
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Booking Email - ${emailBooking.branchName}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 24px; color: #111; }
+            h1 { font-size: 18px; margin-bottom: 12px; }
+            pre { white-space: pre-wrap; font-size: 13px; line-height: 1.6; }
+            .actions { margin-top: 16px; }
+            .btn { display: inline-block; padding: 8px 12px; background: #222; color: #fff; text-decoration: none; border-radius: 4px; }
+            @media print { .actions { display: none; } }
+          </style>
+        </head>
+        <body>
+          <h1>Booking Email Preview</h1>
+          <pre>${content.replace(/</g, "&lt;")}</pre>
+          <div class="actions">
+            <a href="#" class="btn" onclick="window.print(); return false;">Print / Save as PDF</a>
+          </div>
+        </body>
+      </html>
+    `;
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
   };
 
   const filteredBookings = bookings.filter((booking) => {
@@ -318,6 +352,15 @@ export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: B
                               Cancel Booking
                             </Button>
                           )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="justify-start text-red-600 hover:text-red-700"
+                            onClick={() => onDelete(booking)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Booking
+                          </Button>
                         </div>
                       </PopoverContent>
                     </Popover>
@@ -369,6 +412,9 @@ export function BookingsTable({ bookings, isLoading, onEdit, onStatusChange }: B
               <Button className="w-full" onClick={handleComposeEmail} disabled={!emailBooking.guestEmail}>
                 <MailIcon className="h-4 w-4 mr-2" />
                 Compose Email
+              </Button>
+              <Button variant="secondary" className="w-full" onClick={handleDownloadEmailPdf}>
+                Download PDF
               </Button>
               {!emailBooking.guestEmail && (
                 <p className="text-xs text-muted-foreground text-center">

@@ -100,6 +100,20 @@ export default function LoginScreen() {
 
             <View style={styles.formContainer}>
               <View style={styles.form}>
+                <View style={styles.authToggle}>
+                  <TouchableOpacity
+                    style={[styles.toggleOption, isLogin && styles.toggleActive]}
+                    onPress={() => setIsLogin(true)}
+                  >
+                    <Text style={[styles.toggleOptionText, isLogin && styles.toggleActiveText]}>Sign In</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.toggleOption, !isLogin && styles.toggleActive]}
+                    onPress={() => setIsLogin(false)}
+                  >
+                    <Text style={[styles.toggleOptionText, !isLogin && styles.toggleActiveText]}>Sign Up</Text>
+                  </TouchableOpacity>
+                </View>
                 <Text style={styles.welcome}>{isLogin ? 'Welcome Back' : 'Create Account'}</Text>
                 <Text style={styles.instruction}>
                   {isLogin ? 'Enter your credentials to sign in' : 'Fill in the details to get started'}
