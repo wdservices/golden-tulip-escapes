@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "gtph",
+    "slug": "gtph",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.goldentulip.gtph"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4f360e29-e082-4ee9-a71b-45dbccf44a46"
+      }
+    },
+    "owner": "spellz49",
+    "plugins": [
+      "@react-native-community/datetimepicker",
+      "expo-build-properties"
+    ]
+  }
+}

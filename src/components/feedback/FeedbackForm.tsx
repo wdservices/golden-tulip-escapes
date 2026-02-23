@@ -16,7 +16,7 @@ interface FeedbackFormProps {
 
 export function FeedbackForm({ className = '', userId, userEmail, onSuccess }: FeedbackFormProps) {
   const { toast } = useToast();
-  const [type, setType] = useState<'suggestion' | 'complaint' | ''>('');
+  const [type, setType] = useState<'suggestion' | 'complaint' | 'appreciation' | ''>('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -71,7 +71,7 @@ export function FeedbackForm({ className = '', userId, userEmail, onSuccess }: F
           <Label htmlFor="feedback-type">Type</Label>
           <Select 
             value={type} 
-            onValueChange={(value: 'suggestion' | 'complaint' | '') => setType(value)}
+            onValueChange={(value: 'suggestion' | 'complaint' | 'appreciation' | '') => setType(value)}
             required
           >
             <SelectTrigger id="feedback-type">
@@ -80,6 +80,7 @@ export function FeedbackForm({ className = '', userId, userEmail, onSuccess }: F
             <SelectContent>
               <SelectItem value="suggestion">Suggestion</SelectItem>
               <SelectItem value="complaint">Complaint</SelectItem>
+              <SelectItem value="appreciation">Appreciation</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -87,7 +88,8 @@ export function FeedbackForm({ className = '', userId, userEmail, onSuccess }: F
         <div className="space-y-2">
           <Label htmlFor="feedback-message">
             {type === 'suggestion' ? 'Your Suggestion' : 
-             type === 'complaint' ? 'Your Complaint' : 'Your Message'}
+             type === 'complaint' ? 'Your Complaint' : 
+             type === 'appreciation' ? 'Your Appreciation' : 'Your Message'}
           </Label>
           <Textarea
             id="feedback-message"
