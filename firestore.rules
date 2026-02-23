@@ -40,7 +40,8 @@ service cloud.firestore {
       // Allow anyone to submit feedback
       allow create: if request.resource.data.keys().hasAll(['type', 'message']) && 
                     (request.resource.data.type == 'suggestion' || 
-                     request.resource.data.type == 'complaint') && 
+                     request.resource.data.type == 'complaint' ||
+                     request.resource.data.type == 'appreciation') && 
                     request.resource.data.message is string && 
                     request.resource.data.message.size() > 0 && 
                     request.resource.data.message.size() <= 2000;
