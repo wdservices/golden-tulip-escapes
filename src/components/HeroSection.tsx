@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Smartphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -135,14 +135,24 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
               <Button
                 onClick={handleBookNowClick}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg sm:text-xl px-8 sm:px-12 py-4 sm:py-6 min-w-[220px] sm:min-w-[250px] font-bold shadow-2xl hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-6 min-w-[250px] font-bold shadow-2xl hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                 size="lg"
               >
-                <Calendar className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" />
+                <Calendar className="mr-3 h-6 w-6" />
                 Book Your Stay
+              </Button>
+              
+              <Button
+                variant="outline"
+                onClick={() => window.open('/GoldenTulip.apk', '_blank')}
+                className="bg-black/40 hover:bg-black/60 border-white/30 text-white hover:text-white text-lg px-8 py-6 min-w-[250px] font-bold shadow-2xl hover:shadow-lg transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
+                size="lg"
+              >
+                <Smartphone className="mr-3 h-6 w-6" />
+                Download App
               </Button>
             </div>
 

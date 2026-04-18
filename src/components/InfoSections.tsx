@@ -39,6 +39,7 @@ const eventTypes = [
         name: "Anioma Restaurant",
         capacity: "100 - 200 guests",
         priceRange: "From ₦1,000,000 per day",
+        kuulaEmbedUrl: "https://kuula.co/share/collection/7HvLS?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1",
         features: [
           "Professional meeting rooms",
           "Conference facilities",
@@ -55,6 +56,7 @@ const eventTypes = [
         name: "Abuja Hall",
         capacity: "80 - 150 guests",
         priceRange: "From ₦750,000 per day",
+        kuulaEmbedUrl: "https://kuula.co/share/collection/7Hpmv?logo=0&info=1&fs=1&vr=0&sd=1&autop=90&thumbs=1&autorotate=0.16",
         features: [
           "Professional meeting rooms",
           "Conference facilities",
@@ -71,6 +73,7 @@ const eventTypes = [
         name: "Lagos Hall",
         capacity: "30 - 40 guests",
         priceRange: "From ₦400,000 per day",
+        kuulaEmbedUrl: "https://kuula.co/share/collection/7HpmX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1",
         features: [
           "Professional meeting rooms",
           "Conference facilities",
@@ -87,6 +90,7 @@ const eventTypes = [
         name: "Rivers Hall - Boardroom",
         capacity: "18 - 25 guests",
         priceRange: "From ₦400,000 per day",
+        kuulaEmbedUrl: "https://kuula.co/share/collection/7Hpm9?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1",
         features: [
           "Professional meeting rooms",
           "Conference facilities",
@@ -103,6 +107,7 @@ const eventTypes = [
         name: "Kano Hall",
         capacity: "18 - 25 guests",
         priceRange: "From ₦300,000 per day",
+        kuulaEmbedUrl: "https://kuula.co/share/collection/7Hpmq?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1",
         features: [
           "Professional meeting rooms",
           "Conference facilities",
@@ -119,6 +124,7 @@ const eventTypes = [
         name: "The Marquee",
         capacity: "40 - 100 guests",
         priceRange: "From ₦500,000 per day",
+        kuulaEmbedUrl: "",
         features: [
           "Professional meeting rooms",
           "Conference facilities",
@@ -135,6 +141,7 @@ const eventTypes = [
         name: "The Pavilion/ Event Centre",
         capacity: "100 - 300 guests",
         priceRange: "From ₦3,000,000 per day",
+        kuulaEmbedUrl: "https://kuula.co/share/collection/7HvmX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1",
         features: [
           "Professional meeting rooms",
           "Conference facilities",
@@ -239,7 +246,11 @@ export const InfoSections = () => {
   const [showAllSpaServices, setShowAllSpaServices] = useState(false);
   
   const handleOpenDialog = (event: any) => {
-    setSelectedEvent(event.id);
+    if (event.id === "corporate") {
+      window.location.href = `/corporate-halls`;
+    } else {
+      setSelectedEvent(event.id);
+    }
   };
 
   const handleCloseDialog = () => {

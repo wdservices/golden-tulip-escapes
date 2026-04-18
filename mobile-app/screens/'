@@ -1,0 +1,37 @@
+[33mcommit 254ebd6b292f7cfe33ea2018f55c5198c0ab42b5[m
+Author: Waves Digital Services <hello.wdservices@gmail.com>
+Date:   Wed Dec 17 21:06:10 2025 +0100
+
+    update
+
+[1mdiff --git a/src/pages/Index.tsx b/src/pages/Index.tsx[m
+[1mindex 2b23857..7c5869e 100644[m
+[1m--- a/src/pages/Index.tsx[m
+[1m+++ b/src/pages/Index.tsx[m
+[36m@@ -10,6 +10,8 @@[m [mimport { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from[m
+ import { Footer } from "@/components/Footer";[m
+ import { Button } from "@/components/ui/button";[m
+ import { ChevronDown, ChevronUp, X } from "lucide-react";[m
+[32m+[m[32mimport { AdOverlay } from "@/components/ads/AdOverlay";[m
+[32m+[m[32mimport { AdMiniOverlay } from "@/components/ads/AdMiniOverlay";[m
+ [m
+ const Index = () => {[m
+   // Don't set main as the default active tab[m
+[36m@@ -48,6 +50,8 @@[m [mconst Index = () => {[m
+ [m
+   return ([m
+     <div className="min-h-screen bg-background">[m
+[32m+[m[32m      <AdOverlay />[m
+[32m+[m[32m      <AdMiniOverlay />[m
+       <Header activeTab={activeBranch || ''} onTabChange={handleTabChange} onOpenGallery={() => setIsGalleryOpen(true)} />[m
+       [m
+       <main>[m
+[36m@@ -442,6 +446,8 @@[m [mconst Index = () => {[m
+       </main>[m
+       [m
+       <Footer />[m
+[32m+[m[32m      <AdOverlay />[m
+[32m+[m[32m      <AdMiniOverlay />[m
+     </div>[m
+   );[m
+ };[m

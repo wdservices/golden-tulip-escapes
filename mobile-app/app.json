@@ -1,12 +1,11 @@
 {
   "expo": {
-    "name": "GTPH App",
-    "slug": "mobile-app",
+    "name": "GTPH",
+    "slug": "gtph",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -24,7 +23,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.goldentulip.mobile",
       "permissions": [
         "android.permission.CAMERA",
@@ -36,7 +34,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "a5d16409-4ed8-4398-b7d0-5ee35cb8ecd4"
+        "projectId": "2b7829a3-a62c-4592-824d-f1aa9d74ca64"
       }
     },
     "plugins": [
@@ -52,12 +50,17 @@
         {
           "android": {
             "usesCleartextTraffic": true,
-            "gradlePluginVersion": "8.10.1",
             "packagingOptions": {
               "pickFirst": [
                 "**/libc++_shared.so"
               ]
-            }
+            },
+            "gradleProperties": [
+              {
+                "key": "org.gradle.jvmargs",
+                "value": "-Xmx4096m -XX:MaxMetaspaceSize=1g"
+              }
+            ]
           }
         }
       ]

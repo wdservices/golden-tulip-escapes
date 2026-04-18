@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, MessageSquare } from "lucide-react";
-import { collection, getDocs, orderBy, query, limit, updateDoc, doc, serverTimestamp } from "firebase/firestore";
+import { Loader2, MessageSquare, Trash2 } from "lucide-react";
+import { collection, getDocs, orderBy, query, limit, updateDoc, doc, serverTimestamp, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
@@ -52,6 +52,7 @@ export default function FeedbackPage() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchFeedback = async () => {
     setLoading(true);
@@ -98,6 +99,21 @@ export default function FeedbackPage() {
       toast({ title: "Error", description: "Failed to update status", variant: "destructive" });
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const deleteFeedback = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this feedback?")) return;
+    try {
+      setDeletingId(id);
+      await deleteDoc(doc(db, "feedback", id));
+      setItems((prev) => prev.filter((i) => i.id !== id));
+      toast({ title: "Deleted", description: "Feedback removed successfully." });
+    } catch (err) {
+      console.error("Failed to delete feedback:", err);
+      toast({ title: "Error", description: "Failed to delete feedback", variant: "destructive" });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -188,8 +204,11 @@ export default function FeedbackPage() {
                         <Badge className={statusColor(f.status)}>{(f.status || "new").toUpperCase()}</Badge>
                       </TableCell>
                       <TableCell className="space-x-2">
-                        <Button size="sm" className="bg-[hsl(var(--royal-blue))] text-white hover:bg-[hsl(var(--royal-blue-dark))]" disabled={updatingId === f.id} onClick={() => updateStatus(f.id, "in-progress")}>{updatingId === f.id ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}In Progress</Button>
-                        <Button size="sm" className="bg-green-600 text-white hover:bg-green-700" disabled={updatingId === f.id} onClick={() => updateStatus(f.id, "resolved")}>{updatingId === f.id ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}Resolve</Button>
+                        <Button size="sm" className="bg-[hsl(var(--royal-blue))] text-white hover:bg-[hsl(var(--royal-blue-dark))]" disabled={updatingId === f.id || deletingId === f.id} onClick={() => updateStatus(f.id, "in-progress")}>{updatingId === f.id ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}In Progress</Button>
+                        <Button size="sm" className="bg-green-600 text-white hover:bg-green-700" disabled={updatingId === f.id || deletingId === f.id} onClick={() => updateStatus(f.id, "resolved")}>{updatingId === f.id ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}Resolve</Button>
+                        <Button size="icon" variant="destructive" className="h-8 w-8" disabled={updatingId === f.id || deletingId === f.id} onClick={() => deleteFeedback(f.id)}>
+                          {deletingId === f.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))

@@ -45,6 +45,9 @@ service cloud.firestore {
                     request.resource.data.message is string && 
                     request.resource.data.message.size() > 0 && 
                     request.resource.data.message.size() <= 2000;
+                    
+      // Allow admins to manage (update status, delete) feedback
+      allow update, delete: if isAdmin();
     }
     
     // Sessions collection rules

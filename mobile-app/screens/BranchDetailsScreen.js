@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, FlatList, ActivityIndicator, Modal, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronLeft, MapPin, X } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, MapPin, X } from 'lucide-react-native';
 import { collection, getDocs, query } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { BRANCH_IMAGES } from '../data/BranchImages';
@@ -14,13 +14,37 @@ export default function BranchDetailsScreen({ route, navigation }) {
   // Using a Set to avoid potential duplicates if branch.image is also in the gallery
   const initialImages = [branch.image, ...localGallery];
   
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const [images, setImages] = useState(initialImages);
   const [loading, setLoading] = useState(true);
+  const flatListRef = useRef(null);
 
   useEffect(() => {
     fetchBranchImages();
   }, []);
+
+  const handleScroll = (event) => {
+    const slideSize = event.nativeEvent.layoutMeasurement.width;
+    const index = event.nativeEvent.contentOffset.x / slideSize;
+    const roundIndex = Math.round(index);
+    setSelectedIndex(roundIndex);
+  };
+
+  const nextImage = () => {
+    if (selectedIndex < images.length - 1) {
+      const newIndex = selectedIndex + 1;
+      setSelectedIndex(newIndex);
+      flatListRef.current?.scrollToIndex({ index: newIndex, animated: true });
+    }
+  };
+
+  const prevImage = () => {
+    if (selectedIndex > 0) {
+      const newIndex = selectedIndex - 1;
+      setSelectedIndex(newIndex);
+      flatListRef.current?.scrollToIndex({ index: newIndex, animated: true });
+    }
+  };
 
   const fetchBranchImages = async () => {
     try {
@@ -66,7 +90,7 @@ export default function BranchDetailsScreen({ route, navigation }) {
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.heroSection}>
-          <TouchableOpacity onPress={() => setSelectedImage(branch.image)} activeOpacity={0.9} style={{ flex: 1 }}>
+          <TouchableOpacity onPress={() => setSelectedIndex(0)} activeOpacity={0.9} style={{ flex: 1 }}>
             <Image source={branch.image} style={styles.heroImage} resizeMode="cover" />
           </TouchableOpacity>
           <View style={styles.heroOverlay}>
@@ -87,7 +111,7 @@ export default function BranchDetailsScreen({ route, navigation }) {
               <TouchableOpacity 
                 key={index} 
                 style={styles.galleryItem}
-                onPress={() => setSelectedImage(img)}
+                onPress={() => setSelectedIndex(index)}
               >
                 <Image 
                   source={typeof img === 'string' ? { uri: img } : img} 
@@ -102,25 +126,37 @@ export default function BranchDetailsScreen({ route, navigation }) {
 
       {/* Full Screen Image Viewer */}
       <Modal 
-        visible={!!selectedImage} 
+        visible={selectedIndex >= 0} 
         transparent={true} 
-        onRequestClose={() => setSelectedImage(null)}
+        onRequestClose={() => setSelectedIndex(-1)}
         animationType="fade"
       >
         <View style={styles.modalContainer}>
           <TouchableOpacity 
             style={styles.closeButton} 
-            onPress={() => setSelectedImage(null)}
+            onPress={() => setSelectedIndex(-1)}
           >
             <X size={30} color="#fff" />
           </TouchableOpacity>
           
-          {selectedImage && (
+          {selectedIndex >= 0 && (
             <Image 
-              source={typeof selectedImage === 'string' ? { uri: selectedImage } : selectedImage} 
+              source={typeof images[selectedIndex] === 'string' ? { uri: images[selectedIndex] } : images[selectedIndex]} 
               style={styles.fullScreenImage} 
               resizeMode="contain"
             />
+          )}
+
+          {selectedIndex > 0 && (
+            <TouchableOpacity style={[styles.navButton, styles.leftNav]} onPress={prevImage}>
+              <ChevronLeft size={30} color="#fff" />
+            </TouchableOpacity>
+          )}
+          
+          {selectedIndex >= 0 && selectedIndex < images.length - 1 && (
+            <TouchableOpacity style={[styles.navButton, styles.rightNav]} onPress={nextImage}>
+              <ChevronRight size={30} color="#fff" />
+            </TouchableOpacity>
           )}
         </View>
       </Modal>
@@ -146,6 +182,18 @@ const styles = StyleSheet.create({
   galleryImage: { width: '100%', height: '100%' },
   emptyText: { color: '#94a3b8', fontStyle: 'italic' },
   modalContainer: { flex: 1, backgroundColor: 'rgba(0,0,0,0.9)', justifyContent: 'center', alignItems: 'center' },
-  closeButton: { position: 'absolute', top: 50, right: 20, zIndex: 1, padding: 10, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20 },
-  fullScreenImage: { width: Dimensions.get('window').width, height: Dimensions.get('window').height * 0.8 }
+  closeButton: { position: 'absolute', top: 50, right: 20, zIndex: 10, padding: 10, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20 },
+  fullScreenImage: { width: Dimensions.get('window').width, height: Dimensions.get('window').height * 0.8 },
+  navButton: {
+    position: 'absolute',
+    top: '50%',
+    marginTop: -25,
+    padding: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 30,
+    zIndex: 10,
+    elevation: 10,
+  },
+  leftNav: { left: 20 },
+  rightNav: { right: 20 },
 });

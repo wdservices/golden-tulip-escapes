@@ -42,7 +42,8 @@ export const Footer = () => {
     { name: "Dining", href: "#dining" },
     { name: "Spa & Wellness", href: "#spa" },
     { name: "Events", href: "#events" },
-    { name: "Contact", href: "#contact" }
+    { name: "Contact", href: "#contact" },
+    { name: "Privacy Policy", href: "/privacy-policy" }
   ];
 
   const handleWhatsApp = () => {
@@ -106,12 +107,21 @@ export const Footer = () => {
             <ul className="space-y-2">
               {quickLinks.map((link, index) => (
                 <li key={index}>
-                  <a
-                    href={link.href}
-                    className="text-white/80 hover:text-golden-yellow transition-colors duration-300"
-                  >
-                    {link.name}
-                  </a>
+                  {link.href.startsWith('/') ? (
+                    <Link
+                      to={link.href}
+                      className="text-white/80 hover:text-golden-yellow transition-colors duration-300"
+                    >
+                      {link.name}
+                    </Link>
+                  ) : (
+                    <a
+                      href={link.href}
+                      className="text-white/80 hover:text-golden-yellow transition-colors duration-300"
+                    >
+                      {link.name}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -201,9 +211,9 @@ export const Footer = () => {
               <a href="https://bwtng.live" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-golden-yellow text-sm transition-colors duration-300">
                 Website developed by Bluewaves Technologies — www.bwtng.live
               </a>
-              <a href="/privacy" className="text-white/60 hover:text-golden-yellow text-sm transition-colors duration-300">
+              <Link to="/privacy-policy" className="text-white/60 hover:text-golden-yellow text-sm transition-colors duration-300">
                 Privacy Policy
-              </a>
+              </Link>
               <a href="/terms" className="text-white/60 hover:text-golden-yellow text-sm transition-colors duration-300">
                 Terms of Service
               </a>
