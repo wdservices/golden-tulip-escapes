@@ -29,7 +29,7 @@ export default function HomeScreen({ navigation }) {
             </View>
           </View>
           <TouchableOpacity onPress={() => signOut(auth)} style={styles.logoutBtn}>
-            <LogOut size={20} color="#ef4444" />
+            <LogOut size={20} color="#ffffff" />
           </TouchableOpacity>
         </View>
 
@@ -50,13 +50,13 @@ export default function HomeScreen({ navigation }) {
         <View style={styles.actionsGrid}>
           {[
             { icon: Calendar, label: 'Bookings', color: '#3b82f6', action: () => navigation.navigate('Booking') },
-            { icon: QrCode, label: 'Check In', color: '#10b981', action: () => navigation.navigate('BrunchAttendance') },
-            { icon: MapPin, label: 'Locations', color: '#f59e0b' },
-            { icon: User, label: 'Profile', color: '#8b5cf6' },
+            { icon: QrCode, label: 'Sunday Brunch', color: '#10b981', action: () => navigation.navigate('BrunchAttendance') },
+            { icon: MapPin, label: 'Contacts', color: '#f59e0b', action: () => navigation.navigate('Contacts') },
+            { icon: User, label: 'Profile', color: '#8b5cf6', action: () => navigation.navigate('Profile') },
           ].map((action, index) => (
             <TouchableOpacity key={index} style={styles.actionItem} onPress={action.action}>
-              <View style={[styles.iconBox, { backgroundColor: `${action.color}20` }]}>
-                <action.icon size={24} color={action.color} />
+              <View style={[styles.iconBox, { backgroundColor: action.color }]}>
+                <action.icon size={24} color="#ffffff" />
               </View>
               <Text style={styles.actionLabel}>{action.label}</Text>
             </TouchableOpacity>
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   menuBtn: { padding: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 8 },
   greeting: { color: '#94a3b8', fontSize: 16 },
   username: { color: '#fff', fontSize: 24, fontWeight: 'bold' },
-  logoutBtn: { padding: 10, backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: 12 },
+  logoutBtn: { padding: 10, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 12 },
   featuredCard: { margin: 20, height: 200, borderRadius: 20, overflow: 'hidden' },
   featuredImage: { width: '100%', height: '100%' },
   featuredOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 20, backgroundColor: 'rgba(0,0,0,0.6)' },

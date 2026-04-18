@@ -6,6 +6,7 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerI
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 import { StatusBar } from 'expo-status-bar';
+import { fetchActiveAds } from './services/adsService';
 import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreen';
 import BookingScreen from './screens/BookingScreen';
@@ -15,11 +16,14 @@ import MyBookingsScreen from './screens/MyBookingsScreen';
 import BrunchAttendanceScreen from './screens/BrunchAttendanceScreen';
 import BranchDetailsScreen from './screens/BranchDetailsScreen';
 import ContactsScreen from './screens/ContactsScreen';
+import FeedbackScreen from './screens/FeedbackScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ActivityIndicator, View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { Home, Calendar, QrCode, LogOut, Menu, User, BookOpen, Coffee, Phone } from 'lucide-react-native';
+import { Home, Calendar, QrCode, LogOut, Menu, User, BookOpen, Coffee, Phone, MessageSquare } from 'lucide-react-native';
 import { PaystackProvider } from './paystackWrapper';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import AdsBanner from './components/AdsBanner';
+import MiniAdsBanner from './components/MiniAdsBanner';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -30,6 +34,13 @@ function CustomDrawerContent(props) {
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
       <View style={styles.drawerHeader}>
+        {/* Background Image from Login Page */}
+        <Image 
+          source={{ uri: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070&auto=format&fit=crop' }} 
+          style={styles.headerBackgroundImage}
+          resizeMode="cover"
+        />
+        
         <View style={styles.avatarContainer}>
           <Text style={styles.avatarText}>{user?.displayName?.charAt(0) || 'G'}</Text>
         </View>
@@ -46,7 +57,7 @@ function CustomDrawerContent(props) {
           style={styles.logoutBtn} 
           onPress={() => signOut(auth)}
         >
-          <LogOut size={20} color="#ef4444" />
+          <LogOut size={20} color="#ffffff" />
           <Text style={styles.logoutText}>Sign Out</Text>
         </TouchableOpacity>
       </View>
@@ -127,6 +138,14 @@ function DrawerNavigator() {
           drawerIcon: ({ color }) => <Phone size={22} color={color} />
         }}
       />
+      <Drawer.Screen 
+        name="Feedback" 
+        component={FeedbackScreen} 
+        options={{
+          title: 'Share Feedback',
+          drawerIcon: ({ color }) => <MessageSquare size={22} color={color} />
+        }}
+      />
     </Drawer.Navigator>
   );
 }
@@ -134,6 +153,10 @@ function DrawerNavigator() {
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [ads, setAds] = useState([]);
+  const [currentAdIndex, setCurrentAdIndex] = useState(0);
+  const [showMainAd, setShowMainAd] = useState(false);
+  const [showMiniAd, setShowMiniAd] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -143,6 +166,56 @@ export default function App() {
     return unsubscribe;
   }, []);
 
+  // Fetch Ads
+  useEffect(() => {
+    const unsubscribeAds = fetchActiveAds((fetchedAds) => {
+      setAds(fetchedAds);
+      if (fetchedAds.length > 0) {
+        setShowMainAd(true);
+        setShowMiniAd(false);
+      } else {
+        setShowMainAd(false);
+        setShowMiniAd(false);
+      }
+    });
+    return () => {
+      if (unsubscribeAds) unsubscribeAds();
+    };
+  }, []);
+
+  // Ad Rotation Logic
+  useEffect(() => {
+    if (ads.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentAdIndex((prev) => (prev + 1) % ads.length);
+    }, 5000); // Rotate every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [ads.length]);
+
+  // Calculate ad duration based on website logic
+  const getAdDuration = () => {
+    if (ads.length === 0) return 6000;
+    // Minimum 10 seconds, or 5 seconds per ad, max 20 seconds
+    return Math.min(Math.max(10000, ads.length * 5000), 20000);
+  };
+
+  const handleMainAdClose = () => {
+    setShowMainAd(false);
+    // Show mini ad after a short delay to match website behavior
+    setTimeout(() => {
+      if (ads.length > 0) {
+        setShowMiniAd(true);
+      }
+    }, 500);
+  };
+
+  const handleMiniAdExpand = () => {
+    setShowMiniAd(false);
+    setShowMainAd(true);
+  };
+
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1D3649' }}>
@@ -150,6 +223,8 @@ export default function App() {
       </View>
     );
   }
+
+  const currentAd = ads.length > 0 ? ads[currentAdIndex] : null;
 
   return (
     <PaystackProvider publicKey="pk_live_5b8a1cc5108ee14b78f38c309af069f46f59ac83">
@@ -168,6 +243,22 @@ export default function App() {
               )}
             </Stack.Navigator>
           </NavigationContainer>
+          {showMainAd && currentAd && (
+            <AdsBanner
+              imageSource={currentAd.imageUrl ? { uri: currentAd.imageUrl } : require('./assets/branches/evergreen/deluxe room.webp')}
+              title={currentAd.title}
+              description={currentAd.description}
+              onClose={handleMainAdClose}
+              autoHideAfterMs={getAdDuration()}
+            />
+          )}
+          {showMiniAd && currentAd && (
+            <MiniAdsBanner
+              imageSource={currentAd.imageUrl ? { uri: currentAd.imageUrl } : require('./assets/branches/evergreen/deluxe room.webp')}
+              onExpand={handleMiniAdExpand}
+              onClose={() => setShowMiniAd(false)}
+            />
+          )}
         </SafeAreaProvider>
       </GestureHandlerRootView>
     </PaystackProvider>
@@ -180,6 +271,14 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     backgroundColor: '#162b3b',
     marginBottom: 10,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  headerBackgroundImage: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.2, // Faint effect
+    width: '100%',
+    height: '100%',
   },
   avatarContainer: {
     width: 60,
@@ -219,7 +318,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   logoutText: {
-    color: '#ef4444',
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: 'medium',
   }

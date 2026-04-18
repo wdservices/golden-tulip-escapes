@@ -1,13 +1,15 @@
-import { X, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { ThreeSixtyViewer } from "@/components/ThreeSixtyViewer";
+import { useEffect, useMemo, useState } from "react";
 
 export interface VenueType {
   name: string;
   capacity: string;
   priceRange: string;
   features: string[];
+  kuulaEmbedUrl?: string;
 };
 
 export interface EventType {
@@ -20,6 +22,7 @@ export interface EventType {
   priceRange: string;
   image?: string;
   venues?: VenueType[];
+  kuulaEmbedUrl?: string;
   threeSixtyImages?: string[];
 };
 
@@ -30,9 +33,27 @@ interface EventDetailsDialogProps {
 }
 
 export const EventDetailsDialog = ({ isOpen, onClose, event }: EventDetailsDialogProps) => {
-
-  
   if (!event) return null;
+
+  const [selectedVenueIndex, setSelectedVenueIndex] = useState(0);
+
+  useEffect(() => {
+    if (!event.venues || event.venues.length === 0) {
+      setSelectedVenueIndex(0);
+      return;
+    }
+
+    const firstWithTourIndex = event.venues.findIndex(venue => !!venue.kuulaEmbedUrl);
+    setSelectedVenueIndex(firstWithTourIndex >= 0 ? firstWithTourIndex : 0);
+  }, [event.id, event.venues]);
+
+  const activeVenue = useMemo(() => {
+    if (!event.venues || event.venues.length === 0) return null;
+    return event.venues[selectedVenueIndex] ?? event.venues[0];
+  }, [event.venues, selectedVenueIndex]);
+
+  const embedUrl = activeVenue?.kuulaEmbedUrl || event.kuulaEmbedUrl;
+  const hasThreeSixtyImages = !embedUrl && !!event.threeSixtyImages?.length;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -55,7 +76,24 @@ export const EventDetailsDialog = ({ isOpen, onClose, event }: EventDetailsDialo
                     
                     <div className="space-y-6">
                       {event.venues.map((venue, idx) => (
-                        <div key={idx} className="card-luxury border border-primary/20 rounded-xl overflow-hidden hover:shadow-glow transition-all duration-300">
+                        <div
+                          key={idx}
+                          className={[
+                            "card-luxury border rounded-xl overflow-hidden transition-all duration-300 cursor-pointer",
+                            idx === selectedVenueIndex
+                              ? "border-primary shadow-glow"
+                              : "border-primary/20 hover:shadow-glow"
+                          ].join(" ")}
+                          onClick={() => setSelectedVenueIndex(idx)}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setSelectedVenueIndex(idx);
+                            }
+                          }}
+                        >
                           <div className="bg-primary/10 p-4 border-b border-primary/20">
                             <h4 className="text-xl font-serif font-semibold text-gradient-gold">{venue.name}</h4>
                           </div>
@@ -134,24 +172,37 @@ export const EventDetailsDialog = ({ isOpen, onClose, event }: EventDetailsDialo
               
               <div className="h-64 sm:h-80 md:h-auto order-1 md:order-2 bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl overflow-hidden border border-primary/20">
                 <div className="h-full relative">
-                  <iframe 
-                    id="evrFramePopup" 
-                    width="100%" 
-                    height="100%" 
-                    style={{ 
-                      width: '100%', 
-                      height: '100%', 
-                      border: 'none', 
-                      maxWidth: '100%' 
-                    }}  
-                    allow="xr-spatial-tracking; gyroscope; accelerometer; fullscreen" 
-                    loading="lazy"
-                    scrolling="no"
-                    frameBorder="0" 
-                    src="https://kuula.co/share/collection/7HvmX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
-                    title="360° Virtual Tour of Golden Tulip Hotel"
-                    className="absolute inset-0 w-full h-full"
-                  />
+                  {embedUrl ? (
+                    <iframe
+                      key={embedUrl}
+                      width="100%"
+                      height="100%"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        border: "none",
+                        maxWidth: "100%"
+                      }}
+                      allow="xr-spatial-tracking; gyroscope; accelerometer; fullscreen"
+                      loading="lazy"
+                      scrolling="no"
+                      frameBorder="0"
+                      src={embedUrl}
+                      title={`360° Virtual Tour of ${activeVenue?.name || event.title}`}
+                      className="absolute inset-0 w-full h-full"
+                    />
+                  ) : hasThreeSixtyImages ? (
+                    <div className="absolute inset-0">
+                      <ThreeSixtyViewer images={event.threeSixtyImages || []} className="w-full h-full" />
+                    </div>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
+                      <div>
+                        <div className="text-lg font-semibold text-golden-yellow mb-2">360° Tour Unavailable</div>
+                        <div className="text-sm text-muted-foreground">No virtual tour has been added for this selection yet.</div>
+                      </div>
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
                 </div>
               </div>
