@@ -10,12 +10,19 @@
     },
     "preview": {
       "distribution": "internal",
+      "autoIncrement": true,
+      "credentialsSource": "local",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "ORG_GRADLE_JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64",
+        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64"
       }
     },
     "production": {
       "autoIncrement": true,
+      "credentialsSource": "local",
       "android": {
         "buildType": "app-bundle"
       },
