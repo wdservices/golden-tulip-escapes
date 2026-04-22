@@ -147,7 +147,7 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
               
               <Button
                 variant="outline"
-                onClick={() => window.open('/GoldenTulip.apk', '_blank')}
+                onClick={() => window.open('https://d.apkpure.com/b/APK/com.goldentulip.mobile?version=latest', '_blank')}
                 className="bg-black/40 hover:bg-black/60 border-white/30 text-white hover:text-white text-lg px-8 py-6 min-w-[250px] font-bold shadow-2xl hover:shadow-lg transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
                 size="lg"
               >
