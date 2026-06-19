@@ -88,7 +88,8 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
             }`}
           />
         ))}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/40" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.55)_0%,_rgba(0,0,0,0.2)_70%,_transparent_100%)]" />
 
         <button
           onClick={() => setCurrentSlide((prev) => (prev === 0 ? heroImages.length - 1 : prev - 1))}
