@@ -83,7 +83,7 @@ export default function LoginScreen() {
 
   return (
     <ImageBackground 
-      source={{ uri: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070&auto=format&fit=crop' }} 
+      source={require('../assets/branches/garden-city/1670228609dsc_1161885e.jpg')} 
       style={styles.background}
     >
       <LinearGradient colors={['rgba(29, 54, 73, 0.7)', 'rgba(29, 54, 73, 0.95)']} style={styles.gradient}>
