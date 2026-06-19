@@ -36,7 +36,7 @@ function CustomDrawerContent(props) {
       <View style={styles.drawerHeader}>
         {/* Background Image from Login Page */}
         <Image 
-          source={{ uri: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070&auto=format&fit=crop' }} 
+          source={require('./assets/branches/garden-city/1670228609dsc_1161885e.jpg')} 
           style={styles.headerBackgroundImage}
           resizeMode="cover"
         />
@@ -245,7 +245,7 @@ export default function App() {
           </NavigationContainer>
           {showMainAd && currentAd && (
             <AdsBanner
-              imageSource={currentAd.imageUrl ? { uri: currentAd.imageUrl } : require('./assets/branches/evergreen/deluxe room.webp')}
+              imageSource={currentAd.imageUrl ? { uri: currentAd.imageUrl } : require('./assets/branches/evergreen/deluxe_room.webp')}
               title={currentAd.title}
               description={currentAd.description}
               onClose={handleMainAdClose}
@@ -254,7 +254,7 @@ export default function App() {
           )}
           {showMiniAd && currentAd && (
             <MiniAdsBanner
-              imageSource={currentAd.imageUrl ? { uri: currentAd.imageUrl } : require('./assets/branches/evergreen/deluxe room.webp')}
+              imageSource={currentAd.imageUrl ? { uri: currentAd.imageUrl } : require('./assets/branches/evergreen/deluxe_room.webp')}
               onExpand={handleMiniAdExpand}
               onClose={() => setShowMiniAd(false)}
             />

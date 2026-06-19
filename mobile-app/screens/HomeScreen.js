@@ -7,9 +7,9 @@ import { LogOut, MapPin, Building2, Calendar, User, QrCode, Menu } from 'lucide-
 
 const BRANCHES = [
   { id: 'evo-road', name: 'Evo Road', image: require('../assets/evo-road-cover.webp') },
-  { id: 'garden-city', name: 'Garden City', image: { uri: 'https://rivotels.com/images/garden%20city%20images/carousel%20image/IMG20251204143022.jpg' } },
-  { id: 'stadium-31', name: 'Stadium 31', image: { uri: 'https://rivotels.com/images/stadium%20road%2031%20images/carousel%20image/IMG20251204133623.jpg' } },
-  { id: 'evergreen', name: 'Evergreen', image: { uri: 'https://rivotels.com/images/evergreen%20images/standard%20room.webp' } },
+  { id: 'garden-city', name: 'Garden City', image: require('../assets/branches/garden-city/standard_room.webp') },
+  { id: 'stadium-31', name: 'Stadium 31', image: require('../assets/branches/stadium-31/img20251204133623.jpg') },
+  { id: 'evergreen', name: 'Evergreen', image: require('../assets/branches/evergreen/standard_room.webp') },
 ];
 
 export default function HomeScreen({ navigation }) {

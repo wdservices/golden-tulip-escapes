@@ -24,7 +24,7 @@ export default function AdsBanner({ imageSource, title, description, onClose, au
     onClose && onClose();
   };
 
-  const displaySource = imgError ? require('../assets/branches/evergreen/deluxe room.webp') : imageSource;
+  const displaySource = imgError ? require('../assets/branches/evergreen/deluxe_room.webp') : imageSource;
 
   return (
     <Modal

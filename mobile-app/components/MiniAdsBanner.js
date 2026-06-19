@@ -7,7 +7,7 @@ const { width } = Dimensions.get('window');
 export default function MiniAdsBanner({ imageSource, onExpand, onClose }) {
   const [imgError, setImgError] = React.useState(false);
   
-  const displaySource = imgError ? require('../assets/branches/evergreen/deluxe room.webp') : imageSource;
+  const displaySource = imgError ? require('../assets/branches/evergreen/deluxe_room.webp') : imageSource;
 
   return (
     <View style={styles.container}>

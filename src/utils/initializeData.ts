@@ -128,30 +128,6 @@ const sampleBookings = [
   }
 ];
 
-// Sample branch data
-export const sampleBranch = {
-  id: "evo-road",
-  name: "GOLDEN TULIP EVO ROAD",
-  address: "1c Evo Crescent Off Evo Road, GRA Phase II, Port Harcourt, Rivers State",
-  email: "evoroad@goldentulip.com",
-  phone: "+234 84 123 4567",
-  location: "Port Harcourt GRA",
-  status: "active",
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString()
-};
-
-const initializeBranch = async () => {
-  try {
-    const branchRef = doc(db, 'branches', sampleBranch.id);
-    await setDoc(branchRef, sampleBranch, { merge: true });
-    console.log(`Branch '${sampleBranch.name}' initialized successfully.`);
-  } catch (error) {
-    console.error('Error initializing branch:', error);
-    throw error;
-  }
-};
-
 export const initializeSampleData = async () => {
   try {
     console.log('Starting sample data initialization...');
@@ -159,10 +135,6 @@ export const initializeSampleData = async () => {
     // Initialize admin emails first
     await initializeDefaultAdminEmails();
     console.log('✅ Admin emails initialized');
-    
-    // Initialize branch
-    await initializeBranch();
-    console.log('✅ Branch initialized');
     
     // Initialize rooms
     await initializeRooms();

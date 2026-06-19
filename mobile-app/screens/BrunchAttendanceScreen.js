@@ -101,7 +101,7 @@ export default function BrunchAttendanceScreen({ navigation }) {
         {/* Status Card */}
         <View style={styles.card}>
           <ImageBackground 
-            source={{ uri: 'https://rivotels.com/images/garden%20city%20images/carousel%20image/IMG20251204143022.jpg' }} 
+            source={require('../assets/branches/garden-city/1670229580img_20221017_134430f145.jpg')} 
             style={styles.cardBackground}
             imageStyle={{ borderRadius: 20, opacity: 0.3 }}
           >
