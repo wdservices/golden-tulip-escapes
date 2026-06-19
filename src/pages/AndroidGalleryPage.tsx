@@ -8,11 +8,16 @@ export function AndroidGalleryPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const branch = useMemo(() => (branchId ? getBranchById(branchId) : undefined), [branchId]);
+  const encodePath = (p: string) => {
+    if (!p) return p;
+    if (/^https?:\/\//i.test(p)) return p;
+    return p.split('/').map((seg, i) => (i === 0 && seg === '' ? '' : encodeURIComponent(seg))).join('/');
+  };
   const gallery = branch
     ? {
         id: branch.id!,
         name: branch.fullName || branch.name,
-        images: (branch.gallery && branch.gallery.length > 0) ? branch.gallery : [],
+        images: (branch.gallery && branch.gallery.length > 0) ? branch.gallery.map(encodePath) : [],
         description: branch.description || ''
       }
     : null;
