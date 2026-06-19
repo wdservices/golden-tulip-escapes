@@ -88,7 +88,8 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
             }`}
           />
         ))}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/40" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.55)_0%,_rgba(0,0,0,0.2)_70%,_transparent_100%)]" />
 
         <button
           onClick={() => setCurrentSlide((prev) => (prev === 0 ? heroImages.length - 1 : prev - 1))}
@@ -122,16 +123,16 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
       {/* Hero Content */}
       <div className="absolute inset-0 flex items-center justify-center z-10">
         <div className="container mx-auto px-4 sm:px-6 text-center text-white">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl font-serif font-bold mb-4 leading-tight">
-              <span className="golden-yellow drop-shadow-lg">{currentBranch.title}</span>
+          <div className="max-w-4xl mx-auto bg-black/40 backdrop-blur-md rounded-3xl p-8 sm:p-12 border border-white/10 shadow-2xl">
+            <h1 className="text-4xl sm:text-5xl font-serif font-bold mb-4 leading-tight drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">
+              <span className="golden-yellow">{currentBranch.title}</span>
             </h1>
 
-            <p className="text-xl mb-3 font-light text-white/90">
+            <p className="text-xl mb-3 font-light text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
               {currentBranch.subtitle}
             </p>
 
-            <p className="text-base sm:text-lg md:text-xl mb-6 max-w-2xl mx-auto leading-relaxed text-white/80">
+            <p className="text-base sm:text-lg md:text-xl mb-6 max-w-2xl mx-auto leading-relaxed text-white/95 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
               {currentBranch.description}
             </p>
 
@@ -156,12 +157,6 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
                 Download App
               </Button>
             </div>
-
-
-
-
-
-
           </div>
         </div>
       </div>
