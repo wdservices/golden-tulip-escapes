@@ -123,40 +123,38 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
       {/* Hero Content */}
       <div className="absolute inset-0 flex items-center justify-center z-10">
         <div className="container mx-auto px-4 sm:px-6 text-center text-white">
-          <div className="max-w-4xl mx-auto bg-black/40 backdrop-blur-md rounded-3xl p-8 sm:p-12 border border-white/10 shadow-2xl">
-            <h1 className="text-4xl sm:text-5xl font-serif font-bold mb-4 leading-tight drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">
-              <span className="golden-yellow">{currentBranch.title}</span>
-            </h1>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold mb-4 leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] tracking-wide">
+            <span className="golden-yellow">{currentBranch.title}</span>
+          </h1>
 
-            <p className="text-xl mb-3 font-light text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-              {currentBranch.subtitle}
-            </p>
+          <p className="text-xl sm:text-2xl mb-4 font-light text-white/80 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] tracking-widest uppercase">
+            {currentBranch.subtitle}
+          </p>
 
-            <p className="text-base sm:text-lg md:text-xl mb-6 max-w-2xl mx-auto leading-relaxed text-white/95 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-              {currentBranch.description}
-            </p>
+          <p className="text-base sm:text-lg md:text-xl mb-10 max-w-3xl mx-auto leading-relaxed text-white/70 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+            {currentBranch.description}
+          </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
-              <Button
-                onClick={handleBookNowClick}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-6 min-w-[250px] font-bold shadow-2xl hover:shadow-lg transform hover:scale-105 transition-all duration-300"
-                size="lg"
-              >
-                <Calendar className="mr-3 h-6 w-6" />
-                Book Your Stay
-              </Button>
-              
-              <Button
-                variant="outline"
-                onClick={() => window.open('https://d.apkpure.com/b/APK/com.goldentulip.mobile?version=latest', '_blank')}
-                className="bg-black/40 hover:bg-black/60 border-white/30 text-white hover:text-white text-lg px-8 py-6 min-w-[250px] font-bold shadow-2xl hover:shadow-lg transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
-                size="lg"
-              >
-                <Smartphone className="mr-3 h-6 w-6" />
-                Download App
-              </Button>
-            </div>
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button
+              onClick={handleBookNowClick}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-10 py-6 min-w-[250px] font-bold shadow-2xl hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+              size="lg"
+            >
+              <Calendar className="mr-3 h-6 w-6" />
+              Book Your Stay
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={() => window.open('https://d.apkpure.com/b/APK/com.goldentulip.mobile?version=latest', '_blank')}
+              className="bg-white/10 hover:bg-white/20 border-white/30 text-white hover:text-white text-lg px-10 py-6 min-w-[250px] font-bold shadow-2xl hover:shadow-lg transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
+              size="lg"
+            >
+              <Smartphone className="mr-3 h-6 w-6" />
+              Download App
+            </Button>
           </div>
         </div>
       </div>
