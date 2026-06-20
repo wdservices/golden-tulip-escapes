@@ -214,9 +214,9 @@ export const Footer = () => {
               <Link to="/privacy-policy" className="text-white/60 hover:text-golden-yellow text-sm transition-colors duration-300">
                 Privacy Policy
               </Link>
-              <a href="/terms" className="text-white/60 hover:text-golden-yellow text-sm transition-colors duration-300">
+              <Link to="/terms" className="text-white/60 hover:text-golden-yellow text-sm transition-colors duration-300">
                 Terms of Service
-              </a>
+              </Link>
               <a href="/cookies" className="text-white/60 hover:text-golden-yellow text-sm transition-colors duration-300">
                 Cookie Policy
               </a>

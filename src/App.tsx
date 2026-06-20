@@ -29,6 +29,7 @@ import { AndroidGalleryPage } from "./pages/AndroidGalleryPage";
 import IOSPage from "./pages/IOSPage";
 import { IOSGalleryPage } from "./pages/IOSGalleryPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
 import { Button } from "@/components/ui/button";
 import { AdminPanel } from "./components/admin/AdminPanel";
 import FirebaseTest from "./pages/FirebaseTest";
@@ -120,6 +121,7 @@ const App = () => {
             <Route path="/corporate-halls" element={<CorporateHallsPage />} />
             <Route path="/corporate-halls/:hallId" element={<CorporateHallDetailPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
 
             {/* User Dashboard - Only accessible to non-admin users */}
             <Route

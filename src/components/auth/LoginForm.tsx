@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Loader2, Lock, Mail, User, Phone, Eye, EyeOff } from "lucide-react";
@@ -20,6 +20,9 @@ const loginSchema = z.object({
 const registerSchema = loginSchema.extend({
   name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().min(10, "Please enter a valid phone number"),
+  termsAccepted: z.literal(true, {
+    errorMap: () => ({ message: "You must accept the terms and conditions" }),
+  }),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -92,13 +95,14 @@ export default function LoginForm() {
     defaultValues: {
       email: "",
       password: "",
-      ...(isLogin ? {} : { name: "", phone: "" }),
+      ...(isLogin ? {} : { name: "", phone: "", termsAccepted: false }),
     },
   });
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     reset,
     trigger,
@@ -286,6 +290,37 @@ export default function LoginForm() {
             <p className="text-sm text-red-500">{errors.password.message}</p>
           )}
         </div>
+
+        {!isLogin && (
+          <div className="flex items-start space-x-2">
+            <Controller
+              name="termsAccepted"
+              control={control}
+              render={({ field }) => (
+                <Checkbox
+                  id="termsAccepted"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isLoading}
+                  className="mt-1"
+                />
+              )}
+            />
+            <Label htmlFor="termsAccepted" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
+              I have read and agree to the{" "}
+              <Link to="/terms" className="text-primary hover:underline font-medium">
+                Terms and Conditions
+              </Link>{" "}
+              and{" "}
+              <Link to="/privacy-policy" className="text-primary hover:underline font-medium">
+                Privacy Policy
+              </Link>
+            </Label>
+          </div>
+        )}
+        {errors.termsAccepted && (
+          <p className="text-sm text-red-500">{errors.termsAccepted.message}</p>
+        )}
 
         <Button
           type="submit"

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, ActivityIndicator, Alert, ScrollView, Modal, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, ActivityIndicator, Alert, ScrollView, Modal, KeyboardAvoidingView, Platform, Linking } from 'react-native';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
@@ -14,6 +14,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Forgot Password State
   const [resetModalVisible, setResetModalVisible] = useState(false);
@@ -26,6 +27,7 @@ export default function LoginScreen() {
       if (!email || !password) return Alert.alert('Error', 'Please fill in all fields');
     } else {
       if (!name || !email || !phone || !password) return Alert.alert('Error', 'Please fill in all fields');
+      if (!termsAccepted) return Alert.alert('Error', 'You must accept the Terms and Conditions');
     }
 
     setLoading(true);
@@ -163,6 +165,23 @@ export default function LoginScreen() {
                   </TouchableOpacity>
                 </View>
 
+                {!isLogin && (
+                  <View style={styles.checkboxRow}>
+                    <TouchableOpacity
+                      style={[styles.checkbox, termsAccepted && styles.checkboxActive]}
+                      onPress={() => setTermsAccepted(!termsAccepted)}
+                    >
+                      {termsAccepted && <Text style={styles.checkmark}>✓</Text>}
+                    </TouchableOpacity>
+                    <Text style={styles.checkboxLabel}>
+                      I have read and agree to the{' '}
+                      <Text style={styles.checkboxLink} onPress={() => Linking.openURL('https://goldentulipportharcourt.com/terms')}>
+                        Terms and Conditions
+                      </Text>
+                    </Text>
+                  </View>
+                )}
+
                 {isLogin && (
                   <TouchableOpacity 
                     style={styles.forgotPassContainer} 
@@ -266,6 +285,12 @@ const styles = StyleSheet.create({
   toggleText: { color: '#C5A059', fontSize: 14, fontWeight: '600' },
   forgotPassContainer: { alignSelf: 'flex-end', marginBottom: 16 },
   forgotPassText: { color: '#C5A059', fontSize: 14 },
+  checkboxRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, marginTop: 4 },
+  checkbox: { width: 22, height: 22, borderRadius: 4, borderWidth: 2, borderColor: '#94a3b8', alignItems: 'center', justifyContent: 'center', marginRight: 10 },
+  checkboxActive: { backgroundColor: '#C5A059', borderColor: '#C5A059' },
+  checkmark: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
+  checkboxLabel: { flex: 1, color: '#cbd5e1', fontSize: 13, lineHeight: 18 },
+  checkboxLink: { color: '#C5A059', fontWeight: '600' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 20 },
   modalContent: { backgroundColor: '#1D3649', width: '100%', padding: 24, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
