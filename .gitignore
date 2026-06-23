@@ -1,11 +1,28 @@
-# Remove zips from tracking
-git rm --cached frontend-dist.zip backend-deploy.zip dist.zip "dist (2).zip"
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Commit the removal
-git commit -m "Remove large zip files from repo"
+node_modules
+dist
+dist-ssr
+*.local
 
-# Rewrite history to purge all zip files
-git filter-repo --path-glob '*.zip' --invert-paths
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# Force push the cleaned history
-git push origin --force --all
+# Deployment artifacts
+*.zip
