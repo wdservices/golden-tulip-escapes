@@ -354,6 +354,15 @@ export const NewBookingForm = ({
                   </div>
                 </div>
 
+                {/* Booking availability notice */}
+                {bookingBlocked && (
+                  <BookingDisabledNotice
+                    branchName={selectedBranchName}
+                    disabledUntil={bookingDisabledUntil}
+                    reason={bookingDisabledReason}
+                  />
+                )}
+
                 {/* Room Selection */}
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold text-white flex items-center">
