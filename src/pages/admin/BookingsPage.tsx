@@ -539,6 +539,17 @@ export const BookingsPage = () => {
             <Download className="h-4 w-4 mr-2" />
             Export Data
           </Button>
+          <Button
+            onClick={() => setShowAvailability(true)}
+            className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] hover:bg-yellow-300 font-semibold"
+          >
+            <Ban className="h-4 w-4 mr-2" />
+            Booking Availability
+          </Button>
+          <BookingAvailabilityModal
+            open={showAvailability}
+            onOpenChange={setShowAvailability}
+          />
           <Dialog open={showCreateBooking} onOpenChange={setShowCreateBooking}>
             <DialogTrigger asChild>
               <Button className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] hover:bg-yellow-300 hover:text-[hsl(var(--royal-blue-dark))] font-semibold">
