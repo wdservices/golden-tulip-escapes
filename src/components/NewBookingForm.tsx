@@ -67,6 +67,12 @@ export const NewBookingForm = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
+  // Run auto-enable sweep once when form mounts
+  useEffect(() => {
+    runAutoEnableSweep();
+  }, []);
+
+
   const [formData, setFormData] = useState({
     location: selectedBranch || "",
     roomType: "",
