@@ -553,14 +553,16 @@ export const NewBookingForm = ({
                 <div className="pt-6">
                   <Button
                     type="submit"
-                    disabled={isLoading}
-                    className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-[hsl(var(--royal-blue-dark))] border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+                    disabled={isLoading || bookingBlocked}
+                    className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-[hsl(var(--royal-blue-dark))] border-0 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-60"
                   >
                     {isLoading ? (
                       <div className="flex items-center">
                         <Loader2 className="w-5 h-5 animate-spin mr-2" />
                         Processing...
                       </div>
+                    ) : bookingBlocked ? (
+                      <div className="flex items-center">Bookings Temporarily Unavailable</div>
                     ) : (
                       <div className="flex items-center">
                         <CreditCard className="w-5 h-5 mr-2" />
