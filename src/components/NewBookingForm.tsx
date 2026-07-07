@@ -151,6 +151,27 @@ export const NewBookingForm = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
      e.preventDefault();
+
+     // Server-side re-check: block if this branch's bookings are disabled
+     if (formData.location) {
+       try {
+         const av = await getForBranch(formData.location);
+         const stillDisabled =
+           !av.bookingEnabled &&
+           (!av.disabledUntil || av.disabledUntil.getTime() > Date.now());
+         if (stillDisabled) {
+           toast({
+             title: "Bookings unavailable",
+             description: `Online bookings for ${selectedBranchName || "this branch"} are temporarily disabled.`,
+             variant: "destructive",
+           });
+           return;
+         }
+       } catch (err) {
+         console.warn("Availability re-check failed", err);
+       }
+     }
+     
      
      if (!formData.checkIn || !formData.checkOut) {
        toast({
