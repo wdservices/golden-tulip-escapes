@@ -54,6 +54,8 @@ import { getBranches } from "@/services/branchService";
 import { getDatabaseBranchId, getStaticBranchId } from "@/config/branchMappings";
 import { getBranchName } from "@/config/paymentConfig";
 import { AdminBookingForm } from "@/components/admin/AdminBookingForm";
+import { BookingAvailabilityModal } from "@/components/admin/BookingAvailabilityModal";
+import { Ban } from "lucide-react";
 
 import { BookingsTable } from "@/components/bookings/BookingsTable";
 import { clearBookingData } from "@/utils/clearDatabase";
