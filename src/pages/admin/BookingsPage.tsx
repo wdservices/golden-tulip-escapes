@@ -75,6 +75,7 @@ export const BookingsPage = () => {
   type BookingWithMeta = Booking & { __isRoot?: boolean; __branchPathId?: string };
   const [bookings, setBookings] = useState<BookingWithMeta[]>([]);
   const [showCreateBooking, setShowCreateBooking] = useState(false);
+  const [showAvailability, setShowAvailability] = useState(false);
   const [currentBranchName, setCurrentBranchName] = useState<string>("");
   const { currentUser, activeBranchId, setActiveBranchId } = useAuth();
   const { toast } = useToast();
