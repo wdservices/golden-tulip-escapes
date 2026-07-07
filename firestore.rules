@@ -104,24 +104,50 @@ service cloud.firestore {
       }
     }
     
+    // Booking Availability collection rules
+    match /bookingAvailability/{branchId} {
+      // Anyone can read availability (public gate on the booking form)
+      allow read: if true;
+      // Only admins can toggle availability. Also allow the client-side auto-enable
+      // sweep to flip an expired disable to enabled (bookingEnabled == true).
+      allow create, update: if isAdmin() ||
+        (request.resource.data.bookingEnabled == true);
+      allow delete: if isAdmin();
+
+      match /logs/{logId} {
+        allow read: if isAdmin();
+        allow create: if true; // audit trail, includes system auto-enable entries
+        allow update, delete: if false;
+      }
+    }
+
+    // Helper: true when the branch's availability record blocks new bookings.
+    function branchBookingBlocked(branchId) {
+      return exists(/databases/$(database)/documents/bookingAvailability/$(branchId)) &&
+             get(/databases/$(database)/documents/bookingAvailability/$(branchId)).data.bookingEnabled == false &&
+             get(/databases/$(database)/documents/bookingAvailability/$(branchId)).data.disabledUntil > request.time;
+    }
+
     // Bookings collection rules
     match /bookings/{bookingId} {
       // Allow users to read their own bookings and admins to read all bookings
-      allow read: if request.auth != null && 
-                  (request.auth.uid == resource.data.userId || 
-                   (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) && 
+      allow read: if request.auth != null &&
+                  (request.auth.uid == resource.data.userId ||
+                   (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
                     get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
-      
-      // Allow authenticated users to create bookings and admins to manage all bookings
-      allow create: if request.auth != null && 
-                   (request.auth.uid == request.resource.data.userId || 
-                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) && 
-                     get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
-      
+
+      // Allow authenticated users to create bookings and admins to manage all bookings.
+      // Reject creates when the target branch has bookings disabled (admins bypass).
+      allow create: if request.auth != null &&
+                   (request.auth.uid == request.resource.data.userId ||
+                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+                     get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true)) &&
+                   (isAdmin() || !branchBookingBlocked(request.resource.data.branchId));
+
       // Allow users to update/cancel their own bookings (if status is not cancelled) and admins to manage all
-      allow update: if request.auth != null && 
-                   ((request.auth.uid == resource.data.userId && resource.data.status != 'cancelled') || 
-                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) && 
+      allow update: if request.auth != null &&
+                   ((request.auth.uid == resource.data.userId && resource.data.status != 'cancelled') ||
+                    (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
                      get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true));
     }
     
