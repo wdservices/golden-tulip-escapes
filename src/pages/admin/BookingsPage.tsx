@@ -54,6 +54,8 @@ import { getBranches } from "@/services/branchService";
 import { getDatabaseBranchId, getStaticBranchId } from "@/config/branchMappings";
 import { getBranchName } from "@/config/paymentConfig";
 import { AdminBookingForm } from "@/components/admin/AdminBookingForm";
+import { BookingAvailabilityModal } from "@/components/admin/BookingAvailabilityModal";
+import { Ban } from "lucide-react";
 
 import { BookingsTable } from "@/components/bookings/BookingsTable";
 import { clearBookingData } from "@/utils/clearDatabase";
@@ -73,6 +75,7 @@ export const BookingsPage = () => {
   type BookingWithMeta = Booking & { __isRoot?: boolean; __branchPathId?: string };
   const [bookings, setBookings] = useState<BookingWithMeta[]>([]);
   const [showCreateBooking, setShowCreateBooking] = useState(false);
+  const [showAvailability, setShowAvailability] = useState(false);
   const [currentBranchName, setCurrentBranchName] = useState<string>("");
   const { currentUser, activeBranchId, setActiveBranchId } = useAuth();
   const { toast } = useToast();
@@ -536,6 +539,17 @@ export const BookingsPage = () => {
             <Download className="h-4 w-4 mr-2" />
             Export Data
           </Button>
+          <Button
+            onClick={() => setShowAvailability(true)}
+            className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] hover:bg-yellow-300 font-semibold"
+          >
+            <Ban className="h-4 w-4 mr-2" />
+            Booking Availability
+          </Button>
+          <BookingAvailabilityModal
+            open={showAvailability}
+            onOpenChange={setShowAvailability}
+          />
           <Dialog open={showCreateBooking} onOpenChange={setShowCreateBooking}>
             <DialogTrigger asChild>
               <Button className="bg-yellow-400 text-[hsl(var(--royal-blue-dark))] hover:bg-yellow-300 hover:text-[hsl(var(--royal-blue-dark))] font-semibold">

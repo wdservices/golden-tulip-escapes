@@ -18,6 +18,9 @@ import { cn } from "@/lib/utils";
 import { collection, addDoc, Timestamp, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { PaystackPaymentModal } from "@/components/payment/PaystackPaymentModal";
+import { useBookingAvailability } from "@/hooks/useBookingAvailability";
+import { runAutoEnableSweep, getForBranch } from "@/services/bookingAvailabilityService";
+import { BookingDisabledNotice } from "@/components/booking/BookingDisabledNotice";
 
 
 interface UserProfile {
@@ -64,6 +67,12 @@ export const NewBookingForm = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
+  // Run auto-enable sweep once when form mounts
+  useEffect(() => {
+    runAutoEnableSweep();
+  }, []);
+
+
   const [formData, setFormData] = useState({
     location: selectedBranch || "",
     roomType: "",
@@ -80,6 +89,14 @@ export const NewBookingForm = ({
   });
 
   const { roomTypes, isLoading: roomsLoading, error: roomsError } = useRooms(formData.location);
+  const {
+    isEnabled: bookingsEnabled,
+    disabledUntil: bookingDisabledUntil,
+    reason: bookingDisabledReason,
+    loading: availabilityLoading,
+  } = useBookingAvailability(formData.location || null);
+  const bookingBlocked = !!formData.location && !availabilityLoading && !bookingsEnabled;
+  const selectedBranchName = branches.find((b) => b.id === formData.location)?.name;
 
   // Auto-populate user data when authenticated
   useEffect(() => {
@@ -134,6 +151,27 @@ export const NewBookingForm = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
      e.preventDefault();
+
+     // Server-side re-check: block if this branch's bookings are disabled
+     if (formData.location) {
+       try {
+         const av = await getForBranch(formData.location);
+         const stillDisabled =
+           !av.bookingEnabled &&
+           (!av.disabledUntil || av.disabledUntil.getTime() > Date.now());
+         if (stillDisabled) {
+           toast({
+             title: "Bookings unavailable",
+             description: `Online bookings for ${selectedBranchName || "this branch"} are temporarily disabled.`,
+             variant: "destructive",
+           });
+           return;
+         }
+       } catch (err) {
+         console.warn("Availability re-check failed", err);
+       }
+     }
+     
      
      if (!formData.checkIn || !formData.checkOut) {
        toast({
@@ -315,6 +353,15 @@ export const NewBookingForm = ({
                     </Select>
                   </div>
                 </div>
+
+                {/* Booking availability notice */}
+                {bookingBlocked && (
+                  <BookingDisabledNotice
+                    branchName={selectedBranchName}
+                    disabledUntil={bookingDisabledUntil}
+                    reason={bookingDisabledReason}
+                  />
+                )}
 
                 {/* Room Selection */}
                 <div className="space-y-6">
@@ -506,14 +553,16 @@ export const NewBookingForm = ({
                 <div className="pt-6">
                   <Button
                     type="submit"
-                    disabled={isLoading}
-                    className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-[hsl(var(--royal-blue-dark))] border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+                    disabled={isLoading || bookingBlocked}
+                    className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-[hsl(var(--royal-blue-dark))] border-0 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-60"
                   >
                     {isLoading ? (
                       <div className="flex items-center">
                         <Loader2 className="w-5 h-5 animate-spin mr-2" />
                         Processing...
                       </div>
+                    ) : bookingBlocked ? (
+                      <div className="flex items-center">Bookings Temporarily Unavailable</div>
                     ) : (
                       <div className="flex items-center">
                         <CreditCard className="w-5 h-5 mr-2" />
