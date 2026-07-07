@@ -89,6 +89,14 @@ export const NewBookingForm = ({
   });
 
   const { roomTypes, isLoading: roomsLoading, error: roomsError } = useRooms(formData.location);
+  const {
+    isEnabled: bookingsEnabled,
+    disabledUntil: bookingDisabledUntil,
+    reason: bookingDisabledReason,
+    loading: availabilityLoading,
+  } = useBookingAvailability(formData.location || null);
+  const bookingBlocked = !!formData.location && !availabilityLoading && !bookingsEnabled;
+  const selectedBranchName = branches.find((b) => b.id === formData.location)?.name;
 
   // Auto-populate user data when authenticated
   useEffect(() => {
