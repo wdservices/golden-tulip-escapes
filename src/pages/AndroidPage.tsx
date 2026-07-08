@@ -14,7 +14,7 @@ const BRANCHES = [
   { 
     id: 'evo-road', 
     name: 'Evo Road',
-    image: '/images/evo road carousel image/GT-PH-1.png'
+    image: '/images/evo road carousel image/GT-PH-1.jpg'
   },
   { 
     id: 'garden-city', 
@@ -35,7 +35,7 @@ const BRANCHES = [
 
 // Image slider data for main page
 const SLIDER_IMAGES = [
-  { src: '/images/evo road carousel image/GT-PH-1.png', alt: 'Evo Road – Grand Arrival' },
+  { src: '/images/evo road carousel image/GT-PH-1.jpg', alt: 'Evo Road – Grand Arrival' },
   { src: '/images/garden city images/carousel image/IMG20251204143022.jpg', alt: 'Garden City – Suite Interior' },
   { src: '/images/stadium road 31 images/carousel image/IMG20251204133623.jpg', alt: 'Stadium Road 31 – Lobby' },
   { src: '/images/evergreen images/standard room.webp', alt: 'Evergreen – Standard Room' }

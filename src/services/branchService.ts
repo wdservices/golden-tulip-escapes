@@ -145,11 +145,11 @@ const branches: Branch[] = [
       }
     ],
     gallery: [
-      "/images/evo road carousel image/GT-PH-1.png",
-      "/images/evo road carousel image/GT-PH-2.png",
-      "/images/evo road carousel image/GT-PH-3.png",
-      "/images/evo road carousel image/GT-PH-4.png",
-      "/images/evo road carousel image/GT-PH-5.png"
+      "/images/evo road carousel image/GT-PH-1.jpg",
+      "/images/evo road carousel image/GT-PH-2.jpg",
+      "/images/evo road carousel image/GT-PH-3.jpg",
+      "/images/evo road carousel image/GT-PH-4.jpg",
+      "/images/evo road carousel image/GT-PH-5.jpg"
     ]
   },
   {

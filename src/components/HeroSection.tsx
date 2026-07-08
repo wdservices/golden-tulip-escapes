@@ -35,11 +35,11 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
   
   // Hero images for carousel
   const heroImages = [
-    { src: "/images/evo road carousel image/GT-PH-1.png", alt: "Golden Tulip Evo Road Exterior", title: "Welcome to Golden Tulip" },
-    { src: "/images/evo road carousel image/GT-PH-2.png", alt: "Evo Road lobby interior", title: "Grand Arrival" },
-    { src: "/images/evo road carousel image/GT-PH-3.png", alt: "Premium suite interior", title: "Signature Suites" },
-    { src: "/images/evo road carousel image/GT-PH-4.png", alt: "Luxury Amenities", title: "Experience Luxury" },
-    { src: "/images/evo road carousel image/GT-PH-5.png", alt: "Modern Comfort", title: "Modern Comfort" }
+    { src: "/images/evo road carousel image/GT-PH-1.jpg", alt: "Golden Tulip Evo Road Exterior", title: "Welcome to Golden Tulip" },
+    { src: "/images/evo road carousel image/GT-PH-2.jpg", alt: "Evo Road lobby interior", title: "Grand Arrival" },
+    { src: "/images/evo road carousel image/GT-PH-3.jpg", alt: "Premium suite interior", title: "Signature Suites" },
+    { src: "/images/evo road carousel image/GT-PH-4.jpg", alt: "Luxury Amenities", title: "Experience Luxury" },
+    { src: "/images/evo road carousel image/GT-PH-5.jpg", alt: "Modern Comfort", title: "Modern Comfort" }
   ];
 
   useEffect(() => {

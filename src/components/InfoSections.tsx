@@ -21,18 +21,18 @@ const eventTypes = [
     title: "Corporate Events",
     description: "The Golden Tulip Port Harcourt Hotel is a perfect location to organize private business meetings, trainings, lectures, seminars, interviews, product launches, or for family gatherings and dinners.",
     threeSixtyImages: [
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg"
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg"
     ],
     venues: [
       {
@@ -176,18 +176,18 @@ const eventTypes = [
     title: "Weddings",
     description: "Create magical moments in our beautiful venues, with expert wedding planners to bring your dream wedding to life.",
     threeSixtyImages: [
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg"
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg"
     ],
     features: [
       "Elegant ballrooms",
@@ -210,18 +210,18 @@ const eventTypes = [
     title: "Special Occasions",
     description: "Celebrate life's special moments with us, from birthdays to anniversaries and everything in between.",
     threeSixtyImages: [
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg",
-      "/images/hotel-360-preview.jpg"
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg",
+      "/images/room_image_placeholder/hotel-360-preview.jpg"
     ],
     features: [
       "Custom decoration",
@@ -404,6 +404,7 @@ export const InfoSections = () => {
                         src={room.images[0]}
                         alt={room.name}
                         className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                        onError={(e) => { e.currentTarget.src = '/images/rooms/placeholder-room.jpg' }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-golden-yellow/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
@@ -548,7 +549,7 @@ export const InfoSections = () => {
               <div className="relative group">
                 <div className="relative overflow-hidden rounded-3xl h-[500px]">
                   <img
-                    src="/images/spa.png"
+                    src="/images/room_image_placeholder/spa.png"
                     alt="Luxury Spa Experience"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />

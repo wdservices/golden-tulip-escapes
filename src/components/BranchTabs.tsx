@@ -18,7 +18,7 @@ export function BranchTabs({ selectedBranch, onBranchSelect }: BranchTabsProps) 
       id: "evergreen",
       name: "Evergreen",
       location: "Evergreen, Port Harcourt",
-      image: "/images/Evergreen.png",
+      image: "/images/room_image_placeholder/Evergreen.png",
       description: "Tranquil setting with premium amenities and personalized service"
     },
     {
@@ -32,7 +32,7 @@ export function BranchTabs({ selectedBranch, onBranchSelect }: BranchTabsProps) 
       id: "stadium-31",
       name: "Stadium Road 31",
       location: "Stadium Road 31, Port Harcourt",
-      image: "/images/standium rd 31.png",
+      image: "/images/room_image_placeholder/standium rd 31.png",
       description: "Modern hotel with excellent facilities"
     }
   ];

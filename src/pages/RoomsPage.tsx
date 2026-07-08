@@ -61,7 +61,7 @@ export default function RoomsPage() {
                 <div key={room.id} className="inline-block w-80 mx-3 first:ml-0 last:mr-0 bg-white/90 backdrop-blur-sm rounded-xl overflow-hidden border border-blue-200 hover:border-blue-400 shadow-lg hover:shadow-xl transition-all duration-300" style={{ minWidth: '320px' }}>
                   <div className="relative h-64">
                     <img 
-                      src={room.images?.[0] || '/placeholder-room.jpg'} 
+                      src={room.images?.[0] || '/images/rooms/placeholder-room.jpg'} 
                       alt={room.name}
                       className="w-full h-full object-cover"
                     />
