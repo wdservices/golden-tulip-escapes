@@ -84,7 +84,7 @@ export function AndroidGalleryPage() {
                 alt={`${gallery.name} - Image ${currentImageIndex + 1}`}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  e.currentTarget.src = '/images/placeholder-hotel.jpg';
+                  e.currentTarget.src = '/images/rooms/placeholder-room.jpg';
                 }}
               />
               
@@ -123,7 +123,7 @@ export function AndroidGalleryPage() {
                     alt={`Thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.src = '/images/placeholder-hotel.jpg';
+                      e.currentTarget.src = '/images/rooms/placeholder-room.jpg';
                     }}
                   />
                 </button>
