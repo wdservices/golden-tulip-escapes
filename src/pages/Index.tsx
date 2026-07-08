@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { AdOverlay } from "@/components/ads/AdOverlay";
 import { AdMiniOverlay } from "@/components/ads/AdMiniOverlay";
+import { resolveGalleryImage } from "@/utils/galleryImages";
 
 const Index = () => {
   // Don't set main as the default active tab
@@ -185,7 +186,7 @@ const Index = () => {
                 </Button>
 
                 <img 
-                  src={getImages()[lightboxIndex]} 
+                  src={resolveGalleryImage(getImages()[lightboxIndex])} 
                   alt="Preview" 
                   className="w-full h-auto max-h-[80vh] object-contain rounded-2xl shadow-2xl transition-all duration-300" 
                 />
@@ -224,7 +225,7 @@ const Index = () => {
                       onClick={() => setSelectedCategory(key)}
                       className={`w-full text-left rounded-xl border ${selectedCategory === key ? "border-primary ring-1 ring-primary/30" : "border-border"} bg-card hover:border-primary/60 hover:ring-1 hover:ring-primary/20 transition-colors shadow-sm hover:shadow-md`}
                     >
-                      <img src={thumb} alt={key} className="w-full h-20 object-cover rounded-t-xl" />
+                      <img src={resolveGalleryImage(thumb)} alt={key} className="w-full h-20 object-cover rounded-t-xl" />
                       <div className="px-2 py-1 text-xs font-medium">{key}</div>
                     </button>
                   ))}
@@ -240,7 +241,7 @@ const Index = () => {
                         }}
                         className="group relative overflow-hidden rounded-2xl shadow-sm hover:shadow-lg"
                       >
-                        <img src={src} alt={selectedCategory} className="w-full h-48 sm:h-64 object-cover rounded-2xl transition-transform duration-300 group-hover:scale-105" />
+                        <img src={resolveGalleryImage(src)} alt={selectedCategory} className="w-full h-48 sm:h-64 object-cover rounded-2xl transition-transform duration-300 group-hover:scale-105" />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                       </button>
                     ))}
