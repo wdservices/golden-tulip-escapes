@@ -1,0 +1,31 @@
+Golden Tulip Hotel - Branch Information
+
+1. GRA Branch (Main Branch)
+   - Location: Government Reserved Area
+   - Status: Flagship branch
+   - Admin Dashboard: Will be developed first
+   - Notes: This is the main administrative hub
+
+2. Stadium Road Branch
+   - Location: Stadium Road, Port Harcourt
+   - Status: Secondary branch
+   - Admin Dashboard: Will be duplicated from GRA
+
+3. Airforce Branch
+   - Location: Near Airforce Base, Port Harcourt
+   - Status: Secondary branch
+   - Admin Dashboard: Will be duplicated from GRA
+
+4. Oyigbo Branch
+   - Location: Oyigbo, Rivers State
+   - Status: Secondary branch
+   - Admin Dashboard: Will be duplicated from GRA
+
+Development Plan:
+1. Build complete admin dashboard for GRA branch first
+2. Implement branch-based authentication and access control
+3. Duplicate admin dashboard for other branches
+4. Customize each branch dashboard as needed
+5. Ensure data isolation between branches
+
+Note: All branches share the same website but have separate admin dashboards for managing their respective operations.

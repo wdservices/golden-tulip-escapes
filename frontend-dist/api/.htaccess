@@ -1,0 +1,6 @@
+
+PassengerEnabled on
+PassengerAppType node
+PassengerStartupFile server.js
+PassengerAppRoot /home/rivooivv/backend
+PassengerBaseURI /api
