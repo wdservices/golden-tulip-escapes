@@ -9,30 +9,30 @@ import { AdProvider } from "@/contexts/AdContext";
 import { ConditionalChatbot } from "@/components/chat/ConditionalChatbot";
 import { lazy, Suspense } from 'react';
 import Index from "./pages/Index";
-import { BookPage } from "./pages/BookPage";
-import AdminDashboard from "./pages/AdminDashboard";
 import { AdminLoading } from "./components/admin/AdminLoading";
-import { AuthPage } from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 import { ErrorBoundary } from "react-error-boundary";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
-import { UserDashboard } from "./pages/UserDashboard";
-import { BranchPage } from "./pages/BranchPage";
-import RoomPage from "./pages/rooms/RoomPage";
-import { RoomDetailPage } from "./pages/branches/RoomDetailPage";
-import { HallDetailPage } from "./pages/branches/HallDetailPage";
-import PublicRoomsPage from "./pages/RoomsPage";
-import CorporateHallsPage from "./pages/CorporateHallsPage";
-import { CorporateHallDetailPage } from "./pages/CorporateHallDetailPage";
-import AndroidPage from "./pages/AndroidPage";
-import { AndroidGalleryPage } from "./pages/AndroidGalleryPage";
-import IOSPage from "./pages/IOSPage";
-import { IOSGalleryPage } from "./pages/IOSGalleryPage";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsAndConditions from "./pages/TermsAndConditions";
 import { Button } from "@/components/ui/button";
-import { AdminPanel } from "./components/admin/AdminPanel";
-import FirebaseTest from "./pages/FirebaseTest";
+
+// Lazy load non-critical pages to keep the initial bundle small and the landing page fast.
+const BookPage = lazy(() => import("./pages/BookPage").then(m => ({ default: m.BookPage })));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AuthPage = lazy(() => import("./pages/AuthPage").then(m => ({ default: m.AuthPage })));
+const UserDashboard = lazy(() => import("./pages/UserDashboard").then(m => ({ default: m.UserDashboard })));
+const BranchPage = lazy(() => import("./pages/BranchPage").then(m => ({ default: m.BranchPage })));
+const RoomPage = lazy(() => import("./pages/rooms/RoomPage"));
+const RoomDetailPage = lazy(() => import("./pages/branches/RoomDetailPage").then(m => ({ default: m.RoomDetailPage })));
+const HallDetailPage = lazy(() => import("./pages/branches/HallDetailPage").then(m => ({ default: m.HallDetailPage })));
+const PublicRoomsPage = lazy(() => import("./pages/RoomsPage"));
+const CorporateHallsPage = lazy(() => import("./pages/CorporateHallsPage"));
+const CorporateHallDetailPage = lazy(() => import("./pages/CorporateHallDetailPage").then(m => ({ default: m.CorporateHallDetailPage })));
+const AndroidPage = lazy(() => import("./pages/AndroidPage"));
+const AndroidGalleryPage = lazy(() => import("./pages/AndroidGalleryPage").then(m => ({ default: m.AndroidGalleryPage })));
+const IOSGalleryPage = lazy(() => import("./pages/IOSGalleryPage").then(m => ({ default: m.IOSGalleryPage })));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
+const FirebaseTest = lazy(() => import("./pages/FirebaseTest"));
 
 
 // Lazy load admin components
