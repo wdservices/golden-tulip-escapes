@@ -205,6 +205,7 @@ const App = () => {
             {/* 404 - Keep this last */}
             <Route path="*" element={<NotFound />} />
               </Routes>
+              </Suspense>
                 </AdProvider>
               </DatabaseProvider>
           </AuthProvider>
