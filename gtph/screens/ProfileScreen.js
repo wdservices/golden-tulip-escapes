@@ -152,7 +152,7 @@ export default function ProfileScreen({ navigation }) {
             <Text style={styles.chevron}>›</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionRow}>
+          <TouchableOpacity style={styles.actionRow} onPress={() => navigation.navigate('PrivacySecurity')}>
             <View style={styles.actionLeft}>
               <Shield size={20} color="#94a3b8" />
               <Text style={styles.actionText}>Privacy & Security</Text>

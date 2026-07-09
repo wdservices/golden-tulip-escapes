@@ -17,174 +17,34 @@ interface GalleryProps {
 }
 
 const defaultImages: GalleryImage[] = [
-  {
-    id: "1",
-    src: "/images/gallery/others/img (1).jpg",
-    title: "Hotel Image 1",
-    category: "Gallery"
-  },
-  {
-    id: "2",
-    src: "/images/gallery/rooms/img (2).jpg",
-    title: "Hotel Image 2",
-    category: "Gallery"
-  },
-  {
-    id: "3",
-    src: "/images/gallery/rooms/img (3).jpg",
-    title: "Hotel Image 3",
-    category: "Gallery"
-  },
-  {
-    id: "4",
-    src: "/images/gallery/rooms/img (4).jpg",
-    title: "Hotel Image 4",
-    category: "Gallery"
-  },
-  {
-    id: "5",
-    src: "/images/gallery/rooms/img (5).jpg",
-    title: "Hotel Image 5",
-    category: "Gallery"
-  },
-  {
-    id: "6",
-    src: "/images/gallery/rooms/img (6).jpg",
-    title: "Hotel Image 6",
-    category: "Gallery"
-  },
-  {
-    id: "7",
-    src: "/images/gallery/rooms/img (7).jpg",
-    title: "Hotel Image 7",
-    category: "Gallery"
-  },
-  {
-    id: "8",
-    src: "/images/gallery/rooms/img (8).jpg",
-    title: "Hotel Image 8",
-    category: "Gallery"
-  },
-  {
-    id: "9",
-    src: "/images/gallery/rooms/img (9).jpg",
-    title: "Hotel Image 9",
-    category: "Gallery"
-  },
-  {
-    id: "10",
-    src: "/images/gallery/rooms/img (10).jpg",
-    title: "Hotel Image 10",
-    category: "Gallery"
-  },
-  {
-    id: "11",
-    src: "/images/gallery/others/img (11).jpg",
-    title: "Hotel Image 11",
-    category: "Gallery"
-  },
-  {
-    id: "12",
-    src: "/images/gallery/rooms/img (12).jpg",
-    title: "Hotel Image 12",
-    category: "Gallery"
-  },
-  {
-    id: "13",
-    src: "/images/gallery/rooms/img (13).jpg",
-    title: "Hotel Image 13",
-    category: "Gallery"
-  },
-  {
-    id: "14",
-    src: "/images/gallery/rooms/img (14).jpg",
-    title: "Hotel Image 14",
-    category: "Gallery"
-  },
-  {
-    id: "15",
-    src: "/images/gallery/rooms/img (15).jpg",
-    title: "Hotel Image 15",
-    category: "Gallery"
-  },
-  {
-    id: "16",
-    src: "/images/gallery/rooms/img (16).jpg",
-    title: "Hotel Image 16",
-    category: "Gallery"
-  },
-  {
-    id: "17",
-    src: "/images/gallery/rooms/img (17).jpg",
-    title: "Hotel Image 17",
-    category: "Gallery"
-  },
-  {
-    id: "18",
-    src: "/images/gallery/rooms/img (18).jpg",
-    title: "Hotel Image 18",
-    category: "Gallery"
-  },
-  {
-    id: "19",
-    src: "/images/gallery/rooms/img (19).jpg",
-    title: "Hotel Image 19",
-    category: "Gallery"
-  },
-  {
-    id: "20",
-    src: "/images/gallery/rooms/img (20).jpg",
-    title: "Hotel Image 20",
-    category: "Gallery"
-  },
-  {
-    id: "21",
-    src: "/images/gallery/others/img (21).jpg",
-    title: "Hotel Image 21",
-    category: "Gallery"
-  },
-  {
-    id: "22",
-    src: "/images/gallery/rooms/img (22).jpg",
-    title: "Hotel Image 22",
-    category: "Gallery"
-  },
-  {
-    id: "23",
-    src: "/images/gallery/wellness/spar2.jpg",
-    title: "Hotel Image 23",
-    category: "Gallery"
-  },
-  {
-    id: "24",
-    src: "/images/gallery/catering/IMG_7822.JPG",
-    title: "Palm Courtyard",
-    category: "Gallery"
-  },
-  {
-    id: "25",
-    src: "/images/gallery/others/1764979633.png",
-    title: "Lobby Reception",
-    category: "Gallery"
-  },
-  {
-    id: "26",
-    src: "/images/gallery/others/IMG_2650.jpg",
-    title: "Outdoor Lounge",
-    category: "Gallery"
-  },
-  {
-    id: "27",
-    src: "/images/gallery/others/IMG_2652.jpg",
-    title: "Pool Terrace",
-    category: "Gallery"
-  },
-  {
-    id: "28",
-    src: "/images/gallery/others/IMG_2661.jpg",
-    title: "Executive Dining",
-    category: "Gallery"
-  }
+  { id: "1", src: "/images/gallery/others/img (1).jpg", title: "Hotel Image 1", category: "Gallery" },
+  { id: "2", src: "/images/gallery/rooms/img (2).jpg", title: "Hotel Image 2", category: "Gallery" },
+  { id: "3", src: "/images/gallery/rooms/img (3).jpg", title: "Hotel Image 3", category: "Gallery" },
+  { id: "4", src: "/images/gallery/rooms/img (4).jpg", title: "Hotel Image 4", category: "Gallery" },
+  { id: "5", src: "/images/gallery/rooms/img (5).jpg", title: "Hotel Image 5", category: "Gallery" },
+  { id: "6", src: "/images/gallery/rooms/img (6).jpg", title: "Hotel Image 6", category: "Gallery" },
+  { id: "7", src: "/images/gallery/rooms/img (7).jpg", title: "Hotel Image 7", category: "Gallery" },
+  { id: "8", src: "/images/gallery/rooms/img (8).jpg", title: "Hotel Image 8", category: "Gallery" },
+  { id: "9", src: "/images/gallery/rooms/img (9).jpg", title: "Hotel Image 9", category: "Gallery" },
+  { id: "10", src: "/images/gallery/rooms/img (10).jpg", title: "Hotel Image 10", category: "Gallery" },
+  { id: "11", src: "/images/gallery/others/img (11).jpg", title: "Hotel Image 11", category: "Gallery" },
+  { id: "12", src: "/images/gallery/rooms/img (12).jpg", title: "Hotel Image 12", category: "Gallery" },
+  { id: "13", src: "/images/gallery/rooms/img (13).jpg", title: "Hotel Image 13", category: "Gallery" },
+  { id: "14", src: "/images/gallery/rooms/img (14).jpg", title: "Hotel Image 14", category: "Gallery" },
+  { id: "15", src: "/images/gallery/rooms/img (15).jpg", title: "Hotel Image 15", category: "Gallery" },
+  { id: "16", src: "/images/gallery/rooms/img (16).jpg", title: "Hotel Image 16", category: "Gallery" },
+  { id: "17", src: "/images/gallery/rooms/img (17).jpg", title: "Hotel Image 17", category: "Gallery" },
+  { id: "18", src: "/images/gallery/rooms/img (18).jpg", title: "Hotel Image 18", category: "Gallery" },
+  { id: "19", src: "/images/gallery/rooms/img (19).jpg", title: "Hotel Image 19", category: "Gallery" },
+  { id: "20", src: "/images/gallery/rooms/img (20).jpg", title: "Hotel Image 20", category: "Gallery" },
+  { id: "21", src: "/images/gallery/others/img (21).jpg", title: "Hotel Image 21", category: "Gallery" },
+  { id: "22", src: "/images/gallery/rooms/img (22).jpg", title: "Hotel Image 22", category: "Gallery" },
+  { id: "23", src: "/images/gallery/wellness/spar2.jpg", title: "Hotel Image 23", category: "Gallery" },
+  { id: "24", src: "/images/gallery/catering/IMG_7822.JPG", title: "Palm Courtyard", category: "Gallery" },
+  { id: "25", src: "/images/gallery/others/1764979633.png", title: "Lobby Reception", category: "Gallery" },
+  { id: "26", src: "/images/gallery/others/IMG_2650.jpg", title: "Outdoor Lounge", category: "Gallery" },
+  { id: "27", src: "/images/gallery/others/IMG_2652.jpg", title: "Pool Terrace", category: "Gallery" },
+  { id: "28", src: "/images/gallery/others/IMG_2661.jpg", title: "Executive Dining", category: "Gallery" },
 ];
 
 export const Gallery = ({ 
@@ -289,6 +149,7 @@ export const Gallery = ({
                     alt={image.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
+                    onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
@@ -359,6 +220,7 @@ export const Gallery = ({
                 src={selectedImage.src}
                 alt={selectedImage.title}
                 className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
+                onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
               />
               
               {/* Image info */}

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Modal, ActivityIndicator, FlatList, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronLeft, Calendar as CalendarIcon, User, Mail, Phone, MapPin, Bed, Users, X, ChevronDown, CheckCircle } from 'lucide-react-native';
+import { ChevronLeft, Calendar as CalendarIcon, User, Mail, Phone, MapPin, Bed, Users, X, ChevronDown, CheckCircle, AlertTriangle } from 'lucide-react-native';
 import { Calendar } from 'react-native-calendars';
 import { addDoc, collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
 import { usePaystack } from '../paystackWrapper';
 import { db, auth } from '../firebaseConfig';
 import { WebView } from 'react-native-webview';
+import { getAllBookingAvailability } from '../services/bookingAvailabilityService';
 
 const PAYSTACK_PUBLIC_KEY = "pk_live_5b8a1cc5108ee14b78f38c309af069f46f59ac83";
 
@@ -93,6 +94,7 @@ export default function BookingScreen({ navigation }) {
   const [branches, setBranches] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [branchAvailability, setBranchAvailability] = useState({});
 
   // Form State
   const [formData, setFormData] = useState({
@@ -124,6 +126,10 @@ export default function BookingScreen({ navigation }) {
   
   const { popup } = usePaystack();
 
+  // Check if selected branch is disabled
+  const selectedBranchAvailability = formData.branchId ? branchAvailability[formData.branchId] : null;
+  const isBranchDisabled = selectedBranchAvailability && !selectedBranchAvailability.bookingEnabled;
+
   // Branch Payment Configuration (Mirrors web config)
   const BRANCH_PAYMENT_CONFIG = {
     'evo-road': {
@@ -150,6 +156,12 @@ export default function BookingScreen({ navigation }) {
       const snapshot = await getDocs(q);
       const branchList = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name, ...doc.data() }));
       setBranches(branchList);
+
+      // Fetch booking availability for all branches
+      const availability = await getAllBookingAvailability();
+      const availabilityMap = {};
+      availability.forEach(a => { availabilityMap[a.branchId] = a; });
+      setBranchAvailability(availabilityMap);
     } catch (error) {
       console.error("Error fetching branches:", error);
     } finally {
@@ -282,6 +294,11 @@ export default function BookingScreen({ navigation }) {
   `;
 
   const handleSubmit = () => {
+    // Re-check availability before submit
+    if (isBranchDisabled) {
+      return Alert.alert('Bookings Unavailable', `Online bookings for ${formData.branchName} are temporarily disabled.`);
+    }
+
     if (!formData.branchId || !formData.roomTypeId || !formData.checkIn || !formData.checkOut || !formData.firstName || !formData.lastName || !formData.phone) {
       return Alert.alert('Missing Fields', 'Please fill in all required fields marked with *');
     }
@@ -467,6 +484,34 @@ export default function BookingScreen({ navigation }) {
             </Text>
             <ChevronDown size={20} color="#94a3b8" />
           </TouchableOpacity>
+
+          {isBranchDisabled && (
+            <View style={styles.disabledBanner}>
+              <View style={styles.disabledBannerIcon}>
+                <AlertTriangle size={24} color="#f59e0b" />
+              </View>
+              <View style={styles.disabledBannerContent}>
+                <Text style={styles.disabledBannerTitle}>
+                  Online bookings are temporarily unavailable for {formData.branchName}
+                </Text>
+                <Text style={styles.disabledBannerReason}>
+                  {selectedBranchAvailability?.reason || "All rooms at this branch are currently occupied. Bookings will reopen automatically."}
+                </Text>
+                {selectedBranchAvailability?.disabledUntil && (
+                  <View style={styles.disabledBannerDateBox}>
+                    <Text style={styles.disabledBannerDateLabel}>Bookings reopen on</Text>
+                    <Text style={styles.disabledBannerDate}>
+                      {new Date(selectedBranchAvailability.disabledUntil).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </Text>
+                  </View>
+                )}
+                <View style={styles.disabledBannerContact}>
+                  <Phone size={14} color="#f59e0b" />
+                  <Text style={styles.disabledBannerContactText}>For urgent reservations, please contact reception directly.</Text>
+                </View>
+              </View>
+            </View>
+          )}
 
           <Text style={styles.label}>Room Type *</Text>
           <TouchableOpacity 
@@ -719,5 +764,15 @@ const styles = StyleSheet.create({
   paystackContainer: { flex: 1, backgroundColor: '#0f172a' },
   paystackHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: '#162b3b' },
   paystackTitle: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  paystackLoading: { flex: 1, justifyContent: 'center', alignItems: 'center' }
+  paystackLoading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  disabledBanner: { flexDirection: 'row', backgroundColor: 'rgba(245, 158, 11, 0.1)', borderWidth: 1, borderColor: 'rgba(245, 158, 11, 0.3)', borderRadius: 12, padding: 16, marginBottom: 16 },
+  disabledBannerIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(245, 158, 11, 0.2)', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  disabledBannerContent: { flex: 1 },
+  disabledBannerTitle: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginBottom: 6, lineHeight: 22 },
+  disabledBannerReason: { color: '#cbd5e1', fontSize: 14, lineHeight: 20, marginBottom: 10 },
+  disabledBannerDateBox: { backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 8, padding: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', marginBottom: 10 },
+  disabledBannerDateLabel: { color: '#94a3b8', fontSize: 12 },
+  disabledBannerDate: { color: '#f59e0b', fontSize: 16, fontWeight: 'bold', marginTop: 2 },
+  disabledBannerContact: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
+  disabledBannerContactText: { color: '#cbd5e1', fontSize: 13 },
 });

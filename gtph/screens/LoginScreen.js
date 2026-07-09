@@ -84,12 +84,17 @@ export default function LoginScreen() {
   };
 
   return (
-    <ImageBackground 
-      source={{ uri: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070&auto=format&fit=crop' }} 
-      style={styles.background}
-    >
-      <LinearGradient colors={['rgba(29, 54, 73, 0.7)', 'rgba(29, 54, 73, 0.95)']} style={styles.gradient}>
-        <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <View style={styles.background}>
+      <ImageBackground 
+        source={require('../assets/branches/garden-city/1670228609dsc_1161885e.jpg')} 
+        style={StyleSheet.absoluteFill}
+        resizeMode="cover"
+      />
+      <LinearGradient colors={['rgba(29, 54, 73, 0.7)', 'rgba(29, 54, 73, 0.95)']} style={StyleSheet.absoluteFill}>
+        <KeyboardAvoidingView 
+          style={styles.container} 
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
           <ScrollView 
             contentContainerStyle={styles.mainScrollView}
             showsVerticalScrollIndicator={false}
@@ -253,19 +258,18 @@ export default function LoginScreen() {
         </Modal>
 
       </LinearGradient>
-    </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  background: { flex: 1 },
-  gradient: { flex: 1, justifyContent: 'center' },
+  background: { flex: 1, backgroundColor: '#1D3649' },
   container: { flex: 1 },
-  mainScrollView: { flexGrow: 1, justifyContent: 'center', paddingVertical: 60 },
+  mainScrollView: { flexGrow: 1, paddingVertical: 40 },
   header: { alignItems: 'center', marginBottom: 30 },
   title: { fontSize: 36, fontWeight: 'bold', color: '#fff', letterSpacing: 1 },
   subtitle: { fontSize: 16, color: '#e2e8f0', marginTop: 5 },
-  formContainer: { paddingHorizontal: 20 },
+  formContainer: { paddingHorizontal: 20, flex: 1, justifyContent: 'center' },
   scrollContent: { paddingBottom: 20 },
   form: { backgroundColor: 'rgba(255,255,255,0.05)', padding: 24, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   authToggle: { flexDirection: 'row', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 12, padding: 4, marginBottom: 24 },

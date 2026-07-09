@@ -17,6 +17,7 @@ import BrunchAttendanceScreen from './screens/BrunchAttendanceScreen';
 import BranchDetailsScreen from './screens/BranchDetailsScreen';
 import ContactsScreen from './screens/ContactsScreen';
 import FeedbackScreen from './screens/FeedbackScreen';
+import PrivacySecurityScreen from './screens/PrivacySecurityScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ActivityIndicator, View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Home, Calendar, QrCode, LogOut, Menu, User, BookOpen, Coffee, Phone, MessageSquare } from 'lucide-react-native';
@@ -237,6 +238,7 @@ export default function App() {
                 <>
                   <Stack.Screen name="DrawerRoot" component={DrawerNavigator} />
                   <Stack.Screen name="BranchDetails" component={BranchDetailsScreen} />
+                  <Stack.Screen name="PrivacySecurity" component={PrivacySecurityScreen} />
                 </>
               ) : (
                 <Stack.Screen name="Login" component={LoginScreen} />

@@ -2,7 +2,7 @@
   "expo": {
     "name": "GTPH",
     "slug": "gtph",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -34,7 +34,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "2b7829a3-a62c-4592-824d-f1aa9d74ca64"
+        "projectId": "4f360e29-e082-4ee9-a71b-45dbccf44a46"
       }
     },
     "plugins": [
