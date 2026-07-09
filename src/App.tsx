@@ -103,6 +103,7 @@ const App = () => {
               <DatabaseProvider>
                 <AdProvider>
                   <ConditionalChatbot />
+                  <Suspense fallback={<LoadingFallback />}>
                   <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
