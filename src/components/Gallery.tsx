@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { resolveGalleryImage } from "@/utils/galleryImages";
 
 interface GalleryImage {
   id: string;
