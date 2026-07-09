@@ -1,0 +1,153 @@
+[33mcommit 34f8bed12ac27ab2bec8f3001bbdeeb1aca17285[m
+Author: Waves Digital Services <hello.wdservices@gmail.com>
+Date:   Sat Jan 24 22:16:18 2026 +0100
+
+    update
+
+[1mdiff --git a/src/components/InfoSections.tsx b/src/components/InfoSections.tsx[m
+[1mindex 12c645a..efcf5d6 100644[m
+[1m--- a/src/components/InfoSections.tsx[m
+[1m+++ b/src/components/InfoSections.tsx[m
+[36m@@ -239,11 +239,7 @@[m [mexport const InfoSections = () => {[m
+   const [showAllSpaServices, setShowAllSpaServices] = useState(false);[m
+   [m
+   const handleOpenDialog = (event: any) => {[m
+[31m-    if (event.id === "corporate") {[m
+[31m-      window.location.href = `/corporate-halls`;[m
+[31m-    } else {[m
+[31m-      setSelectedEvent(event.id);[m
+[31m-    }[m
+[32m+[m[32m    setSelectedEvent(event.id);[m
+   };[m
+ [m
+   const handleCloseDialog = () => {[m
+
+[33mcommit 0ec21a4db223fced91bd6698c2ffd0661e8fb1ff[m
+Author: Waves Digital Services <hello.wdservices@gmail.com>
+Date:   Wed Jan 14 17:02:34 2026 +0100
+
+    update
+
+[1mdiff --git a/src/components/InfoSections.tsx b/src/components/InfoSections.tsx[m
+[1mindex 988e3fe..12c645a 100644[m
+[1m--- a/src/components/InfoSections.tsx[m
+[1m+++ b/src/components/InfoSections.tsx[m
+[36m@@ -1,4 +1,4 @@[m
+[31m-import { useState } from "react";[m
+[32m+[m[32mimport { useState, useEffect } from "react";[m
+ import { Link } from "react-router-dom";[m
+ import { Card, CardContent } from "@/components/ui/card";[m
+ import { Button } from "@/components/ui/button";[m
+[36m@@ -6,7 +6,13 @@[m [mimport { Bed, Utensils, Waves, Calendar, Globe, Car, Dumbbell, Shield, Coffee, T[m
+ import luxurySuite from "@/assets/luxury-suite.jpg";[m
+ import restaurant from "@/assets/restaurant.jpg";[m
+ import { EventDetailsDialog } from "@/components/events/EventDetailsDialog";[m
+[31m-import { roomTypes } from '@/data/rooms';[m
+[32m+[m[32mimport { roomTypes as staticRoomTypes } from '@/data/rooms';[m
+[32m+[m[32mimport { db } from "@/lib/firebase";[m
+[32m+[m[32mimport { doc, getDoc, collection, getDocs } from "firebase/firestore";[m
+[32m+[m[32mimport { RoomType } from "@/types/room";[m
+[32m+[m
+[32m+[m[32m// Evo Road Branch ID[m
+[32m+[m[32mconst EVO_ROAD_BRANCH_ID = "URcvGkmbfrOFInlOS4I9";[m
+ [m
+ // Event data[m
+ const eventTypes = [[m
+[36m@@ -321,6 +327,50 @@[m [mexport const InfoSections = () => {[m
+   ];[m
+   [m
+   const [showAllAmenities, setShowAllAmenities] = useState(false);[m
+[32m+[m[32m  const [roomTypes, setRoomTypes] = useState<RoomType[]>(staticRoomTypes);[m
+[32m+[m
+[32m+[m[32m  useEffect(() => {[m
+[32m+[m[32m    const fetchRoomPrices = async () => {[m
+[32m+[m[32m      try {[m
+[32m+[m[32m        const roomsRef = collection(db, "branches", EVO_ROAD_BRANCH_ID, "rooms");[m
+[32m+[m[32m        const roomsSnap = await getDocs(roomsRef);[m
+[32m+[m[41m        [m
+[32m+[m[32m        if (!roomsSnap.empty) {[m
+[32m+[m[32m            const priceMap = new Map<string, number>();[m
+[32m+[m[32m            roomsSnap.forEach(doc => {[m
+[32m+[m[32m                const data = doc.data();[m
+[32m+[m[32m                if (data.type && data.pricePerNight) {[m
+[32m+[m[32m                    priceMap.set(data.type, Number(data.pricePerNight));[m
+[32m+[m[32m                }[m
+[32m+[m[32m            });[m
+[32m+[m
+[32m+[m[32m            const updatedRooms = staticRoomTypes.map(staticRoom => {[m
+[32m+[m[32m              // Check for direct match or mapped match[m
+[32m+[m[32m              let dbPrice = priceMap.get(staticRoom.id);[m
+[32m+[m[41m              [m
+[32m+[m[32m              // Handle 'deluxe' mismatch (DB has 'deluxe', static has 'deluxe-room')[m
+[32m+[m[32m              if (dbPrice === undefined && staticRoom.id === 'deluxe-room') {[m
+[32m+[m[32m                  dbPrice = priceMap.get('deluxe');[m
+[32m+[m[32m              }[m
+[32m+[m
+[32m+[m[32m              if (dbPrice !== undefined) {[m
+[32m+[m[32m                return {[m
+[32m+[m[32m                  ...staticRoom,[m
+[32m+[m[32m                  price: dbPrice,[m
+[32m+[m[32m                };[m
+[32m+[m[32m              }[m
+[32m+[m[32m              return staticRoom;[m
+[32m+[m[32m            });[m
+[32m+[m[41m            [m
+[32m+[m[32m            setRoomTypes(updatedRooms);[m
+[32m+[m[32m        }[m
+[32m+[m[32m      } catch (error) {[m
+[32m+[m[32m        console.error("Error fetching room prices:", error);[m
+[32m+[m[32m      }[m
+[32m+[m[32m    };[m
+[32m+[m
+[32m+[m[32m    fetchRoomPrices();[m
+[32m+[m[32m  }, []);[m
+ [m
+   return ([m
+     <div className="space-y-16">[m
+
+[33mcommit d991ae08dc575280294d5974f2514a728881d769[m
+Author: Waves Digital Services <hello.wdservices@gmail.com>
+Date:   Mon Nov 24 00:12:18 2025 +0100
+
+    new update
+
+[1mdiff --git a/src/components/InfoSections.tsx b/src/components/InfoSections.tsx[m
+[1mindex c988a3f..988e3fe 100644[m
+[1m--- a/src/components/InfoSections.tsx[m
+[1m+++ b/src/components/InfoSections.tsx[m
+[36m@@ -379,7 +379,7 @@[m [mexport const InfoSections = () => {[m
+       <section id="dining" className="py-20 bg-gradient-to-b from-background to-royal-blue/5">[m
+         <div className="container mx-auto px-4">[m
+           <div className="text-center mb-16">[m
+[31m-            <h2 className="text-5xl font-serif font-bold mb-6 text-golden-yellow drop-shadow-lg">[m
+[32m+[m[32m            <h2 className="text-4xl font-serif font-bold mb-6 text-golden-yellow drop-shadow-lg">[m
+               Dining Options[m
+             </h2>[m
+             <p className="text-xl text-foreground/80 max-w-3xl mx-auto leading-relaxed">[m
+[36m@@ -477,7 +477,7 @@[m [mexport const InfoSections = () => {[m
+         <div className="absolute inset-0 bg-gradient-to-b from-royal-blue/10 to-transparent"></div>[m
+         <div className="container mx-auto px-4 relative z-10">[m
+           <div className="text-center mb-16">[m
+[31m-            <h2 className="text-5xl font-serif font-bold mb-6 text-golden-yellow drop-shadow-lg">[m
+[32m+[m[32m            <h2 className="text-4xl font-serif font-bold mb-6 text-golden-yellow drop-shadow-lg">[m
+               Sanctuary of Serenity[m
+             </h2>[m
+             <p className="text-xl text-foreground/80 max-w-3xl mx-auto leading-relaxed">[m
+[36m@@ -571,7 +571,7 @@[m [mexport const InfoSections = () => {[m
+       <section id="events" className="py-16 bg-gradient-to-br from-royal-blue/5 to-royal-blue/10">[m
+         <div className="container mx-auto px-4">[m
+           <div className="text-center mb-12">[m
+[31m-            <h2 className="text-4xl font-serif font-bold mb-4 text-golden-yellow drop-shadow-lg">[m
+[32m+[m[32m            <h2 className="text-4xl font-serif font-bold mb-6 text-golden-yellow drop-shadow-lg">[m
+               Events & Conferences[m
+             </h2>[m
+             <p className="text-lg text-foreground/80 max-w-3xl mx-auto">[m
+[36m@@ -629,7 +629,7 @@[m [mexport const InfoSections = () => {[m
+       <section className="py-16">[m
+         <div className="container mx-auto px-4">[m
+           <div className="text-center mb-12">[m
+[31m-            <h2 className="text-4xl font-serif font-bold mb-4 text-golden-yellow drop-shadow-lg">[m
+[32m+[m[32m            <h2 className="text-4xl font-serif font-bold mb-6 text-golden-yellow drop-shadow-lg">[m
+               Hotel Amenities[m
+             </h2>[m
+             <p className="text-lg text-foreground/80 max-w-2xl mx-auto">[m

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { resolveGalleryImage } from "@/utils/galleryImages";
 
 interface GalleryImage {
   id: string;
@@ -145,7 +146,7 @@ export const Gallery = ({
               >
                 <div className="aspect-[4/3] relative overflow-hidden">
                   <img
-                    src={image.src}
+                    src={resolveGalleryImage(image.src)}
                     alt={image.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
@@ -217,7 +218,7 @@ export const Gallery = ({
             {/* Image */}
             <div className="relative">
               <img
-                src={selectedImage.src}
+                src={resolveGalleryImage(selectedImage.src)}
                 alt={selectedImage.title}
                 className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
                 onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
