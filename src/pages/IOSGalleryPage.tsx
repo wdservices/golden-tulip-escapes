@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getBranchById } from '@/services/branchService';
+import { resolveGalleryImage } from '@/utils/galleryImages';
 
 export function IOSGalleryPage() {
   const { branchId } = useParams<{ branchId: string }>();
@@ -10,8 +11,9 @@ export function IOSGalleryPage() {
   const branch = useMemo(() => (branchId ? getBranchById(branchId) : undefined), [branchId]);
   const encodePath = (p: string) => {
     if (!p) return p;
-    if (/^https?:\/\//i.test(p)) return p;
-    return p.split('/').map((seg, i) => (i === 0 && seg === '' ? '' : encodeURIComponent(seg))).join('/');
+    const resolved = resolveGalleryImage(p);
+    if (/^https?:\/\//i.test(resolved) || resolved.startsWith('/assets/') || resolved.startsWith('data:')) return resolved;
+    return resolved.split('/').map((seg, i) => (i === 0 && seg === '' ? '' : encodeURIComponent(seg))).join('/');
   };
   const gallery = branch
     ? {
