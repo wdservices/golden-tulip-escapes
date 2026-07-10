@@ -2,8 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getBranchById } from '@/services/branchService';
-import { resolveGalleryImage } from '@/utils/galleryImages';
-
 export function AndroidGalleryPage() {
   const { branchId } = useParams<{ branchId: string }>();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -11,9 +9,8 @@ export function AndroidGalleryPage() {
   const branch = useMemo(() => (branchId ? getBranchById(branchId) : undefined), [branchId]);
   const encodePath = (p: string) => {
     if (!p) return p;
-    const resolved = resolveGalleryImage(p);
-    if (/^https?:\/\//i.test(resolved) || resolved.startsWith('/assets/') || resolved.startsWith('data:')) return resolved;
-    return resolved.split('/').map((seg, i) => (i === 0 && seg === '' ? '' : encodeURIComponent(seg))).join('/');
+    if (/^https?:\/\//i.test(p) || p.startsWith('/assets/') || p.startsWith('data:')) return p;
+    return p.split('/').map((seg, i) => (i === 0 && seg === '' ? '' : encodeURIComponent(seg))).join('/');
   };
   const gallery = branch
     ? {

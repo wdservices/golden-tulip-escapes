@@ -3,7 +3,7 @@ import { Bed, Users, DollarSign, Check, Star, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import luxurySuite from "@/assets/luxury-suite.jpg";
+const luxurySuite = "/images/luxury-suite.jpg";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 

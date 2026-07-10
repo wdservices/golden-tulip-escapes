@@ -1,10 +1,10 @@
 import { Branch, BranchMeta } from "@/types/branch";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
-import hotelExterior from "@/assets/hotel-exterior.jpg";
-import hotelLobby from "@/assets/hotel-lobby.jpg";
-import luxurySuite from "@/assets/luxury-suite.jpg";
-import restaurant from "@/assets/restaurant.jpg";
+const hotelExterior = "/images/hotel-exterior.jpg";
+const hotelLobby = "/images/hotel-lobby.jpg";
+const luxurySuite = "/images/luxury-suite.jpg";
+const restaurant = "/images/restaurant.jpg";
 // Using existing images for pool and spa as placeholders
 const pool = hotelExterior;
 const spa = luxurySuite;

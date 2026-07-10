@@ -48,6 +48,7 @@ const SettingsPage = lazy(() => import("@/pages/admin/settings/SettingsPage"));
 const DashboardHome = lazy(() => import("@/pages/admin/DashboardHome"));
 const AdsPage = lazy(() => import("@/pages/admin/AdsPageNew"));
 const SundayBrunchPage = lazy(() => import("@/pages/admin/SundayBrunchPage"));
+const GalleryPage = lazy(() => import("@/pages/GalleryPage"));
 
 // Loading component for Suspense fallback
 const LoadingFallback = () => (
@@ -123,6 +124,7 @@ const App = () => {
             <Route path="/corporate-halls/:hallId" element={<CorporateHallDetailPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/gallery" element={<GalleryPage />} />
 
             {/* User Dashboard - Only accessible to non-admin users */}
             <Route

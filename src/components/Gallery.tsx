@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { resolveGalleryImage } from "@/utils/galleryImages";
+
 
 interface GalleryImage {
   id: string;
@@ -18,34 +18,34 @@ interface GalleryProps {
 }
 
 const defaultImages: GalleryImage[] = [
-  { id: "1", src: "/images/gallery/others/img (1).jpg", title: "Hotel Image 1", category: "Gallery" },
-  { id: "2", src: "/images/gallery/rooms/img (2).jpg", title: "Hotel Image 2", category: "Gallery" },
-  { id: "3", src: "/images/gallery/rooms/img (3).jpg", title: "Hotel Image 3", category: "Gallery" },
-  { id: "4", src: "/images/gallery/rooms/img (4).jpg", title: "Hotel Image 4", category: "Gallery" },
-  { id: "5", src: "/images/gallery/rooms/img (5).jpg", title: "Hotel Image 5", category: "Gallery" },
-  { id: "6", src: "/images/gallery/rooms/img (6).jpg", title: "Hotel Image 6", category: "Gallery" },
-  { id: "7", src: "/images/gallery/rooms/img (7).jpg", title: "Hotel Image 7", category: "Gallery" },
-  { id: "8", src: "/images/gallery/rooms/img (8).jpg", title: "Hotel Image 8", category: "Gallery" },
-  { id: "9", src: "/images/gallery/rooms/img (9).jpg", title: "Hotel Image 9", category: "Gallery" },
-  { id: "10", src: "/images/gallery/rooms/img (10).jpg", title: "Hotel Image 10", category: "Gallery" },
-  { id: "11", src: "/images/gallery/others/img (11).jpg", title: "Hotel Image 11", category: "Gallery" },
-  { id: "12", src: "/images/gallery/rooms/img (12).jpg", title: "Hotel Image 12", category: "Gallery" },
-  { id: "13", src: "/images/gallery/rooms/img (13).jpg", title: "Hotel Image 13", category: "Gallery" },
-  { id: "14", src: "/images/gallery/rooms/img (14).jpg", title: "Hotel Image 14", category: "Gallery" },
-  { id: "15", src: "/images/gallery/rooms/img (15).jpg", title: "Hotel Image 15", category: "Gallery" },
-  { id: "16", src: "/images/gallery/rooms/img (16).jpg", title: "Hotel Image 16", category: "Gallery" },
-  { id: "17", src: "/images/gallery/rooms/img (17).jpg", title: "Hotel Image 17", category: "Gallery" },
-  { id: "18", src: "/images/gallery/rooms/img (18).jpg", title: "Hotel Image 18", category: "Gallery" },
-  { id: "19", src: "/images/gallery/rooms/img (19).jpg", title: "Hotel Image 19", category: "Gallery" },
-  { id: "20", src: "/images/gallery/rooms/img (20).jpg", title: "Hotel Image 20", category: "Gallery" },
-  { id: "21", src: "/images/gallery/others/img (21).jpg", title: "Hotel Image 21", category: "Gallery" },
-  { id: "22", src: "/images/gallery/rooms/img (22).jpg", title: "Hotel Image 22", category: "Gallery" },
-  { id: "23", src: "/images/gallery/wellness/spar2.jpg", title: "Hotel Image 23", category: "Gallery" },
-  { id: "24", src: "/images/gallery/catering/IMG_7822.JPG", title: "Palm Courtyard", category: "Gallery" },
-  { id: "25", src: "/images/gallery/others/1764979633.png", title: "Lobby Reception", category: "Gallery" },
-  { id: "26", src: "/images/gallery/others/IMG_2650.jpg", title: "Outdoor Lounge", category: "Gallery" },
-  { id: "27", src: "/images/gallery/others/IMG_2652.jpg", title: "Pool Terrace", category: "Gallery" },
-  { id: "28", src: "/images/gallery/others/IMG_2661.jpg", title: "Executive Dining", category: "Gallery" },
+  { id: "1", src: "/images/gallery/rooms/img1.jpg", title: "Room Image 1", category: "Rooms" },
+  { id: "2", src: "/images/gallery/rooms/img2.jpg", title: "Room Image 2", category: "Rooms" },
+  { id: "3", src: "/images/gallery/rooms/img3.jpg", title: "Room Image 3", category: "Rooms" },
+  { id: "4", src: "/images/gallery/rooms/img4.jpg", title: "Room Image 4", category: "Rooms" },
+  { id: "5", src: "/images/gallery/rooms/img5.jpg", title: "Room Image 5", category: "Rooms" },
+  { id: "6", src: "/images/gallery/rooms/img6.jpg", title: "Room Image 6", category: "Rooms" },
+  { id: "7", src: "/images/gallery/rooms/img7.jpg", title: "Room Image 7", category: "Rooms" },
+  { id: "8", src: "/images/gallery/rooms/img8.jpg", title: "Room Image 8", category: "Rooms" },
+  { id: "9", src: "/images/gallery/rooms/img9.jpg", title: "Room Image 9", category: "Rooms" },
+  { id: "10", src: "/images/gallery/rooms/img10.jpg", title: "Room Image 10", category: "Rooms" },
+  { id: "11", src: "/images/gallery/rooms/img11.jpg", title: "Room Image 11", category: "Rooms" },
+  { id: "12", src: "/images/gallery/rooms/img12.jpg", title: "Room Image 12", category: "Rooms" },
+  { id: "13", src: "/images/gallery/rooms/img13.jpg", title: "Room Image 13", category: "Rooms" },
+  { id: "14", src: "/images/gallery/rooms/img14.jpg", title: "Room Image 14", category: "Rooms" },
+  { id: "15", src: "/images/gallery/rooms/img15.jpg", title: "Room Image 15", category: "Rooms" },
+  { id: "16", src: "/images/gallery/rooms/img16.jpg", title: "Room Image 16", category: "Rooms" },
+  { id: "17", src: "/images/gallery/rooms/img17.jpg", title: "Room Image 17", category: "Rooms" },
+  { id: "18", src: "/images/gallery/rooms/img18.jpg", title: "Room Image 18", category: "Rooms" },
+  { id: "19", src: "/images/gallery/rooms/img19.jpg", title: "Room Image 19", category: "Rooms" },
+  { id: "20", src: "/images/gallery/catering/61940181_XXL.jpg", title: "Catering Image 1", category: "Catering" },
+  { id: "21", src: "/images/gallery/catering/61940891_XXL.jpg", title: "Catering Image 2", category: "Catering" },
+  { id: "22", src: "/images/gallery/meetings/73066312_XXL.jpg", title: "Meeting Hall 1", category: "Meetings" },
+  { id: "23", src: "/images/gallery/wellness/spar2.jpg", title: "Wellness Spa", category: "Wellness" },
+  { id: "24", src: "/images/gallery/facility/6429175_XXL.jpg", title: "Facility Image 1", category: "Facilities" },
+  { id: "25", src: "/images/gallery/others/1764979633.jpg", title: "Lobby Reception", category: "Others" },
+  { id: "26", src: "/images/gallery/others/61940047_xxl.jpg", title: "Hotel Exterior", category: "Others" },
+  { id: "27", src: "/images/gallery/others/6429153_xxl.jpg", title: "Hotel Lounge", category: "Others" },
+  { id: "28", src: "/images/gallery/others/73067760_xxl.jpg", title: "Hotel Interior", category: "Others" },
 ];
 
 export const Gallery = ({ 
@@ -146,11 +146,11 @@ export const Gallery = ({
               >
                 <div className="aspect-[4/3] relative overflow-hidden">
                   <img
-                    src={resolveGalleryImage(image.src)}
+                    src={image.src}
                     alt={image.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
-                    onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
+                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/gallery/others/img7.jpeg'; }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
@@ -218,10 +218,10 @@ export const Gallery = ({
             {/* Image */}
             <div className="relative">
               <img
-                src={resolveGalleryImage(selectedImage.src)}
+                src={selectedImage.src}
                 alt={selectedImage.title}
                 className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
-                onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
+                onError={(e) => { (e.target as HTMLImageElement).src = '/images/gallery/others/img7.jpeg'; }}
               />
               
               {/* Image info */}

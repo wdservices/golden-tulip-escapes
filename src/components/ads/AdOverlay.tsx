@@ -6,8 +6,6 @@ import { getProxiedUrl } from "@/utils/imageUtils";
 export const AdOverlay = () => {
   const { ads, showMainAd, setShowMainAd, setShowMiniAd, currentAdIndex } = useAd();
   
-  console.log("AdOverlay: Rendering with ads:", ads, "showMainAd:", showMainAd);
-  
   const currentAd = ads[currentAdIndex];
 
   const handleClose = () => {
@@ -20,7 +18,6 @@ export const AdOverlay = () => {
   const duration = Math.min(Math.max(10, ads.length * 5), 20);
 
   if (!showMainAd || !currentAd) {
-    console.log("AdOverlay: Not rendering (showMainAd:", showMainAd, "currentAd:", currentAd, ")");
     return null;
   }
 

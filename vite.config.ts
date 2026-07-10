@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => ({
         "frame-ancestors 'none';",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://paystack.com https://interfaces.zapier.com https://*.zapier.com https://kuula.co https://*.kuula.co https://tour.panoee.net https://*.panoee.net;",
         // Tighten image sources to avoid allowing external fingerprinting pixel requests
-        "img-src 'self' data: https: https://kuula.co https://*.kuula.co https://tour.panoee.net https://*.panoee.net;",
+        "img-src 'self' data: http: https: https://kuula.co https://*.kuula.co https://tour.panoee.net https://*.panoee.net;",
         "font-src 'self' data: https://fonts.gstatic.com;",
         "frame-src 'self' https://webobook.com https://checkout.paystack.com https://golden-tulip-34749.firebaseapp.com https://*.firebaseapp.com https://accounts.google.com https://interfaces.zapier.com https://*.zapier.com https://kuula.co https://*.kuula.co https://tour.panoee.net https://*.panoee.net;",
         // Allow Firebase/Google endpoints for Firestore/Auth and dev sockets

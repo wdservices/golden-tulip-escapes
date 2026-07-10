@@ -8,8 +8,6 @@ export const AdMiniOverlay = () => {
   const { ads, currentAdIndex, showMiniAd, setShowMiniAd } = useAd();
   const [showFullAd, setShowFullAd] = useState(false);
 
-  console.log("AdMiniOverlay: Rendering with ads:", ads, "showMiniAd:", showMiniAd, "currentAdIndex:", currentAdIndex);
-
   const ad = ads[currentAdIndex];
 
   const handleMiniAdClick = () => {

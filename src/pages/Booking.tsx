@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 // Remove Header import
 // import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import luxurySuite from "@/assets/luxury-suite.jpg";
-import hotelExterior from "@/assets/hotel-exterior.jpg";
+const luxurySuite = "/images/luxury-suite.jpg";
+const hotelExterior = "/images/hotel-exterior.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { collection, addDoc, serverTimestamp, query, where, getDocs, Timestamp } from "firebase/firestore";

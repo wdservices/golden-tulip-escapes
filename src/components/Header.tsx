@@ -9,10 +9,9 @@ import { toast } from "sonner";
 interface HeaderProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
-  onOpenGallery?: () => void;
 }
 
-export const Header = ({ activeTab, onTabChange, onOpenGallery }: HeaderProps) => {
+export const Header = ({ activeTab, onTabChange }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,7 +24,7 @@ export const Header = ({ activeTab, onTabChange, onOpenGallery }: HeaderProps) =
   }> = [
     { name: "Home", href: "/", isRoute: true },
     { name: "Rooms", href: "#rooms", isRoute: false },
-    { name: "Gallery", href: "#gallery", isRoute: false },
+    { name: "Gallery", href: "/gallery", isRoute: true },
     { name: "Dining", href: "#dining", isRoute: false },
     { name: "Events", href: "#events", isRoute: false },
     { name: "About", href: "#about", isRoute: false },
@@ -82,17 +81,7 @@ export const Header = ({ activeTab, onTabChange, onOpenGallery }: HeaderProps) =
                 ) : (
                   <button
                     onClick={() => {
-                      if (item.name === 'Gallery') {
-                        if (location.pathname !== '/') {
-                          window.location.href = '/#gallery';
-                        } else if (onOpenGallery) {
-                          onOpenGallery();
-                        } else {
-                          scrollToSection(item.href);
-                        }
-                      } else {
-                        scrollToSection(item.href);
-                      }
+                      scrollToSection(item.href);
                     }}
                     className="px-4 py-2 rounded-lg text-white hover:text-primary transition-all duration-300 font-medium"
                   >
@@ -153,17 +142,7 @@ export const Header = ({ activeTab, onTabChange, onOpenGallery }: HeaderProps) =
                   <button
                     key={item.name}
                     onClick={() => {
-                      if (item.name === 'Gallery') {
-                        if (location.pathname !== '/') {
-                          window.location.href = '/#gallery';
-                        } else if (onOpenGallery) {
-                          onOpenGallery();
-                        } else {
-                          scrollToSection(item.href);
-                        }
-                      } else {
-                        scrollToSection(item.href);
-                      }
+                      scrollToSection(item.href);
                       setIsMenuOpen(false);
                     }}
                     className="block w-full text-left px-4 py-3 text-white hover:text-primary hover:bg-white/10 transition-all duration-300 font-medium rounded-lg mx-2"

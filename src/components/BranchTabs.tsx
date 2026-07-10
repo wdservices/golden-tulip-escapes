@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
-import hotelExterior from "@/assets/hotel-exterior.jpg";
-import hotelLobby from "@/assets/hotel-lobby.jpg";
-import luxurySuite from "@/assets/luxury-suite.jpg";
-import restaurant from "@/assets/restaurant.jpg";
-import stadiumRoad31 from "@/assets/stadium-road-31.jpg";
+const hotelExterior = "/images/hotel-exterior.jpg";
+const hotelLobby = "/images/hotel-lobby.jpg";
+const luxurySuite = "/images/luxury-suite.jpg";
+const restaurant = "/images/restaurant.jpg";
+const stadiumRoad31 = "/images/stadium-road-31.jpg";
 
 interface BranchTabsProps {
   selectedBranch?: string;
