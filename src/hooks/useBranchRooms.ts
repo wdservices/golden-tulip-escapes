@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { getFirestoreBranchId } from "@/lib/branchIds";
+import { collection, onSnapshot, getDocs } from "firebase/firestore";
 
 export interface BranchRoom {
   id: string;
@@ -25,52 +24,95 @@ export interface BranchRoomDisplay {
   type: string;
 }
 
+const slugToFirestoreIdCache = new Map<string, string>();
+
+async function resolveFirestoreBranchId(urlSlug: string): Promise<string> {
+  const cached = slugToFirestoreIdCache.get(urlSlug);
+  if (cached) return cached;
+
+  try {
+    const branchesSnap = await getDocs(collection(db, "branches"));
+    for (const doc of branchesSnap.docs) {
+      const data = doc.data();
+      const name: string = (data.name || "").toLowerCase().trim();
+      const fullName: string = (data.fullName || "").toLowerCase().trim();
+      const slug = urlSlug.toLowerCase().replace(/-/g, " ");
+
+      if (
+        name === slug ||
+        name.includes(slug) ||
+        slug.includes(name) ||
+        fullName.includes(slug) ||
+        slug.includes(fullName)
+      ) {
+        slugToFirestoreIdCache.set(urlSlug, doc.id);
+        return doc.id;
+      }
+    }
+  } catch (err) {
+    console.error("Error resolving Firestore branch ID:", err);
+  }
+
+  slugToFirestoreIdCache.set(urlSlug, urlSlug);
+  return urlSlug;
+}
+
 export const useBranchRooms = (branchId?: string) => {
   const [rooms, setRooms] = useState<BranchRoom[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const firestoreBranchId = branchId ? getFirestoreBranchId(branchId) : null;
+  const [resolvedId, setResolvedId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!firestoreBranchId) {
+    if (!branchId) {
       setIsLoading(false);
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    let unsubscribe: (() => void) | undefined;
 
-    const roomsRef = collection(db, "branches", firestoreBranchId, "rooms");
-    const unsubscribe = onSnapshot(
-      roomsRef,
-      (snapshot) => {
-        const roomData: BranchRoom[] = [];
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          roomData.push({
-            id: doc.id,
-            type: data.type || "",
-            pricePerNight: Number(data.pricePerNight) || 0,
-            availability: data.availability !== false,
-            roomNumber: data.roomNumber || "",
-            amenities: data.amenities || [],
-            images: data.images || [],
-            roomCount: data.roomCount,
+    const setup = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      const firestoreId = await resolveFirestoreBranchId(branchId);
+      setResolvedId(firestoreId);
+
+      const roomsRef = collection(db, "branches", firestoreId, "rooms");
+      unsubscribe = onSnapshot(
+        roomsRef,
+        (snapshot) => {
+          const roomData: BranchRoom[] = [];
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            roomData.push({
+              id: doc.id,
+              type: data.type || "",
+              pricePerNight: Number(data.pricePerNight) || 0,
+              availability: data.availability !== false,
+              roomNumber: data.roomNumber || "",
+              amenities: data.amenities || [],
+              images: data.images || [],
+              roomCount: data.roomCount,
+            });
           });
-        });
-        setRooms(roomData);
-        setIsLoading(false);
-      },
-      (err) => {
-        console.error("Error listening to branch rooms:", err);
-        setError("Failed to load rooms");
-        setIsLoading(false);
-      }
-    );
+          setRooms(roomData);
+          setIsLoading(false);
+        },
+        (err) => {
+          console.error("Error listening to branch rooms:", err);
+          setError("Failed to load rooms");
+          setIsLoading(false);
+        }
+      );
+    };
 
-    return () => unsubscribe();
-  }, [firestoreBranchId]);
+    setup();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [branchId]);
 
   const getRoomsByType = useCallback(
     (typeName: string): BranchRoom[] => {
@@ -102,6 +144,7 @@ export const useBranchRooms = (branchId?: string) => {
     rooms,
     isLoading,
     error,
+    resolvedId,
     getRoomsByType,
     getRoomPrice,
     formatPrice,

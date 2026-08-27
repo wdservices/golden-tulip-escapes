@@ -1,24 +1,30 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Bed, Users, ArrowLeft, Check, Star, ArrowRight, Phone, Mail, MapPin } from 'lucide-react';
+import { Users, ArrowLeft, Check, Star, ArrowRight, Phone, Mail, MapPin } from 'lucide-react';
 import { getBranchById } from '@/services/branchService';
 import { Branch } from '@/types/branch';
-import { useBranchRooms } from '@/hooks/useBranchRooms';
+import { useBranchRooms, BranchRoom } from '@/hooks/useBranchRooms';
+
+function formatTypeName(type: string): string {
+  return type
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
 
 export const RoomDetailPage = () => {
   const { branchId, roomId } = useParams<{ branchId: string; roomId: string }>();
   const navigate = useNavigate();
   const [branch, setBranch] = useState<Branch | null>(null);
-  const [staticRoom, setStaticRoom] = useState<Branch['roomTypes'][0] | null>(null);
   const [isLoadingBranch, setIsLoadingBranch] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const { rooms: dbRooms, isLoading: isLoadingRooms, formatPrice } = useBranchRooms(branchId);
 
   useEffect(() => {
-    if (!branchId || !roomId) {
-      setError('Missing branch or room information');
+    if (!branchId) {
+      setError('Missing branch information');
       setIsLoadingBranch(false);
       return;
     }
@@ -31,55 +37,58 @@ export const RoomDetailPage = () => {
     }
 
     setBranch(branchData);
-
-    const decodedRoomId = roomId.replace(/-/g, ' ');
-    const roomData = branchData.roomTypes?.find(
-      (r) => r.name.toLowerCase() === decodedRoomId.toLowerCase()
-    );
-
-    if (!roomData) {
-      setError('Room not found');
-      navigate(`/branch/${branchId}`, { replace: true });
-      return;
-    }
-
-    setStaticRoom(roomData);
     setIsLoadingBranch(false);
-  }, [branchId, roomId, navigate]);
+  }, [branchId, navigate]);
 
   const isLoading = isLoadingBranch || isLoadingRooms;
 
-  const dbPriceByType = new Map<string, number>();
-  dbRooms.forEach((r) => {
-    if (r.pricePerNight > 0) {
-      const key = r.type.toLowerCase().trim();
-      if (!dbPriceByType.has(key)) {
-        dbPriceByType.set(key, r.pricePerNight);
-      }
-    }
+  const dbRoom: BranchRoom | undefined = dbRooms.find((r) => {
+    if (!roomId) return false;
+    const target = roomId.toLowerCase();
+    const roomType = r.type.toLowerCase().trim();
+    return (
+      roomType === target ||
+      roomType.replace(/\s+/g, '-') === target ||
+      roomType.replace(/\s+/g, '') === target.replace(/\s+/g, '')
+    );
   });
 
-  const getDbPrice = (roomName: string): number | null => {
-    const lower = roomName.toLowerCase().trim();
-    const variations = [
-      lower,
-      lower.replace(/\s+/g, '-'),
-      lower.replace(/\s+/g, ''),
-      lower.split(' ')[0],
-    ];
-    for (const v of variations) {
-      if (dbPriceByType.has(v)) return dbPriceByType.get(v)!;
-    }
-    return null;
-  };
+  const staticByName = new Map<string, Branch['roomTypes'][0]>();
+  branch?.roomTypes?.forEach((sr) => {
+    const key = sr.name?.toLowerCase().trim() || '';
+    staticByName.set(key, sr);
+    staticByName.set(key.replace(/\s+/g, '-'), sr);
+    staticByName.set(key.replace(/\s+/g, ''), sr);
+  });
 
-  const dbPrice = staticRoom ? getDbPrice(staticRoom.name) : null;
-  const room = staticRoom
-    ? {
-        ...staticRoom,
-        priceRange: dbPrice !== null ? formatPrice(dbPrice) : null,
-      }
-    : null;
+  const lookupKeys = dbRoom
+    ? [
+        dbRoom.type.toLowerCase().trim(),
+        dbRoom.type.toLowerCase().replace(/-/g, ' '),
+        dbRoom.type.toLowerCase().replace(/\s+/g, ''),
+      ]
+    : [];
+
+  let staticMeta: Branch['roomTypes'][0] | undefined;
+  for (const key of lookupKeys) {
+    if (staticByName.has(key)) {
+      staticMeta = staticByName.get(key);
+      break;
+    }
+  }
+
+  if (!isLoading && !dbRoom && branch) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Room Not Found</h1>
+        <p className="text-gray-600 mb-6">The requested room could not be found.</p>
+        <Button onClick={() => navigate(`/branch/${branchId}`)} variant="outline">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to {branch.name}
+        </Button>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -89,7 +98,7 @@ export const RoomDetailPage = () => {
     );
   }
 
-  if (error || !room || !branch) {
+  if (error || !branch || !dbRoom) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Room</h1>
@@ -102,6 +111,13 @@ export const RoomDetailPage = () => {
     );
   }
 
+  const roomName = staticMeta?.name || formatTypeName(dbRoom.type);
+  const roomDescription = staticMeta?.description || '';
+  const roomCapacity = staticMeta?.capacity || 2;
+  const roomFeatures = staticMeta?.features || [];
+  const roomImage = staticMeta?.image;
+  const roomIdSlug = dbRoom.type;
+
   const isEvoRoad = branchId === 'evo-road';
 
   return (
@@ -109,129 +125,21 @@ export const RoomDetailPage = () => {
       {/* Hero Section */}
       <section className={`relative h-[70vh] ${isEvoRoad ? 'bg-gradient-to-b from-blue-900/80 via-blue-800/70 to-yellow-900/60' : 'bg-gradient-to-b from-black/80 to-black/60'}`}>
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-black/30">
-          {branchId === 'garden-city' && room.name.toLowerCase() === 'superior room' ? (
-            <iframe 
-              width="100%" 
-              height="640" 
-              frameBorder="0" 
-              allow="xr-spatial-tracking; gyroscope; accelerometer" 
-              allowFullScreen 
-              scrolling="no" 
-              src="https://kuula.co/share/collection/7HGx1?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
-              className="w-full h-full object-cover"
-            />
-          ) : branchId === 'garden-city' && room.name.toLowerCase() === 'standard room' ? (
-            <iframe 
-              width="100%" 
-              height="640" 
-              frameBorder="0" 
-              allow="xr-spatial-tracking; gyroscope; accelerometer" 
-              allowFullScreen 
-              scrolling="no" 
-              src="https://kuula.co/share/collection/7HGxX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
-              className="w-full h-full object-cover"
-            />
-          ) : room.name.toLowerCase() === 'super executive room' ? (
-            <iframe 
-              width="100%" 
-              height="100%" 
-              frameBorder="0" 
-              allow="xr-spatial-tracking; gyroscope; accelerometer" 
-              allowFullScreen 
-              scrolling="no" 
-              src="https://kuula.co/share/collection/7HphP?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=-1"
-              className="w-full h-full object-cover"
-            />
-          ) : room.name.toLowerCase() === 'deluxe room' ? (
-            <iframe 
-              width="100%" 
-              height="640" 
-              frameBorder="0" 
-              allow="xr-spatial-tracking; gyroscope; accelerometer" 
-              allowFullScreen 
-              scrolling="no" 
-              src="https://kuula.co/share/collection/7HphX?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1"
-              className="w-full h-full object-cover"
-            />
-          ) : room.name.toLowerCase() === 'executive deluxe room' ? (
-            <iframe 
-              width="100%" 
-              height="640" 
-              frameBorder="0" 
-              allow="xr-spatial-tracking; gyroscope; accelerometer" 
-              allowFullScreen 
-              scrolling="no" 
-              src="https://kuula.co/share/collection/7Hph1?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=-1"
-              className="w-full h-full object-cover"
-            />
-          ) : room.name.toLowerCase() === 'executive twin room' ? (
-            <iframe 
-              width="100%" 
-              height="640" 
-              frameBorder="0" 
-              allow="xr-spatial-tracking; gyroscope; accelerometer" 
-              allowFullScreen 
-              scrolling="no" 
-              src="https://kuula.co/share/collection/7HphC?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=-1"
-              className="w-full h-full object-cover"
-            />
-          ) : room.name.toLowerCase() === 'standard room' ? (
-            <iframe 
-              width="100%" 
-              height="640" 
-              frameBorder="0" 
-              allow="xr-spatial-tracking; gyroscope; accelerometer" 
-              allowFullScreen 
-              scrolling="no" 
-              src="https://kuula.co/share/collection/7HpLN?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
-              className="w-full h-full object-cover"
-            />
-          ) : room.name.toLowerCase() === 'executive suite' ? (
-            <iframe 
-              width="100%" 
-              height="640" 
-              frameBorder="0" 
-              allow="xr-spatial-tracking; gyroscope; accelerometer" 
-              allowFullScreen 
-              scrolling="no" 
-              src="https://kuula.co/share/collection/7HDWq?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=1"
-              className="w-full h-full object-cover"
-            />
-          ) : room.name.toLowerCase() === 'junior suite' ? (
-            <iframe 
-              width="100%" 
-              height="640" 
-              frameBorder="0" 
-              allow="xr-spatial-tracking; gyroscope; accelerometer" 
-              allowFullScreen 
-              scrolling="no" 
-              src="https://kuula.co/share/collection/7HDWP?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=0.16&autop=90&autopalt=1&thumbs=-1&alpha=0.60"
-              className="w-full h-full object-cover"
-            />
-          ) : room.name.toLowerCase() === 'deluxe suite' ? (
-            <iframe 
-              width="100%" 
-              height="640" 
-              frameBorder="0" 
-              allow="xr-spatial-tracking; gyroscope; accelerometer" 
-              allowFullScreen 
-              scrolling="no" 
-              src="https://kuula.co/share/collection/7HpLs?logo=1&info=1&fs=1&vr=0&sd=1&autorotate=1.5&autop=90&autopalt=1&thumbs=1"
-              className="w-full h-full object-cover"
-            />
+          {roomImage ? (
+            <img src={roomImage} alt={roomName} className="w-full h-full object-cover" />
           ) : (
-            <img 
-              src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070" 
-              alt={room.name}
+            <img
+              src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070"
+              alt={roomName}
               className="w-full h-full object-cover"
             />
           )}
         </div>
         <div className={`absolute bottom-0 left-0 w-full bg-gradient-to-t ${isEvoRoad ? 'from-blue-900/90 to-transparent' : 'from-black/90 to-transparent'} p-6 pointer-events-none`}>
           <div className="container mx-auto">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               className={`mb-4 text-white pointer-events-auto ${isEvoRoad ? 'border-blue-200/30 bg-blue-800/40 hover:bg-blue-700/60' : 'border-white/30 bg-black/40 hover:bg-black/60'}`}
               onClick={() => navigate(`/branch/${branchId}`)}
             >
@@ -239,18 +147,14 @@ export const RoomDetailPage = () => {
               Back to {branch.name}
             </Button>
             <div className="flex justify-between items-center">
-              <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{room.name}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{roomName}</h1>
               <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${isEvoRoad ? 'bg-yellow-500/20 border border-yellow-300/30' : 'bg-white/20 border border-white/30'}`}>
                 <Star className={`h-5 w-5 ${isEvoRoad ? 'text-yellow-300' : 'text-primary'}`} />
                 <span className="font-medium text-white">4.8</span>
               </div>
             </div>
             <p className={`text-xl mt-2 drop-shadow-md ${isEvoRoad ? 'text-yellow-100' : 'text-white'}`}>
-              {room.priceRange ? (
-                <>{room.priceRange}/night</>
-              ) : (
-                <span className="text-white/60">Price updating soon</span>
-              )}
+              {formatPrice(dbRoom.pricePerNight)}/night
             </p>
           </div>
         </div>
@@ -262,35 +166,41 @@ export const RoomDetailPage = () => {
           <div className="max-w-4xl mx-auto">
             <div className={`rounded-xl shadow-lg p-8 mb-8 ${isEvoRoad ? 'bg-white/90 backdrop-blur-sm border border-blue-100' : 'bg-card'}`}>
               <h2 className={`text-2xl font-bold mb-4 ${isEvoRoad ? 'text-blue-900' : 'text-foreground'}`}>Room Overview</h2>
-              <p className={`mb-6 leading-relaxed ${isEvoRoad ? 'text-slate-700' : 'text-muted-foreground'}`}>{room.description}</p>
-              
+              {roomDescription && (
+                <p className={`mb-6 leading-relaxed ${isEvoRoad ? 'text-slate-700' : 'text-muted-foreground'}`}>{roomDescription}</p>
+              )}
+
               <div className={`flex items-center gap-2 mb-6 ${isEvoRoad ? 'text-blue-800' : 'text-foreground'}`}>
                 <Users className={`h-5 w-5 ${isEvoRoad ? 'text-blue-600' : 'text-primary'}`} />
-                <span>Accommodates up to {room.capacity} guests</span>
+                <span>Accommodates up to {roomCapacity} guests</span>
               </div>
-              
-              <h3 className={`text-xl font-semibold mb-3 ${isEvoRoad ? 'text-blue-900' : 'text-foreground'}`}>Room Features</h3>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
-                {room.features?.map((feature, idx) => (
-                  <li key={idx} className={`flex items-center gap-2 ${isEvoRoad ? 'text-slate-700' : 'text-muted-foreground'}`}>
-                    <Check className={`h-5 w-5 ${isEvoRoad ? 'text-[hsl(var(--royal-blue))]' : 'text-primary'}`} />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              
+
+              {roomFeatures.length > 0 && (
+                <>
+                  <h3 className={`text-xl font-semibold mb-3 ${isEvoRoad ? 'text-blue-900' : 'text-foreground'}`}>Room Features</h3>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
+                    {roomFeatures.map((feature, idx) => (
+                      <li key={idx} className={`flex items-center gap-2 ${isEvoRoad ? 'text-slate-700' : 'text-muted-foreground'}`}>
+                        <Check className={`h-5 w-5 ${isEvoRoad ? 'text-[hsl(var(--royal-blue))]' : 'text-primary'}`} />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
               <Button size="lg" className={`w-full md:w-auto shadow-md ${isEvoRoad ? 'bg-[hsl(var(--royal-blue))] hover:bg-[hsl(var(--royal-blue-dark))] text-white' : ''}`}>
-                <Link to={`/book?branch=${branchId}&room=${roomId}`} className="flex items-center">
+                <Link to={`/book?branch=${branchId}&room=${roomIdSlug}`} className="flex items-center">
                   Book Now
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </div>
-            
+
             <div className={`rounded-xl shadow-lg p-8 mb-8 ${isEvoRoad ? 'bg-white/90 backdrop-blur-sm border border-[hsl(var(--royal-blue)/0.15)]' : 'bg-card'}`}>
               <h2 className={`text-2xl font-bold mb-4 ${isEvoRoad ? 'text-[hsl(var(--royal-blue-dark))]' : 'text-foreground'}`}>About {branch.name}</h2>
               <p className={`mb-6 leading-relaxed ${isEvoRoad ? 'text-slate-700' : 'text-muted-foreground'}`}>{branch.description}</p>
-              
+
               <Button variant="outline" className={isEvoRoad ? 'border-[hsl(var(--royal-blue)/0.35)] text-[hsl(var(--royal-blue))] hover:bg-[hsl(var(--royal-blue)/0.05)]' : ''} asChild>
                 <Link to={`/branch/${branchId}`}>
                   View Branch Details
@@ -299,7 +209,6 @@ export const RoomDetailPage = () => {
               </Button>
             </div>
 
-            {/* Contact Information - Only show for EVO Road */}
             {isEvoRoad && (
               <div className="bg-gradient-to-r from-yellow-50 to-blue-50 rounded-xl shadow-lg border border-yellow-200 p-8">
                 <h2 className="text-2xl font-bold mb-6 text-blue-900">Contact Information</h2>
