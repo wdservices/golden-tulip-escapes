@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, ChevronLeft, ChevronRight, Smartphone } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -146,15 +146,26 @@ export const HeroSection = ({ activeBranch, onBookNowClick }: HeroSectionProps) 
               Book Your Stay
             </Button>
             
-            <Button
-              variant="outline"
-              onClick={() => window.open('https://d.apkpure.com/b/APK/com.goldentulip.mobile?version=latest', '_blank')}
-              className="bg-white/10 hover:bg-white/20 border-white/30 text-white hover:text-white text-lg px-10 py-6 min-w-[250px] font-bold shadow-2xl hover:shadow-lg transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
-              size="lg"
-            >
-              <Smartphone className="mr-3 h-6 w-6" />
-              Download App
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <a
+                href="https://play.google.com/store/apps/details?id=com.goldentulip.mobile&hl=en"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  src="/playstore-gtph.png"
+                  alt="Get it on Google Play"
+                  className="h-14 w-auto hover:scale-105 transition-transform duration-300"
+                />
+              </a>
+              <button onClick={() => toast.info("iOS version coming soon!")} className="hover:scale-105 transition-transform duration-300 opacity-70 bg-white rounded-md overflow-hidden" style={{ height: '3.5rem' }}>
+                <img
+                  src="/appstore-gtph.png"
+                  alt="Download on the App Store"
+                  className="h-full w-auto"
+                />
+              </button>
+            </div>
           </div>
         </div>
       </div>

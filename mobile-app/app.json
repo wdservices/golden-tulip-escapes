@@ -24,6 +24,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.goldentulip.mobile",
+      "versionCode": 20,
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
@@ -34,7 +35,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "2b7829a3-a62c-4592-824d-f1aa9d74ca64"
+        "projectId": "4f360e29-e082-4ee9-a71b-45dbccf44a46"
       }
     },
     "plugins": [
@@ -65,6 +66,6 @@
         }
       ]
     ],
-    "owner": "bluewaves_tech"
+    "owner": "spellz49"
   }
 }

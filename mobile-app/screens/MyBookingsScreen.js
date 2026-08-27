@@ -21,17 +21,65 @@ export default function MyBookingsScreen({ navigation }) {
     try {
       const uid = auth.currentUser.uid;
       const email = auth.currentUser.email || '';
-
-      const rootByUid = await getDocs(query(collection(db, 'bookings'), where('userId', '==', uid)));
-      const rootByEmail = email ? await getDocs(query(collection(db, 'bookings'), where('email', '==', email))) : { docs: [] };
-      const cgByEmail = email ? await getDocs(query(collectionGroup(db, 'bookings'), where('guestEmail', '==', email))) : { docs: [] };
-      const cgByUid = await getDocs(query(collectionGroup(db, 'bookings'), where('userId', '==', uid)));
-
       const raw = [];
-      for (const d of rootByUid.docs) raw.push({ id: d.id, ...d.data() });
-      for (const d of rootByEmail.docs) raw.push({ id: d.id, ...d.data() });
-      for (const d of cgByEmail.docs) raw.push({ id: d.id, ...d.data() });
-      for (const d of cgByUid.docs) raw.push({ id: d.id, ...d.data() });
+
+      // Query 1: Root bookings by userId
+      try {
+        const rootByUid = await getDocs(query(collection(db, 'bookings'), where('userId', '==', uid)));
+        for (const d of rootByUid.docs) raw.push({ id: d.id, ...d.data() });
+      } catch (e) { console.warn('rootByUid query failed:', e.message); }
+
+      // Query 2: Root bookings by email
+      if (email) {
+        try {
+          const rootByEmail = await getDocs(query(collection(db, 'bookings'), where('email', '==', email)));
+          for (const d of rootByEmail.docs) raw.push({ id: d.id, ...d.data() });
+        } catch (e) { console.warn('rootByEmail query failed:', e.message); }
+      }
+
+      // Query 3: Branch subcollection bookings by guestEmail (collectionGroup)
+      if (email) {
+        try {
+          const cgByEmail = await getDocs(query(collectionGroup(db, 'bookings'), where('guestEmail', '==', email)));
+          for (const d of cgByEmail.docs) raw.push({ id: d.id, branchId: d.ref.parent.parent?.id || '', ...d.data() });
+        } catch (e) {
+          console.warn('cgByEmail collectionGroup query failed:', e.message);
+          // Fallback: query each branch's bookings individually
+          try {
+            const branchesSnap = await getDocs(collection(db, 'branches'));
+            for (const branchDoc of branchesSnap.docs) {
+              try {
+                const branchBookings = await getDocs(query(
+                  collection(db, 'branches', branchDoc.id, 'bookings'),
+                  where('guestEmail', '==', email)
+                ));
+                for (const d of branchBookings.docs) raw.push({ id: d.id, branchId: branchDoc.id, ...d.data() });
+              } catch (e2) { /* skip branch */ }
+            }
+          } catch (e3) { console.warn('Fallback branch query failed:', e3.message); }
+        }
+      }
+
+      // Query 4: Branch subcollection bookings by userId (collectionGroup)
+      try {
+        const cgByUid = await getDocs(query(collectionGroup(db, 'bookings'), where('userId', '==', uid)));
+        for (const d of cgByUid.docs) raw.push({ id: d.id, branchId: d.ref.parent.parent?.id || '', ...d.data() });
+      } catch (e) {
+        console.warn('cgByUid collectionGroup query failed:', e.message);
+        // Fallback: query each branch's bookings individually
+        try {
+          const branchesSnap = await getDocs(collection(db, 'branches'));
+          for (const branchDoc of branchesSnap.docs) {
+            try {
+              const branchBookings = await getDocs(query(
+                collection(db, 'branches', branchDoc.id, 'bookings'),
+                where('userId', '==', uid)
+              ));
+              for (const d of branchBookings.docs) raw.push({ id: d.id, branchId: branchDoc.id, ...d.data() });
+            } catch (e2) { /* skip branch */ }
+          }
+        } catch (e3) { console.warn('Fallback branch query failed:', e3.message); }
+      }
 
       const seen = new Set();
       const normalized = raw.map(b => {

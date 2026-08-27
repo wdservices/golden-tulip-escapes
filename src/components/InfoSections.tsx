@@ -10,9 +10,7 @@ import { roomTypes as staticRoomTypes } from '@/data/rooms';
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { RoomType } from "@/types/room";
-
-// Evo Road Branch ID
-const EVO_ROAD_BRANCH_ID = "URcvGkmbfrOFInlOS4I9";
+import { BRANCH_ID_MAPPINGS } from "@/config/branchMappings";
 
 // Event data
 const eventTypes = [

@@ -1,3 +1,14 @@
 dist/
 node_modules/
 .expo/
+.vscode/
+*.bak.jks
+*.keystore
+production.keystore
+release.keystore
+upload_cert.pem
+fetch_logs.ps1
+test_resolve.js
+generate-assets-map.js
+resolve_expo.js
+@bluewaves_tech__gtph.bak.jks

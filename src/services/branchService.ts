@@ -92,7 +92,7 @@ const branches: Branch[] = [
       {
         name: "Deluxe Room",
         description: "Elegant room with a king-size bed and city view",
-        priceRange: "₦45,000 - ₦65,000",
+        priceRange: "",
         capacity: 2,
         features: [
           "Queen-size bed",
@@ -108,7 +108,7 @@ const branches: Branch[] = [
       {
         name: "Executive Suite",
         description: "Spacious suite with separate living area and premium amenities",
-        priceRange: "₦75,000 - ₦95,000",
+        priceRange: "",
         capacity: 2,
         features: [
           "Queen-size bed",
@@ -126,7 +126,7 @@ const branches: Branch[] = [
       {
         name: "Presidential Suite",
         description: "Luxurious suite with premium furnishings and panoramic views",
-        priceRange: "₦150,000 - ₦200,000",
+        priceRange: "",
         capacity: 4,
         features: [
           "Queen-size bed",
@@ -176,7 +176,7 @@ const branches: Branch[] = [
       {
         name: "Deluxe Room",
         description: "Our Deluxe Rooms are complemented with modern and luxurious amenities for a wonderful stay.",
-        priceRange: "₦86,250",
+        priceRange: "",
         capacity: 2,
         image: "/images/stadium road 31 images/deluxe.webp",
         features: [
@@ -198,7 +198,7 @@ const branches: Branch[] = [
       {
         name: "Executive Deluxe Room",
         description: "Our Executive Rooms are spacious, nice and comfortable. The rooms gives access to our gym or swimming pool. The rooms are spacious with a read area.",
-        priceRange: "₦97,750",
+        priceRange: "",
         capacity: 2,
         image: "/images/stadium road 31 images/executive deluxe.webp",
         features: [
@@ -223,7 +223,7 @@ const branches: Branch[] = [
       {
         name: "Executive Twin Room",
         description: "Need more fun, our Executive Twin Rooms give comfort and space to suite your relaxation need. Enjoy complimentary Breakfast with access to pool and gym facilities.",
-        priceRange: "₦115,000",
+        priceRange: "",
         capacity: 2,
         image: "/images/stadium road 31 images/executive twin.webp",
         features: [
@@ -248,7 +248,7 @@ const branches: Branch[] = [
       {
         name: "Super Executive Room",
         description: "The Super Executive Suites are always welcoming with nice furniture, either for business or pleasure the suites are always there to make you feel at home.",
-        priceRange: "₦138,000",
+        priceRange: "",
         capacity: 2,
         image: "/images/stadium road 31 images/super executive.webp",
         features: [
@@ -507,7 +507,7 @@ const branches: Branch[] = [
       {
         name: "Standard Room",
         description: "Comfortable and well-appointed rooms with modern amenities.",
-        priceRange: "₦91,831 per night",
+        priceRange: "",
         capacity: 2,
         image: "/images/garden city images/standard room.webp",
         features: [
@@ -524,7 +524,7 @@ const branches: Branch[] = [
       {
         name: "Superior Room",
         description: "Comfortable and well-appointed rooms with modern amenities.",
-        priceRange: "₦107,154 per night",
+        priceRange: "",
         capacity: 2,
         image: "/images/garden city images/superior room.webp",
         features: [
@@ -542,7 +542,7 @@ const branches: Branch[] = [
       {
         name: "Deluxe Room",
         description: "Spacious rooms with premium furnishings and city views.",
-        priceRange: "₦127,832 per night",
+        priceRange: "",
         capacity: 2,
         features: [
           "Queen-size bed",
@@ -559,7 +559,7 @@ const branches: Branch[] = [
       {
         name: "Junior Suite",
         description: "Luxurious suites with separate living area.",
-        priceRange: "₦147,850 per night",
+        priceRange: "",
         capacity: 2,
         image: "/images/garden city images/junior room.jpg",
         features: [
@@ -577,7 +577,7 @@ const branches: Branch[] = [
       {
         name: "Executive Suite",
         description: "Ultimate luxury with premium furnishings.",
-        priceRange: "₦168,909 per night",
+        priceRange: "",
         capacity: 2,
         image: "/images/garden city images/executive room.jpg",
         features: [
@@ -735,7 +735,7 @@ const branches: Branch[] = [
       {
         name: "Standard Room",
         description: "Elegantly furnished room with complimentary buffet breakfast, access to gym and outdoor swimming pool, and exceptional dining experiences.",
-        priceRange: "₦84,200/night",
+        priceRange: "",
         capacity: 2,
         image: "/images/evergreen images/standard room.webp",
         features: [
@@ -752,7 +752,7 @@ const branches: Branch[] = [
       {
         name: "Deluxe Suite",
         description: "Elegantly furnished suite with premium furnishings and city views.",
-        priceRange: "₦122,300/night",
+        priceRange: "",
         capacity: 2,
         image: "/images/evergreen images/deluxe room.webp",
         features: [
@@ -769,7 +769,7 @@ const branches: Branch[] = [
       {
         name: "Executive Suite",
         description: "Luxurious suites with separate living area, premium amenities, concierge service, premium furnishings, and complimentary breakfast.",
-        priceRange: "₦165,000/night",
+        priceRange: "",
         capacity: 3,
         image: "/images/evergreen images/executive room.webp",
         features: [

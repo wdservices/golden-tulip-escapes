@@ -269,12 +269,14 @@ export default function App() {
 
 const styles = StyleSheet.create({
   drawerHeader: {
+    minHeight: 180,
     padding: 20,
     paddingTop: 40,
     backgroundColor: '#162b3b',
     marginBottom: 10,
     overflow: 'hidden',
     position: 'relative',
+    justifyContent: 'flex-end',
   },
   headerBackgroundImage: {
     ...StyleSheet.absoluteFillObject,

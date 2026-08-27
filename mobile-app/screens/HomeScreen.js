@@ -1,9 +1,16 @@
-import React from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, AppState } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth } from '../firebaseConfig';
 import { signOut } from 'firebase/auth';
 import { LogOut, MapPin, Building2, Calendar, User, QrCode, Menu } from 'lucide-react-native';
+
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
+};
 
 const BRANCHES = [
   { id: 'evo-road', name: 'Evo Road', image: require('../assets/evo-road-cover.webp') },
@@ -14,6 +21,16 @@ const BRANCHES = [
 
 export default function HomeScreen({ navigation }) {
   const user = auth.currentUser;
+  const [greeting, setGreeting] = useState(getGreeting());
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        setGreeting(getGreeting());
+      }
+    });
+    return () => subscription.remove();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -24,7 +41,7 @@ export default function HomeScreen({ navigation }) {
               <Menu size={24} color="#fff" />
             </TouchableOpacity>
             <View>
-              <Text style={styles.greeting}>Good Evening,</Text>
+              <Text style={styles.greeting}>{greeting},</Text>
               <Text style={styles.username}>{user?.displayName || 'Guest'}</Text>
             </View>
           </View>

@@ -4,145 +4,82 @@ import { Button } from '@/components/ui/button';
 import { Bed, Users, ArrowLeft, Check, Star, ArrowRight, Phone, Mail, MapPin } from 'lucide-react';
 import { getBranchById } from '@/services/branchService';
 import { Branch } from '@/types/branch';
-import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { useBranchRooms } from '@/hooks/useBranchRooms';
 
 export const RoomDetailPage = () => {
   const { branchId, roomId } = useParams<{ branchId: string; roomId: string }>();
   const navigate = useNavigate();
   const [branch, setBranch] = useState<Branch | null>(null);
-  const [room, setRoom] = useState<Branch['roomTypes'][0] | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [staticRoom, setStaticRoom] = useState<Branch['roomTypes'][0] | null>(null);
+  const [isLoadingBranch, setIsLoadingBranch] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { rooms: dbRooms, isLoading: isLoadingRooms, formatPrice } = useBranchRooms(branchId);
+
   useEffect(() => {
-    const fetchRoomData = async () => {
-      if (!branchId || !roomId) {
-        setError('Missing branch or room information');
-        setIsLoading(false);
-        return;
-      }
+    if (!branchId || !roomId) {
+      setError('Missing branch or room information');
+      setIsLoadingBranch(false);
+      return;
+    }
 
-      try {
-        const branchData = getBranchById(branchId);
-        if (!branchData) {
-          setError('Branch not found');
-          navigate('/404', { replace: true });
-          return;
-        }
+    const branchData = getBranchById(branchId);
+    if (!branchData) {
+      setError('Branch not found');
+      navigate('/404', { replace: true });
+      return;
+    }
 
-        setBranch(branchData);
+    setBranch(branchData);
 
-        // Find the room by its URL-friendly name using branch-specific room data
-        const decodedRoomId = roomId.replace(/-/g, ' ');
-        const roomData = branchData.roomTypes?.find(
-          (r) => r.name.toLowerCase() === decodedRoomId.toLowerCase()
-        );
+    const decodedRoomId = roomId.replace(/-/g, ' ');
+    const roomData = branchData.roomTypes?.find(
+      (r) => r.name.toLowerCase() === decodedRoomId.toLowerCase()
+    );
 
-        if (!roomData) {
-          setError('Room not found');
-          navigate(`/branch/${branchId}`, { replace: true });
-          return;
-        }
+    if (!roomData) {
+      setError('Room not found');
+      navigate(`/branch/${branchId}`, { replace: true });
+      return;
+    }
 
-        // Fetch price from Firestore
-        let roomWithPrice = roomData;
-        try {
-          // Map room name to DB type with multiple variations
-          const roomNameVariations = [
-            decodedRoomId.toLowerCase(),
-            decodedRoomId.toLowerCase().replace(/\s+/g, '-'),
-            decodedRoomId.toLowerCase().replace(/\s+/g, ''),
-            decodedRoomId.toLowerCase().split(' ')[0]
-          ];
-          
-          let dbType = decodedRoomId.toLowerCase();
-          
-          // Handle specific room type mappings
-          if (decodedRoomId.toLowerCase() === 'deluxe room') {
-            dbType = 'deluxe';
-          } else if (decodedRoomId.toLowerCase() === 'standard room') {
-            dbType = 'standard-room';
-          } else if (decodedRoomId.toLowerCase() === 'superior room') {
-            dbType = 'superior-room';
-          } else if (decodedRoomId.toLowerCase() === 'junior suite') {
-            dbType = 'junior-suite';
-          } else if (decodedRoomId.toLowerCase() === 'executive suite') {
-            dbType = 'executive-suite';
-          }
-
-          // Map URL branch IDs to Firestore branch IDs
-          const branchIdMapping: { [key: string]: string } = {
-            "stadium-31": "UShvwSYpMNpuNaS32MxZ",
-            "evo-road": "URcvGkmbfrOFInlOS4I9",
-            "evergreen": "5vkOc2peS2tAoTyHcmQp",
-            "garden-city": "RYoG3qsKFIiy9REDFRbq",
-            // Add other branch mappings as needed
-          };
-
-          const firestoreBranchId = branchIdMapping[branchId] || branchId;
-
-          const roomsRef = collection(db, "branches", firestoreBranchId, "rooms");
-          
-          // Try to find the room using different name variations
-          let querySnapshot = null;
-          
-          // First try the direct mapping
-          const q = query(roomsRef, where("type", "==", dbType));
-          querySnapshot = await getDocs(q);
-          
-          // If not found, try other variations
-          if (querySnapshot.empty) {
-            for (const variation of roomNameVariations) {
-              const qVar = query(roomsRef, where("type", "==", variation));
-              const varSnapshot = await getDocs(qVar);
-              if (!varSnapshot.empty) {
-                querySnapshot = varSnapshot;
-                console.log("RoomDetailPage: Found room using variation:", variation);
-                break;
-              }
-            }
-          }
-
-          if (!querySnapshot.empty) {
-            let bestDocData: { pricePerNight?: number | string } | null = null;
-            let bestPrice = -Infinity;
-            querySnapshot.forEach(doc => {
-              const data = doc.data() as { pricePerNight?: number | string };
-              if (data.pricePerNight !== undefined) {
-                const price = Number(data.pricePerNight);
-                if (Number.isFinite(price) && price > bestPrice) {
-                  bestPrice = price;
-                  bestDocData = data;
-                }
-              }
-            });
-
-            if (bestDocData && bestPrice > -Infinity) {
-              roomWithPrice = {
-                ...roomData,
-                priceRange: `₦${bestPrice.toLocaleString()}`
-              };
-              console.log("RoomDetailPage: Updated room price:", roomData.name, "->", roomWithPrice.priceRange);
-            }
-          } else {
-            console.log("RoomDetailPage: No room found in Firestore for type:", dbType, "or variations:", roomNameVariations);
-          }
-        } catch (error) {
-          console.error('Error fetching room price from Firestore:', error);
-        }
-
-        setRoom(roomWithPrice);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load room information');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchRoomData();
+    setStaticRoom(roomData);
+    setIsLoadingBranch(false);
   }, [branchId, roomId, navigate]);
+
+  const isLoading = isLoadingBranch || isLoadingRooms;
+
+  const dbPriceByType = new Map<string, number>();
+  dbRooms.forEach((r) => {
+    if (r.pricePerNight > 0) {
+      const key = r.type.toLowerCase().trim();
+      if (!dbPriceByType.has(key)) {
+        dbPriceByType.set(key, r.pricePerNight);
+      }
+    }
+  });
+
+  const getDbPrice = (roomName: string): number | null => {
+    const lower = roomName.toLowerCase().trim();
+    const variations = [
+      lower,
+      lower.replace(/\s+/g, '-'),
+      lower.replace(/\s+/g, ''),
+      lower.split(' ')[0],
+    ];
+    for (const v of variations) {
+      if (dbPriceByType.has(v)) return dbPriceByType.get(v)!;
+    }
+    return null;
+  };
+
+  const dbPrice = staticRoom ? getDbPrice(staticRoom.name) : null;
+  const room = staticRoom
+    ? {
+        ...staticRoom,
+        priceRange: dbPrice !== null ? formatPrice(dbPrice) : null,
+      }
+    : null;
 
   if (isLoading) {
     return (
@@ -165,9 +102,8 @@ export const RoomDetailPage = () => {
     );
   }
 
-  // Branch-specific styling
   const isEvoRoad = branchId === 'evo-road';
-  
+
   return (
     <div className={`min-h-screen ${isEvoRoad ? 'bg-gradient-to-br from-blue-50 via-white to-yellow-50' : 'bg-background'}`}>
       {/* Hero Section */}
@@ -309,7 +245,13 @@ export const RoomDetailPage = () => {
                 <span className="font-medium text-white">4.8</span>
               </div>
             </div>
-            <p className={`text-xl mt-2 drop-shadow-md ${isEvoRoad ? 'text-yellow-100' : 'text-white'}`}>{room.priceRange}/night</p>
+            <p className={`text-xl mt-2 drop-shadow-md ${isEvoRoad ? 'text-yellow-100' : 'text-white'}`}>
+              {room.priceRange ? (
+                <>{room.priceRange}/night</>
+              ) : (
+                <span className="text-white/60">Price updating soon</span>
+              )}
+            </p>
           </div>
         </div>
       </section>

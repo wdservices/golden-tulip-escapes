@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, ActivityIndicator, Alert, ScrollView, Modal, KeyboardAvoidingView, Platform, Linking } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, ActivityIndicator, Alert, ScrollView, Modal, KeyboardAvoidingView, Platform, Linking, Keyboard, Pressable } from 'react-native';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
@@ -71,11 +71,7 @@ export default function LoginScreen() {
     setResetLoading(true);
     try {
       await sendPasswordResetEmail(auth, resetEmail);
-      Alert.alert(
-        'Check your email', 
-        'A password reset link has been sent to ' + resetEmail,
-        [{ text: 'OK', onPress: () => setResetModalVisible(false) }]
-      );
+      setIsResetSent(true);
     } catch (error) {
       Alert.alert('Error', error.message);
     } finally {
@@ -93,7 +89,8 @@ export default function LoginScreen() {
       <LinearGradient colors={['rgba(29, 54, 73, 0.7)', 'rgba(29, 54, 73, 0.95)']} style={StyleSheet.absoluteFill}>
         <KeyboardAvoidingView 
           style={styles.container} 
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
           <ScrollView 
             contentContainerStyle={styles.mainScrollView}
@@ -215,46 +212,84 @@ export default function LoginScreen() {
           visible={resetModalVisible}
           onRequestClose={() => setResetModalVisible(false)}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Reset Password</Text>
-                <TouchableOpacity onPress={() => setResetModalVisible(false)}>
-                  <X size={24} color="#fff" />
-                </TouchableOpacity>
-              </View>
-              
-              <Text style={styles.modalText}>
-                Enter your email address and we'll send you a link to reset your password.
-              </Text>
-              
-              <Text style={[styles.modalText, { fontSize: 13, color: '#94a3b8', fontStyle: 'italic', marginTop: -10 }]}>
-                Note: If you don't see the email, please check your spam folder.
-              </Text>
+          <Pressable style={styles.modalOverlay} onPress={() => setResetModalVisible(false)}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.modalKeyboardView}
+            >
+              <Pressable onPress={() => {}} style={styles.modalContent}>
+                {isResetSent ? (
+                  <>
+                    <View style={styles.modalHeader}>
+                      <Text style={styles.modalTitle}>Check Your Email</Text>
+                      <TouchableOpacity onPress={() => { setResetModalVisible(false); setIsResetSent(false); setResetEmail(''); }}>
+                        <X size={24} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                    
+                    <View style={styles.successIconContainer}>
+                      <Text style={styles.successIcon}>✓</Text>
+                    </View>
 
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your email"
-                placeholderTextColor="#94a3b8"
-                value={resetEmail}
-                onChangeText={setResetEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-              />
+                    <Text style={styles.modalText}>
+                      We've sent a password reset link to:
+                    </Text>
+                    <Text style={styles.resetEmailText}>{resetEmail}</Text>
+                    
+                    <Text style={styles.modalNote}>
+                      Please check your inbox and also your spam/junk folder if you don't see it.
+                    </Text>
 
-              <TouchableOpacity 
-                style={styles.button} 
-                onPress={handlePasswordReset}
-                disabled={resetLoading}
-              >
-                {resetLoading ? (
-                  <ActivityIndicator color="#fff" />
+                    <TouchableOpacity 
+                      style={styles.button} 
+                      onPress={() => { setResetModalVisible(false); setIsResetSent(false); setResetEmail(''); }}
+                    >
+                      <Text style={styles.buttonText}>Back to Sign In</Text>
+                    </TouchableOpacity>
+                  </>
                 ) : (
-                  <Text style={styles.buttonText}>Send Reset Link</Text>
+                  <>
+                    <View style={styles.modalHeader}>
+                      <Text style={styles.modalTitle}>Reset Password</Text>
+                      <TouchableOpacity onPress={() => setResetModalVisible(false)}>
+                        <X size={24} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                    
+                    <Text style={styles.modalText}>
+                      Enter your email address and we'll send you a link to reset your password.
+                    </Text>
+                    
+                    <Text style={styles.modalNote}>
+                      Note: If you don't see the email, please check your spam folder.
+                    </Text>
+
+                    <TextInput
+                      style={styles.modalInput}
+                      placeholder="Enter your email"
+                      placeholderTextColor="#94a3b8"
+                      value={resetEmail}
+                      onChangeText={setResetEmail}
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                    />
+
+                    <TouchableOpacity 
+                      style={styles.button} 
+                      onPress={handlePasswordReset}
+                      disabled={resetLoading}
+                    >
+                      {resetLoading ? (
+                        <ActivityIndicator color="#fff" />
+                      ) : (
+                        <Text style={styles.buttonText}>Send Reset Link</Text>
+                      )}
+                    </TouchableOpacity>
+                  </>
                 )}
-              </TouchableOpacity>
-            </View>
-          </View>
+              </Pressable>
+            </KeyboardAvoidingView>
+          </Pressable>
         </Modal>
 
       </LinearGradient>
@@ -295,9 +330,15 @@ const styles = StyleSheet.create({
   checkmark: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
   checkboxLabel: { flex: 1, color: '#cbd5e1', fontSize: 13, lineHeight: 18 },
   checkboxLink: { color: '#C5A059', fontWeight: '600' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-  modalContent: { backgroundColor: '#1D3649', width: '100%', padding: 24, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
-  modalText: { color: '#cbd5e1', marginBottom: 20, lineHeight: 20 }
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
+  modalKeyboardView: { width: '100%', justifyContent: 'center', alignItems: 'center' },
+  modalContent: { backgroundColor: '#1D3649', width: '85%', maxWidth: 400, padding: 28, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  modalTitle: { fontSize: 22, fontWeight: 'bold', color: '#ffffff' },
+  modalText: { color: '#cbd5e1', marginBottom: 16, lineHeight: 22, fontSize: 15 },
+  modalNote: { color: '#94a3b8', fontSize: 13, fontStyle: 'italic', marginBottom: 20 },
+  modalInput: { backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: 12, padding: 16, color: '#fff', marginBottom: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)', fontSize: 16 },
+  successIconContainer: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#C5A059', justifyContent: 'center', alignItems: 'center', alignSelf: 'center', marginBottom: 16 },
+  successIcon: { color: '#fff', fontSize: 28, fontWeight: 'bold' },
+  resetEmailText: { color: '#C5A059', fontSize: 15, fontWeight: 'bold', textAlign: 'center', marginBottom: 16 }
 });
